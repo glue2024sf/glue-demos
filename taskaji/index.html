@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>タスカジ｜Agentforce チャットボット デモ (v0.1)</title>
+<style>
+  :root {
+    --primary: #2e8b57;
+    --primary-dark: #1f6b41;
+    --accent: #ff9933;
+    --bg: #f5f7fa;
+    --panel: #ffffff;
+    --border: #e2e8f0;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --user-bubble: #e8f5ec;
+    --ai-bubble: #ffffff;
+    --escA: #dc2626;
+    --escB: #d97706;
+    --escC: #16a34a;
+    --guard: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; font-family: -apple-system, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif; background: var(--bg); color: var(--text); }
+  header {
+    background: var(--primary);
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  }
+  header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  header .tag { background: var(--accent); color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+  header .controls { margin-left: auto; display: flex; gap: 8px; align-items: center; font-size: 13px; flex-wrap: wrap; }
+  header button, header select {
+    background: rgba(255,255,255,.18);
+    color: white;
+    border: 1px solid rgba(255,255,255,.35);
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  header button:hover { background: rgba(255,255,255,.3); }
+  header select option { color: var(--text); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    height: calc(100vh - 56px);
+  }
+  .chat-pane {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-right: 1px solid var(--border);
+  }
+  .chat-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fafafa;
+  }
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+  .chat-header .meta { flex: 1; }
+  .chat-header .meta .name { font-weight: 600; font-size: 14px; }
+  .chat-header .meta .sub { font-size: 11px; color: var(--muted); }
+  .chat-header .status { font-size: 11px; color: var(--escC); }
+  .chat-header .status::before { content: "●"; margin-right: 4px; }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .msg { display: flex; gap: 8px; max-width: 75%; }
+  .msg.ai { align-self: flex-start; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg .bubble {
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .msg.ai .bubble { background: var(--ai-bubble); border: 1px solid var(--border); border-top-left-radius: 4px; }
+  .msg.user .bubble { background: var(--user-bubble); border: 1px solid #c6e3cf; border-top-right-radius: 4px; }
+  .msg .icon {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .msg.ai .icon { background: var(--primary); color: white; }
+  .msg.user .icon { background: #c6e3cf; color: var(--primary-dark); }
+
+  .system-msg {
+    align-self: center;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 4px 12px;
+    background: #eef2f5;
+    border-radius: 12px;
+  }
+  .guard-banner {
+    align-self: center;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: var(--guard);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    max-width: 90%;
+  }
+  .esc-banner {
+    align-self: center;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: var(--escB);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .esc-banner.A { background: #fef2f2; border-color: #fecaca; color: var(--escA); }
+
+  .quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .quick-replies button {
+    background: white;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .quick-replies button:hover { background: var(--primary); color: white; }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: white;
+  }
+  .input-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+  }
+  .input-row input:focus { border-color: var(--primary); }
+  .input-row button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .input-row button:hover { background: var(--primary-dark); }
+  .input-row button:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+  .hints {
+    padding: 8px 16px;
+    background: #fafafa;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .hints b { color: var(--text); }
+  .hints code {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    font-family: inherit;
+  }
+  .hints code:hover { background: var(--user-bubble); }
+
+  /* Admin pane */
+  .admin-pane {
+    background: #f9fafb;
+    padding: 16px;
+    overflow-y: auto;
+    font-size: 12px;
+  }
+  .admin-pane h2 {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+  }
+  .admin-section { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; }
+  .admin-section .row { display: flex; justify-content: space-between; padding: 3px 0; }
+  .admin-section .row .key { color: var(--muted); }
+  .admin-section .row .val { font-weight: 600; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .pill.escA { background: #fef2f2; color: var(--escA); }
+  .pill.escB { background: #fff7ed; color: var(--escB); }
+  .pill.escC { background: #ecfdf5; color: var(--escC); }
+  .pill.guard { background: #fef2f2; color: var(--guard); }
+  .pill.idle { background: #f3f4f6; color: var(--muted); }
+  pre.json {
+    background: #1f2937;
+    color: #e5e7eb;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    line-height: 1.45;
+    overflow-x: auto;
+    margin: 0;
+  }
+  pre.json .k { color: #93c5fd; }
+  pre.json .s { color: #fde68a; }
+  pre.json .n { color: #f9a8d4; }
+  pre.json .b { color: #fca5a5; }
+
+  .scenario-badge {
+    background: var(--accent);
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .ref-faq { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 6px 10px; border-radius: 4px; font-size: 11px; margin-top: 6px; display: inline-block; }
+
+  /* ===== 入口モーダル（ユーザータイプ選択） ===== */
+  .entry-modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, .55);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+  }
+  .entry-modal-bg.hidden { display: none; }
+  .entry-modal {
+    background: white;
+    border-radius: 10px;
+    padding: 32px 36px;
+    width: 460px;
+    max-width: 92%;
+    box-shadow: 0 8px 32px rgba(0,0,0,.2);
+    text-align: center;
+  }
+  .entry-modal h2 { margin: 0 0 8px; font-size: 18px; color: var(--primary-dark); }
+  .entry-modal p { margin: 0 0 24px; font-size: 13px; color: var(--muted); }
+  .entry-modal .entry-buttons { display: flex; gap: 14px; justify-content: center; }
+  .entry-modal .entry-btn {
+    flex: 1;
+    background: white;
+    border: 2px solid var(--primary);
+    color: var(--primary-dark);
+    padding: 18px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all .15s;
+  }
+  .entry-modal .entry-btn:hover { background: var(--primary); color: white; transform: translateY(-1px); }
+  .entry-modal .entry-btn .emoji { font-size: 28px; display: block; margin-bottom: 6px; }
+  .entry-modal .entry-btn .desc { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 400; }
+  .entry-modal .entry-btn:hover .desc { color: rgba(255,255,255,.85); }
+  .entry-modal .pattern-note { margin-top: 18px; font-size: 11px; color: var(--muted); }
+
+  /* ===== 担当者接続トースト通知 ===== */
+  .notify-toast {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    width: 320px;
+    background: white;
+    border-left: 4px solid var(--escA);
+    box-shadow: 0 4px 16px rgba(0,0,0,.18);
+    border-radius: 6px;
+    padding: 14px 16px;
+    z-index: 900;
+    animation: slideInRight .25s ease-out;
+    font-size: 12px;
+  }
+  .notify-toast.hidden { display: none; }
+  @keyframes slideInRight { from { transform: translateX(120%); } to { transform: translateX(0); } }
+  .notify-toast .nt-title { font-weight: 700; color: var(--escA); font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .notify-toast .nt-recipients {
+    background: #fef2f2;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin: 8px 0;
+    color: var(--text);
+  }
+  .notify-toast .nt-recipients .recipient { display: inline-block; padding: 2px 8px; background: white; border-radius: 10px; margin: 2px 4px 2px 0; font-size: 11px; }
+  .notify-toast .nt-countdown {
+    background: #fff7ed;
+    color: var(--escB);
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-top: 8px;
+    font-weight: 600;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .notify-toast .nt-skip {
+    margin-top: 8px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 11px;
+  }
+  .notify-toast .nt-skip:hover { background: #f3f4f6; }
+
+  /* ===== 営業時間外 → メール対応バナー ===== */
+  .mail-mode-banner {
+    align-self: center;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    max-width: 90%;
+    line-height: 1.5;
+  }
+  .mail-mode-banner b { color: #1e3a8a; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>タスカジ｜Agentforce サポートチャット</h1>
+  <span class="tag">DEMO v0.1</span>
+  <div class="controls">
+    <label>シナリオ:
+      <select id="scenarioSelector">
+        <option value="auto">自動判定（推奨）</option>
+        <option value="S1">S1: キャンセル</option>
+        <option value="S2">S2: 日程・住所変更</option>
+        <option value="S3">S3: 依頼方法</option>
+        <option value="S4">S4: 時間枠変更</option>
+        <option value="S5">S5: 衛生・安全</option>
+      </select>
+    </label>
+    <label>ユーザー種別:
+      <select id="userTypeSelector">
+        <option value="依頼者">依頼者</option>
+        <option value="タスカジさん">タスカジさん</option>
+      </select>
+    </label>
+    <label>営業状態:
+      <select id="businessHoursSelector">
+        <option value="open">営業時間内</option>
+        <option value="closed">営業時間外（夜間/休業）</option>
+      </select>
+    </label>
+    <button id="resetBtn">リセット</button>
+  </div>
+</header>
+
+<!-- 入口モーダル: ユーザータイプ選択（リセット時にも表示） -->
+<div class="entry-modal-bg" id="entryModalBg">
+  <div class="entry-modal">
+    <h2>タスカジ サポートチャットへようこそ</h2>
+    <p>ご利用の立場を教えてください。<br>お問い合わせ内容にあわせて最適なご案内をします。</p>
+    <div class="entry-buttons">
+      <button class="entry-btn" data-usertype="依頼者">
+        <span class="emoji">🏠</span>
+        依頼者
+        <span class="desc">サービスを依頼する方</span>
+      </button>
+      <button class="entry-btn" data-usertype="タスカジさん">
+        <span class="emoji">🧹</span>
+        タスカジさん
+        <span class="desc">ハウスキーパーの方</span>
+      </button>
+    </div>
+    <div class="pattern-note">【パターンA】入口で選択 ／ 【パターンB】画面上部で切替 — どちらも検証可能です</div>
+  </div>
+</div>
+
+<!-- 担当者接続ポップアップ通知 -->
+<div class="notify-toast hidden" id="notifyToast">
+  <div class="nt-title">📲 担当者へ接続中</div>
+  <div style="color:var(--muted);">担当者にポップアップ通知を送信しました。</div>
+  <div class="nt-recipients">
+    <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">通知先</div>
+    <span class="recipient">👤 藤原 良枝</span>
+    <span class="recipient">👤 岩崎</span>
+  </div>
+  <div class="nt-countdown" id="ntCountdown">応答待機中... 残り 30 秒</div>
+  <button class="nt-skip" id="ntSkip">▶ タイムアウトを早送り（デモ用）</button>
+</div>
+
+<div class="layout">
+  <!-- Chat Pane -->
+  <div class="chat-pane">
+    <div class="chat-header">
+      <div class="avatar">タ</div>
+      <div class="meta">
+        <div class="name">タスカジ サポートボット</div>
+        <div class="sub">AIが一次対応します。必要に応じて担当者へお繋ぎします。</div>
+      </div>
+      <div class="status">オンライン</div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-row">
+      <input id="userInput" type="text" placeholder="メッセージを入力..." autocomplete="off">
+      <button id="sendBtn">送信</button>
+    </div>
+    <div class="hints">
+      <b>サンプル入力:</b>
+      <code onclick="fillInput(this)">キャンセルしたい</code>
+      <code onclick="fillInput(this)">キャンセル料を免除してほしい</code>
+      <code onclick="fillInput(this)">日程を変更したい</code>
+      <code onclick="fillInput(this)">引越したので住所も変えたい</code>
+      <code onclick="fillInput(this)">依頼の仕方がわからない</code>
+      <code onclick="fillInput(this)">男性一人暮らしですが女性に来てもらえますか</code>
+      <code onclick="fillInput(this)">時間枠を変えたい</code>
+      <code onclick="fillInput(this)">ネズミが出る家で不安です</code>
+    </div>
+  </div>
+
+  <!-- Admin Pane -->
+  <div class="admin-pane">
+    <h2>シナリオ判定</h2>
+    <div class="admin-section">
+      <div class="row"><span class="key">Scenario</span><span class="val" id="adminScenario">—</span></div>
+      <div class="row"><span class="key">Intent</span><span class="val" id="adminIntent">—</span></div>
+      <div class="row"><span class="key">User type</span><span class="val" id="adminUserType">—</span></div>
+    </div>
+
+    <h2>Slots (収集状況)</h2>
+    <div class="admin-section" id="adminSlots">
+      <div style="color:var(--muted);font-size:11px;">未収集</div>
+    </div>
+
+    <h2>Guardrail / Escalation</h2>
+    <div class="admin-section">
+      <div class="row"><span class="key">Guardrail</span><span class="val" id="adminGuardrail"><span class="pill idle">none</span></span></div>
+      <div class="row"><span class="key">Escalation</span><span class="val" id="adminEscalation"><span class="pill idle">—</span></span></div>
+      <div class="row"><span class="key">Reason</span><span class="val" id="adminEscReason" style="font-size:11px;">—</span></div>
+    </div>
+
+    <h2>参照FAQ（候補）</h2>
+    <div class="admin-section" id="adminFaq">
+      <div style="color:var(--muted);font-size:11px;">未参照</div>
+    </div>
+
+    <h2>Inquiry__c プレビュー</h2>
+    <pre class="json" id="adminInquiry">{}</pre>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   タスカジ Agentforce デモ — シナリオ駆動の会話エンジン
+   実装方針: 状態機械 + Slot filling + ガードレール判定
+   実装時は Salesforce Agent Builder の Topic/Action に置換
+   ========================================================= */
+
+// ---------- 0. シナリオ判定（簡易キーワードルーティング） ----------
+const scenarioRouting = [
+  // S5 を最優先（安全優先）
+  { scenario: 'S5', intent: 'safety_risk_imminent',  keywords: ['今','作業できない','続けられない','ネズミ','糞','ゴミ屋敷','害虫','悪臭','危険','衛生'] },
+  { scenario: 'S5', intent: 'safety_risk_consultation', keywords: ['ネズミ','糞','ゴミ屋敷','害虫','悪臭','不安','衛生'] },
+  // S1 キャンセル
+  { scenario: 'S1', intent: 'cancel_fee_waiver',  keywords: ['免除','返金','無料にして','まけて','キャンセル料を払いたくない'] },
+  { scenario: 'S1', intent: 'cancel_fee_rule',    keywords: ['キャンセル料','いくら','料金'] },
+  { scenario: 'S1', intent: 'cancel_procedure',   keywords: ['キャンセル'] },
+  // S2 日程・住所
+  { scenario: 'S2', intent: 'address_change',     keywords: ['住所変更','引越','引っ越','住所を変'] },
+  { scenario: 'S2', intent: 'schedule_change',    keywords: ['日程変更','日程を変','変更したい','ずらしたい','変えたい'] },
+  // S3 依頼方法 / マッチング
+  { scenario: 'S3', intent: 'matching_safety_concern', keywords: ['男性','女性','一人暮らし','安全','性別','外国','年齢'] },
+  { scenario: 'S3', intent: 'how_to_request',     keywords: ['依頼','頼みたい','使い方','どうやって','作り置き','調理','掃除','整理収納'] },
+  // S4 時間枠
+  { scenario: 'S4', intent: 'change_availability_error', keywords: ['エラー','押せない','できません','動かない'] },
+  { scenario: 'S4', intent: 'change_availability', keywords: ['時間枠','枠を変','9-12','16-19','シフト'] },
+];
+
+function routeScenario(text, userType) {
+  const t = text.toLowerCase();
+  for (const r of scenarioRouting) {
+    if (r.keywords.some(k => text.includes(k))) {
+      // S4/S5はタスカジさん、S1〜S3は依頼者寄り（参考）
+      return { scenario: r.scenario, intent: r.intent };
+    }
+  }
+  return null;
+}
+
+// ---------- 1. シナリオ定義（状態機械） ----------
+// 各シナリオは asks[] を順に進める。slotKey に値が入ったら次へ。
+// branches で分岐。end で会話を締める。
+const scenarios = {
+  S1: {
+    name: 'キャンセル料・キャンセル手続き',
+    userType: '依頼者',
+    intents: {
+      cancel_fee_waiver: {
+        flow: [
+          { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。必要に応じて担当者へお繋ぎします。' },
+          { type: 'guardrail', code: 'G1', note: '金銭に関する断定回避（免除/返金は AI で判断しない）' },
+          { type: 'ask', slot: 'service_datetime', text: '免除のご相談ですね。まず、依頼日時（開始予定）はいつでしたか？', input: 'date' },
+          { type: 'ask', slot: 'reason_summary', text: '差し支えない範囲で、キャンセルに至った経緯を1〜2行で教えてください。' },
+          { type: 'escalate', level: 'A', reason: '免除判断は個別事情のためAIでは確定回答しない (G1)',
+            text: 'ご相談ありがとうございます。キャンセル料の取扱いは個別事情によって判断が変わるため、AIではお返事せず担当者へお繋ぎいたします。いただいた内容を担当へ申し送り、追ってご連絡差し上げます。'
+          }
+        ]
+      },
+      cancel_fee_rule: {
+        flow: [
+          { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
+          { type: 'ask', slot: 'reservation_type', text: '対象のご予約はスポット／定期のどちらですか？', options: ['スポット','定期'] },
+          { type: 'faq', faqs: ['FAQ_CANCEL_FEE_TIMING — キャンセル料の発生時期'] },
+          { type: 'end', level: 'C', text: 'キャンセル料は、依頼日時の何日前にキャンセル操作を行うかで発生条件が変わります。詳細は上記FAQをご確認ください。判断に迷う場合は担当へお繋ぎします。' }
+        ]
+      },
+      cancel_procedure: {
+        flow: [
+          { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
+          { type: 'ask', slot: 'already_cancelled', text: 'すでにアプリ上でキャンセル操作はお済みですか？', options: ['はい','いいえ'] },
+          { type: 'branch', on: 'already_cancelled', cases: {
+            'はい': [
+              { type: 'faq', faqs: ['FAQ_CANCEL_FEE_TIMING — キャンセル料の発生時期'] },
+              { type: 'end', level: 'C', text: 'キャンセル操作は完了しています。料金ルールの詳細は上記FAQをご参照ください。判断に迷う場合は担当へお繋ぎします。' }
+            ],
+            'いいえ': [
+              { type: 'faq', faqs: ['FAQ_CANCEL_PROCEDURE — キャンセル手続きの方法'] },
+              { type: 'end', level: 'C', text: 'キャンセル手続きの方法をご案内します。\n1. アプリ／Webから対象の予約を開く\n2. 「キャンセル」ボタンから操作\n3. キャンセル料の発生条件は時期により異なります（上記FAQ参照）。' }
+            ]
+          }}
+        ]
+      }
+    }
+  },
+
+  S2: {
+    name: '定期依頼の日程変更／住所変更',
+    userType: '依頼者',
+    intents: {
+      schedule_change: {
+        flow: [
+          { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
+          { type: 'ask', slot: 'change_scope', text: 'ご変更されたい内容を教えてください。', options: ['日程のみ','日程＋住所','住所のみ'] },
+          { type: 'ask', slot: 'target_booking_date', text: '対象の予約日はいつですか？', input: 'date' },
+          { type: 'ask', slot: 'desired_new_date', text: '変更ご希望日はいつですか？', input: 'date' },
+          { type: 'guard_check', name: 'overdue_check', logic: 'if (target_booking_date - today < 24h) escalate A' },
+          { type: 'faq', faqs: ['FAQ_SCHEDULE_CHANGE — 日程変更手順'] },
+          { type: 'end', level: 'C', text: '日程変更の手順を上記FAQでご確認ください。変更可能な期限を過ぎている場合は担当者にお繋ぎします。' }
+        ]
+      },
+      address_change: {
+        flow: [
+          { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
+          { type: 'ask', slot: 'target_booking_date', text: '対象の予約日はいつですか？', input: 'date' },
+          { type: 'ask', slot: 'id_document_ready_date', text: '新住所の身分証はいつ準備できそうですか？', input: 'date' },
+          { type: 'faq', faqs: ['FAQ_ADDRESS_CHANGE — 住所変更（身分証提出）', 'FAQ_ID_VERIFICATION — 本人確認'] },
+          { type: 'escalate', level: 'B', reason: '身分証提出時期によっては運用判断が必要',
+            text: '住所変更には身分証の本人確認が必要です。提出時期によっては運用判断が必要なため、担当者にお繋ぎし、調整いたします。' }
+        ]
+      }
+    }
+  },
+
+  S3: {
+    name: '依頼方法／条件マッチ',
+    userType: '依頼者',
+    intents: {
+      how_to_request: {
+        flow: [
+          { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
+          { type: 'ask', slot: 'task_type', text: 'やりたい内容はどれに近いですか？', options: ['買い物+調理','作り置き','掃除','整理収納','その他'] },
+          { type: 'ask', slot: 'preferred_style', text: '探し方はどちらが良さそうですか？', options: ['検索形式（指名）','募集形式','どちらでも'] },
+          { type: 'faq', faqs: ['FAQ_HOW_TO_REQUEST — 依頼方法','FAQ_SEARCH_VS_RECRUIT — 検索と募集の違い'] },
+          { type: 'end', level: 'C', text: 'ご希望の依頼方法をご案内します。検索形式は指名、募集形式は条件で応募を集める方式です。詳細は上記FAQをご確認ください。' }
+        ]
+      },
+      matching_safety_concern: {
+        flow: [
+          { type: 'ai', text: 'ご質問ありがとうございます。AIが一次対応を担当します。' },
+          { type: 'guardrail', code: 'G4', note: '性別/家族構成/国籍の断定回避' },
+          { type: 'guardrail', code: 'G7', note: 'プラットフォーム中立スタンスを保持' },
+          { type: 'faq', faqs: ['FAQ_MATCHING_SAFETY — 安全配慮'] },
+          { type: 'escalate', level: 'B', reason: '性別/家族構成等の個別事情を含むため担当レビュー推奨',
+            text: 'タスカジさんとのマッチングは個別のご判断になるため、AIから確定的なご案内はいたしません。プラットフォーム上の仕組み（検索形式／募集形式）はご案内できます。具体的なケースについては担当者にお繋ぎし、安全配慮を含めてご案内します。' }
+        ]
+      }
+    }
+  },
+
+  S4: {
+    name: '時間枠変更（タスカジさん側）',
+    userType: 'タスカジさん',
+    intents: {
+      change_availability: {
+        flow: [
+          { type: 'ai', text: 'お問い合わせありがとうございます。AIが一次対応を担当します。' },
+          { type: 'ask', slot: 'current_slots', text: '現在の時間枠を教えてください（例: 9-12, 13-16）。' },
+          { type: 'ask', slot: 'desired_slots', text: '変更したい時間枠を教えてください（例: 16-19）。' },
+          { type: 'ask', slot: 'has_regular_contract', text: '定期契約に影響する変更ですか？', options: ['はい','いいえ'] },
+          { type: 'branch', on: 'has_regular_contract', cases: {
+            'いいえ': [
+              { type: 'faq', faqs: ['FAQ_KEEPER_AVAILABILITY — 時間枠変更手順'] },
+              { type: 'end', level: 'C', text: '時間枠の変更手順をご案内します。\n1. 管理画面 > 「予定枠の設定」を開く\n2. 既存の枠を選択し、希望時間に変更\n3. 「保存」で確定\n操作できない場合は担当へお繋ぎします。' }
+            ],
+            'はい': [
+              { type: 'escalate', level: 'B', reason: '定期契約への影響あり', text: '定期契約への影響がある変更のため、担当者にお繋ぎし手順を確認します。' }
+            ]
+          }}
+        ]
+      },
+      change_availability_error: {
+        flow: [
+          { type: 'ai', text: 'お問い合わせありがとうございます。' },
+          { type: 'escalate', level: 'A', reason: '操作不可・エラーは即時人へ', text: 'システムエラーで操作できない状態のため、担当者へお繋ぎします。少々お待ちください。' }
+        ]
+      }
+    }
+  },
+
+  S5: {
+    name: '衛生・安全リスク（タスカジさん側）',
+    userType: 'タスカジさん',
+    intents: {
+      safety_risk_imminent: {
+        flow: [
+          { type: 'ai', text: '安全に関わるご相談、ありがとうございます。**安全確保を最優先**してください。' },
+          { type: 'guardrail', code: 'G1', note: 'キャンセル料/補償の断定は絶対NG → 事務局判断' },
+          { type: 'guardrail', code: 'G3', note: '中止/続行の判断は AI で行わない' },
+          { type: 'ask', slot: 'can_continue', text: '今、その場で作業継続が可能な状況ですか？', options: ['可能','難しい'] },
+          { type: 'ask', slot: 'risk_type', text: 'リスク内容を選んでください（複数選択可）。', options: ['ネズミ','害虫','糞','足の踏み場無し','悪臭','その他'], multi: true },
+          { type: 'escalate', level: 'A', reason: '衛生・安全リスクは原則 A エスカ',
+            text: '担当者にお繋ぎします。お時間頂戴しないよう状況を申し送ります。\n\n必要なら以下の定型をご利用ください:\n『安全確保が難しい状況のため、サポートセンターに確認してから対応します。本日は一度事務局に連絡し、指示を待ちます。』' }
+        ]
+      },
+      safety_risk_consultation: {
+        flow: [
+          { type: 'ai', text: 'ご相談ありがとうございます。安全に関する事前確認ですね。' },
+          { type: 'guardrail', code: 'G1', note: 'キャンセル料/補償の断定は絶対NG' },
+          { type: 'ask', slot: 'risk_type', text: '想定されるリスク内容を選んでください。', options: ['ネズミ','害虫','糞','足の踏み場無し','悪臭','その他'], multi: true },
+          { type: 'escalate', level: 'A', reason: '事前相談でも安全系は原則 A エスカ',
+            text: '安全に関わるご相談は事務局判断となるため、担当者にお繋ぎします。状況を申し送り、対応方針をご案内します。' }
+        ]
+      }
+    }
+  }
+};
+
+// ---------- 2. 状態管理 ----------
+let state = {
+  scenario: null,
+  intent: null,
+  userType: '依頼者',
+  slots: {},
+  flowIndex: 0,
+  currentFlow: null,
+  expectedSlot: null,
+  expectedInput: null,
+  expectedOptions: null,
+  expectedMulti: false,
+  guardrails: [],
+  escalation: null,
+  escReason: '',
+  faqs: [],
+  inquiryName: 'INQ-2026-' + String(Math.floor(Math.random()*9000)+1000),
+  awaitingResponse: false,
+  conversationLog: []
+};
+
+// ---------- 3. レンダリング ----------
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+
+function renderMessage(role, text, opts = {}) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + role;
+  const icon = document.createElement('div');
+  icon.className = 'icon';
+  icon.textContent = role === 'ai' ? '🤖' : '👤';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+  wrap.appendChild(icon);
+  wrap.appendChild(bubble);
+
+  if (opts.quickReplies && opts.quickReplies.length) {
+    const qr = document.createElement('div');
+    qr.className = 'quick-replies';
+    opts.quickReplies.forEach(opt => {
+      const b = document.createElement('button');
+      b.textContent = opt;
+      b.onclick = () => { handleUserInput(opt); };
+      qr.appendChild(b);
+    });
+    bubble.appendChild(qr);
+  }
+  if (opts.faqs && opts.faqs.length) {
+    opts.faqs.forEach(f => {
+      const ref = document.createElement('div');
+      ref.className = 'ref-faq';
+      ref.textContent = '▶ ' + f;
+      bubble.appendChild(ref);
+    });
+  }
+  messagesEl.appendChild(wrap);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function renderSystem(text) {
+  const el = document.createElement('div');
+  el.className = 'system-msg';
+  el.textContent = text;
+  messagesEl.appendChild(el);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function renderGuardrail(code, note) {
+  const el = document.createElement('div');
+  el.className = 'guard-banner';
+  el.innerHTML = `🛡️ <b>Guardrail ${code}</b> 発動: ${note}`;
+  messagesEl.appendChild(el);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function renderEscalation(level, reason) {
+  const el = document.createElement('div');
+  el.className = 'esc-banner ' + level;
+  el.innerHTML = `🚨 <b>Escalation_${level}</b> — ${reason}`;
+  messagesEl.appendChild(el);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function renderMailMode(text) {
+  const el = document.createElement('div');
+  el.className = 'mail-mode-banner';
+  el.innerHTML = text;
+  messagesEl.appendChild(el);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+/* ===== 担当者接続トースト + 30秒タイムアウト ===== */
+let countdownTimer = null;
+let countdownRemain = 0;
+
+function showAgentNotifyToast() {
+  const toast = document.getElementById('notifyToast');
+  toast.classList.remove('hidden');
+  countdownRemain = 30;
+  document.getElementById('ntCountdown').textContent = `応答待機中... 残り ${countdownRemain} 秒`;
+  countdownTimer = setInterval(() => {
+    countdownRemain--;
+    if (countdownRemain <= 0) {
+      finishCountdown('timeout');
+    } else {
+      document.getElementById('ntCountdown').textContent = `応答待機中... 残り ${countdownRemain} 秒`;
+    }
+  }, 1000);
+}
+
+function finishCountdown(mode) {
+  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+  document.getElementById('notifyToast').classList.add('hidden');
+  // タイムアウト → 「後ほどメールで回答」モードに切替
+  renderSystem('⏱ 30秒以内に担当者が応答できなかったため、「後ほど回答」モードへ切替');
+  renderMailMode(
+    '<b>担当者がただいま対応中です。</b><br>' +
+    'いただいたご相談は担当者にエスカレーション済みです。<br>' +
+    '<b>本日中〜翌営業日</b>にメールでご返信いたします。受付ID: <code>' + state.inquiryName + '</code>'
+  );
+}
+
+
+// ---------- 4. 会話エンジン ----------
+function startScenario(scenarioCode, intent) {
+  state.scenario = scenarioCode;
+  state.intent = intent;
+  const scen = scenarios[scenarioCode];
+  if (!scen || !scen.intents[intent]) {
+    renderMessage('ai', '申し訳ありません、その内容は担当者にお繋ぎします。');
+    escalate('B', 'シナリオ未定義（G5 ハルシ防止）');
+    return;
+  }
+  state.currentFlow = scen.intents[intent].flow;
+  state.flowIndex = 0;
+  updateAdmin();
+  advance();
+}
+
+function advance() {
+  if (state.flowIndex >= state.currentFlow.length) {
+    state.awaitingResponse = false;
+    updateAdmin();
+    return;
+  }
+  const step = state.currentFlow[state.flowIndex];
+  state.flowIndex++;
+
+  if (step.type === 'ai') {
+    renderMessage('ai', step.text);
+    setTimeout(advance, 400);
+  } else if (step.type === 'guardrail') {
+    state.guardrails.push(step.code);
+    renderGuardrail(step.code, step.note);
+    updateAdmin();
+    setTimeout(advance, 250);
+  } else if (step.type === 'ask') {
+    state.expectedSlot = step.slot;
+    state.expectedInput = step.input || 'text';
+    state.expectedOptions = step.options || null;
+    state.expectedMulti = !!step.multi;
+    state.awaitingResponse = true;
+    renderMessage('ai', step.text, { quickReplies: step.options });
+    updateAdmin();
+  } else if (step.type === 'branch') {
+    const val = state.slots[step.on];
+    const branchFlow = step.cases[val] || [];
+    // 現在のフローに分岐を差し込む
+    state.currentFlow.splice(state.flowIndex, 0, ...branchFlow);
+    advance();
+  } else if (step.type === 'faq') {
+    state.faqs.push(...step.faqs);
+    updateAdmin();
+    advance();
+  } else if (step.type === 'guard_check') {
+    // 簡易: ロジックは説明だけ。実装時は判定式
+    renderSystem(`[guard_check] ${step.logic}`);
+    advance();
+  } else if (step.type === 'escalate' || step.type === 'end') {
+    if (step.type === 'escalate') {
+      escalate(step.level, step.reason);
+    } else {
+      // 'end' は C エスカ相当（完結）
+      state.escalation = step.level || 'C';
+      state.escReason = '正常完結';
+    }
+    renderMessage('ai', step.text, { faqs: [] });
+    if (step.type === 'escalate') {
+      renderEscalation(step.level, step.reason);
+      // A エスカ: 営業時間内→通知ポップアップ+30秒タイムアウト / 営業時間外→即メール対応
+      if (step.level === 'A') {
+        const businessHours = document.getElementById('businessHoursSelector').value;
+        if (businessHours === 'open') {
+          showAgentNotifyToast();
+        } else {
+          renderMailMode(
+            '<b>🌙 現在は営業時間外（夜間/休業）です。</b><br>' +
+            '担当者へのリアルタイム接続は行わず、メール対応に自動切替しました。<br>' +
+            '<b>翌営業日</b>にご返信いたします。受付ID: <code>' + state.inquiryName + '</code>'
+          );
+        }
+      }
+    }
+    renderSystem(`Inquiry__c に記録しました（${state.inquiryName}）`);
+    state.awaitingResponse = false;
+    updateAdmin();
+  }
+}
+
+function escalate(level, reason) {
+  state.escalation = level;
+  state.escReason = reason;
+}
+
+function handleUserInput(text) {
+  if (!text || !text.trim()) return;
+  renderMessage('user', text);
+
+  // 初回入力ならシナリオ判定
+  if (!state.scenario) {
+    const sel = document.getElementById('scenarioSelector').value;
+    const userType = document.getElementById('userTypeSelector').value;
+    state.userType = userType;
+    let routed;
+    if (sel === 'auto') {
+      routed = routeScenario(text, userType);
+    } else {
+      // 明示選択時はそのシナリオの最初のintentに振る
+      const first = Object.keys(scenarios[sel].intents)[0];
+      routed = { scenario: sel, intent: first };
+    }
+    if (!routed) {
+      renderMessage('ai', '申し訳ありません、該当する案内が見つかりませんでした。担当者にお繋ぎします。');
+      state.guardrails.push('G5');
+      renderGuardrail('G5', 'FAQ該当なし — ハルシ防止のため AI 回答せず');
+      escalate('B', 'G5 発動（FAQ該当なし）');
+      updateAdmin();
+      return;
+    }
+    startScenario(routed.scenario, routed.intent);
+    return;
+  }
+
+  // Slot を期待している場合
+  if (state.awaitingResponse && state.expectedSlot) {
+    if (state.expectedMulti) {
+      const arr = state.slots[state.expectedSlot] || [];
+      arr.push(text);
+      state.slots[state.expectedSlot] = arr;
+    } else {
+      state.slots[state.expectedSlot] = text;
+    }
+    state.expectedSlot = null;
+    state.expectedOptions = null;
+    state.awaitingResponse = false;
+    updateAdmin();
+    setTimeout(advance, 350);
+  } else {
+    // 想定外発話 — 担当に繋ぐ
+    renderMessage('ai', 'ご質問ありがとうございます。担当者にお繋ぎして個別にご案内します。');
+    state.guardrails.push('G5');
+    renderGuardrail('G5', '想定外発話 — AI回答せず人へ');
+    escalate('B', '想定外発話（G5）');
+    updateAdmin();
+  }
+}
+
+// ---------- 5. 管理者ビュー更新 ----------
+function updateAdmin() {
+  document.getElementById('adminScenario').textContent = state.scenario || '—';
+  document.getElementById('adminIntent').textContent = state.intent || '—';
+  document.getElementById('adminUserType').textContent = state.userType;
+
+  // Slots
+  const slotsEl = document.getElementById('adminSlots');
+  if (Object.keys(state.slots).length === 0) {
+    slotsEl.innerHTML = '<div style="color:var(--muted);font-size:11px;">未収集</div>';
+  } else {
+    slotsEl.innerHTML = Object.entries(state.slots).map(([k,v]) =>
+      `<div class="row"><span class="key">${k}</span><span class="val">${Array.isArray(v) ? v.join(', ') : v}</span></div>`
+    ).join('');
+  }
+
+  // Guardrail
+  const gEl = document.getElementById('adminGuardrail');
+  if (state.guardrails.length === 0) {
+    gEl.innerHTML = '<span class="pill idle">none</span>';
+  } else {
+    gEl.innerHTML = [...new Set(state.guardrails)].map(g => `<span class="pill guard">${g}</span>`).join(' ');
+  }
+
+  // Escalation
+  const eEl = document.getElementById('adminEscalation');
+  if (!state.escalation) {
+    eEl.innerHTML = '<span class="pill idle">—</span>';
+  } else {
+    eEl.innerHTML = `<span class="pill esc${state.escalation}">Level ${state.escalation}</span>`;
+  }
+  document.getElementById('adminEscReason').textContent = state.escReason || '—';
+
+  // FAQ
+  const fEl = document.getElementById('adminFaq');
+  if (state.faqs.length === 0) {
+    fEl.innerHTML = '<div style="color:var(--muted);font-size:11px;">未参照</div>';
+  } else {
+    fEl.innerHTML = [...new Set(state.faqs)].map(f => `<div style="padding:3px 0;font-size:11px;">▶ ${f}</div>`).join('');
+  }
+
+  // Inquiry__c プレビュー
+  const inquiry = {
+    Name: state.inquiryName,
+    ReceivedAt__c: new Date().toISOString(),
+    Channel__c: 'Web',
+    UserType__c: state.userType,
+    Intent__c: state.intent || null,
+    SlotsJson__c: state.slots,
+    EscalationLevel__c: state.escalation || null,
+    EscalationReason__c: state.escReason || null,
+    GuardrailTriggered__c: [...new Set(state.guardrails)],
+    ReferencedFaqIds__c: [...new Set(state.faqs)].map(f => f.split(' — ')[0])
+  };
+  document.getElementById('adminInquiry').innerHTML = syntaxHighlight(inquiry);
+}
+
+function syntaxHighlight(obj) {
+  let json = JSON.stringify(obj, null, 2);
+  return json.replace(/("(\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|true|false|null|-?\d+(\.\d+)?)/g, function (match) {
+    let cls = 'n';
+    if (/^"/.test(match)) cls = /:$/.test(match) ? 'k' : 's';
+    else if (/true|false/.test(match)) cls = 'b';
+    return `<span class="${cls}">${match}</span>`;
+  });
+}
+
+// ---------- 6. リセット ----------
+function reset() {
+  // 通知トースト・カウントダウン解除
+  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+  const toast = document.getElementById('notifyToast');
+  if (toast) toast.classList.add('hidden');
+
+  messagesEl.innerHTML = '';
+  state = {
+    scenario: null, intent: null,
+    userType: document.getElementById('userTypeSelector').value,
+    slots: {}, flowIndex: 0, currentFlow: null,
+    expectedSlot: null, expectedInput: null, expectedOptions: null, expectedMulti: false,
+    guardrails: [], escalation: null, escReason: '', faqs: [],
+    inquiryName: 'INQ-2026-' + String(Math.floor(Math.random()*9000)+1000),
+    awaitingResponse: false, conversationLog: []
+  };
+  // 入口モーダルを表示（パターンA: 入口で選択）
+  showEntryModal();
+  updateAdmin();
+}
+
+// ---------- 入口モーダル制御 ----------
+function showEntryModal() {
+  const bg = document.getElementById('entryModalBg');
+  if (bg) bg.classList.remove('hidden');
+}
+function hideEntryModalAndStart(userType) {
+  const bg = document.getElementById('entryModalBg');
+  if (bg) bg.classList.add('hidden');
+  // ヘッダー側セレクタも同期
+  document.getElementById('userTypeSelector').value = userType;
+  state.userType = userType;
+  updateAdmin();
+  renderMessage('ai',
+    `こんにちは、タスカジ サポートボットです。\n${userType}としてのご利用ですね。\nAIが一次対応を担当し、必要に応じて担当者にお繋ぎします。\nご相談内容を入力してください。`
+  );
+}
+
+// ---------- 7. UI ハンドラ ----------
+sendBtn.onclick = () => {
+  const v = inputEl.value;
+  inputEl.value = '';
+  handleUserInput(v);
+};
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { sendBtn.click(); }
+});
+document.getElementById('resetBtn').onclick = reset;
+document.getElementById('userTypeSelector').onchange = () => { state.userType = document.getElementById('userTypeSelector').value; updateAdmin(); };
+
+// 入口モーダルのボタン
+document.querySelectorAll('.entry-btn').forEach(btn => {
+  btn.onclick = () => {
+    const ut = btn.getAttribute('data-usertype');
+    hideEntryModalAndStart(ut);
+  };
+});
+
+// タイムアウト早送りボタン（DOMContentLoaded前にバインド）
+document.getElementById('ntSkip').onclick = () => finishCountdown('manual');
+
+function fillInput(el) {
+  inputEl.value = el.textContent;
+  inputEl.focus();
+}
+
+// 初期表示
+reset();
+</script>
+</body>
+</html>

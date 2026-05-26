@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Glue Demos</title>
+<style>
+  body {
+    font-family: -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #f5f7fa;
+    color: #1f2937;
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+  }
+  .container { max-width: 720px; width: 100%; }
+  h1 { font-size: 22px; color: #1f6b41; margin-bottom: 8px; }
+  .sub { color: #6b7280; font-size: 13px; margin-bottom: 32px; }
+  .demo-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .demo-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+  .demo-card a { color: #2e8b57; text-decoration: none; font-weight: 600; font-size: 16px; }
+  .demo-card a:hover { text-decoration: underline; }
+  .demo-card .meta { color: #6b7280; font-size: 12px; margin-top: 6px; }
+  .demo-card .desc { font-size: 13px; margin-top: 8px; line-height: 1.55; }
+  .tag { display: inline-block; background: #e8f5ec; color: #1f6b41; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-right: 4px; font-weight: 600; }
+  footer { margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Glue Demos</h1>
+  <div class="sub">株式会社Glue が構築する Salesforce デモ環境の一覧</div>
+
+  <div class="demo-card">
+    <a href="taskaji/">タスカジ｜Agentforce サポートチャット (v0.2)</a>
+    <div class="meta">
+      <span class="tag">Agentforce</span>
+      <span class="tag">Data Cloud</span>
+      <span class="tag">Service Cloud</span>
+    </div>
+    <div class="desc">
+      家事代行マッチングプラットフォームのカスタマーサポート用チャットボット。
+      依頼者・タスカジさん（ハウスキーパー）の2タイプに対応し、5シナリオ（キャンセル／日程変更／依頼方法／時間枠／衛生・安全）+ガードレール+エスカレーション判定+営業時間振り分けを実装。
+    </div>
+  </div>
+</div>
+<footer>© Glue Inc.</footer>
+</body>
+</html>
