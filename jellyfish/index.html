@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>JELLYFISH様｜Salesforce画面モックアップ v0.1</title>
+<style>
+  :root{
+    --sf-blue:#0176d3;
+    --sf-blue-dark:#014486;
+    --sf-bg:#f3f3f3;
+    --sf-border:#dddbda;
+    --sf-text:#181818;
+    --sf-muted:#706e6b;
+    --sf-green:#2e844a;
+    --sf-amber:#fe9339;
+    --sf-red:#ba0517;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:'Salesforce Sans','Helvetica Neue',Arial,sans-serif;
+    background:var(--sf-bg);color:var(--sf-text);font-size:13px;
+  }
+  /* グローバルナビ */
+  .gnav{
+    background:var(--sf-blue);color:#fff;padding:10px 16px;
+    display:flex;align-items:center;gap:16px;
+  }
+  .gnav .app{font-weight:700;font-size:15px}
+  .gnav .tabs{display:flex;gap:4px;margin-left:24px;flex-wrap:wrap}
+  .gnav .tabs button{
+    background:transparent;color:#fff;border:none;
+    padding:8px 14px;border-radius:4px 4px 0 0;cursor:pointer;font-size:13px;
+  }
+  .gnav .tabs button.active{background:#fff;color:var(--sf-blue-dark);font-weight:600}
+  .gnav .user{margin-left:auto;font-size:12px;opacity:.9}
+
+  /* ページコンテナ */
+  .page{display:none;padding:16px 24px}
+  .page.active{display:block}
+
+  /* レコードヘッダー */
+  .rec-header{
+    background:#fff;border:1px solid var(--sf-border);border-radius:4px;
+    padding:14px 20px;margin-bottom:12px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  }
+  .rec-icon{
+    width:44px;height:44px;border-radius:6px;
+    background:var(--sf-blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;
+  }
+  .rec-title{font-size:18px;font-weight:700;margin:0}
+  .rec-sub{color:var(--sf-muted);font-size:12px;margin-top:2px}
+  .rec-actions{margin-left:auto;display:flex;gap:8px}
+  .btn{
+    background:#fff;border:1px solid var(--sf-border);border-radius:4px;
+    padding:6px 12px;cursor:pointer;font-size:13px;color:var(--sf-blue-dark);
+  }
+  .btn-primary{background:var(--sf-blue);color:#fff;border-color:var(--sf-blue)}
+  .badge{
+    display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;
+    background:#ecebea;color:var(--sf-text);
+  }
+  .badge.green{background:#cdefc4;color:#194e2c}
+  .badge.amber{background:#fee8d5;color:#794619}
+  .badge.blue{background:#cfe5fc;color:#014486}
+
+  /* ハイライトパネル */
+  .hl{
+    background:#fff;border:1px solid var(--sf-border);border-radius:4px;
+    padding:12px 20px;margin-bottom:12px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  }
+  .hl .item .k{font-size:11px;color:var(--sf-muted);text-transform:uppercase}
+  .hl .item .v{font-size:14px;margin-top:2px}
+
+  /* メイン2カラム */
+  .grid{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .card{
+    background:#fff;border:1px solid var(--sf-border);border-radius:4px;
+    margin-bottom:12px;
+  }
+  .card-header{
+    padding:10px 16px;border-bottom:1px solid var(--sf-border);
+    font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;
+    background:#fafaf9;
+  }
+  .card-header .count{color:var(--sf-muted);font-weight:400;font-size:12px}
+  .card-body{padding:12px 16px}
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:6px 12px;font-size:13px}
+  .kv .k{color:var(--sf-muted)}
+
+  table.rel{width:100%;border-collapse:collapse;font-size:12px}
+  table.rel th,table.rel td{
+    text-align:left;padding:8px 10px;border-bottom:1px solid var(--sf-border);
+  }
+  table.rel th{background:#fafaf9;color:var(--sf-muted);font-weight:600}
+  table.rel tr:hover{background:#f7f9fb}
+  table.rel a{color:var(--sf-blue);text-decoration:none}
+
+  /* パスバー（フェーズ進行） */
+  .path{display:flex;gap:0;overflow:hidden;border-radius:4px;border:1px solid var(--sf-border)}
+  .path .step{
+    flex:1;padding:10px 12px;background:#fff;color:var(--sf-muted);
+    font-size:12px;text-align:center;position:relative;border-right:1px solid var(--sf-border);
+  }
+  .path .step:last-child{border-right:none}
+  .path .step.done{background:#e8f5ed;color:var(--sf-green);font-weight:600}
+  .path .step.current{background:var(--sf-blue);color:#fff;font-weight:700}
+
+  /* 活動履歴 */
+  .activity{display:flex;flex-direction:column;gap:8px}
+  .activity .row{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--sf-border)}
+  .activity .row:last-child{border-bottom:none}
+  .activity .date{color:var(--sf-muted);font-size:11px;width:80px;flex-shrink:0}
+  .activity .type{
+    font-size:11px;padding:1px 6px;border-radius:3px;background:#eef4ff;
+    color:var(--sf-blue-dark);height:fit-content;
+  }
+  .activity .body{flex:1;font-size:12px}
+
+  /* KPIタイル */
+  .kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .kpi .tile{
+    background:#fff;border:1px solid var(--sf-border);border-radius:4px;
+    padding:10px;text-align:center;
+  }
+  .kpi .tile .v{font-size:20px;font-weight:700;color:var(--sf-blue-dark)}
+  .kpi .tile .k{font-size:11px;color:var(--sf-muted);margin-top:4px}
+
+  .note{
+    background:#fff8e1;border-left:3px solid var(--sf-amber);
+    padding:8px 12px;font-size:11px;color:#794619;margin-bottom:12px;
+  }
+
+  /* ===== 業務フロー概要 ===== */
+  .flow-hero{background:linear-gradient(135deg,#014486,#0176d3);color:#fff;
+    border-radius:8px;padding:20px 24px;margin-bottom:16px}
+  .flow-hero h2{margin:0 0 6px;font-size:20px}
+  .flow-hero p{margin:0;font-size:13px;opacity:.92;line-height:1.6}
+  .flow-ext{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+  .ext{background:#fff;border:1px solid var(--sf-border);border-radius:6px;padding:12px 14px}
+  .ext .et{font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px;margin-bottom:6px}
+  .ext .ed{font-size:12px;color:var(--sf-muted);line-height:1.5}
+  .ext .tag{display:inline-block;margin-top:6px}
+
+  .flow-lane{display:flex;flex-direction:column;gap:0;margin-bottom:16px}
+  .stage{background:#fff;border:1px solid var(--sf-border);border-radius:8px;
+    padding:14px 16px;display:grid;grid-template-columns:48px 1fr auto;gap:14px;align-items:center;position:relative}
+  .stage + .stage{margin-top:26px}
+  .stage + .stage::before{content:"▼";position:absolute;top:-22px;left:24px;
+    color:var(--sf-blue);font-size:14px}
+  .stage .num{width:48px;height:48px;border-radius:50%;background:var(--sf-blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700}
+  .stage .body .st{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .stage .body .sd{font-size:12px;color:var(--sf-muted);margin-top:4px;line-height:1.6}
+  .stage .body .meta{margin-top:7px;display:flex;gap:6px;flex-wrap:wrap}
+  .stage .go{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  .stage .obj{font-size:11px;background:#eef4ff;color:var(--sf-blue-dark);
+    border:1px solid #cfe5fc;border-radius:4px;padding:2px 8px}
+  .stage .intg{font-size:11px;background:#e8f5ed;color:#194e2c;
+    border:1px solid #bfe3cc;border-radius:4px;padding:2px 8px}
+  .jump{background:var(--sf-blue);color:#fff;border:none;border-radius:4px;
+    padding:6px 12px;cursor:pointer;font-size:12px;white-space:nowrap}
+  .jump:hover{background:var(--sf-blue-dark)}
+
+  /* データモデル相関図 */
+  .model{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+    padding:18px;font-size:12px}
+  .ent{border:2px solid var(--sf-blue);border-radius:6px;padding:8px 12px;background:#fff;
+    text-align:center;min-width:96px}
+  .ent .en{font-weight:700;color:var(--sf-blue-dark)}
+  .ent .ef{color:var(--sf-muted);font-size:11px;margin-top:2px}
+  .rel-arrow{color:var(--sf-muted);font-size:11px;display:flex;flex-direction:column;align-items:center}
+  .rel-arrow .lbl{font-size:10px}
+
+  /* ===== Slack連携モック ===== */
+  .slack-wrap{display:grid;grid-template-columns:220px 1fr 360px;gap:0;
+    border:1px solid var(--sf-border);border-radius:6px;overflow:hidden;background:#fff}
+  .slack-side{background:#3f0e40;color:#cfc3cf;padding:12px 0;font-size:13px}
+  .slack-side .ws{padding:4px 16px 12px;color:#fff;font-weight:700;font-size:15px;
+    border-bottom:1px solid #522653;margin-bottom:8px}
+  .slack-side .sec{padding:6px 16px;color:#b9aebb;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  .slack-side .ch{padding:4px 16px;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .slack-side .ch.active{background:#1164a3;color:#fff;font-weight:600}
+  .slack-side .ch .hash{opacity:.6}
+  .slack-main{display:flex;flex-direction:column;min-width:0}
+  .slack-head{padding:10px 16px;border-bottom:1px solid var(--sf-border);
+    font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px}
+  .slack-head .topic{font-weight:400;color:var(--sf-muted);font-size:12px}
+  .slack-msgs{padding:8px 16px;display:flex;flex-direction:column;gap:14px;max-height:520px;overflow:auto}
+  .msg{display:flex;gap:10px}
+  .msg .av{width:36px;height:36px;border-radius:6px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+  .msg .who{font-weight:700;font-size:13px}
+  .msg .who .t{font-weight:400;color:var(--sf-muted);font-size:11px;margin-left:6px}
+  .msg .text{font-size:13px;line-height:1.5;margin-top:2px}
+  .msg.bot .av{background:#2e844a}
+  .msg.user .av{background:#7c3aed}
+  .threadcard{border:1px solid var(--sf-border);border-radius:6px;background:#f8f8fb;
+    padding:8px 12px;margin-top:6px;font-size:12px;max-width:520px}
+  .threadcard .tt{font-weight:700;color:var(--sf-blue-dark);margin-bottom:4px}
+  .threadcard .field{display:flex;gap:8px;padding:1px 0}
+  .threadcard .field .fk{color:var(--sf-muted);width:84px;flex-shrink:0}
+  .threadcard .acts{margin-top:8px;display:flex;gap:8px}
+  .sbtn{font-size:12px;padding:4px 10px;border-radius:4px;border:1px solid var(--sf-border);
+    background:#fff;cursor:pointer}
+  .sbtn.primary{background:#007a5a;color:#fff;border-color:#007a5a}
+  .threadreply{margin-left:46px;font-size:12px;color:var(--sf-muted);
+    border-left:2px solid var(--sf-border);padding:2px 0 2px 10px;margin-top:4px}
+  .slack-thread{border-left:1px solid var(--sf-border);background:#fafaf9;
+    padding:12px;display:flex;flex-direction:column;gap:10px;font-size:12px}
+  .slack-thread h4{margin:0 0 4px;font-size:13px}
+  .sync{display:flex;align-items:center;gap:8px;background:#e8f5ed;border:1px solid #bfe3cc;
+    border-radius:6px;padding:8px 10px;font-size:12px;color:#194e2c}
+
+  /* ===== メール / 問い合わせ管理箱モック ===== */
+  .mail-wrap{display:grid;grid-template-columns:300px 1fr;gap:0;
+    border:1px solid var(--sf-border);border-radius:6px;overflow:hidden;background:#fff}
+  .mail-list{border-right:1px solid var(--sf-border);max-height:560px;overflow:auto}
+  .mail-list .mhead{padding:10px 14px;border-bottom:1px solid var(--sf-border);
+    font-weight:700;background:#fafaf9;display:flex;align-items:center;justify-content:space-between}
+  .mail-item{padding:10px 14px;border-bottom:1px solid var(--sf-border);cursor:pointer}
+  .mail-item.active{background:#eef4ff;border-left:3px solid var(--sf-blue)}
+  .mail-item.unread .mfrom{font-weight:700}
+  .mail-item .mfrom{font-size:13px;display:flex;justify-content:space-between}
+  .mail-item .msub{font-size:12px;margin-top:2px}
+  .mail-item .mprev{font-size:11px;color:var(--sf-muted);margin-top:2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mail-item .link{margin-top:5px;display:flex;gap:5px;flex-wrap:wrap}
+  .mail-detail{padding:16px 20px}
+  .mail-detail .mdh{font-size:16px;font-weight:700;margin-bottom:8px}
+  .mail-detail .meta{font-size:12px;color:var(--sf-muted);margin-bottom:4px}
+  .mail-body{background:#f7f9fb;border:1px solid var(--sf-border);border-radius:6px;
+    padding:14px;font-size:13px;line-height:1.7;margin-top:10px}
+  .autolink{background:#fff;border:1px dashed var(--sf-blue);border-radius:6px;
+    padding:10px 14px;margin-top:12px;font-size:12px}
+  .autolink .tt{font-weight:700;color:var(--sf-blue-dark);margin-bottom:6px;
+    display:flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+
+<div class="gnav">
+  <div class="app">🪼 JELLYFISH Sales Cloud（モック v0.2）</div>
+  <div class="tabs">
+    <button data-tab="flow" class="active">業務フロー</button>
+    <button data-tab="candidate">候補者</button>
+    <button data-tab="job">求人</button>
+    <button data-tab="selection">選考</button>
+    <button data-tab="account">企業</button>
+    <button data-tab="slack">Slack連携</button>
+    <button data-tab="mail">メール連携</button>
+    <button data-tab="dashboard">ダッシュボード</button>
+  </div>
+  <div class="user">倉島 ▼</div>
+</div>
+
+<!-- ========== 業務フロー（全体像） ========== -->
+<section class="page active" id="page-flow">
+  <div class="flow-hero">
+    <h2>🪼 JELLYFISH 人材紹介事業 — 全業務フロー</h2>
+    <p>企業の受託から候補者の入社・成果報酬までを Salesforce 上で一気通貫管理。ATS（HRMOS等）・Slack・メールと連携し、推薦コメント生成やフェーズ通知を自動化します。各ステージの「画面を見る ▶」から実際の画面に移動できます。</p>
+  </div>
+
+  <!-- 外部連携サマリ -->
+  <div class="flow-ext">
+    <div class="ext">
+      <div class="et">🔌 ATS / 媒体連携</div>
+      <div class="ed">HRMOS・Talentio・ジョブカン・採用一括かんりくん 等から求人/候補者を取込。API対応はAPI、未対応はスクレイピングで対応。</div>
+      <span class="badge blue tag">第1〜4層で優先度整理</span>
+    </div>
+    <div class="ext">
+      <div class="et">💬 Slack 連携</div>
+      <div class="ed">1チャンネルに候補者ごとのスレッド。フェーズ変更・面接確定をBotが自動投稿、返信/リアクションがSFに反映（双方向）。</div>
+      <span class="badge blue tag">スレッド = 選考レコード 1:1</span>
+    </div>
+    <div class="ext">
+      <div class="et">📧 メール連携</div>
+      <div class="ed">問い合わせ管理箱で受信を一元化。差出人ドメイン・本文から企業＋候補者へ自動紐付け。</div>
+      <span class="badge blue tag">構築初期から実装</span>
+    </div>
+  </div>
+
+  <!-- パイプライン -->
+  <div class="flow-lane">
+
+    <div class="stage">
+      <div class="num">1</div>
+      <div class="body">
+        <div class="st">企業開拓 → 受託 <span class="badge green">受託中</span></div>
+        <div class="sd">企業と契約締結し、求人要件・利用ATS・採用担当（取引先責任者）をヒアリング。企業がすべての起点。</div>
+        <div class="meta"><span class="obj">📦 企業（Account）</span><span class="obj">👥 取引先責任者（Contact）</span></div>
+      </div>
+      <div class="go"><span class="intg">手入力 / 名刺</span><button class="jump" data-jump="account">企業画面を見る ▶</button></div>
+    </div>
+
+    <div class="stage">
+      <div class="num">2</div>
+      <div class="body">
+        <div class="st">求人取得</div>
+        <div class="sd">受託企業のATSから求人を自動取込（API/スクレイピング）。ポジション分類・想定年収・募集職種を構造化。ステータス遷移日を記録。</div>
+        <div class="meta"><span class="obj">📦 求人（Job）</span></div>
+      </div>
+      <div class="go"><span class="intg">🔌 ATS自動取込</span><button class="jump" data-jump="job">求人画面を見る ▶</button></div>
+    </div>
+
+    <div class="stage">
+      <div class="num">3</div>
+      <div class="body">
+        <div class="st">候補者登録・ランク付け</div>
+        <div class="sd">媒体から候補者を登録。経歴・希望条件・タグ・ランクを付与。現状は人の目視確認が入り、将来はAI判定で面談可否を補助。職種横断で共通フォーマット。</div>
+        <div class="meta"><span class="obj">📦 候補者（Candidate）</span></div>
+      </div>
+      <div class="go"><span class="intg">🔌 媒体取込</span><button class="jump" data-jump="candidate">候補者画面を見る ▶</button></div>
+    </div>
+
+    <div class="stage">
+      <div class="num">4</div>
+      <div class="body">
+        <div class="st">マッチング・推薦</div>
+        <div class="sd">候補者 × 求人で「選考」レコードを生成。AIが推薦コメントを自動生成（2,000文字単位課金）し、企業へ推薦状を送付。</div>
+        <div class="meta"><span class="obj">📦 選考（Selection）</span><span class="badge amber">🤖 AI推薦コメント</span></div>
+      </div>
+      <div class="go"><span class="intg">📧 メール送付</span><button class="jump" data-jump="selection">選考画面を見る ▶</button></div>
+    </div>
+
+    <div class="stage">
+      <div class="num">5</div>
+      <div class="body">
+        <div class="st">選考進行（フェーズ管理）</div>
+        <div class="sd">推薦 → 書類送付 → 1次 → 2次 → 最終 → 内定 → 入社 をパスで管理。<strong>フェーズ変更時に日付・変更者・前後フェーズを自動記録</strong>（リードタイム分析の元データ）。</div>
+        <div class="meta"><span class="obj">📦 選考フェーズ履歴</span><span class="badge">⚙ Flow自動記録</span></div>
+      </div>
+      <div class="go"><span class="intg">⏰ リマインド</span><button class="jump" data-jump="selection">選考画面を見る ▶</button></div>
+    </div>
+
+    <div class="stage">
+      <div class="num">6</div>
+      <div class="body">
+        <div class="st">コミュニケーション（Slack / メール）</div>
+        <div class="sd">フェーズ進行をSlackスレッドへ自動通知、企業とのやり取りは問い合わせ管理箱に集約。すべて選考/企業/候補者レコードに紐付き活動履歴化。</div>
+        <div class="meta"><span class="badge blue">💬 Slack双方向</span><span class="badge blue">📧 問い合わせ管理箱</span></div>
+      </div>
+      <div class="go"><span class="intg">↔ 双方向同期</span><button class="jump" data-jump="slack">Slack画面を見る ▶</button></div>
+    </div>
+
+    <div class="stage">
+      <div class="num">7</div>
+      <div class="body">
+        <div class="st">入社確定 → 成果報酬 <span class="badge green">入社</span></div>
+        <div class="sd">入社で選考クローズ。入社日・成果報酬を記録し請求につなげる。辞退時は理由（選択リスト）を記録し改善に活用。</div>
+        <div class="meta"><span class="obj">📦 選考（成果）</span></div>
+      </div>
+      <div class="go"><span class="intg">💰 請求連携</span><button class="jump" data-jump="account">企業画面を見る ▶</button></div>
+    </div>
+
+    <div class="stage">
+      <div class="num">8</div>
+      <div class="body">
+        <div class="st">分析・改善（ダッシュボード）</div>
+        <div class="sd">出口KPI（推薦→入社ファネル）、媒体別・企業別・担当別、フェーズ別リードタイムでボトルネックを可視化。企業ベースの進捗分析も提供。</div>
+        <div class="meta"><span class="obj">📊 ダッシュボード</span></div>
+      </div>
+      <div class="go"><span class="intg">📈 自動集計</span><button class="jump" data-jump="dashboard">ダッシュボードを見る ▶</button></div>
+    </div>
+
+  </div>
+
+  <!-- データモデル相関図 -->
+  <div class="card">
+    <div class="card-header">🗂 データモデル相関図（オブジェクト構成）</div>
+    <div class="card-body">
+      <div class="model">
+        <div class="ent"><div class="en">企業</div><div class="ef">Account</div></div>
+        <div class="rel-arrow"><span>1</span><span>—</span><span class="lbl">求人を持つ</span><span>∞</span></div>
+        <div class="ent"><div class="en">求人</div><div class="ef">Job</div></div>
+        <div class="rel-arrow"><span>1</span><span>—</span><span class="lbl">選考</span><span>∞</span></div>
+        <div class="ent" style="border-color:var(--sf-amber)"><div class="en">選考</div><div class="ef">Selection（中核）</div></div>
+        <div class="rel-arrow"><span>∞</span><span>—</span><span class="lbl">候補者</span><span>1</span></div>
+        <div class="ent"><div class="en">候補者</div><div class="ef">Candidate</div></div>
+      </div>
+      <div class="note" style="margin:0">★「選考」が候補者×求人を結ぶ中核オブジェクト。フェーズ履歴・活動（Slack/メール）・推薦コメントはすべて選考に紐付く。企業⇄候補者はメール連携で双方向にも辿れる。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 候補者詳細 ========== -->
+<section class="page" id="page-candidate">
+  <div class="note">★ Salesforce標準UI（Lightning App Builder）に近い構成。実装時はLightningレコードページで構築。</div>
+
+  <div class="rec-header">
+    <div class="rec-icon">👤</div>
+    <div>
+      <h2 class="rec-title">山田 太郎</h2>
+      <div class="rec-sub">候補者 / ステータス: <span class="badge blue">紹介可能</span> / 担当: 倉島</div>
+    </div>
+    <div class="rec-actions">
+      <button class="btn">編集</button>
+      <button class="btn">活動を記録</button>
+      <button class="btn btn-primary">推薦を作成</button>
+    </div>
+  </div>
+
+  <div class="hl">
+    <div class="item"><div class="k">現職</div><div class="v">ABC社 / プロダクトマネージャー</div></div>
+    <div class="item"><div class="k">希望年収</div><div class="v">800〜900万円</div></div>
+    <div class="item"><div class="k">勤務地希望</div><div class="v">東京 / リモート可</div></div>
+    <div class="item"><div class="k">最終接触日</div><div class="v">2026-05-18</div></div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div class="card-header">📋 基本情報</div>
+        <div class="card-body">
+          <div class="kv">
+            <div class="k">氏名</div><div>山田 太郎</div>
+            <div class="k">メール</div><div>yamada.taro@example.com</div>
+            <div class="k">電話</div><div>090-1234-5678</div>
+            <div class="k">登録日</div><div>2026-03-12</div>
+            <div class="k">経験社数</div><div>3社</div>
+            <div class="k">ソース媒体</div><div><span class="badge">HRMOS Hire</span></div>
+            <div class="k">タグ</div><div><span class="badge">PM</span> <span class="badge">SaaS</span> <span class="badge">B2B</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📑 関連選考 <span class="count">3件</span></div>
+        <table class="rel">
+          <thead><tr><th>求人</th><th>企業</th><th>フェーズ</th><th>推薦日</th><th>次アクション</th></tr></thead>
+          <tbody>
+            <tr><td><a>EM募集</a></td><td>株式会社○○</td><td><span class="badge amber">1次面接</span></td><td>2026-05-12</td><td>結果確認</td></tr>
+            <tr><td><a>PdM求人</a></td><td>株式会社△△</td><td><span class="badge blue">紹介済み</span></td><td>2026-05-18</td><td>返信待ち</td></tr>
+            <tr><td><a>SRE募集</a></td><td>株式会社□□</td><td><span class="badge">クローズ</span></td><td>2026-04-22</td><td>—（辞退）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📝 推薦コメント（AI生成）</div>
+        <div class="card-body">
+          <div style="background:#f7f9fb;padding:10px;border-radius:4px;font-size:12px;line-height:1.6">
+            山田様はABC社にて3年間PMを務め、特にSaaSプロダクトのグロース施策で大きな実績をお持ちです...<br>
+            <button class="btn" style="margin-top:8px">▶ AIで再生成（2,000文字単位課金）</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-header">📞 活動履歴 <span class="count">直近5件</span></div>
+        <div class="card-body">
+          <div class="activity">
+            <div class="row"><div class="date">05/18</div><div class="type">メール</div><div class="body">求人案内（PdM求人）送付</div></div>
+            <div class="row"><div class="date">05/15</div><div class="type">Slack</div><div class="body">面談日程調整</div></div>
+            <div class="row"><div class="date">05/12</div><div class="type">電話</div><div class="body">EM募集に推薦OK確認</div></div>
+            <div class="row"><div class="date">05/08</div><div class="type">面談</div><div class="body">初回面談実施（オンライン）</div></div>
+            <div class="row"><div class="date">03/12</div><div class="type">登録</div><div class="body">HRMOS経由で登録</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📎 添付ファイル</div>
+        <div class="card-body" style="font-size:12px">
+          📄 職務経歴書_山田太郎.pdf<br>
+          📄 履歴書_山田太郎.pdf
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 求人詳細 ========== -->
+<section class="page" id="page-job">
+  <div class="rec-header">
+    <div class="rec-icon" style="background:#7c3aed">💼</div>
+    <div>
+      <h2 class="rec-title">EM募集（株式会社○○）</h2>
+      <div class="rec-sub">求人 / ステータス: <span class="badge amber">推薦中</span> / 取得元: <span class="badge">HRMOS Hire</span></div>
+    </div>
+    <div class="rec-actions">
+      <button class="btn">編集</button>
+      <button class="btn btn-primary">候補者を推薦</button>
+    </div>
+  </div>
+
+  <div class="hl">
+    <div class="item"><div class="k">企業</div><div class="v">株式会社○○</div></div>
+    <div class="item"><div class="k">想定年収</div><div class="v">800〜1,200万円</div></div>
+    <div class="item"><div class="k">勤務地</div><div class="v">東京</div></div>
+    <div class="item"><div class="k">採用担当</div><div class="v">田中 様</div></div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div class="card-header">📋 求人情報</div>
+        <div class="card-body">
+          <div class="kv">
+            <div class="k">ポジション分類</div><div>マネジメント</div>
+            <div class="k">募集職種カテゴリ</div><div>エンジニアリングマネージャー</div>
+            <div class="k">雇用形態</div><div>正社員</div>
+            <div class="k">ステータス</div><div><span class="badge amber">推薦中</span></div>
+            <div class="k">ステータス遷移日</div><div>2026-05-10</div>
+            <div class="k">取得元媒体</div><div>HRMOS Hire</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📑 推薦中候補者 <span class="count">5件</span></div>
+        <table class="rel">
+          <thead><tr><th>候補者</th><th>フェーズ</th><th>推薦日</th><th>次アクション</th><th>担当</th></tr></thead>
+          <tbody>
+            <tr><td><a>山田 太郎</a></td><td><span class="badge amber">1次面接</span></td><td>05-12</td><td>結果確認</td><td>倉島</td></tr>
+            <tr><td><a>鈴木 花子</a></td><td><span class="badge blue">紹介済み</span></td><td>05-18</td><td>返信待ち</td><td>倉島</td></tr>
+            <tr><td><a>佐藤 一郎</a></td><td><span class="badge">書類送付</span></td><td>05-15</td><td>書類結果待ち</td><td>倉島</td></tr>
+            <tr><td><a>田中 二郎</a></td><td><span class="badge">クローズ</span></td><td>05-02</td><td>—（辞退）</td><td>倉島</td></tr>
+            <tr><td><a>高橋 三郎</a></td><td><span class="badge green">内定</span></td><td>04-22</td><td>入社確認</td><td>倉島</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-header">📊 求人別 出口KPI</div>
+        <div class="card-body">
+          <div class="kpi" style="grid-template-columns:repeat(5,1fr)">
+            <div class="tile"><div class="v">5</div><div class="k">推薦</div></div>
+            <div class="tile"><div class="v">3</div><div class="k">書類通過</div></div>
+            <div class="tile"><div class="v">2</div><div class="k">面接</div></div>
+            <div class="tile"><div class="v">1</div><div class="k">内定</div></div>
+            <div class="tile"><div class="v">0</div><div class="k">入社</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📞 活動履歴</div>
+        <div class="card-body">
+          <div class="activity">
+            <div class="row"><div class="date">05/18</div><div class="type">Slack</div><div class="body">採用担当に進捗連絡</div></div>
+            <div class="row"><div class="date">05/10</div><div class="type">取込</div><div class="body">HRMOSから自動取込</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 選考詳細 ========== -->
+<section class="page" id="page-selection">
+  <div class="rec-header">
+    <div class="rec-icon" style="background:#fe9339">🔄</div>
+    <div>
+      <h2 class="rec-title">山田 太郎 × EM募集（株式会社○○）</h2>
+      <div class="rec-sub">選考 / フェーズ: <span class="badge amber">1次面接</span> / 推薦日: 2026-05-12</div>
+    </div>
+    <div class="rec-actions">
+      <button class="btn">編集</button>
+      <button class="btn btn-primary">次フェーズへ進める</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📋 フェーズ進行（パス）</div>
+    <div class="card-body">
+      <div class="path">
+        <div class="step done">推薦 ✓</div>
+        <div class="step done">書類送付 ✓</div>
+        <div class="step current">1次面接</div>
+        <div class="step">2次面接</div>
+        <div class="step">最終面接</div>
+        <div class="step">内定</div>
+        <div class="step">入社</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div class="card-header">📋 選考詳細</div>
+        <div class="card-body">
+          <div class="kv">
+            <div class="k">求人</div><div><a>EM募集</a></div>
+            <div class="k">候補者</div><div><a>山田 太郎</a></div>
+            <div class="k">企業</div><div>株式会社○○</div>
+            <div class="k">推薦日</div><div>2026-05-12</div>
+            <div class="k">書類送付日</div><div>2026-05-13</div>
+            <div class="k">1次面接日</div><div>2026-05-20 14:00</div>
+            <div class="k">2次面接日</div><div>—</div>
+            <div class="k">内定日</div><div>—</div>
+            <div class="k">入社日</div><div>—</div>
+            <div class="k">結果理由</div><div>—</div>
+            <div class="k">辞退理由</div><div>—（選択リスト）</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📝 推薦コメント（AI生成・送付済）</div>
+        <div class="card-body">
+          <div style="background:#f7f9fb;padding:10px;border-radius:4px;font-size:12px;line-height:1.6">
+            山田様はABC社にて3年間PMを務め、SaaSプロダクトの月次MRR成長率を実績として持つ。御社のエンジニアリング組織再編フェーズに合致...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-header">📎 添付</div>
+        <div class="card-body" style="font-size:12px">
+          📄 職務経歴書_山田太郎.pdf<br>
+          📄 推薦状.pdf
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📞 関連活動</div>
+        <div class="card-body">
+          <div class="activity">
+            <div class="row"><div class="date">05/20</div><div class="type">面接</div><div class="body">1次面接（オンライン）</div></div>
+            <div class="row"><div class="date">05/13</div><div class="type">メール</div><div class="body">書類送付完了</div></div>
+            <div class="row"><div class="date">05/12</div><div class="type">推薦</div><div class="body">推薦コメント送付</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">⏰ リマインド</div>
+        <div class="card-body" style="font-size:12px">
+          🔔 05/22 までに1次結果ヒアリング<br>
+          🔔 05/25 候補者フォローアップ
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 企業詳細 ========== -->
+<section class="page" id="page-account">
+  <div class="rec-header">
+    <div class="rec-icon" style="background:#2e844a">🏢</div>
+    <div>
+      <h2 class="rec-title">株式会社○○</h2>
+      <div class="rec-sub">企業 / フェーズ: <span class="badge green">受託中</span> / 担当: 倉島</div>
+    </div>
+    <div class="rec-actions">
+      <button class="btn">編集</button>
+      <button class="btn btn-primary">新規求人を追加</button>
+    </div>
+  </div>
+
+  <div class="hl">
+    <div class="item"><div class="k">業界</div><div class="v">SaaS / B2B</div></div>
+    <div class="item"><div class="k">規模</div><div class="v">100〜300名</div></div>
+    <div class="item"><div class="k">利用ATS</div><div class="v">HRMOS Hire</div></div>
+    <div class="item"><div class="k">取引開始</div><div class="v">2026-03-01</div></div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div class="card-header">📑 求人一覧 <span class="count">5件</span></div>
+        <table class="rel">
+          <thead><tr><th>求人名</th><th>フェーズ</th><th>推薦数</th><th>内定数</th><th>採用担当</th></tr></thead>
+          <tbody>
+            <tr><td><a>EM募集</a></td><td><span class="badge amber">推薦中</span></td><td>5</td><td>1</td><td>田中 様</td></tr>
+            <tr><td><a>PdM求人</a></td><td><span class="badge blue">ヒアリング</span></td><td>0</td><td>0</td><td>田中 様</td></tr>
+            <tr><td><a>SRE募集</a></td><td><span class="badge">クローズ</span></td><td>3</td><td>0</td><td>佐々木 様</td></tr>
+            <tr><td><a>QA Engineer</a></td><td><span class="badge green">入社済</span></td><td>4</td><td>1</td><td>田中 様</td></tr>
+            <tr><td><a>テックリード</a></td><td><span class="badge amber">推薦中</span></td><td>2</td><td>0</td><td>田中 様</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">👥 取引先責任者（採用担当者） <span class="count">3件</span></div>
+        <table class="rel">
+          <thead><tr><th>氏名</th><th>役職</th><th>メール</th><th>最終接触</th></tr></thead>
+          <tbody>
+            <tr><td>田中 様</td><td>人事部長</td><td>tanaka@maru-maru.example</td><td>05-18</td></tr>
+            <tr><td>佐々木 様</td><td>採用マネージャー</td><td>sasaki@maru-maru.example</td><td>05-12</td></tr>
+            <tr><td>鈴木 様</td><td>採用担当</td><td>suzuki@maru-maru.example</td><td>04-30</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-header">📊 企業別 出口KPI（直近90日）</div>
+        <div class="card-body">
+          <div class="kpi" style="grid-template-columns:repeat(2,1fr)">
+            <div class="tile"><div class="v">14</div><div class="k">推薦</div></div>
+            <div class="tile"><div class="v">8</div><div class="k">書類通過</div></div>
+            <div class="tile"><div class="v">5</div><div class="k">面接</div></div>
+            <div class="tile"><div class="v">2</div><div class="k">内定</div></div>
+            <div class="tile"><div class="v">1</div><div class="k">入社</div></div>
+            <div class="tile"><div class="v">36%</div><div class="k">面接通過率</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📞 直近の活動</div>
+        <div class="card-body">
+          <div class="activity">
+            <div class="row"><div class="date">05/18</div><div class="type">MTG</div><div class="body">EM募集 進捗会議</div></div>
+            <div class="row"><div class="date">05/12</div><div class="type">メール</div><div class="body">推薦状送付（山田様）</div></div>
+            <div class="row"><div class="date">05/01</div><div class="type">MTG</div><div class="body">月次レビュー</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== Slack連携 ========== -->
+<section class="page" id="page-slack">
+  <div class="note">★ 御社の現行運用に合わせ「1チャンネルに候補者ごとのスレッド」方式を採用。Salesforceの選考フェーズ変更・面接確定などを Bot が自動投稿し、Slack上の返信・絵文字リアクションが Salesforce 側の活動／フェーズに反映されます（双方向）。</div>
+
+  <div class="rec-header">
+    <div class="rec-icon" style="background:#4a154b">💬</div>
+    <div>
+      <h2 class="rec-title">Slack ⇄ Salesforce 連携デモ</h2>
+      <div class="rec-sub">方式: <span class="badge blue">1チャンネル ＋ 候補者ごとスレッド</span> / 通知: フェーズ変更・面接確定・リマインド</div>
+    </div>
+    <div class="rec-actions">
+      <button class="btn">通知設定</button>
+      <button class="btn btn-primary">チャンネルを連携</button>
+    </div>
+  </div>
+
+  <div class="slack-wrap">
+    <!-- サイドバー -->
+    <div class="slack-side">
+      <div class="ws">JELLYFISH 🪼</div>
+      <div class="sec">チャンネル</div>
+      <div class="ch active"><span class="hash">#</span> 候補者進捗</div>
+      <div class="ch"><span class="hash">#</span> 企業やりとり</div>
+      <div class="ch"><span class="hash">#</span> 内定・入社速報</div>
+      <div class="ch"><span class="hash">#</span> general</div>
+      <div class="sec">App</div>
+      <div class="ch">⚡ Salesforce</div>
+    </div>
+
+    <!-- メイン（スレッド親メッセージ一覧） -->
+    <div class="slack-main">
+      <div class="slack-head"># 候補者進捗 <span class="topic">／ 候補者1名 = スレッド1本。フェーズが動くとBotが親メッセージに追記</span></div>
+      <div class="slack-msgs">
+
+        <!-- スレッド親1 -->
+        <div class="msg bot">
+          <div class="av">SF</div>
+          <div>
+            <div class="who">Salesforce Bot <span class="t">10:02</span></div>
+            <div class="text">🆕 新規推薦が登録されました</div>
+            <div class="threadcard">
+              <div class="tt">山田 太郎 × EM募集（株式会社○○）</div>
+              <div class="field"><div class="fk">フェーズ</div><div><span class="badge amber">1次面接</span></div></div>
+              <div class="field"><div class="fk">面接日</div><div>2026-05-20 14:00（オンライン）</div></div>
+              <div class="field"><div class="fk">担当</div><div>倉島</div></div>
+              <div class="field"><div class="fk">SFレコード</div><div><a>選考: 山田太郎×EM募集 ↗</a></div></div>
+              <div class="acts">
+                <button class="sbtn primary">✅ 次フェーズへ</button>
+                <button class="sbtn">📅 面接日変更</button>
+                <button class="sbtn">📝 SFを開く</button>
+              </div>
+            </div>
+            <div class="threadreply">💬 3件の返信　最終: 倉島「1次OKでした、2次へ」 05/22</div>
+          </div>
+        </div>
+
+        <!-- スレッド親2 -->
+        <div class="msg bot">
+          <div class="av">SF</div>
+          <div>
+            <div class="who">Salesforce Bot <span class="t">09:40</span></div>
+            <div class="text">🔁 フェーズが変更されました（書類送付 → 1次面接）</div>
+            <div class="threadcard">
+              <div class="tt">鈴木 花子 × PdM求人（株式会社△△）</div>
+              <div class="field"><div class="fk">フェーズ</div><div><span class="badge">書類送付</span> → <span class="badge amber">1次面接</span></div></div>
+              <div class="field"><div class="fk">面接日</div><div>調整中（候補3日提示済）</div></div>
+              <div class="field"><div class="fk">SFレコード</div><div><a>選考: 鈴木花子×PdM求人 ↗</a></div></div>
+              <div class="acts">
+                <button class="sbtn primary">✅ 次フェーズへ</button>
+                <button class="sbtn">🚫 辞退で記録</button>
+              </div>
+            </div>
+            <div class="threadreply">💬 1件の返信　藤本様「日程確定したら更新します」</div>
+          </div>
+        </div>
+
+        <!-- ユーザー返信（スレッド内） -->
+        <div class="msg user">
+          <div class="av">倉</div>
+          <div>
+            <div class="who">倉島 <span class="t">09:55</span></div>
+            <div class="text">👍 のリアクションでSalesforceの「次アクション=完了」が自動更新されます（絵文字トリガー）</div>
+          </div>
+        </div>
+
+        <!-- スレッド親3 -->
+        <div class="msg bot">
+          <div class="av">SF</div>
+          <div>
+            <div class="who">Salesforce Bot <span class="t">昨日</span></div>
+            <div class="text">🎉 内定が登録されました</div>
+            <div class="threadcard">
+              <div class="tt">高橋 三郎 × EM募集（株式会社○○）</div>
+              <div class="field"><div class="fk">フェーズ</div><div><span class="badge green">内定</span></div></div>
+              <div class="field"><div class="fk">内定日</div><div>2026-06-01</div></div>
+              <div class="acts">
+                <button class="sbtn">🏢 #内定・入社速報 にも通知</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 右: スレッド詳細＆SF反映 -->
+    <div class="slack-thread">
+      <h4>🧵 スレッド: 山田 太郎 × EM募集</h4>
+      <div class="sync">↔ このスレッドは Salesforce「選考」レコードと1:1で同期</div>
+      <div class="msg user" style="gap:8px">
+        <div class="av" style="width:28px;height:28px;font-size:12px">倉</div>
+        <div><div class="who">倉島 <span class="t">05/20</span></div><div class="text">1次面接実施しました。手応えあり。</div></div>
+      </div>
+      <div class="msg bot" style="gap:8px">
+        <div class="av" style="width:28px;height:28px;font-size:12px">SF</div>
+        <div><div class="who">Salesforce Bot <span class="t">05/20</span></div><div class="text">↳ 活動「面接実施」をSFに記録しました ✅</div></div>
+      </div>
+      <div class="msg user" style="gap:8px">
+        <div class="av" style="width:28px;height:28px;font-size:12px">倉</div>
+        <div><div class="who">倉島 <span class="t">05/22</span></div><div class="text">1次OKでした、2次へ進めます ✅(リアクション)</div></div>
+      </div>
+      <div class="msg bot" style="gap:8px">
+        <div class="av" style="width:28px;height:28px;font-size:12px">SF</div>
+        <div><div class="who">Salesforce Bot <span class="t">05/22</span></div><div class="text">↳ フェーズを「2次面接」に更新／履歴を記録しました 🔁</div></div>
+      </div>
+      <div class="note" style="margin:0">論点: スレッド方式 vs チャンネル方式。明日は本デモでSF反映を確認し、運用方式を確定。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== メール連携 ========== -->
+<section class="page" id="page-mail">
+  <div class="note">★ 構築初期から「問い合わせ管理箱（共有メールボックス）」を実装。受信メールは差出人ドメイン・本文から <strong>企業</strong> と <strong>候補者</strong> に自動紐付け。企業ベース／候補者ベースどちらの軸でも追えるよう、両方にリレーション可能な設計。Salesforce標準のメール機能（Email-to-Case / 拡張メール）で実現。</div>
+
+  <div class="rec-header">
+    <div class="rec-icon" style="background:#0176d3">📧</div>
+    <div>
+      <h2 class="rec-title">問い合わせ管理箱（Email連携デモ）</h2>
+      <div class="rec-sub">受信箱: recruit@jellyfish.example / 自動紐付け: <span class="badge blue">企業</span> + <span class="badge blue">候補者</span></div>
+    </div>
+    <div class="rec-actions">
+      <button class="btn">紐付けルール</button>
+      <button class="btn btn-primary">返信</button>
+    </div>
+  </div>
+
+  <div class="mail-wrap">
+    <!-- 受信トレイ一覧 -->
+    <div class="mail-list">
+      <div class="mhead"><span>📥 受信トレイ</span><span class="badge amber">未割当 2</span></div>
+
+      <div class="mail-item active unread">
+        <div class="mfrom"><span>田中 様（株式会社○○）</span><span style="color:var(--sf-muted);font-size:11px">10:14</span></div>
+        <div class="msub">Re: EM募集 山田様の二次面接日程について</div>
+        <div class="mprev">先日はありがとうございました。山田様の二次面接ですが…</div>
+        <div class="link"><span class="badge green">🏢 株式会社○○</span><span class="badge blue">👤 山田 太郎</span></div>
+      </div>
+
+      <div class="mail-item unread">
+        <div class="mfrom"><span>佐々木 様（株式会社○○）</span><span style="color:var(--sf-muted);font-size:11px">09:50</span></div>
+        <div class="msub">テックリード求人の追加要件について</div>
+        <div class="mprev">先方の状況が変わりまして、必須要件を1点追加…</div>
+        <div class="link"><span class="badge green">🏢 株式会社○○</span><span class="badge">求人: テックリード</span></div>
+      </div>
+
+      <div class="mail-item">
+        <div class="mfrom"><span>yamada.taro@example.com</span><span style="color:var(--sf-muted);font-size:11px">昨日</span></div>
+        <div class="msub">面接のお礼と質問</div>
+        <div class="mprev">本日はお時間いただきありがとうございました…</div>
+        <div class="link"><span class="badge blue">👤 山田 太郎</span><span class="badge amber">企業: 候補2件</span></div>
+      </div>
+
+      <div class="mail-item">
+        <div class="mfrom"><span>info@new-company.example</span><span style="color:var(--sf-muted);font-size:11px">昨日</span></div>
+        <div class="msub">人材紹介のご相談（新規）</div>
+        <div class="mprev">貴社のサービスを拝見しご連絡いたしました…</div>
+        <div class="link"><span class="badge red">⚠ 未割当（新規企業の可能性）</span></div>
+      </div>
+    </div>
+
+    <!-- メール詳細 -->
+    <div class="mail-detail">
+      <div class="mdh">Re: EM募集 山田様の二次面接日程について</div>
+      <div class="meta">差出人: 田中 様 &lt;tanaka@maru-maru.example&gt;</div>
+      <div class="meta">宛先: recruit@jellyfish.example / 受信: 2026-06-02 10:14</div>
+
+      <div class="mail-body">
+        倉島様<br><br>
+        先日はありがとうございました。山田様の二次面接ですが、以下の日程でいかがでしょうか。<br>
+        ・6/5（木）15:00〜<br>
+        ・6/6（金）11:00〜<br><br>
+        ご調整のほどよろしくお願いいたします。<br>
+        株式会社○○ 人事部 田中
+      </div>
+
+      <div class="autolink">
+        <div class="tt">🔗 自動紐付け結果（Salesforce）</div>
+        <div class="threadcard" style="background:#fff;max-width:none;margin-top:0">
+          <div class="field"><div class="fk">企業</div><div><a>株式会社○○</a> <span class="badge">ドメイン一致: maru-maru.example</span></div></div>
+          <div class="field"><div class="fk">取引先責任者</div><div><a>田中 様（人事部長）</a></div></div>
+          <div class="field"><div class="fk">候補者</div><div><a>山田 太郎</a> <span class="badge">本文「山田様」＋進行中選考から推定</span></div></div>
+          <div class="field"><div class="fk">関連選考</div><div><a>山田太郎 × EM募集</a> → フェーズ <span class="badge amber">2次面接</span></div></div>
+          <div class="acts">
+            <button class="sbtn primary">この紐付けで確定</button>
+            <button class="sbtn">候補者を変更</button>
+            <button class="sbtn">📅 面接日をSFに登録</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:12px">論点: 紐付けの主軸を「企業ベース」とするか「候補者ベース」とするか。設計上は両方に同時リレーション可能なので、<strong>表示・検索のデフォルト軸</strong>を明日決定。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== ダッシュボード ========== -->
+<section class="page" id="page-dashboard">
+  <div class="rec-header">
+    <div class="rec-icon" style="background:#014486">📊</div>
+    <div>
+      <h2 class="rec-title">紹介事業 出口KPIダッシュボード</h2>
+      <div class="rec-sub">期間: 2026-04-01 〜 2026-05-19（直近6週間）</div>
+    </div>
+    <div class="rec-actions">
+      <button class="btn">期間変更</button>
+      <button class="btn">エクスポート</button>
+    </div>
+  </div>
+
+  <div class="kpi">
+    <div class="tile"><div class="v">132</div><div class="k">推薦数</div></div>
+    <div class="tile"><div class="v">68</div><div class="k">書類通過</div></div>
+    <div class="tile"><div class="v">42</div><div class="k">面接</div></div>
+    <div class="tile"><div class="v">14</div><div class="k">内定</div></div>
+    <div class="tile"><div class="v">8</div><div class="k">入社</div></div>
+  </div>
+
+  <div style="height:12px"></div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-header">📈 媒体別 推薦数 TOP5</div>
+      <div class="card-body" style="font-size:12px">
+        HRMOS Hire　　　　　　 ████████████ 48<br>
+        ジョブカン採用管理　　 ████████ 32<br>
+        Talentio　　　　　　　 ██████ 24<br>
+        採用一括かんりくん　　 ████ 16<br>
+        HERP　　　　　　　　　 ██ 8
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🏢 企業別 内定数 TOP5</div>
+      <div class="card-body" style="font-size:12px">
+        株式会社○○　　　 ████ 4<br>
+        株式会社△△　　　 ███ 3<br>
+        株式会社□□　　　 ██ 2<br>
+        株式会社×× 　　　 ██ 2<br>
+        株式会社◇◇　　　 ██ 2
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">👤 担当者別 入社数</div>
+      <div class="card-body" style="font-size:12px">
+        倉島　 ████ 4<br>
+        藤本様 ██ 2<br>
+        チウ様 ██ 2
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📉 推薦→入社 ファネル更新率</div>
+    <div class="card-body" style="font-size:12px">
+      推薦 (132) → 書類通過 (68) <span class="badge green">52%</span>
+      → 面接 (42) <span class="badge green">62%</span>
+      → 内定 (14) <span class="badge amber">33%</span>
+      → 入社 (8) <span class="badge amber">57%</span>
+      <br><br>
+      <strong>総合更新率（推薦→入社）: 6.1%</strong>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">⏱ フェーズ別 平均リードタイム <span class="count">フェーズ変更履歴から自動算出</span></div>
+      <div class="card-body" style="font-size:12px">
+        推薦 → 書類送付　　 ███ 2.1日<br>
+        書類送付 → 1次面接 ████████ 6.4日<br>
+        1次 → 2次面接　　　 █████ 4.0日<br>
+        2次 → 最終面接　　　 ████ 3.2日<br>
+        最終 → 内定　　　　 ██████ 5.1日<br>
+        内定 → 入社　　　　 ████████████████ 18.6日<br>
+        <div class="note" style="margin-top:10px">★ フェーズ変更時に日付・変更者・前後フェーズを自動記録するFlowを実装。これによりボトルネック工程（上記=内定→入社）を可視化。明日のデモで記録仕様を確認。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">🏢 企業ベース進捗分析（プロセス管理＋企業軸）</div>
+      <table class="rel">
+        <thead><tr><th>企業</th><th>進行中</th><th>今月内定</th><th>平均リードタイム</th><th>停滞</th></tr></thead>
+        <tbody>
+          <tr><td>株式会社○○</td><td>7</td><td>2</td><td>32日</td><td><span class="badge amber">2件</span></td></tr>
+          <tr><td>株式会社△△</td><td>4</td><td>1</td><td>28日</td><td><span class="badge green">0件</span></td></tr>
+          <tr><td>株式会社□□</td><td>3</td><td>0</td><td>45日</td><td><span class="badge red">3件</span></td></tr>
+          <tr><td>株式会社××</td><td>5</td><td>2</td><td>30日</td><td><span class="badge amber">1件</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script>
+  function showTab(tab){
+    document.querySelectorAll('.gnav .tabs button').forEach(b=>
+      b.classList.toggle('active', b.dataset.tab===tab));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+tab).classList.add('active');
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll('.gnav .tabs button').forEach(btn=>{
+    btn.addEventListener('click',()=>showTab(btn.dataset.tab));
+  });
+  // 業務フロー内の「画面を見る ▶」ジャンプ
+  document.querySelectorAll('[data-jump]').forEach(b=>{
+    b.addEventListener('click',()=>showTab(b.dataset.jump));
+  });
+</script>
+
+</body>
+</html>
