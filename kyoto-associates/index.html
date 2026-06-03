@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>京都アソシエイツ｜Agentforce 対話型候補者検索 デモ (v0.1)</title>
+<style>
+  :root {
+    --primary: #1e3a8a;
+    --primary-dark: #152a63;
+    --accent: #d97706;
+    --bg: #f4f6fb;
+    --panel: #ffffff;
+    --border: #e2e8f0;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --user-bubble: #e8edfb;
+    --ai-bubble: #ffffff;
+    --ok: #16a34a;
+    --warn: #d97706;
+    --danger: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; font-family: -apple-system, "Segoe UI", "Hiragino Sans", "Yu Gothic", sans-serif; background: var(--bg); color: var(--text); }
+  header {
+    background: var(--primary);
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  }
+  header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  header .tag { background: var(--accent); color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+  header .controls { margin-left: auto; display: flex; gap: 8px; align-items: center; font-size: 13px; flex-wrap: wrap; }
+  header button, header select {
+    background: rgba(255,255,255,.18);
+    color: white;
+    border: 1px solid rgba(255,255,255,.35);
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  header button:hover { background: rgba(255,255,255,.3); }
+  header select option { color: var(--text); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    height: calc(100vh - 56px);
+  }
+  .chat-pane {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-right: 1px solid var(--border);
+    min-width: 0;
+  }
+  .chat-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fafafa;
+  }
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+  .chat-header .meta { flex: 1; }
+  .chat-header .meta .name { font-weight: 600; font-size: 14px; }
+  .chat-header .meta .sub { font-size: 11px; color: var(--muted); }
+  .chat-header .status { font-size: 11px; color: var(--ok); }
+  .chat-header .status::before { content: "●"; margin-right: 4px; }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .msg { display: flex; gap: 8px; max-width: 82%; }
+  .msg.ai { align-self: flex-start; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg .bubble {
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .msg.ai .bubble { background: var(--ai-bubble); border: 1px solid var(--border); border-top-left-radius: 4px; }
+  .msg.user .bubble { background: var(--user-bubble); border: 1px solid #c3cef0; border-top-right-radius: 4px; }
+  .msg .icon {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .msg.ai .icon { background: var(--primary); color: white; }
+  .msg.user .icon { background: #c3cef0; color: var(--primary-dark); }
+
+  /* AIバブル内の構造化要素 */
+  .count-line { font-weight: 700; color: var(--primary); font-size: 15px; }
+  .count-line .delta { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 6px; }
+  .axis-list { margin: 8px 0 2px; padding: 0; list-style: none; }
+  .axis-list li { padding: 4px 0 4px 18px; position: relative; font-size: 13px; }
+  .axis-list li::before { content: "·"; position: absolute; left: 6px; color: var(--accent); font-weight: 700; }
+  .breakdown { background: #f1f5f9; border-radius: 6px; padding: 8px 10px; margin-top: 8px; font-size: 12px; color: #334155; }
+  .breakdown .bd-title { font-weight: 600; color: var(--muted); font-size: 11px; margin-bottom: 3px; }
+  .cand-card { border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 6px; padding: 7px 10px; margin-top: 6px; font-size: 13px; background: #fff; }
+  .cand-card .cc-name { font-weight: 600; }
+  .cand-card .cc-meta { color: var(--muted); font-size: 12px; }
+  .cand-card .rel { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; margin-left: 6px; }
+  .rel.A { background: #ecfdf5; color: var(--ok); }
+  .rel.B { background: #eff6ff; color: var(--primary); }
+  .rel.C { background: #f3f4f6; color: var(--muted); }
+  .flag-warn { color: var(--danger); font-weight: 600; font-size: 12px; margin-top: 6px; display: block; }
+
+  .quick-replies { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .quick-replies button {
+    background: white;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .quick-replies button:hover { background: var(--primary); color: white; }
+
+  .input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); background: white; }
+  .input-row input { flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 14px; outline: none; }
+  .input-row input:focus { border-color: var(--primary); }
+  .input-row button { background: var(--primary); color: white; border: none; padding: 0 18px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 600; }
+  .input-row button:hover { background: var(--primary-dark); }
+
+  .hints { padding: 8px 16px; background: #fafafa; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); }
+  .hints b { color: var(--text); }
+  .hints code { background: white; border: 1px solid var(--border); padding: 2px 6px; border-radius: 3px; margin: 0 4px 4px 0; cursor: pointer; font-size: 11px; font-family: inherit; display: inline-block; }
+  .hints code:hover { background: var(--user-bubble); }
+
+  .system-msg { align-self: center; font-size: 11px; color: var(--muted); padding: 4px 12px; background: #eef2f7; border-radius: 12px; }
+
+  /* 裏側パネル */
+  .admin-pane { background: #f9fafb; padding: 16px; overflow-y: auto; font-size: 12px; }
+  .admin-pane h2 { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px 0; font-weight: 600; }
+  .admin-pane h2:not(:first-child) { margin-top: 16px; }
+  .admin-section { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+  .admin-section .row { display: flex; justify-content: space-between; padding: 3px 0; }
+  .admin-section .row .key { color: var(--muted); }
+  .admin-section .row .val { font-weight: 600; text-align: right; }
+  .chip { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; margin: 2px 4px 2px 0; background: #eef2f7; color: var(--primary-dark); }
+  .chip.add { background: #ecfdf5; color: var(--ok); }
+  .chip.field { background: #fff7ed; color: var(--accent); }
+  .chip.empty { background: #f3f4f6; color: var(--muted); font-weight: 400; }
+  .count-track { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+  .count-track .step { background: var(--primary); color: white; border-radius: 6px; padding: 4px 10px; }
+  .count-track .arrow { color: var(--muted); }
+  .dict-note { font-size: 11.5px; color: #334155; padding: 5px 0; border-bottom: 1px dashed var(--border); }
+  .dict-note:last-child { border-bottom: none; }
+  .dict-note b { color: var(--accent); }
+  pre.soql { background: #1f2937; color: #e5e7eb; padding: 10px; border-radius: 4px; font-size: 10.5px; line-height: 1.5; overflow-x: auto; margin: 0; white-space: pre-wrap; }
+  pre.soql .k { color: #93c5fd; }
+  pre.soql .s { color: #fde68a; }
+  pre.soql .f { color: #86efac; }
+
+  .note-banner { font-size: 11px; color: var(--muted); background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px 10px; margin-bottom: 12px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>京都アソシエイツ｜Agentforce 対話型候補者検索</h1>
+  <span class="tag">DEMO v0.1</span>
+  <div class="controls">
+    <label>検索パターン:
+      <select id="patternSelector">
+        <option value="auto">自動判定（推奨）</option>
+        <option value="P1">P1: 評価×年齢×ポジション</option>
+        <option value="P2">P2: トピック×期間</option>
+        <option value="P3">P3: 複合スキル（地名拡張）</option>
+        <option value="P4">P4: HRポジション多層</option>
+        <option value="P5">P5: 地域×経歴×財務</option>
+      </select>
+    </label>
+    <button id="resetBtn">リセット</button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- Chat Pane -->
+  <div class="chat-pane">
+    <div class="chat-header">
+      <div class="avatar">京</div>
+      <div class="meta">
+        <div class="name">候補者サーチ AI（社内）</div>
+        <div class="sub">対話で絞り込みます。一発で結果は出さず、件数と絞り込み軸をご提案します。</div>
+      </div>
+      <div class="status">オンライン</div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-row">
+      <input id="userInput" type="text" placeholder="例: Sクラスの人材を出して" autocomplete="off">
+      <button id="sendBtn">送信</button>
+    </div>
+    <div class="hints">
+      <b>サンプル入力（クリックで投入）:</b><br>
+      <code onclick="fillInput(this)">Sクラスの人材を出して</code>
+      <code onclick="fillInput(this)">セキュリティについて話してた人材を出して</code>
+      <code onclick="fillInput(this)">中国で総経理をしてた人材を出して</code>
+      <code onclick="fillInput(this)">人事責任者でHRコンプライアンス経験のある人を</code>
+      <code onclick="fillInput(this)">アメリカで働いてた財務経験者</code>
+    </div>
+  </div>
+
+  <!-- 裏側パネル -->
+  <div class="admin-pane">
+    <div class="note-banner">
+      右側は <b>裏側ロジックの可視化</b> です（顧客画面には出ません）。実装では Agentforce の Topic/Action + SOQL/検索Index に置き換えます。
+    </div>
+
+    <h2>検索パターン判定</h2>
+    <div class="admin-section">
+      <div class="row"><span class="key">Pattern</span><span class="val" id="adminPattern">—</span></div>
+      <div class="row"><span class="key">ユースケース</span><span class="val" id="adminUsecase" style="font-size:11px;max-width:200px;">—</span></div>
+      <div class="row"><span class="key">往復ステップ</span><span class="val" id="adminStep">0 / 0</span></div>
+    </div>
+
+    <h2>抽出した検索条件</h2>
+    <div class="admin-section" id="adminFilters">
+      <span class="chip empty">未抽出</span>
+    </div>
+
+    <h2>ヒット件数の推移</h2>
+    <div class="admin-section">
+      <div class="count-track" id="adminCount"><span class="step">—</span></div>
+    </div>
+
+    <h2>加味した特別項目（関係性/フラグ）</h2>
+    <div class="admin-section" id="adminFields">
+      <span class="chip empty">未参照</span>
+    </div>
+
+    <h2>裏ロジック・辞書（チューニング対象）</h2>
+    <div class="admin-section" id="adminDict">
+      <span class="chip empty">なし</span>
+    </div>
+
+    <h2>生成クエリ（SOQL イメージ）</h2>
+    <pre class="soql" id="adminSoql">-- 検索条件が入るとここに表示します</pre>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   京都アソシエイツ 対話型候補者検索 デモ
+   方針: 一発回答しない。件数+絞り込み軸+代表事例 を返し、
+         対話で 200件 → 30-50件 → 確定 へ絞り込む。
+   実装時は Agentforce の Topic/Action + SOQL/検索Index に置換。
+   出典: 対話パターン草案 v0.1 (Notion 3653f346...)
+   ========================================================= */
+
+// ---------- パターン定義 ----------
+// 各パターンは steps[] を順に進める。step0 = 初期クエリへの応答。
+// 各 step: { trigger, ai{...}, next, admin{...} }
+//   ai.count: 件数 / ai.delta: 前回比 / ai.axes: 絞り込み軸(配列)
+//   ai.breakdown: 内訳テキスト / ai.cands: 代表事例カード / ai.warn: 警告
+//   admin.filters(累積), fields(累積), count, dict(累積), soql
+const patterns = {
+  P1: {
+    usecase: '評価×年齢×ポジション多層検索（例:Sクラスで50歳未満、CD候補）',
+    keywords: ['Sクラス','S評価','評価','CD候補','CXO','部長','ポジション','若手','歳'],
+    steps: [
+      {
+        trigger: 'Sクラスの人材を出して',
+        ai: {
+          count: 80, intro: '評価ベースで拾いました。一発で出さず、絞り込み軸をご提案します。',
+          axes: ['年齢レンジ', 'ポジション希望（CXO / CD / 部長以上）', '面談時期', '業界経験']
+        },
+        next: ['50歳未満でCD候補', '面談時期で絞る', 'CXO候補に限定'],
+        admin: {
+          filters: ['評価 = Sクラス'],
+          fields: ['Grade__c', '印象タグ（ポジティブ）'],
+          count: 80,
+          dict: ['<b>Sクラス</b> → 人材グレード上位 × コンサル所感ポジティブタグ の複合で判定'],
+          soql: "SELECT Id, Name, Age__c, Position__c FROM Candidate__c\nWHERE Grade__c = 'S' AND Impression__c = 'Positive'"
+        }
+      },
+      {
+        trigger: '50歳未満でCD候補',
+        ai: {
+          count: 12, delta: '80 → 12件',
+          breakdown: '面談実施済: 8件 / 直近6ヶ月以内: 5件 / 未実施: 4件',
+          cands: [
+            { name: '田中様', meta: '48歳・製造業 CDO経験' },
+            { name: '山田様', meta: '45歳・IT-CDO経験' }
+          ],
+          tail: '面談未実施／実施済・直近／業界 でさらに絞り込めます。'
+        },
+        next: ['直近6ヶ月以内の5件で', '製造業のみ', '面談実施済だけ'],
+        admin: {
+          filters: ['年齢 < 50', 'ポジション = CD候補'],
+          fields: [],
+          count: 12,
+          dict: ['<b>CD候補</b> → Chief Digital / 役員候補グレードの同義グループ'],
+          soql: "SELECT Id, Name, Age__c, Position__c, LastInterview__c FROM Candidate__c\nWHERE Grade__c = 'S' AND Impression__c = 'Positive'\n  AND Age__c < 50 AND Position__c INCLUDES ('CD候補')"
+        }
+      },
+      {
+        trigger: '直近6ヶ月以内の5件で',
+        ai: {
+          count: 5, delta: '12 → 5件',
+          intro: '連絡禁止フラグ・距離感（Closeness__c）も加味した推奨順です。',
+          cands: [
+            { name: '田中様', rel: 'A', meta: '直近トピック: PE業界転身検討' },
+            { name: '鈴木様', rel: 'A', meta: '直近トピック: 海外勤務希望' },
+            { name: '佐藤様', rel: 'B', meta: '連絡禁止フラグなし' }
+          ],
+          tail: '残り2件は関係性=Cで初回コンタクト要。詳細リストを出しますか？'
+        },
+        next: ['詳細リストを出す', '田中様の詳細', 'アプローチ案を作る'],
+        admin: {
+          filters: ['面談時期 = 直近6ヶ月'],
+          fields: ['Closeness__c（距離感/関係性）', 'ContactProhibited__c（連絡禁止）'],
+          count: 5,
+          dict: ['<b>推奨順</b> → Closeness__c(A>B>C) × 連絡可否 × 直近トピックの鮮度 で並べ替え'],
+          soql: "SELECT Id, Name, Closeness__c, ContactProhibited__c, RecentTopic__c\nFROM Candidate__c\nWHERE Grade__c='S' AND Age__c<50 AND Position__c INCLUDES('CD候補')\n  AND LastInterview__c >= LAST_N_MONTHS:6 AND ContactProhibited__c = false\nORDER BY Closeness__c ASC"
+        }
+      }
+    ]
+  },
+
+  P2: {
+    usecase: 'トピック検索×期間絞り込み（例:セキュリティについて話してた人）',
+    keywords: ['セキュリティ','話してた','トピック','について話','話題','最近話'],
+    steps: [
+      {
+        trigger: 'セキュリティについて話してた人材を出して',
+        ai: {
+          count: 350, intro: '面談メモの話題から拾いました。話題表現を絞るため、期間を指定してください。',
+          axes: ['3ヶ月以内', '1年以内', '3年以内']
+        },
+        next: ['3年以内', '1年以内', '3ヶ月以内'],
+        admin: {
+          filters: ['トピック = セキュリティ'],
+          fields: ['RecentTopic__c', '面談メモ（全文検索）'],
+          count: 350,
+          dict: ['<b>セキュリティ</b> → 情報/工場物理/HR/コンプラ に細分化予定（チューニング対象）'],
+          soql: "SELECT Id, Name FROM Candidate__c\nWHERE RecentTopic__c LIKE '%セキュリティ%'"
+        }
+      },
+      {
+        trigger: '3年以内',
+        ai: {
+          count: 45, delta: '350 → 45件',
+          intro: 'セキュリティの中でも話題を絞りますか？',
+          axes: ['情報セキュリティ', 'HR', '工場物理セキュリティ', 'コンプライアンス'],
+          breakdown: '内訳: 情報セキュリティ=22 / HR=8 / 工場物理=10 / コンプラ=5'
+        },
+        next: ['情報セキュリティで、経営層クラスがいい', '工場物理セキュリティ', 'コンプライアンス'],
+        admin: {
+          filters: ['期間 = 直近3年'],
+          fields: [],
+          count: 45,
+          dict: ['期間軸は会話で指定（3ヶ月/1年/3年）→ LAST_N_MONTHS に変換'],
+          soql: "SELECT Id, Name, RecentTopic__c FROM Candidate__c\nWHERE RecentTopic__c LIKE '%セキュリティ%'\n  AND LastInterview__c >= LAST_N_MONTHS:36"
+        }
+      },
+      {
+        trigger: '情報セキュリティで、経営層クラスがいい',
+        ai: {
+          count: 8, delta: '45 → 8件',
+          intro: '経営層クラス（CISO / 部長以上）のみ。面談メモから抜粋:',
+          cands: [
+            { name: '三井様', meta: '「DX推進に伴うゼロトラスト導入を担当」' },
+            { name: '佐々木様', meta: '「グループ全社のISMS構築リーダー」' },
+            { name: '高橋様', meta: '「ランサム被害復旧の責任者経験」' }
+          ],
+          tail: '残り5名もメモあり。3名にフォーカスして詳細を出しますか？'
+        },
+        next: ['3名の詳細を出す', '三井様の詳細', '案件マッチングを見る'],
+        admin: {
+          filters: ['サブトピック = 情報セキュリティ', 'レイヤー = 経営層（CISO/部長以上）'],
+          fields: ['面談メモ抜粋', 'Position__c'],
+          count: 8,
+          dict: ['<b>経営層クラス</b> → CISO / 部長以上 の役職同義グループ'],
+          soql: "SELECT Id, Name, InterviewMemo__c FROM Candidate__c\nWHERE RecentTopic__c LIKE '%情報セキュリティ%'\n  AND LastInterview__c >= LAST_N_MONTHS:36\n  AND Position__c INCLUDES ('CISO','部長以上')"
+        }
+      }
+    ]
+  },
+
+  P3: {
+    usecase: '複合条件スキル検索（例:中国で総経理経験者）／地名→国単位の辞書拡張',
+    keywords: ['中国','総経理','海外','上海','北京','駐在'],
+    steps: [
+      {
+        trigger: '中国で総経理をしてた人材を出して',
+        ai: {
+          count: 8,
+          intro: '「中国」は上海/北京/深圳等の都市も含めて国単位で拾いました。\n関連スキル（人事責任者経験・20名以上マネジメント経験）も代替推薦に含めています。',
+          tail: '年収・業界・希望エリアで絞り込めます。'
+        },
+        next: ['その人たち、今年収いくら', '製造業だけ', '関西希望の人'],
+        admin: {
+          filters: ['地域 = 中国（都市含む）', '役職 = 総経理'],
+          fields: ['Region__c', 'Position__c'],
+          count: 8,
+          dict: [
+            '<b>中国</b> → 上海/北京/深圳… 都市名拡張辞書で国単位に正規化',
+            '<b>総経理</b> → 人事責任者・20名以上マネジメント を関連スキルとして代替推薦'
+          ],
+          soql: "SELECT Id, Name FROM Candidate__c\nWHERE Region__c = '中国'  /* 都市名は辞書で国に正規化 */\n  AND (Position__c INCLUDES ('総経理') OR RelatedSkill__c INCLUDES ('人事責任者','大規模マネジメント'))"
+        }
+      },
+      {
+        trigger: 'その人たち、今年収いくら',
+        ai: {
+          count: 8, delta: '8件の分布',
+          breakdown: '現在年収レンジ → 1500-2000万: 4名 / 2000万超: 4名\n業界分布 → 製造業5名 / 商社・流通2名 / IT 1名'
+        },
+        next: ['製造業の5名で、関西希望の人は', '2000万超の4名', 'IT業界の人'],
+        admin: {
+          filters: ['（属性補足）現年収レンジ', '業界分布'],
+          fields: ['CurrentSalary__c', 'Industry__c'],
+          count: 8,
+          dict: ['属性補足質問 → 年収・業界の分布を即時集計して返す'],
+          soql: "SELECT Industry__c, CurrentSalary__c, COUNT(Id)\nFROM Candidate__c\nWHERE Region__c='中国' AND Position__c INCLUDES('総経理')\nGROUP BY Industry__c, CurrentSalary__c"
+        }
+      },
+      {
+        trigger: '製造業の5名で、関西希望の人は',
+        ai: {
+          count: 2, delta: '5 → 2件',
+          cands: [
+            { name: '大野様', rel: 'A', meta: '大阪在住・関西限定希望・現年収1800万・直近トピック: 後継者問題' },
+            { name: '中村様', rel: 'A', meta: '神戸在住・関西＋東京可・現年収2300万・直近トピック: M&A後の統合' }
+          ],
+          tail: '両名とも面談実施済・関係性=A。詳細プロファイルとアプローチ案を出しますか？'
+        },
+        next: ['詳細プロファイルを出す', 'アプローチ案を作る', '大野様の詳細'],
+        admin: {
+          filters: ['業界 = 製造業', '希望エリア = 関西'],
+          fields: ['DesiredArea__c', 'Closeness__c', 'RecentTopic__c'],
+          count: 2,
+          dict: ['<b>関西</b> → 大阪/神戸/京都… エリア辞書で吸収'],
+          soql: "SELECT Id, Name, DesiredArea__c, CurrentSalary__c, Closeness__c, RecentTopic__c\nFROM Candidate__c\nWHERE Region__c='中国' AND Position__c INCLUDES('総経理')\n  AND Industry__c='製造業' AND DesiredArea__c INCLUDES ('関西')"
+        }
+      }
+    ]
+  },
+
+  P4: {
+    usecase: 'HRポジション多層検索（連絡禁止フラグ／案件マッチング）',
+    keywords: ['人事責任者','HRコンプライアンス','CHRO','CHO','労務','人的資本','人事'],
+    steps: [
+      {
+        trigger: '人事責任者でHRコンプライアンス経験のある人を',
+        ai: {
+          count: 15, intro: 'HR領域で拾いました。さらに絞るなら:',
+          axes: ['上場企業での経験のみ', '労務×コンプライアンスの両方経験', '業界限定（製造/金融/IT）']
+        },
+        next: ['上場企業で労務×コンプライアンス両方', '金融業界のみ', '製造業のみ'],
+        admin: {
+          filters: ['役職 = 人事責任者', 'スキル = HRコンプライアンス'],
+          fields: ['Position__c', 'SkillTag__c'],
+          count: 15,
+          dict: ['<b>人事</b> → HR/人材開発/労務/HRテック の同義グループで吸収'],
+          soql: "SELECT Id, Name FROM Candidate__c\nWHERE Position__c INCLUDES ('人事責任者')\n  AND SkillTag__c INCLUDES ('HRコンプライアンス')"
+        }
+      },
+      {
+        trigger: '上場企業で労務×コンプライアンス両方',
+        ai: {
+          count: 5, delta: '15 → 5件',
+          intro: '全員 CHRO/CHO 経験者です。',
+          breakdown: '直近トピック分布 → 人的資本開示: 3名 / 内部通報制度: 2名 / ハラスメント対応: 4名',
+          warn: '⚠ うち1名は連絡禁止フラグあり（ContactProhibited__c）'
+        },
+        next: ['連絡禁止以外の4名で、紹介可能なクライアント企業は', '人的資本開示の3名', 'CHRO経験者の詳細'],
+        admin: {
+          filters: ['企業区分 = 上場', 'スキル = 労務 AND コンプライアンス'],
+          fields: ['ContactProhibited__c（連絡禁止）', 'RecentTopic__c'],
+          count: 5,
+          dict: ['<b>連絡禁止フラグ</b> → ContactProhibited__c を必ずチェックし警告表示'],
+          soql: "SELECT Id, Name, ContactProhibited__c, RecentTopic__c FROM Candidate__c\nWHERE Position__c INCLUDES ('CHRO','CHO')\n  AND CompanyType__c='上場'\n  AND SkillTag__c INCLUDES ('労務','コンプライアンス')"
+        }
+      },
+      {
+        trigger: '連絡禁止以外の4名で、紹介可能なクライアント企業は',
+        ai: {
+          count: 4, delta: '5 → 4件（連絡禁止1名を除外）',
+          intro: '直近6ヶ月の求人とマッチングしました:',
+          cands: [
+            { name: '田島様', meta: '◯◯製薬（CHRO候補）／ △△商事（人事部長）' },
+            { name: '横山様', rel: 'A', meta: '□□HD（IPO準備CHRO）← フィット度A' },
+            { name: '早川様', meta: '案件未マッチ → 新規BD要' },
+            { name: '林様', rel: 'A', meta: '××銀行（HR規制責任者）← フィット度A' }
+          ],
+          tail: '早川様向けに案件サーチを並行で動かしますか？'
+        },
+        next: ['早川様の案件サーチを動かす', '横山様にアプローチ', 'マッチング結果を書き出す'],
+        admin: {
+          filters: ['連絡禁止フラグ = 除外', '案件マッチング = ON'],
+          fields: ['JobOpening__c（求人）', 'MatchScore__c'],
+          count: 4,
+          dict: ['<b>案件マッチング</b> → 候補者スキル × 直近6ヶ月求人 のフィット度を算出'],
+          soql: "SELECT c.Name, j.Name, j.MatchScore__c\nFROM Candidate__c c JOIN JobOpening__c j ON j.Skill__c = c.SkillTag__c\nWHERE c.ContactProhibited__c = false AND j.CreatedDate >= LAST_N_MONTHS:6"
+        }
+      }
+    ]
+  },
+
+  P5: {
+    usecase: '地域×経歴スキル×ポジション（例:アメリカで働いてた財務経験者）',
+    keywords: ['アメリカ','米国','財務','CFO','英語','駐在','ニューヨーク'],
+    steps: [
+      {
+        trigger: 'アメリカで働いてた財務経験者',
+        ai: {
+          count: 5,
+          intro: '「アメリカ」はニューヨーク/シカゴ/サンノゼ等の都市名も拾いました。\n「財務」は 財務部長 / CFO / IPO経験 / 経理 を含みます。',
+          breakdown: '5件中3件はポジティブ評価、評価未付与が2件です。'
+        },
+        next: ['ポジティブ評価の3件を、英語力で並べて', 'CFO経験者だけ', '評価未付与の2件'],
+        admin: {
+          filters: ['地域 = アメリカ（都市含む）', '職種 = 財務'],
+          fields: ['Region__c', 'Position__c', 'Impression__c'],
+          count: 5,
+          dict: [
+            '<b>アメリカ</b> → NY/シカゴ/サンノゼ… 都市名拡張辞書で国単位に正規化',
+            '<b>財務</b> → 財務部長/CFO/IPO経験/経理 の同義グループ'
+          ],
+          soql: "SELECT Id, Name, Impression__c FROM Candidate__c\nWHERE Region__c = 'アメリカ'\n  AND Position__c INCLUDES ('財務部長','CFO','IPO','経理')"
+        }
+      },
+      {
+        trigger: 'ポジティブ評価の3件を、英語力で並べて',
+        ai: {
+          count: 3, delta: '5 → 3件（ポジ評価のみ）',
+          intro: 'ビジネス英語レベル（コンサルメモから抽出）で並べました:',
+          cands: [
+            { name: '渡辺様', meta: 'ネイティブレベル（米国大学卒・在米6年）← 帰国2年' },
+            { name: '山口様', meta: 'ビジネス上級（NY駐在5年・現在は東京）' },
+            { name: '黒田様', meta: 'ビジネス中級（シカゴ駐在3年・通訳に頼るケース有）' }
+          ]
+        },
+        next: ['渡辺様の直近のキャリア志向は', '山口様の詳細', 'レコメンド案件を見る'],
+        admin: {
+          filters: ['評価 = ポジティブ', 'ソート = 英語力'],
+          fields: ['Impression__c', 'EnglishLevel__c（メモ抽出）'],
+          count: 3,
+          dict: ['<b>英語力</b> → コンサルメモのテキストからレベルを抽出（ネイティブ/上級/中級）'],
+          soql: "SELECT Id, Name, EnglishLevel__c FROM Candidate__c\nWHERE Region__c='アメリカ' AND Impression__c='Positive'\nORDER BY EnglishLevel__c DESC"
+        }
+      },
+      {
+        trigger: '渡辺様の直近のキャリア志向は',
+        ai: {
+          count: 1, delta: '個人フォーカス',
+          intro: '渡辺様 — 直近3ヶ月のコンサルメモ抽出:',
+          cands: [
+            { name: '渡辺様', rel: 'A', meta: '米国経験を活かせる日系グローバル企業のCFOを希望／製造 or テック志向（金融は避けたい）／関東圏で配偶者の介護があり転居不可／想定年収2500-3500万' }
+          ],
+          tail: '現ポジション=財務部長（東京/大手商社）・連絡可。直近マッチ案件: ◯◯製造（CFO候補・関東勤務）← レコメンド度高'
+        },
+        next: ['◯◯製造の案件詳細', 'アプローチ案を作る', 'プロファイルを書き出す'],
+        admin: {
+          filters: ['個人フォーカス = 渡辺様', '期間 = 直近3ヶ月メモ'],
+          fields: ['CareerVision__c（5-10年ビジョン）', 'PrivateNote__c（介護等）', 'Closeness__c'],
+          count: 1,
+          dict: ['<b>キャリア志向/プライベート</b> → 議事録から自動更新された項目を抽出（未開示情報の価値化）'],
+          soql: "SELECT Name, CareerVision__c, PrivateNote__c, DesiredSalary__c, RecommendedJob__c\nFROM Candidate__c WHERE Name = '渡辺'"
+        }
+      }
+    ]
+  }
+};
+
+// ---------- 状態 ----------
+let state = { pattern: null, stepIndex: 0, filters: [], fields: [], dict: [], counts: [] };
+
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+
+// ---------- ルーティング（フリーテキスト → パターン） ----------
+function routePattern(text) {
+  for (const code of Object.keys(patterns)) {
+    if (patterns[code].keywords.some(k => text.includes(k))) return code;
+  }
+  return null;
+}
+
+// ---------- レンダリング ----------
+function renderUser(text) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg user';
+  wrap.innerHTML = `<div class="icon">🧑‍💼</div><div class="bubble"></div>`;
+  wrap.querySelector('.bubble').textContent = text;
+  messagesEl.appendChild(wrap);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function renderAI(ai, quickReplies) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ai';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+
+  let html = '';
+  if (ai.count !== undefined) {
+    html += `<div class="count-line">${ai.count}件${ai.count >= 30 ? 'ヒットしました' : 'に絞り込みました'}`;
+    if (ai.delta) html += `<span class="delta">（${ai.delta}）</span>`;
+    html += `</div>`;
+  }
+  if (ai.intro) html += `<div style="margin-top:6px;">${escapeHtml(ai.intro)}</div>`;
+  if (ai.axes) {
+    html += `<ul class="axis-list">` + ai.axes.map(a => `<li>${escapeHtml(a)}</li>`).join('') + `</ul>`;
+  }
+  if (ai.breakdown) {
+    html += `<div class="breakdown"><div class="bd-title">内訳</div>${escapeHtml(ai.breakdown)}</div>`;
+  }
+  if (ai.cands) {
+    ai.cands.forEach(c => {
+      const rel = c.rel ? `<span class="rel ${c.rel}">関係性 ${c.rel}</span>` : '';
+      html += `<div class="cand-card"><span class="cc-name">${escapeHtml(c.name)}</span>${rel}<div class="cc-meta">${escapeHtml(c.meta)}</div></div>`;
+    });
+  }
+  if (ai.warn) html += `<span class="flag-warn">${escapeHtml(ai.warn)}</span>`;
+  if (ai.tail) html += `<div style="margin-top:8px;">${escapeHtml(ai.tail)}</div>`;
+
+  bubble.innerHTML = html;
+
+  if (quickReplies && quickReplies.length) {
+    const qr = document.createElement('div');
+    qr.className = 'quick-replies';
+    quickReplies.forEach(opt => {
+      const b = document.createElement('button');
+      b.textContent = opt;
+      b.onclick = () => handleUserInput(opt);
+      qr.appendChild(b);
+    });
+    bubble.appendChild(qr);
+  }
+  wrap.innerHTML = `<div class="icon">🔎</div>`;
+  wrap.appendChild(bubble);
+  messagesEl.appendChild(wrap);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function renderSystem(text) {
+  const el = document.createElement('div');
+  el.className = 'system-msg';
+  el.textContent = text;
+  messagesEl.appendChild(el);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+}
+
+// ---------- 会話エンジン ----------
+function handleUserInput(text) {
+  if (!text || !text.trim()) return;
+  renderUser(text);
+  inputEl.value = '';
+
+  // 初回 → パターン判定
+  if (!state.pattern) {
+    const sel = document.getElementById('patternSelector').value;
+    const code = (sel === 'auto') ? routePattern(text) : sel;
+    if (!code) {
+      renderAI({ intro: '該当する検索パターンが見つかりませんでした。上部の「検索パターン」から選ぶか、サンプル入力をお試しください。' });
+      return;
+    }
+    startPattern(code);
+    return;
+  }
+
+  // 既にパターン進行中 → 次ステップへ
+  advanceStep();
+}
+
+function startPattern(code) {
+  state.pattern = code;
+  state.stepIndex = 0;
+  state.filters = []; state.fields = []; state.dict = []; state.counts = [];
+  renderSystem(`検索パターン判定: ${code}（${patterns[code].usecase}）`);
+  playStep();
+}
+
+function advanceStep() {
+  const p = patterns[state.pattern];
+  if (state.stepIndex >= p.steps.length - 1) {
+    // 最終ステップ以降 → 締め
+    renderAI({ intro: 'ここから先は、選んだ候補者の詳細プロファイル表示・アプローチ案作成・リスト書き出しに進みます。（デモはここまで）' });
+    renderSystem('このパターンは完了です。別パターンを試すには「リセット」してください。');
+    return;
+  }
+  state.stepIndex++;
+  playStep();
+}
+
+function playStep() {
+  const p = patterns[state.pattern];
+  const step = p.steps[state.stepIndex];
+
+  // admin 状態を累積
+  if (step.admin) {
+    if (step.admin.filters) state.filters.push(...step.admin.filters.map(f => ({ t: f, fresh: true })));
+    if (step.admin.fields) state.fields.push(...step.admin.fields);
+    if (step.admin.dict) state.dict.push(...step.admin.dict);
+    if (step.admin.count !== undefined) state.counts.push(step.admin.count);
+    state.lastSoql = step.admin.soql;
+  }
+
+  // 少し遅延して AI 応答（タイピング感）
+  setTimeout(() => {
+    renderAI(step.ai, step.next);
+    updateAdmin();
+    // 既存フィルタの fresh フラグを落とす（次回は通常色）
+    state.filters.forEach(f => { f.wasFresh = f.fresh; f.fresh = false; });
+  }, 450);
+}
+
+// ---------- 裏側パネル更新 ----------
+function updateAdmin() {
+  const p = patterns[state.pattern];
+  document.getElementById('adminPattern').textContent = state.pattern || '—';
+  document.getElementById('adminUsecase').textContent = p ? p.usecase : '—';
+  document.getElementById('adminStep').textContent = p ? `${state.stepIndex + 1} / ${p.steps.length}` : '0 / 0';
+
+  // フィルタ
+  const fEl = document.getElementById('adminFilters');
+  if (!state.filters.length) { fEl.innerHTML = '<span class="chip empty">未抽出</span>'; }
+  else fEl.innerHTML = state.filters.map(f => `<span class="chip ${f.wasFresh ? 'add' : ''}">${escapeHtml(f.t)}</span>`).join('');
+
+  // 件数推移
+  const cEl = document.getElementById('adminCount');
+  if (!state.counts.length) { cEl.innerHTML = '<span class="step">—</span>'; }
+  else cEl.innerHTML = state.counts.map((c, i) =>
+    `${i > 0 ? '<span class="arrow">→</span>' : ''}<span class="step">${c}件</span>`).join('');
+
+  // 特別項目
+  const fieldEl = document.getElementById('adminFields');
+  const uniqFields = [...new Set(state.fields)];
+  fieldEl.innerHTML = uniqFields.length
+    ? uniqFields.map(f => `<span class="chip field">${escapeHtml(f)}</span>`).join('')
+    : '<span class="chip empty">未参照</span>';
+
+  // 辞書
+  const dEl = document.getElementById('adminDict');
+  const uniqDict = [...new Set(state.dict)];
+  dEl.innerHTML = uniqDict.length
+    ? uniqDict.map(d => `<div class="dict-note">${d}</div>`).join('')
+    : '<span class="chip empty">なし</span>';
+
+  // SOQL
+  document.getElementById('adminSoql').innerHTML = state.lastSoql
+    ? highlightSoql(state.lastSoql) : '-- 検索条件が入るとここに表示します';
+}
+
+function highlightSoql(sql) {
+  return escapeHtml(sql)
+    .replace(/\b(SELECT|FROM|WHERE|AND|OR|ORDER BY|GROUP BY|JOIN|ON|INCLUDES|COUNT|LIKE|LAST_N_MONTHS|true|false)\b/g, '<span class="k">$1</span>')
+    .replace(/'[^']*'/g, m => `<span class="s">${m}</span>`)
+    .replace(/(\/\*.*?\*\/|--.*$)/gm, m => `<span class="f">${m}</span>`);
+}
+
+// ---------- 入力ハンドラ ----------
+function fillInput(el) { inputEl.value = el.textContent; inputEl.focus(); }
+sendBtn.onclick = () => handleUserInput(inputEl.value);
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') handleUserInput(inputEl.value); });
+document.getElementById('resetBtn').onclick = () => location.reload();
+
+// ---------- 初期メッセージ ----------
+renderAI({ intro: 'こんにちは。候補者サーチAIです。\n自然な言葉で検索条件を入力してください。一発で結果は出さず、件数と絞り込み軸をご提案しながら、200件→30〜50件→確定まで対話で絞り込みます。\n\n下のサンプル入力からお試しいただけます。' });
+</script>
+</body>
+</html>
