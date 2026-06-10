@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>タスカジ｜Agentforce チャットボット デモ (v0.1)</title>
+<title>タスカジ｜Agentforce チャットボット デモ (v0.2)</title>
 <style>
   :root {
     --primary: #2e8b57;
@@ -362,7 +362,7 @@
 
 <header>
   <h1>タスカジ｜Agentforce サポートチャット</h1>
-  <span class="tag">DEMO v0.1</span>
+  <span class="tag">DEMO v0.2</span>
   <div class="controls">
     <label>シナリオ:
       <select id="scenarioSelector">
@@ -417,8 +417,8 @@
   <div style="color:var(--muted);">担当者にポップアップ通知を送信しました。</div>
   <div class="nt-recipients">
     <div style="font-size:10px;color:var(--muted);margin-bottom:3px;">通知先</div>
-    <span class="recipient">👤 藤原 良枝</span>
-    <span class="recipient">👤 岩崎</span>
+    <span class="recipient">👤 サポート担当 A</span>
+    <span class="recipient">👤 サポート担当 B</span>
   </div>
   <div class="nt-countdown" id="ntCountdown">応答待機中... 残り 30 秒</div>
   <button class="nt-skip" id="ntSkip">▶ タイムアウトを早送り（デモ用）</button>
@@ -450,6 +450,8 @@
       <code onclick="fillInput(this)">男性一人暮らしですが女性に来てもらえますか</code>
       <code onclick="fillInput(this)">時間枠を変えたい</code>
       <code onclick="fillInput(this)">ネズミが出る家で不安です</code>
+      <br><b>ID入力例:</b>
+      <code onclick="fillInput(this)">TK-2026-013254</code>
     </div>
   </div>
 
@@ -460,6 +462,12 @@
       <div class="row"><span class="key">Scenario</span><span class="val" id="adminScenario">—</span></div>
       <div class="row"><span class="key">Intent</span><span class="val" id="adminIntent">—</span></div>
       <div class="row"><span class="key">User type</span><span class="val" id="adminUserType">—</span></div>
+    </div>
+
+    <h2>本人特定 (Identity)</h2>
+    <div class="admin-section">
+      <div class="row"><span class="key">Status</span><span class="val" id="adminIdStatus"><span class="pill idle">—</span></span></div>
+      <div class="row"><span class="key">Booking ID</span><span class="val" id="adminBookingId">—</span></div>
     </div>
 
     <h2>Slots (収集状況)</h2>
@@ -544,6 +552,7 @@ const scenarios = {
       cancel_fee_rule: {
         flow: [
           { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
+          { type: 'identity', idLabel: '依頼ID' },
           { type: 'ask', slot: 'reservation_type', text: '対象のご予約はスポット／定期のどちらですか？', options: ['スポット','定期'] },
           { type: 'faq', faqs: ['FAQ_CANCEL_FEE_TIMING — キャンセル料の発生時期'] },
           { type: 'end', level: 'C', text: 'キャンセル料は、依頼日時の何日前にキャンセル操作を行うかで発生条件が変わります。詳細は上記FAQをご確認ください。判断に迷う場合は担当へお繋ぎします。' }
@@ -552,6 +561,7 @@ const scenarios = {
       cancel_procedure: {
         flow: [
           { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
+          { type: 'identity', idLabel: '依頼ID' },
           { type: 'ask', slot: 'already_cancelled', text: 'すでにアプリ上でキャンセル操作はお済みですか？', options: ['はい','いいえ'] },
           { type: 'branch', on: 'already_cancelled', cases: {
             'はい': [
@@ -575,6 +585,7 @@ const scenarios = {
       schedule_change: {
         flow: [
           { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
+          { type: 'identity', idLabel: '依頼ID' },
           { type: 'ask', slot: 'change_scope', text: 'ご変更されたい内容を教えてください。', options: ['日程のみ','日程＋住所','住所のみ'] },
           { type: 'ask', slot: 'target_booking_date', text: '対象の予約日はいつですか？', input: 'date' },
           { type: 'ask', slot: 'desired_new_date', text: '変更ご希望日はいつですか？', input: 'date' },
@@ -586,6 +597,7 @@ const scenarios = {
       address_change: {
         flow: [
           { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
+          { type: 'identity', idLabel: '依頼ID' },
           { type: 'ask', slot: 'target_booking_date', text: '対象の予約日はいつですか？', input: 'date' },
           { type: 'ask', slot: 'id_document_ready_date', text: '新住所の身分証はいつ準備できそうですか？', input: 'date' },
           { type: 'faq', faqs: ['FAQ_ADDRESS_CHANGE — 住所変更（身分証提出）', 'FAQ_ID_VERIFICATION — 本人確認'] },
@@ -629,6 +641,7 @@ const scenarios = {
       change_availability: {
         flow: [
           { type: 'ai', text: 'お問い合わせありがとうございます。AIが一次対応を担当します。' },
+          { type: 'identity', idLabel: 'タスカジさんID' },
           { type: 'ask', slot: 'current_slots', text: '現在の時間枠を教えてください（例: 9-12, 13-16）。' },
           { type: 'ask', slot: 'desired_slots', text: '変更したい時間枠を教えてください（例: 16-19）。' },
           { type: 'ask', slot: 'has_regular_contract', text: '定期契約に影響する変更ですか？', options: ['はい','いいえ'] },
@@ -698,6 +711,7 @@ let state = {
   faqs: [],
   inquiryName: 'INQ-2026-' + String(Math.floor(Math.random()*9000)+1000),
   awaitingResponse: false,
+  identity: { active: false, phase: null, retries: 0, altIndex: 0, status: null, bookingId: null, label: '依頼ID' },
   conversationLog: []
 };
 
@@ -799,7 +813,7 @@ function finishCountdown(mode) {
   renderSystem('⏱ 30秒以内に担当者が応答できなかったため、「後ほど回答」モードへ切替');
   renderMailMode(
     '<b>担当者がただいま対応中です。</b><br>' +
-    'いただいたご相談は担当者にエスカレーション済みです。<br>' +
+    'いただいたご相談は担当者にお繋ぎ済みです。<br>' +
     '<b>本日中〜翌営業日</b>にメールでご返信いたします。受付ID: <code>' + state.inquiryName + '</code>'
   );
 }
@@ -860,6 +874,9 @@ function advance() {
     // 簡易: ロジックは説明だけ。実装時は判定式
     renderSystem(`[guard_check] ${step.logic}`);
     advance();
+  } else if (step.type === 'identity') {
+    // 本人特定（ID入力）フロー — 完了時に identity 側から advance() を呼ぶ
+    startIdentity(step.idLabel);
   } else if (step.type === 'escalate' || step.type === 'end') {
     if (step.type === 'escalate') {
       escalate(step.level, step.reason);
@@ -896,6 +913,113 @@ function escalate(level, reason) {
   state.escReason = reason;
 }
 
+// ---------- 本人特定（ID入力）フロー ----------
+const ID_REGEX = /^TK-\d{4}-\d{6}$/;          // ※実フォーマットは要確認（D4）
+const QR_ID_TOP = ['依頼IDを入力', '確認方法を見る', '分からない／スキップ'];
+const ALT_QUEUE = [
+  { key: 'alt_nickname', q: '登録ニックネームを教えてください。' },
+  { key: 'alt_email',    q: '登録メールアドレスを教えてください。' },
+  { key: 'alt_date',     q: '対象のご予約日を教えてください（例: 2026-06-20）。' }
+];
+
+function startIdentity(idLabel) {
+  state.identity.active = true;
+  state.identity.phase = 'ask';
+  state.identity.retries = 0;
+  state.identity.altIndex = 0;
+  state.identity.label = idLabel || '依頼ID';
+  state.awaitingResponse = true;
+  renderMessage('ai',
+    `対象のご予約を確認するため、${state.identity.label}を教えていただけますか？\nお手元で分かる場合のみで大丈夫です。分からなければスキップできます。`,
+    { quickReplies: QR_ID_TOP });
+  updateAdmin();
+}
+
+function askIdInput() {
+  state.identity.phase = 'await_id';
+  state.awaitingResponse = true;
+  renderMessage('ai', `${state.identity.label}を入力してください（例: TK-2026-013254）。`,
+    { quickReplies: ['確認方法を見る', '分からない／スキップ'] });
+}
+
+function startAltIdentify() {
+  state.identity.phase = 'alt';
+  state.identity.altIndex = 0;
+  renderMessage('ai', 'IDが無くても確認できます。差し支えなければ以下を順にお伺いします。（カード番号・口座番号などはお預かりしません）');
+  setTimeout(askNextAlt, 350);
+}
+
+function askNextAlt() {
+  const i = state.identity.altIndex;
+  if (i >= ALT_QUEUE.length) { finishIdentity(); return; }
+  state.awaitingResponse = true;
+  renderMessage('ai', ALT_QUEUE[i].q);
+}
+
+function finishIdentity() {
+  state.identity.active = false;
+  state.identity.phase = 'done';
+  state.awaitingResponse = false;
+  if (!state.identity.status) state.identity.status = '紐付け済';
+  updateAdmin();
+  setTimeout(advance, 400);   // メインフローへ復帰
+}
+
+function handleIdentityInput(text) {
+  const id = state.identity;
+  const t = (text || '').trim();
+
+  // 代替特定（ニックネーム→メール→対象日）の収集中
+  if (id.phase === 'alt') {
+    state.slots[ALT_QUEUE[id.altIndex].key] = t;
+    id.altIndex++;
+    updateAdmin();
+    if (id.altIndex >= ALT_QUEUE.length) {
+      renderSystem('代替情報を収集 → 担当者が本人特定できる状態で申し送り');
+      finishIdentity();
+    } else {
+      setTimeout(askNextAlt, 300);
+    }
+    return;
+  }
+
+  // クイックリプライ分岐
+  if (t === '確認方法を見る') {
+    renderMessage('ai',
+      '依頼IDは アプリの［依頼履歴］→ 対象の予約を開く と、画面上部の「依頼番号」に表示されます（例: TK-2026-013254）。\nWebの場合は マイページ ＞ 予約詳細 のURL末尾の番号です。',
+      { quickReplies: ['依頼IDを入力', '分からない／スキップ'] });
+    id.phase = 'ask';
+    return;
+  }
+  if (t === '依頼IDを入力') { askIdInput(); return; }
+  if (t === '分からない／スキップ' || t === 'やっぱり分からない') {
+    id.status = '未入力';
+    renderSystem('ID未入力 → 代替特定へ（離脱させず継続）');
+    startAltIdentify();
+    return;
+  }
+
+  // それ以外＝ID入力とみなしてバリデーション
+  if (ID_REGEX.test(t)) {
+    id.status = '紐付け済';
+    id.bookingId = t;
+    renderSystem(`✓ Salesforce 照合成功 — 予約 ${id.bookingId} に紐付けました`);
+    renderMessage('ai', 'ありがとうございます。ご予約を確認できました。続けてご案内します。');
+    finishIdentity();
+  } else {
+    id.retries++;
+    if (id.retries >= 2) {
+      id.status = '不一致';
+      renderMessage('ai', '恐れ入ります、うまく確認できませんでした。IDが無くても確認できますので、別の方法でお伺いします。');
+      startAltIdentify();
+    } else {
+      id.phase = 'await_id';
+      renderMessage('ai', '恐れ入ります、依頼IDは「TK-」で始まる番号です（例: TK-2026-013254）。もう一度ご確認いただけますか？',
+        { quickReplies: ['確認方法を見る', '分からない／スキップ'] });
+    }
+  }
+}
+
 function handleUserInput(text) {
   if (!text || !text.trim()) return;
   renderMessage('user', text);
@@ -922,6 +1046,12 @@ function handleUserInput(text) {
       return;
     }
     startScenario(routed.scenario, routed.intent);
+    return;
+  }
+
+  // 本人特定（ID入力）モード中
+  if (state.identity && state.identity.active) {
+    handleIdentityInput(text);
     return;
   }
 
@@ -954,6 +1084,17 @@ function updateAdmin() {
   document.getElementById('adminScenario').textContent = state.scenario || '—';
   document.getElementById('adminIntent').textContent = state.intent || '—';
   document.getElementById('adminUserType').textContent = state.userType;
+
+  // 本人特定 (Identity)
+  const idStatusEl = document.getElementById('adminIdStatus');
+  const idSt = state.identity && state.identity.status;
+  if (!idSt) {
+    idStatusEl.innerHTML = '<span class="pill idle">—</span>';
+  } else {
+    const cls = idSt === '紐付け済' ? 'escC' : (idSt === '不一致' ? 'escA' : 'escB');
+    idStatusEl.innerHTML = `<span class="pill ${cls}">${idSt}</span>`;
+  }
+  document.getElementById('adminBookingId').textContent = (state.identity && state.identity.bookingId) || '—';
 
   // Slots
   const slotsEl = document.getElementById('adminSlots');
@@ -997,6 +1138,8 @@ function updateAdmin() {
     Channel__c: 'Web',
     UserType__c: state.userType,
     Intent__c: state.intent || null,
+    MatchedBookingId__c: (state.identity && state.identity.bookingId) || null,
+    IdentityMatchStatus__c: (state.identity && state.identity.status) || null,
     SlotsJson__c: state.slots,
     EscalationLevel__c: state.escalation || null,
     EscalationReason__c: state.escReason || null,
@@ -1031,7 +1174,9 @@ function reset() {
     expectedSlot: null, expectedInput: null, expectedOptions: null, expectedMulti: false,
     guardrails: [], escalation: null, escReason: '', faqs: [],
     inquiryName: 'INQ-2026-' + String(Math.floor(Math.random()*9000)+1000),
-    awaitingResponse: false, conversationLog: []
+    awaitingResponse: false,
+    identity: { active: false, phase: null, retries: 0, altIndex: 0, status: null, bookingId: null, label: '依頼ID' },
+    conversationLog: []
   };
   // 入口モーダルを表示（パターンA: 入口で選択）
   showEntryModal();
