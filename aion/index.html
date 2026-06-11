@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>AION株式会社 Salesforce デモ画面</title>
+<style>
+:root{
+  --brand:#0176d3; --brand-dark:#014486; --brand-50:#eaf4fb;
+  --bg:#f3f3f3; --card:#ffffff; --border:#dddbda; --border-light:#f3f2f2;
+  --text:#181818; --text-2:#3e3e3c; --text-mute:#706e6b;
+  --success:#2e844a; --success-bg:#cdefc4; --warn:#fe9339; --warn-bg:#fef0e6;
+  --error:#ba0517; --error-bg:#fdd9d4; --info:#0176d3;
+  --shadow-card:0 2px 2px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.06);
+  --shadow-hover:0 2px 4px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.08);
+  --radius:.25rem;
+  --chatwork:#e57400; --chatwork-bg:#fff4e6;
+  --claude:#cc785c; --claude-bg:#f5e9e2;
+  --sheets:#0f9d58; --sheets-bg:#e6f4ea;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Salesforce Sans","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+  font-size:13px; color:var(--text); background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit; cursor:pointer}
+a{color:var(--brand); text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ===== Global Header ===== */
+.global-header{
+  background:linear-gradient(0deg,#032e61,#0176d3); height:48px;
+  display:flex; align-items:center; padding:0 16px; gap:12px;
+  position:sticky; top:0; z-index:1000;
+}
+.app-launcher{
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.1); border-radius:3px; cursor:pointer;
+}
+.app-launcher:hover{background:rgba(255,255,255,.2)}
+.app-launcher::before{
+  content:""; width:14px;height:14px;
+  background-image:
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px);
+  background-size:5px 5px;
+  background-position:0 0,5px 0,10px 0,0 5px,5px 5px,10px 5px,0 10px,5px 10px,10px 10px;
+  background-repeat:no-repeat;
+}
+.app-name{
+  color:#fff; font-weight:700; font-size:14px;
+  padding-left:12px; border-left:1px solid rgba(255,255,255,.3);
+}
+.app-name .sub{font-weight:400; opacity:.8; margin-left:6px; font-size:12px}
+.gh-spacer{flex:1}
+.gh-search{
+  background:rgba(255,255,255,.95); border-radius:3px; padding:6px 12px;
+  width:380px; display:flex; align-items:center; gap:8px; font-size:13px;
+}
+.gh-search input{border:0;outline:0;flex:1;background:transparent;font-size:13px}
+.gh-actions{display:flex; gap:8px; align-items:center}
+.gh-actions .icon-btn{
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  color:#fff; cursor:pointer; border-radius:50%;
+}
+.gh-actions .icon-btn:hover{background:rgba(255,255,255,.15)}
+.gh-user{
+  width:32px;height:32px;border-radius:50%;
+  background:#a5d8ff;color:#0b4a83;display:flex;align-items:center;justify-content:center;
+  font-weight:700; cursor:pointer; font-size:12px;
+}
+
+/* ===== App Bar (Tabs) ===== */
+.app-bar{
+  background:#fff; border-bottom:1px solid var(--border);
+  display:flex; align-items:stretch; padding:0 16px; height:40px;
+  position:sticky; top:48px; z-index:999; overflow-x:auto;
+}
+.app-bar .tab{
+  padding:0 16px; display:flex; align-items:center; gap:6px; cursor:pointer;
+  border-bottom:3px solid transparent; color:var(--text-2); font-weight:400;
+  font-size:13px; user-select:none; white-space:nowrap;
+}
+.app-bar .tab:hover{background:var(--brand-50)}
+.app-bar .tab.active{border-bottom-color:var(--brand); color:var(--brand); font-weight:700}
+
+/* ===== Main content ===== */
+.main{padding:12px 16px; max-width:1440px; margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+
+/* ===== Object Page Header ===== */
+.obj-header{
+  background:#fff; padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.obj-header .row1{display:flex; align-items:center; gap:12px}
+.obj-icon{
+  width:40px;height:40px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  color:#fff; font-size:18px; font-weight:700;
+}
+.obj-icon.account{background:#ff9a3c}
+.obj-icon.lead{background:#f88962}
+.obj-icon.opp{background:#fcb95b}
+.obj-icon.quote{background:#a094ed}
+.obj-icon.order{background:#2e844a}
+.obj-icon.report{background:#76ded9}
+.obj-icon.dashboard{background:#e6437f}
+.obj-icon.home{background:#0176d3}
+.obj-icon.chatwork{background:var(--chatwork)}
+.obj-icon.claude{background:var(--claude)}
+.obj-icon.sheets{background:var(--sheets)}
+.obj-title{flex:1}
+.obj-title .label{color:var(--text-mute); font-size:12px}
+.obj-title .name{font-size:18px; font-weight:700}
+.obj-actions{display:flex; gap:6px; flex-wrap:wrap}
+
+/* ===== Buttons ===== */
+.btn{
+  padding:6px 14px; border:1px solid var(--border); background:#fff;
+  border-radius:var(--radius); font-size:13px; color:var(--text);
+}
+.btn:hover{background:var(--border-light)}
+.btn.primary{background:var(--brand); color:#fff; border-color:var(--brand)}
+.btn.primary:hover{background:var(--brand-dark)}
+.btn.success{background:var(--success); color:#fff; border-color:var(--success)}
+.btn.success:hover{filter:brightness(0.95)}
+.btn.warn{background:var(--warn); color:#fff; border-color:var(--warn)}
+.btn.small{padding:3px 10px; font-size:12px}
+
+/* ===== Highlights Panel ===== */
+.highlights{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  padding:12px 16px; display:flex; gap:32px; margin-bottom:8px; flex-wrap:wrap;
+}
+.highlights .item{min-width:120px}
+.highlights .lbl{color:var(--text-mute); font-size:12px}
+.highlights .val{font-size:15px; font-weight:700; margin-top:2px}
+
+/* ===== Path Component (Sales Path) ===== */
+.path{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px; display:flex; padding:0;
+  overflow:hidden;
+}
+.path .stage{
+  flex:1; padding:10px 0; text-align:center; position:relative;
+  background:#ecebea; color:var(--text-2); font-size:12px; cursor:pointer;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+  margin-right:-12px; min-width:0;
+}
+.path .stage:first-child{ clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%) }
+.path .stage:last-child{
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%); margin-right:0;
+}
+.path .stage.completed{background:#4bc076; color:#fff}
+.path .stage.current{background:var(--brand); color:#fff; font-weight:700}
+.path .stage:hover{filter:brightness(0.95)}
+
+.path-label{
+  display:flex; align-items:center; gap:6px;
+  padding:4px 12px 0; font-size:11px; color:var(--text-mute); background:#fff;
+  border:1px solid var(--border); border-bottom:0; border-radius:var(--radius) var(--radius) 0 0;
+}
+.path-label .badge{margin-left:auto}
+
+/* ===== Two-column layout ===== */
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.two-col-3{display:grid; grid-template-columns:2fr 1fr; gap:8px}
+@media(max-width:1000px){ .two-col,.two-col-3{grid-template-columns:1fr} }
+
+/* ===== Card ===== */
+.card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.card .card-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.card .card-head .actions{margin-left:auto; display:flex; gap:6px}
+.card .card-body{padding:12px 16px}
+.sec-title{
+  font-size:12px; font-weight:700; color:var(--text-2);
+  padding:8px 16px; background:#fafaf9; border-bottom:1px solid var(--border-light);
+}
+
+/* ===== Field rows ===== */
+.field-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 24px}
+.field{padding:8px 0; border-bottom:1px solid var(--border-light)}
+.field .lbl{color:var(--text-mute); font-size:12px; margin-bottom:2px}
+.field .val{font-size:13px}
+.field.full{grid-column:1/-1}
+.field .val .ai-source{
+  display:inline-block; padding:1px 6px; border-radius:8px;
+  font-size:10px; background:var(--claude-bg); color:var(--claude);
+  margin-left:6px; vertical-align:middle;
+}
+.field .val .cw-source{
+  background:var(--chatwork-bg); color:var(--chatwork);
+}
+
+/* ===== Table ===== */
+.tbl{width:100%; border-collapse:collapse; background:#fff; font-size:13px}
+.tbl th{
+  background:#fafaf9; text-align:left; padding:8px 12px;
+  border-bottom:1px solid var(--border); font-weight:700; color:var(--text-2);
+  font-size:12px;
+}
+.tbl td{padding:8px 12px; border-bottom:1px solid var(--border-light)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .num{text-align:right}
+.tbl tbody tr:hover{background:var(--brand-50)}
+.tbl .name-link{font-weight:700; cursor:pointer; color:var(--brand)}
+
+/* ===== Badges ===== */
+.badge{
+  display:inline-block; padding:2px 8px; border-radius:10px;
+  font-size:11px; font-weight:700;
+}
+.badge.info{background:#e0f0fb; color:#0176d3}
+.badge.success{background:var(--success-bg); color:var(--success)}
+.badge.warn{background:var(--warn-bg); color:var(--warn)}
+.badge.error{background:var(--error-bg); color:var(--error)}
+.badge.gray{background:#ecebea; color:var(--text-mute)}
+.badge.cw{background:var(--chatwork-bg); color:var(--chatwork)}
+.badge.claude{background:var(--claude-bg); color:var(--claude)}
+.badge.sheets{background:var(--sheets-bg); color:var(--sheets)}
+
+/* ===== Related card ===== */
+.related-card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.related-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.related-head .count{color:var(--text-mute); font-weight:400; font-size:12px}
+.related-head .actions{margin-left:auto}
+
+/* ===== Timeline ===== */
+.timeline{padding:8px 16px}
+.tl-item{display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border-light)}
+.tl-item:last-child{border-bottom:0}
+.tl-icon{
+  width:28px; height:28px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; color:#fff;
+}
+.tl-icon.call{background:#76ded9}
+.tl-icon.mail{background:#fcb95b}
+.tl-icon.meet{background:#0176d3}
+.tl-icon.cw{background:var(--chatwork)}
+.tl-icon.claude{background:var(--claude)}
+.tl-body{flex:1}
+.tl-meta{font-size:11px; color:var(--text-mute)}
+.tl-title{font-weight:700; margin-top:1px}
+.tl-desc{color:var(--text-2); margin-top:2px; font-size:12px}
+
+/* ===== Dashboard widget grid ===== */
+.dash-grid{display:grid; grid-template-columns:repeat(12,1fr); gap:8px}
+.widget{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px}
+.widget.span-3{grid-column:span 3}
+.widget.span-4{grid-column:span 4}
+.widget.span-6{grid-column:span 6}
+.widget.span-8{grid-column:span 8}
+.widget.span-12{grid-column:span 12}
+.w-title{font-weight:700; font-size:13px; margin-bottom:6px; color:var(--text-2)}
+.w-big{font-size:28px; font-weight:700; line-height:1.1}
+.w-sub{font-size:11px; color:var(--text-mute); margin-top:2px}
+.w-sub.up{color:var(--success)}
+.w-sub.down{color:var(--error)}
+
+/* Bar chart */
+.bar-chart-wrap{padding:8px 0 0}
+.bar-chart{
+  display:flex; align-items:flex-end; gap:6px;
+  height:160px; padding:0 4px;
+}
+.bar-chart .bar{
+  flex:1; background:linear-gradient(0deg,#0176d3,#4faae8);
+  border-radius:3px 3px 0 0; position:relative; display:flex; flex-direction:column;
+  justify-content:flex-end; align-items:center; min-width:0;
+}
+.bar-chart .bar .v{font-size:10px; color:var(--text-2); position:absolute; top:-16px}
+.bar-chart .bar .x{
+  font-size:10px; color:var(--text-mute); position:absolute; bottom:-18px;
+}
+
+/* Donut */
+.donut-wrap{display:flex; align-items:center; gap:14px; padding:6px 0}
+.donut{width:120px; height:120px; border-radius:50%}
+.legend{flex:1; font-size:12px}
+.lg-item{display:flex; align-items:center; gap:6px; padding:3px 0}
+.lg-dot{width:10px; height:10px; border-radius:2px}
+
+/* ===== Help text ===== */
+.help-text{color:var(--text-mute); font-size:11px}
+
+/* ===== Modal ===== */
+.modal-bg{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.4);
+  z-index:2000; align-items:center; justify-content:center; padding:24px;
+}
+.modal-bg.active{display:flex}
+.modal{
+  background:#fff; border-radius:6px; max-width:880px; width:100%;
+  max-height:90vh; overflow:auto; box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+.modal-head{padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center}
+.modal-head .title{font-weight:700; font-size:15px; flex:1}
+.modal-head .close{cursor:pointer; font-size:20px; color:var(--text-mute)}
+.modal-body{padding:20px}
+
+/* ===== ChatWork chat style ===== */
+.chat-stage{
+  background:linear-gradient(180deg, #fff8ef 0%, #fff 60%);
+  border:1px solid #f1c992; border-radius:8px; padding:14px;
+  margin-bottom:8px;
+}
+.chat-header{
+  display:flex; align-items:center; gap:8px; margin-bottom:10px;
+  padding-bottom:8px; border-bottom:1px solid #f3e3cc;
+}
+.chat-header .cw-logo{
+  width:28px;height:28px;border-radius:4px;background:var(--chatwork);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;
+}
+.chat-header .room{font-weight:700}
+.chat-header .room-sub{color:var(--text-mute); font-size:11px}
+.chat-msg{
+  display:flex; gap:10px; padding:8px 0;
+}
+.chat-msg .avatar{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;
+}
+.chat-msg .avatar.a-hosokai{background:#3b82f6}
+.chat-msg .avatar.a-ishida{background:#f97316}
+.chat-msg .avatar.a-masaki{background:#16a34a}
+.chat-msg .avatar.a-claude{background:var(--claude)}
+.chat-msg .avatar.a-sf{background:#0176d3}
+.chat-msg .body{flex:1}
+.chat-msg .meta{font-size:11px; color:var(--text-mute)}
+.chat-msg .name{font-weight:700; font-size:12px}
+.chat-msg .text{margin-top:3px; line-height:1.6; white-space:pre-wrap}
+.chat-msg .text.claude{
+  background:var(--claude-bg); border-left:3px solid var(--claude);
+  padding:8px 12px; border-radius:4px;
+}
+.chat-msg .text.sf{
+  background:var(--brand-50); border-left:3px solid var(--brand);
+  padding:8px 12px; border-radius:4px;
+}
+
+/* ===== Flow Diagram ===== */
+.flow-diagram{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  padding:20px; margin-bottom:8px;
+}
+.flow-row{
+  display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;
+}
+.flow-node{
+  background:#fff; border:2px solid var(--border); border-radius:8px;
+  padding:14px 18px; min-width:140px; text-align:center;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
+}
+.flow-node.chatwork{border-color:var(--chatwork); background:var(--chatwork-bg)}
+.flow-node.claude{border-color:var(--claude); background:var(--claude-bg)}
+.flow-node.sf{border-color:var(--brand); background:var(--brand-50)}
+.flow-node.sheets{border-color:var(--sheets); background:var(--sheets-bg)}
+.flow-node.cloudsign{border-color:#3a3a3a; background:#f5f5f5}
+.flow-node .ic{font-size:24px; margin-bottom:4px}
+.flow-node .nm{font-weight:700}
+.flow-node .sub{font-size:11px; color:var(--text-mute); margin-top:2px}
+.flow-arrow{
+  font-size:20px; color:var(--text-mute); font-weight:700;
+}
+
+/* Spreadsheet style */
+.sheet-wrap{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius); overflow:auto;
+}
+.sheet-toolbar{
+  background:#f3f3f3; padding:6px 12px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px; font-size:12px;
+}
+.sheet-toolbar .sheets-logo{
+  width:18px;height:18px;border-radius:3px;background:var(--sheets);
+  display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:10px;
+}
+.sheet-tbl{width:100%; border-collapse:collapse; font-size:12px}
+.sheet-tbl th{
+  background:#e8f0fe; padding:6px 10px; border:1px solid #c2d6f8;
+  font-weight:600; color:#1a73e8; font-size:11px; text-align:left;
+}
+.sheet-tbl td{
+  padding:6px 10px; border:1px solid #e0e0e0;
+}
+.sheet-tbl tr:hover td{background:#f8fbff}
+.sheet-tbl .row-num{
+  background:#f8f9fa; color:var(--text-mute); font-size:10px;
+  text-align:center; width:30px;
+}
+
+/* nav helpers */
+.crumb{font-size:11px; color:var(--text-mute); margin-bottom:4px}
+.crumb a{color:var(--text-mute); cursor:pointer}
+.crumb .sep{margin:0 4px; color:#bbb}
+
+/* Callout */
+.callout{
+  background:var(--brand-50); border-left:3px solid var(--brand);
+  padding:10px 14px; border-radius:0 var(--radius) var(--radius) 0;
+  margin-bottom:10px; font-size:12px;
+}
+.callout.warn{background:var(--warn-bg); border-color:var(--warn)}
+.callout.success{background:var(--success-bg); border-color:var(--success)}
+.callout strong{font-weight:700}
+
+@media(max-width:1000px){
+  .dash-grid{grid-template-columns:repeat(4,1fr)}
+  .widget.span-3,.widget.span-4{grid-column:span 2}
+  .widget.span-6,.widget.span-8,.widget.span-12{grid-column:span 4}
+  .gh-search{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ========================================= -->
+<!-- Global Header -->
+<!-- ========================================= -->
+<div class="global-header">
+  <div class="app-launcher" title="アプリランチャー"></div>
+  <div class="app-name">セールス <span class="sub">AION株式会社</span></div>
+  <div class="gh-spacer"></div>
+  <div class="gh-search">
+    <span style="color:#706e6b">🔍</span>
+    <input placeholder="検索..." />
+  </div>
+  <div class="gh-actions">
+    <div class="icon-btn" title="お気に入り">⭐</div>
+    <div class="icon-btn" title="通知">🔔</div>
+    <div class="icon-btn" title="ヘルプ">❓</div>
+    <div class="gh-user" title="山本 花子">YH</div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- App Bar Tabs -->
+<!-- ========================================= -->
+<div class="app-bar">
+  <div class="tab active" data-page="home">🏠 ホーム</div>
+  <div class="tab" data-page="lead-list">🧭 リード</div>
+  <div class="tab" data-page="account-list">🏢 取引先</div>
+  <div class="tab" data-page="opp-list">💼 商談</div>
+  <div class="tab" data-page="quote-list">📄 見積</div>
+  <div class="tab" data-page="order-list">📦 受注処理</div>
+  <div class="tab" data-page="dash-monitor">📈 モニタリングDB</div>
+  <div class="tab" data-page="dash-alert">🚨 アラートDB</div>
+  <div class="tab" data-page="chatwork-flow">💬 ChatWork連携</div>
+  <div class="tab" data-page="sheet-sync">📊 スプシ同期</div>
+</div>
+
+<div class="main">
+
+<!-- ========================================= -->
+<!-- HOME -->
+<!-- ========================================= -->
+<div class="page active" id="home">
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon home">🏠</div>
+      <div class="obj-title">
+        <div class="label">ホーム</div>
+        <div class="name">こんにちは、山本さん</div>
+      </div>
+      <div class="obj-actions">
+        <span style="color:var(--text-mute);font-size:12px">最終更新: 2026/06/11 09:50 <span class="badge claude">Claude自動更新</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>💡 本日のメッセージ</strong>　ChatWorkの#営業ルームの投稿を <span class="badge claude">Claude</span> が自動で解析し、商談更新2件（明応学園・全日ロジスティクス）・リード1件を処理しました。
+  </div>
+
+  <div class="dash-grid">
+    <div class="widget span-3">
+      <div class="w-title">📈 パイプライン金額</div>
+      <div class="w-big">¥26,000,000</div>
+      <div class="w-sub">商談 10件（実動）</div>
+    </div>
+    <div class="widget span-3">
+      <div class="w-title">🎯 期待値（確度加重）</div>
+      <div class="w-big">¥12,000,000</div>
+      <div class="w-sub up">▲ 明応学園 80%が牽引</div>
+    </div>
+    <div class="widget span-3">
+      <div class="w-title">⚠️ 滞留商談</div>
+      <div class="w-big" style="color:var(--error)">2</div>
+      <div class="w-sub">14日以上更新なし</div>
+    </div>
+    <div class="widget span-3">
+      <div class="w-title">📦 当月リード件数</div>
+      <div class="w-big">14</div>
+      <div class="w-sub up">紹介 5件 / アウトバウンド 9件</div>
+    </div>
+
+    <div class="widget span-8">
+      <div class="w-title">📈 月次パイプライン推移（着地予測）</div>
+      <div class="bar-chart-wrap">
+        <div class="bar-chart">
+          <div class="bar" style="height:30%"><span class="v">¥1.8M</span><span class="x">2月</span></div>
+          <div class="bar" style="height:38%"><span class="v">¥2.3M</span><span class="x">3月</span></div>
+          <div class="bar" style="height:46%"><span class="v">¥2.8M</span><span class="x">4月</span></div>
+          <div class="bar" style="height:55%"><span class="v">¥3.3M</span><span class="x">5月</span></div>
+          <div class="bar" style="height:72%" title="当月"><span class="v">¥4.3M</span><span class="x" style="font-weight:700;color:var(--brand)">6月</span></div>
+          <div class="bar" style="height:60%; background:linear-gradient(0deg,#dddbda,#e8e7e6)"><span class="v">¥3.6M</span><span class="x">7月</span></div>
+          <div class="bar" style="height:40%; background:linear-gradient(0deg,#dddbda,#e8e7e6)"><span class="v">¥2.4M</span><span class="x">8月</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="widget span-4">
+      <div class="w-title">🥧 リード経路別件数（当月）</div>
+      <div class="donut-wrap">
+        <div class="donut" style="background:conic-gradient(#0176d3 0 36%, #fcb95b 36% 100%);
+          mask:radial-gradient(circle at center, transparent 40px, #000 41px); -webkit-mask:radial-gradient(circle at center, transparent 40px, #000 41px);"></div>
+        <div class="legend">
+          <div class="lg-item"><span class="lg-dot" style="background:#0176d3"></span>紹介経由 <b style="margin-left:auto">5件</b></div>
+          <div class="lg-item"><span class="lg-dot" style="background:#fcb95b"></span>アウトバウンド <b style="margin-left:auto">9件</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="widget span-6">
+      <div class="w-title">🚨 アラート（要対応）</div>
+      <table class="tbl" style="margin-top:6px">
+        <thead><tr><th>種別</th><th>件名</th><th class="num">経過</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge warn">滞留商談</span></td><td><a class="name-link" data-go="opp-list">三国テクノロジー（2/26商談後 未更新）</a></td><td class="num">15日</td></tr>
+          <tr><td><span class="badge warn">滞留商談</span></td><td>ブルーテレコム（先方主導で待ち）</td><td class="num">21日</td></tr>
+          <tr><td><span class="badge error">必須未入力</span></td><td>ウィルワークス — 受注予定日／予算感</td><td class="num">—</td></tr>
+          <tr><td><span class="badge error">対応期限超過</span></td><td>ウィルワークス（イベント経由・返信なし）</td><td class="num">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="widget span-6">
+      <div class="w-title">⏳ 今月の受注予定（60〜90%）</div>
+      <table class="tbl" style="margin-top:6px">
+        <thead><tr><th>商談</th><th>取引先</th><th class="num">予定金額</th><th class="num">確度</th></tr></thead>
+        <tbody>
+          <tr><td><a class="name-link" data-go="opp-detail">OPP-2026-0031</a></td><td>明応学園</td><td class="num">¥3,000,000</td><td class="num"><span class="badge info">80%</span></td></tr>
+          <tr><td>OPP-2026-0030</td><td>全日ロジスティクス</td><td class="num">¥2,800,000</td><td class="num"><span class="badge warn">60%</span></td></tr>
+          <tr><td>OPP-2026-0029</td><td>ハイラインシステムズ</td><td class="num">¥2,200,000</td><td class="num"><span class="badge warn">60%</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="widget span-12">
+      <div class="w-title">📰 最近の活動 <span class="badge claude">Claudeが自動取込み</span></div>
+      <div class="timeline" style="padding:0; margin-top:6px">
+        <div class="tl-item">
+          <div class="tl-icon cw">CW</div>
+          <div class="tl-body">
+            <div class="tl-meta">2026/06/11 09:42 — ChatWork#営業ルーム → Claude経由</div>
+            <div class="tl-title">明応学園 ／ 社内稟議で前向きの感触の感触</div>
+            <div class="tl-desc">鈴木さん投稿「明応さん、来週比較検討の結果連絡」→ 商談OPP-2026-0031を更新</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-icon meet">M</div>
+          <div class="tl-body">
+            <div class="tl-meta">2026/06/10 16:00 — Google Meet録画 → Claude経由</div>
+            <div class="tl-title">全日ロジスティクス ／ Aプランで社内調整中</div>
+            <div class="tl-desc">議事録自動生成、Next Action「決算期スケジュール確認」を商談タスクへ反映</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-icon claude">C</div>
+          <div class="tl-body">
+            <div class="tl-meta">2026/06/09 11:10 — Claude名刺取込み</div>
+            <div class="tl-title">名刺写真 → 新規リード（大成建工 担当A様）を自動生成</div>
+            <div class="tl-desc">紹介者 紹介元B様 経由で受領した名刺をChatWorkに投稿 → Lead作成・紐付け</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- LEAD LIST -->
+<!-- ========================================= -->
+<div class="page" id="lead-list">
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon lead">L</div>
+      <div class="obj-title">
+        <div class="label">リード</div>
+        <div class="name">最近表示したリスト <span style="color:var(--text-mute);font-weight:400;font-size:13px">▼</span></div>
+      </div>
+      <div class="obj-actions">
+        <button class="btn">インポート</button>
+        <button class="btn">名刺取込み <span class="badge claude">Claude</span></button>
+        <button class="btn primary">新規</button>
+      </div>
+    </div>
+  </div>
+  <div class="callout">
+    <strong>💡 入力経路</strong>　手動／ChatWork投稿（Claude解析）／名刺写真（Claude OCR）／スプレッドシート同期、いずれもこの一覧に集約されます。展示会・SNS・ウェビナー経由の新規リードもここへ。
+  </div>
+  <table class="tbl">
+    <thead><tr>
+      <th>会社名</th><th>担当者</th><th>役職</th><th>業種</th><th>獲得経路</th><th>確度</th><th>開始時期</th><th>状況</th><th>取込元</th>
+    </tr></thead>
+    <tbody>
+      <tr><td><a class="name-link" data-go="lead-detail">大成建工株式会社</a></td><td>担当 A様</td><td>DX推進担当</td><td>建設</td><td><span class="badge success">紹介</span></td><td><span class="badge success">A</span></td><td>2026年7月</td><td><span class="badge warn">面談調整中</span></td><td><span class="badge claude">名刺</span></td></tr>
+      <tr><td>ウィルワークス株式会社</td><td>ご担当者</td><td>—</td><td>IT</td><td><span class="badge success">紹介</span></td><td><span class="badge gray">C</span></td><td>未定</td><td><span class="badge gray">再コンタクト</span></td><td>手動</td></tr>
+      <tr><td>株式会社グリーンフィールド</td><td>佐藤 直樹</td><td>店舗開発部</td><td>小売</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge warn">B</span></td><td>2026年8月</td><td><span class="badge info">対応中</span></td><td><span class="badge cw">ChatWork</span></td></tr>
+      <tr><td>医療法人 明和会</td><td>山口 紀子</td><td>管理部長</td><td>医療</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge warn">B</span></td><td>2026年9月</td><td><span class="badge warn">商談化検討</span></td><td><span class="badge sheets">スプシ</span></td></tr>
+      <tr><td>株式会社ミナト精工</td><td>大野 弘樹</td><td>営業部</td><td>製造</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge gray">C</span></td><td>未定</td><td><span class="badge gray">休眠</span></td><td>手動</td></tr>
+      <tr><td>ウェビナー参加（6/5）</td><td>複数</td><td>—</td><td>各種</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge gray">C</span></td><td>未定</td><td><span class="badge info">一括取込</span></td><td><span class="badge sheets">スプシ</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========================================= -->
+<!-- LEAD DETAIL -->
+<!-- ========================================= -->
+<div class="page" id="lead-detail">
+  <div class="crumb">
+    <a data-go="lead-list">リード</a><span class="sep">›</span>大成建工株式会社
+  </div>
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon lead">L</div>
+      <div class="obj-title">
+        <div class="label">リード</div>
+        <div class="name">大成建工株式会社 ／ 担当 A様</div>
+      </div>
+      <div class="obj-actions">
+        <button class="btn">編集</button>
+        <button class="btn primary" onclick="convertLead()">商談に変換</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="path-label">
+    リードステージ <span class="badge info" style="margin-left:auto">アポ獲得済</span>
+  </div>
+  <div class="path">
+    <div class="stage completed">1. 初回接触</div>
+    <div class="stage completed">2. ヒアリング</div>
+    <div class="stage current">3. アポ獲得</div>
+    <div class="stage">4. 商談化</div>
+  </div>
+
+  <div class="highlights">
+    <div class="item"><div class="lbl">担当者</div><div class="val">担当 A様 (DX推進担当)</div></div>
+    <div class="item"><div class="lbl">獲得経路</div><div class="val">紹介（紹介元 B様）</div></div>
+    <div class="item"><div class="lbl">確度</div><div class="val">A（90日以内に検討）</div></div>
+    <div class="item"><div class="lbl">開始時期</div><div class="val">2026年7月</div></div>
+    <div class="item"><div class="lbl">取込元</div><div class="val"><span class="badge claude">名刺(Claude)</span></div></div>
+  </div>
+
+  <div class="two-col-3">
+    <div>
+      <div class="card">
+        <div class="card-head">📝 詳細</div>
+        <div class="card-body">
+          <div class="sec-title" style="margin:-12px -16px 8px">会社情報</div>
+          <div class="field-grid">
+            <div class="field"><div class="lbl">会社名</div><div class="val">大成建工株式会社 <span class="ai-source">Claude取込</span></div></div>
+            <div class="field"><div class="lbl">業種</div><div class="val">建設・建設DX</div></div>
+            <div class="field"><div class="lbl">所在地</div><div class="val">東京都港区xx-x-x</div></div>
+            <div class="field"><div class="lbl">電話</div><div class="val">03-xxxx-xxxx</div></div>
+            <div class="field"><div class="lbl">従業員規模</div><div class="val">1,000名以上</div></div>
+            <div class="field"><div class="lbl">URL</div><div class="val">https://www.example-nishimatsu.jp/</div></div>
+          </div>
+
+          <div class="sec-title" style="margin:16px -16px 8px">担当者情報</div>
+          <div class="field-grid">
+            <div class="field"><div class="lbl">氏名</div><div class="val">担当 A様</div></div>
+            <div class="field"><div class="lbl">役職</div><div class="val">DX推進担当</div></div>
+            <div class="field"><div class="lbl">紹介者</div><div class="val">紹介元 B様（個別面談を仲介）</div></div>
+            <div class="field"><div class="lbl">電話</div><div class="val">090-xxxx-xxxx</div></div>
+          </div>
+
+          <div class="sec-title" style="margin:16px -16px 8px">案件情報</div>
+          <div class="field-grid">
+            <div class="field"><div class="lbl">獲得経路</div><div class="val">紹介（紹介元 B様）</div></div>
+            <div class="field"><div class="lbl">確度</div><div class="val">A（90日以内に検討）</div></div>
+            <div class="field"><div class="lbl">開始時期</div><div class="val">2026年7月</div></div>
+            <div class="field"><div class="lbl">予算感</div><div class="val">未確認（面談で把握予定）</div></div>
+            <div class="field full"><div class="lbl">課題・ニーズ</div><div class="val">DX担当の担当A様が社内ヒアリング中。来週、紹介者の紹介元B様を交えて個別面談を予定。<span class="cw-source ai-source">ChatWork投稿から抽出</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="related-card">
+        <div class="related-head">📞 活動 <span class="count">(3)</span></div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-icon cw">CW</div>
+            <div class="tl-body">
+              <div class="tl-meta">2026/06/09 11:08 — ChatWork #営業</div>
+              <div class="tl-title">鈴木さん投稿</div>
+              <div class="tl-desc">「紹介元Bさん紹介の大成建工・担当Aさん、来週個別面談セット」→ Claudeが活動に登録</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-icon mail">メ</div>
+            <div class="tl-body">
+              <div class="tl-meta">2026/06/06 18:00</div>
+              <div class="tl-title">紹介元B様より紹介メール受領</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="related-card">
+        <div class="related-head">📎 ファイル <span class="count">(1)</span></div>
+        <div style="padding:12px 16px; color:var(--text-mute); font-size:12px">
+          📄 名刺_大成建工_担当A様.jpg
+        </div>
+      </div>
+
+      <div class="related-card">
+        <div class="related-head">💬 ChatWork メッセージ <span class="count">(4)</span></div>
+        <div style="padding:8px 16px; font-size:12px; color:var(--text-mute)">
+          直近のやりとりは <a data-go="chatwork-flow">ChatWork連携画面</a> で全文確認可能
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- ACCOUNT LIST -->
+<!-- ========================================= -->
+<div class="page" id="account-list">
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon account">A</div>
+      <div class="obj-title">
+        <div class="label">取引先</div>
+        <div class="name">すべての取引先 <span style="color:var(--text-mute);font-weight:400;font-size:13px">▼</span></div>
+      </div>
+      <div class="obj-actions">
+        <button class="btn">インポート</button>
+        <button class="btn primary">新規</button>
+      </div>
+    </div>
+  </div>
+  <table class="tbl">
+    <thead><tr>
+      <th>法人名</th><th>業種</th><th>従業員規模</th><th>所在地</th><th>状況</th><th class="num">進行中商談額</th>
+    </tr></thead>
+    <tbody>
+      <tr><td><a class="name-link" data-go="account-detail">明応学園</a></td><td>教育</td><td>—</td><td>東京都中野区</td><td>商談中</td><td class="num">¥3,000,000</td></tr>
+      <tr><td>ブルーテレコム株式会社</td><td>通信・IT</td><td>10,000名以上</td><td>東京都港区</td><td>商談中</td><td class="num">¥5,000,000</td></tr>
+      <tr><td>大成建工株式会社</td><td>建設</td><td>1,000名以上</td><td>東京都港区</td><td>商談中（紹介）</td><td class="num">¥4,000,000</td></tr>
+      <tr><td>全日ロジスティクス株式会社</td><td>物流</td><td>100〜300</td><td>大阪府</td><td>商談中</td><td class="num">¥2,800,000</td></tr>
+      <tr><td>株式会社シンセイ化成</td><td>製造</td><td>300〜500</td><td>新潟県</td><td>商談中</td><td class="num">¥2,500,000</td></tr>
+      <tr><td>株式会社ハイラインシステムズ</td><td>IT</td><td>50〜100</td><td>東京都</td><td>商談中</td><td class="num">¥2,200,000</td></tr>
+      <tr><td>松風堂</td><td>小売</td><td>10〜50</td><td>—</td><td>商談中</td><td class="num">¥2,000,000</td></tr>
+      <tr><td>三国テクノロジー株式会社</td><td>製造</td><td>100〜300</td><td>千葉県</td><td>商談中</td><td class="num">¥1,800,000</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========================================= -->
+<!-- ACCOUNT DETAIL -->
+<!-- ========================================= -->
+<div class="page" id="account-detail">
+  <div class="crumb">
+    <a data-go="account-list">取引先</a><span class="sep">›</span>明応学園
+  </div>
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon account">A</div>
+      <div class="obj-title">
+        <div class="label">取引先</div>
+        <div class="name">明応学園</div>
+      </div>
+      <div class="obj-actions">
+        <button class="btn">編集</button>
+        <button class="btn primary">新規商談</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlights">
+    <div class="item"><div class="lbl">業種</div><div class="val">教育</div></div>
+    <div class="item"><div class="lbl">所在地</div><div class="val">東京都中野区</div></div>
+    <div class="item"><div class="lbl">進行中商談</div><div class="val">1件 / ¥3,000,000</div></div>
+    <div class="item"><div class="lbl">最終接触</div><div class="val">2026/06/11</div></div>
+    <div class="item"><div class="lbl">担当営業</div><div class="val">鈴木 一郎</div></div>
+  </div>
+
+  <div class="two-col-3">
+    <div>
+      <div class="card">
+        <div class="card-head">📝 詳細</div>
+        <div class="card-body">
+          <div class="field-grid">
+            <div class="field"><div class="lbl">法人名</div><div class="val">明応学園</div></div>
+            <div class="field"><div class="lbl">業種</div><div class="val">教育</div></div>
+            <div class="field"><div class="lbl">電話</div><div class="val">03-xxxx-xxxx</div></div>
+            <div class="field"><div class="lbl">URL</div><div class="val">https://www.example-hosen.jp/</div></div>
+            <div class="field full"><div class="lbl">本社住所</div><div class="val">東京都中野区xx-x-x</div></div>
+            <div class="field"><div class="lbl">担当営業</div><div class="val">鈴木 一郎</div></div>
+            <div class="field full"><div class="lbl">備考</div><div class="val">競合3社と比較検討中。ご担当部長は好意的、決裁者も前向きなニュアンス。来週、先方が比較検討の上で方向性を決定予定。</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="related-card">
+        <div class="related-head">👥 取引先責任者 <span class="count">(3)</span><div class="actions"><button class="btn small">新規</button></div></div>
+        <table class="tbl">
+          <tr><td>代表</td><td>社内稟議</td><td>意思決定者</td></tr>
+          <tr><td>ご担当部長</td><td>—</td><td>推進者</td></tr>
+          <tr><td>管理部長</td><td>管理部</td><td>担当</td></tr>
+        </table>
+      </div>
+
+      <div class="related-card">
+        <div class="related-head">💼 商談 <span class="count">(1)</span><div class="actions"><button class="btn small">新規</button></div></div>
+        <table class="tbl">
+          <tr><td><a class="name-link" data-go="opp-detail">OPP-2026-0031</a></td><td><span class="badge info">見積提示(80%)</span></td><td class="num">¥3,000,000</td></tr>
+        </table>
+      </div>
+
+      <div class="related-card">
+        <div class="related-head">📞 活動 <span class="count">(8)</span></div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-icon cw">CW</div>
+            <div class="tl-body">
+              <div class="tl-meta">2026/06/11 09:42 — ChatWork経由</div>
+              <div class="tl-title">社内稟議で前向きの感触の感触</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- OPP LIST -->
+<!-- ========================================= -->
+<div class="page" id="opp-list">
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon opp">O</div>
+      <div class="obj-title">
+        <div class="label">商談</div>
+        <div class="name">すべての商談 <span style="color:var(--text-mute);font-weight:400;font-size:13px">▼</span></div>
+      </div>
+      <div class="obj-actions">
+        <button class="btn primary">新規</button>
+      </div>
+    </div>
+  </div>
+  <div class="callout">
+    <strong>💡 ステージは経路で異なります</strong>　紹介経由 = 4ステージ／アウトバウンド = 6ステージ（上申・社内調整が追加）。現在の3区分（初期接触/ニーズ把握/メリット訴求）から移行マッピング済み。
+  </div>
+  <table class="tbl">
+    <thead><tr>
+      <th>商談番号</th><th>取引先</th><th>経路</th><th>フェーズ</th><th>受注予定日</th><th class="num">予定金額</th><th class="num">確度</th><th>所有者</th>
+    </tr></thead>
+    <tbody>
+      <tr><td><a class="name-link" data-go="opp-detail">OPP-2026-0031</a></td><td>明応学園</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge info">見積提示 (80%)</span></td><td>2026/06/30</td><td class="num">¥3,000,000</td><td class="num">80%</td><td>鈴木 一郎</td></tr>
+      <tr><td>OPP-2026-0030</td><td>全日ロジスティクス</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge warn">上申中 (60%)</span></td><td>2026/07/31</td><td class="num">¥2,800,000</td><td class="num">60%</td><td>鈴木 一郎</td></tr>
+      <tr><td>OPP-2026-0029</td><td>ハイラインシステムズ</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge warn">上申中 (60%)</span></td><td>2026/07/20</td><td class="num">¥2,200,000</td><td class="num">60%</td><td>鈴木 一郎</td></tr>
+      <tr><td>OPP-2026-0035</td><td>ブルーテレコム</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge gray">詳細商談 (50%)</span></td><td>2026/07/31</td><td class="num">¥5,000,000</td><td class="num">50%</td><td>田中</td></tr>
+      <tr><td>OPP-2026-0028</td><td>松風堂</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge gray">詳細商談 (50%)</span></td><td>2026/07/15</td><td class="num">¥2,000,000</td><td class="num">50%</td><td>渡辺</td></tr>
+      <tr><td>OPP-2026-0026</td><td>シンセイ化成</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge gray">詳細商談 (50%)</span></td><td>2026/07/10</td><td class="num">¥2,500,000</td><td class="num">50%</td><td>渡辺</td></tr>
+      <tr><td>OPP-2026-0025</td><td>三国テクノロジー</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge warn">詳細商談 (50%)</span></td><td>2026/07/05</td><td class="num">¥1,800,000</td><td class="num">50%</td><td>鈴木 一郎</td></tr>
+      <tr><td><a class="name-link" data-go="opp-detail-intro">OPP-2026-0027</a></td><td>季報出版</td><td><span class="badge success">紹介</span></td><td><span class="badge gray">詳細商談 (50%)</span></td><td>2026/07/15</td><td class="num">¥1,200,000</td><td class="num">50%</td><td>鈴木 一郎</td></tr>
+      <tr><td>OPP-2026-0033</td><td>大成建工</td><td><span class="badge success">紹介</span></td><td><span class="badge info">個別面談 (30%)</span></td><td>2026/08/31</td><td class="num">¥4,000,000</td><td class="num">30%</td><td>鈴木 一郎</td></tr>
+      <tr><td>OPP-2026-0034</td><td>ウィルワークス</td><td><span class="badge success">紹介</span></td><td><span class="badge info">個別面談 (30%)</span></td><td>2026/08/15</td><td class="num">¥1,500,000</td><td class="num">30%</td><td>鈴木 一郎</td></tr>
+      <tr><td>OPP-2026-0018</td><td>墨花堂</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge gray">凍結 (保留)</span></td><td>—</td><td class="num">¥1,500,000</td><td class="num">—</td><td>田中</td></tr>
+      <tr><td>OPP-2026-0020</td><td>エルニード不動産</td><td><span class="badge info">アウトバウンド</span></td><td><span class="badge gray">様子見 (保留)</span></td><td>—</td><td class="num">¥1,000,000</td><td class="num">—</td><td>田中</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========================================= -->
+<!-- OPP DETAIL (アウトバウンド経路) -->
+<!-- ========================================= -->
+<div class="page" id="opp-detail">
+  <div class="crumb">
+    <a data-go="opp-list">商談</a><span class="sep">›</span>OPP-2026-0031
+  </div>
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon opp">O</div>
+      <div class="obj-title">
+        <div class="label">商談 <span class="badge info" style="margin-left:6px">アウトバウンド経路</span></div>
+        <div class="name">OPP-2026-0031 ／ 明応学園 導入提案</div>
+      </div>
+      <div class="obj-actions">
+        <button class="btn">編集</button>
+        <button class="btn">📄 見積作成</button>
+        <button class="btn success" onclick="closeWon()">受注（100%）にする</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="path-label">
+    商談ステージ — <strong>アウトバウンド経路</strong>（上申・社内調整あり） <span class="badge info" style="margin-left:auto">見積・開始時期提示（80%）</span>
+  </div>
+  <div class="path">
+    <div class="stage completed">1. 個別面談（30%）</div>
+    <div class="stage completed">2. 詳細商談（50%）</div>
+    <div class="stage completed">3. 上申・社内調整①（60%）</div>
+    <div class="stage completed">4. 上申・社内調整②（70%）</div>
+    <div class="stage current">5. 見積・開始時期提示（80%）</div>
+    <div class="stage">6. 受注（100%）</div>
+  </div>
+
+  <div class="highlights">
+    <div class="item"><div class="lbl">予定金額</div><div class="val">¥3,000,000</div></div>
+    <div class="item"><div class="lbl">取引先</div><div class="val">明応学園</div></div>
+    <div class="item"><div class="lbl">受注予定日</div><div class="val">2026/06/30</div></div>
+    <div class="item"><div class="lbl">所有者</div><div class="val">鈴木 一郎</div></div>
+    <div class="item"><div class="lbl">確度</div><div class="val">80%</div></div>
+  </div>
+
+  <div class="two-col-3">
+    <div>
+      <div class="card">
+        <div class="card-head">📋 詳細（フェーズ別表示）</div>
+        <div class="card-body">
+
+          <div class="callout success">
+            <strong>✅ 現フェーズ「見積・開始時期提示」で必要な項目</strong>　見積金額／開始希望時期／契約形態／回答期限
+          </div>
+
+          <div class="sec-title" style="margin:-12px -16px 8px">フェーズ別必須項目（見積提示中）</div>
+          <div class="field-grid">
+            <div class="field"><div class="lbl">見積金額</div><div class="val">¥3,000,000（提示済）</div></div>
+            <div class="field"><div class="lbl">開始希望時期</div><div class="val">2026年7月〜</div></div>
+            <div class="field"><div class="lbl">契約形態</div><div class="val">初期＋月額保守</div></div>
+            <div class="field"><div class="lbl">回答期限</div><div class="val">2026/06/25</div></div>
+          </div>
+
+          <div class="sec-title" style="margin:16px -16px 8px">商談情報</div>
+          <div class="field-grid">
+            <div class="field"><div class="lbl">商談番号</div><div class="val">OPP-2026-0031</div></div>
+            <div class="field"><div class="lbl">フェーズ</div><div class="val">5. 見積・開始時期提示 (80%)</div></div>
+            <div class="field"><div class="lbl">取引先</div><div class="val">明応学園</div></div>
+            <div class="field"><div class="lbl">受注予定日</div><div class="val">2026/06/30</div></div>
+            <div class="field"><div class="lbl">経路</div><div class="val">アウトバウンド</div></div>
+            <div class="field"><div class="lbl">所有者</div><div class="val">鈴木 一郎</div></div>
+            <div class="field"><div class="lbl">主担当者</div><div class="val">ご担当部長</div></div>
+            <div class="field"><div class="lbl">意思決定者</div><div class="val">代表（決裁者）</div></div>
+          </div>
+
+          <div class="sec-title" style="margin:16px -16px 8px">案件詳細</div>
+          <div class="field-grid">
+            <div class="field full"><div class="lbl">提案内容</div><div class="val">弊社¥3,000,000で提案。ご担当部長は好意的、社内で予算感の最終調整中。</div></div>
+            <div class="field"><div class="lbl">競合状況</div><div class="val">他社2社と比較検討中</div></div>
+            <div class="field"><div class="lbl">想定開始時期</div><div class="val">2026年7月</div></div>
+            <div class="field"><div class="lbl">予算感</div><div class="val">予算は調整中（要交渉）</div></div>
+            <div class="field full"><div class="lbl">課題・ニーズ</div><div class="val">来週、先方が比較検討の上で方向性を決定予定。社内稟議の予算上限がポイント。<span class="cw-source ai-source">ChatWork取込</span></div></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="related-card">
+        <div class="related-head">📞 活動 <span class="count">(7)</span></div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-icon cw">CW</div>
+            <div class="tl-body">
+              <div class="tl-meta">2026/06/11 09:42 — ChatWork#営業</div>
+              <div class="tl-title">鈴木さん投稿</div>
+              <div class="tl-desc">「明応さん、社内稟議で前向きの感触。来週比較検討の結果連絡」</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-icon meet">M</div>
+            <div class="tl-body">
+              <div class="tl-meta">2026/06/05 14:00</div>
+              <div class="tl-title">見積・開始時期の提示MTG（ご担当部長同席）</div>
+              <div class="tl-desc">¥3,000,000で提示。社内稟議への上申用に資料を整理。</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-icon claude">C</div>
+            <div class="tl-body">
+              <div class="tl-meta">2026/06/05 16:00 — Claude議事録</div>
+              <div class="tl-title">Next Action 自動抽出</div>
+              <div class="tl-desc">「社内稟議向け上申資料 / 価格交渉余地の整理 / 6/25回答期限」</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-icon call">電</div>
+            <div class="tl-body">
+              <div class="tl-meta">2026/05/28 11:00</div>
+              <div class="tl-title">詳細商談（ご担当部長）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="related-card">
+        <div class="related-head">📄 見積 <span class="count">(1)</span></div>
+        <table class="tbl">
+          <tr><td><a class="name-link" data-go="quote-detail">QUO-2026-0012</a></td><td><span class="badge info">送付済</span></td><td class="num">¥3,000,000</td></tr>
+        </table>
+      </div>
+
+      <div class="related-card">
+        <div class="related-head">✅ タスク <span class="count">(3)</span><div class="actions"><button class="btn small">新規</button></div></div>
+        <table class="tbl">
+          <tr><td>社内稟議向け上申資料の作成</td><td>鈴木</td><td><span class="badge warn">期限 6/18</span></td></tr>
+          <tr><td>価格交渉余地の整理</td><td>鈴木</td><td><span class="badge info">6/16</span></td></tr>
+          <tr><td>競合比較表の更新</td><td>山本</td><td><span class="badge gray">6/15</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- OPP DETAIL (紹介経由) -->
+<!-- ========================================= -->
+<div class="page" id="opp-detail-intro">
+  <div class="crumb">
+    <a data-go="opp-list">商談</a><span class="sep">›</span>OPP-2026-0027
+  </div>
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon opp">O</div>
+      <div class="obj-title">
+        <div class="label">商談 <span class="badge success" style="margin-left:6px">紹介経由</span></div>
+        <div class="name">OPP-2026-0027 ／ 季報出版 導入提案</div>
+      </div>
+      <div class="obj-actions">
+        <button class="btn">編集</button>
+        <button class="btn primary">📄 見積作成</button>
+        <button class="btn success">受注（100%）にする</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="path-label">
+    商談ステージ — <strong>紹介経由</strong>（短いリードタイム） <span class="badge gray" style="margin-left:auto">詳細商談（50%）</span>
+  </div>
+  <div class="path">
+    <div class="stage completed">1. 個別面談（30%）</div>
+    <div class="stage current">2. 詳細商談（50%）</div>
+    <div class="stage">3. 見積・開始時期提示（80%）</div>
+    <div class="stage">4. 受注（100%）</div>
+  </div>
+
+  <div class="highlights">
+    <div class="item"><div class="lbl">予定金額</div><div class="val">¥1,200,000</div></div>
+    <div class="item"><div class="lbl">取引先</div><div class="val">季報出版</div></div>
+    <div class="item"><div class="lbl">受注予定日</div><div class="val">2026/07/15</div></div>
+    <div class="item"><div class="lbl">紹介元</div><div class="val">鈴木 → 中村ライン</div></div>
+    <div class="item"><div class="lbl">確度</div><div class="val">50%</div></div>
+  </div>
+
+  <div class="two-col-3">
+    <div>
+      <div class="card">
+        <div class="card-head">📋 詳細（フェーズ別表示）</div>
+        <div class="card-body">
+
+          <div class="callout warn">
+            <strong>⚠ 現フェーズ「詳細商談」で必要な項目</strong>　意思決定者／予算感
+          </div>
+
+          <div class="sec-title" style="margin:-12px -16px 8px">フェーズ別必須項目（詳細商談中）</div>
+          <div class="field-grid">
+            <div class="field"><div class="lbl">意思決定者</div><div class="val">確認中</div></div>
+            <div class="field"><div class="lbl">予算感</div><div class="val">スモール導入想定（〜¥1,500,000）</div></div>
+            <div class="field"><div class="lbl">次回アクション</div><div class="val">中村による自己紹介（鈴木からの流れ）</div></div>
+          </div>
+
+          <div class="sec-title" style="margin:16px -16px 8px">商談情報</div>
+          <div class="field-grid">
+            <div class="field"><div class="lbl">商談番号</div><div class="val">OPP-2026-0027</div></div>
+            <div class="field"><div class="lbl">フェーズ</div><div class="val">2. 詳細商談 (50%)</div></div>
+            <div class="field"><div class="lbl">取引先</div><div class="val">季報出版</div></div>
+            <div class="field"><div class="lbl">受注予定日</div><div class="val">2026/07/15</div></div>
+            <div class="field"><div class="lbl">経路</div><div class="val">紹介</div></div>
+            <div class="field"><div class="lbl">紹介元</div><div class="val">鈴木 → 中村ライン</div></div>
+            <div class="field"><div class="lbl">主担当者</div><div class="val">ご担当者</div></div>
+            <div class="field full"><div class="lbl">提案内容</div><div class="val">スモール導入提案。まずは中村の自己紹介から関係構築。</div></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="related-card">
+        <div class="related-head">📞 活動 <span class="count">(2)</span></div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-icon meet">M</div>
+            <div class="tl-body">
+              <div class="tl-meta">2026/05/29 16:00</div>
+              <div class="tl-title">個別面談（鈴木）</div>
+              <div class="tl-desc">スモール導入に関心。次は中村を紹介して関係深化。</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-icon mail">メ</div>
+            <div class="tl-body">
+              <div class="tl-meta">2026/05/22 11:00</div>
+              <div class="tl-title">初回コンタクト（鈴木）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="related-card">
+        <div class="related-head">✅ タスク <span class="count">(1)</span></div>
+        <table class="tbl">
+          <tr><td>中村による自己紹介の設定</td><td>鈴木</td><td><span class="badge warn">6/16</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- QUOTE LIST -->
+<!-- ========================================= -->
+<div class="page" id="quote-list">
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon quote">Q</div>
+      <div class="obj-title">
+        <div class="label">見積</div>
+        <div class="name">すべての見積 <span style="color:var(--text-mute);font-weight:400;font-size:13px">▼</span></div>
+      </div>
+      <div class="obj-actions">
+        <button class="btn primary">新規</button>
+      </div>
+    </div>
+  </div>
+  <table class="tbl">
+    <thead><tr>
+      <th>見積番号</th><th>商談</th><th>取引先</th><th>有効期限</th><th>状態</th><th class="num">金額</th>
+    </tr></thead>
+    <tbody>
+      <tr><td><a class="name-link" data-go="quote-detail">QUO-2026-0012</a></td><td>OPP-2026-0031</td><td>明応学園</td><td>2026/06/25</td><td><span class="badge info">送付済</span></td><td class="num">¥3,000,000</td></tr>
+      <tr><td>QUO-2026-0011</td><td>OPP-2026-0030</td><td>全日ロジスティクス</td><td>2026/07/15</td><td><span class="badge gray">下書き</span></td><td class="num">¥2,800,000</td></tr>
+      <tr><td>QUO-2026-0010</td><td>OPP-2026-0029</td><td>ハイラインシステムズ</td><td>2026/07/10</td><td><span class="badge gray">下書き</span></td><td class="num">¥2,200,000</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========================================= -->
+<!-- QUOTE DETAIL -->
+<!-- ========================================= -->
+<div class="page" id="quote-detail">
+  <div class="crumb">
+    <a data-go="quote-list">見積</a><span class="sep">›</span>QUO-2026-0012
+  </div>
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon quote">Q</div>
+      <div class="obj-title">
+        <div class="label">見積</div>
+        <div class="name">QUO-2026-0012 ／ 明応学園</div>
+      </div>
+      <div class="obj-actions">
+        <button class="btn">編集</button>
+        <button class="btn" onclick="showPdf()">📄 PDF出力</button>
+        <button class="btn primary">📨 クラウドサインで送付</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlights">
+    <div class="item"><div class="lbl">商談</div><div class="val"><a data-go="opp-detail">OPP-2026-0031</a></div></div>
+    <div class="item"><div class="lbl">取引先</div><div class="val">明応学園</div></div>
+    <div class="item"><div class="lbl">合計金額</div><div class="val">¥3,000,000（税抜）</div></div>
+    <div class="item"><div class="lbl">有効期限</div><div class="val">2026/06/25</div></div>
+    <div class="item"><div class="lbl">状態</div><div class="val"><span class="badge info">送付済</span></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">📋 見積明細</div>
+    <div class="card-body">
+      <table class="tbl">
+        <thead><tr><th>#</th><th>商品/サービス</th><th class="num">数量</th><th class="num">単価</th><th class="num">金額</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>初期導入費</td><td class="num">1</td><td class="num">¥1,800,000</td><td class="num">¥1,800,000</td></tr>
+          <tr><td>2</td><td>導入支援・カスタマイズ</td><td class="num">1</td><td class="num">¥900,000</td><td class="num">¥900,000</td></tr>
+          <tr><td>3</td><td>初期トレーニング（オンライン3回）</td><td class="num">1</td><td class="num">¥300,000</td><td class="num">¥300,000</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="4" class="num" style="font-weight:700">小計（税抜）</td><td class="num" style="font-weight:700">¥3,000,000</td></tr>
+          <tr><td colspan="4" class="num">消費税（10%）</td><td class="num">¥300,000</td></tr>
+          <tr style="background:var(--brand-50)"><td colspan="4" class="num" style="font-weight:700">合計（税込）</td><td class="num" style="font-weight:700">¥3,300,000</td></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">📨 クラウドサイン連携状況</div>
+    <div class="card-body">
+      <div class="field-grid">
+        <div class="field"><div class="lbl">送信日時</div><div class="val">2026/06/06 17:30</div></div>
+        <div class="field"><div class="lbl">送信先</div><div class="val">明応学園 管理部 御中</div></div>
+        <div class="field"><div class="lbl">クラウドサインステータス</div><div class="val"><span class="badge info">確認待ち</span></div></div>
+        <div class="field"><div class="lbl">書類ID</div><div class="val">cs_doc_a1b2c3d4...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- ORDER LIST (受注処理) -->
+<!-- ========================================= -->
+<div class="page" id="order-list">
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon order">R</div>
+      <div class="obj-title">
+        <div class="label">受注処理</div>
+        <div class="name">受注済み案件 ／ 契約書フロー</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>💡 受注後の流れ</strong>　商談ステージ「受注（100%）」更新 → Flowが受注番号自動採番 → クラウドサインに契約書ドラフト自動作成 → 先方署名 → ダッシュボードで完了表示
+  </div>
+
+  <div class="callout warn">
+    <strong>📦 現在、受注確定済みの案件はありません。</strong>　最有力は <a data-go="opp-detail">明応学園（OPP-2026-0031・80%）</a>。商談を「受注」に更新すると、このリストに自動でレコードが生成されます（下の「受注にする」ボタンで体験できます）。
+  </div>
+
+  <table class="tbl">
+    <thead><tr>
+      <th>受注番号</th><th>商談</th><th>取引先</th><th>受注日</th><th class="num">金額</th><th>契約書</th><th>クラウドサイン</th>
+    </tr></thead>
+    <tbody>
+      <tr><td colspan="7" style="text-align:center; color:var(--text-mute); padding:24px">受注レコードはまだありません。商談ステージ「受注（100%）」更新で自動生成されます。</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ========================================= -->
+<!-- DASHBOARD: モニタリング系 -->
+<!-- ========================================= -->
+<div class="page" id="dash-monitor">
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon dashboard">📈</div>
+      <div class="obj-title">
+        <div class="label">ダッシュボード</div>
+        <div class="name">モニタリング系 — 営業全体の現状把握</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="widget span-4">
+      <div class="w-title">📊 パイプライン金額（フェーズ別）</div>
+      <div class="bar-chart-wrap">
+        <div class="bar-chart">
+          <div class="bar" style="height:44%; background:linear-gradient(0deg,#76ded9,#a5ede9)"><span class="v">¥5.5M</span><span class="x">面談</span></div>
+          <div class="bar" style="height:100%; background:linear-gradient(0deg,#fcb95b,#fcd397)"><span class="v">¥12.5M</span><span class="x">詳細</span></div>
+          <div class="bar" style="height:40%; background:linear-gradient(0deg,#fe9339,#feb377)"><span class="v">¥5.0M</span><span class="x">上申</span></div>
+          <div class="bar" style="height:24%; background:linear-gradient(0deg,#0176d3,#4faae8)"><span class="v">¥3.0M</span><span class="x">見積</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="widget span-4">
+      <div class="w-title">🎯 経路別 受注率（参考・過去実績）</div>
+      <div style="padding:20px 0; text-align:center">
+        <div style="display:flex; gap:30px; justify-content:center">
+          <div>
+            <div style="font-size:36px; font-weight:700; color:var(--success)">紹介</div>
+            <div class="help-text">リードタイム短・受注率高</div>
+          </div>
+          <div>
+            <div style="font-size:36px; font-weight:700; color:var(--brand)">外販</div>
+            <div class="help-text">件数多・上申で長期化</div>
+          </div>
+        </div>
+        <div class="help-text" style="margin-top:12px">※ 受注実績が貯まると自動で率を算出</div>
+      </div>
+    </div>
+
+    <div class="widget span-4">
+      <div class="w-title">⏱️ 平均リードタイム（想定）</div>
+      <div style="padding:20px 0">
+        <div style="display:flex; justify-content:space-between; padding:6px 0">
+          <span>紹介経由</span><b>約3週間</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:6px 0">
+          <span>アウトバウンド</span><b>約6〜8週間</b>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:6px 0; border-top:1px dashed var(--border); margin-top:6px">
+          <span class="help-text">上申・社内調整の有無が差</span><b style="color:var(--warn)">+3〜5週</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="widget span-6">
+      <div class="w-title">📋 メンバー別パイプライン</div>
+      <table class="tbl" style="margin-top:6px">
+        <thead><tr><th>担当</th><th class="num">商談数</th><th class="num">合計金額</th><th class="num">期待値</th></tr></thead>
+        <tbody>
+          <tr><td>鈴木 一郎</td><td class="num">7</td><td class="num">¥16,500,000</td><td class="num">¥7,400,000</td></tr>
+          <tr><td>渡辺</td><td class="num">2</td><td class="num">¥4,500,000</td><td class="num">¥2,250,000</td></tr>
+          <tr><td>田中</td><td class="num">1</td><td class="num">¥5,000,000</td><td class="num">¥2,500,000</td></tr>
+          <tr><td>山本 花子</td><td class="num">0</td><td class="num">¥0</td><td class="num">¥0（管理者）</td></tr>
+          <tr><td>中村 大輔</td><td class="num">0</td><td class="num">¥0</td><td class="num">¥0（管理者）</td></tr>
+          <tr style="background:var(--brand-50)"><td><b>合計（5ユーザー）</b></td><td class="num"><b>10</b></td><td class="num"><b>¥26,000,000</b></td><td class="num"><b>¥12,150,000</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="widget span-6">
+      <div class="w-title">📅 月次受注予測（次3ヶ月）</div>
+      <table class="tbl" style="margin-top:6px">
+        <thead><tr><th>月</th><th class="num">確度80%以上</th><th class="num">確度60%</th><th class="num">確度50%</th></tr></thead>
+        <tbody>
+          <tr><td>2026年6月</td><td class="num">¥3,000,000</td><td class="num">¥0</td><td class="num">¥0</td></tr>
+          <tr><td>2026年7月</td><td class="num">¥0</td><td class="num">¥5,000,000</td><td class="num">¥10,500,000</td></tr>
+          <tr><td>2026年8月</td><td class="num">¥0</td><td class="num">¥0</td><td class="num">¥5,500,000</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- DASHBOARD: アラート系 -->
+<!-- ========================================= -->
+<div class="page" id="dash-alert">
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon dashboard" style="background:#ba0517">🚨</div>
+      <div class="obj-title">
+        <div class="label">ダッシュボード</div>
+        <div class="name">アラート系 — 要対応事項</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="widget span-3">
+      <div class="w-title">🚨 受注済み・契約書未作成</div>
+      <div class="w-big" style="color:var(--text-mute)">0</div>
+      <div class="w-sub">受注確定後に表示</div>
+    </div>
+    <div class="widget span-3">
+      <div class="w-title">⏰ 滞留商談（14日以上更新なし）</div>
+      <div class="w-big" style="color:var(--warn)">2</div>
+      <div class="w-sub">三国テクノロジー・ブルーテレコム</div>
+    </div>
+    <div class="widget span-3">
+      <div class="w-title">📝 必須項目未入力</div>
+      <div class="w-big" style="color:var(--warn)">3</div>
+      <div class="w-sub">受注予定日／予算感など</div>
+    </div>
+    <div class="widget span-3">
+      <div class="w-title">📅 リード対応期限超過</div>
+      <div class="w-big" style="color:var(--error)">2</div>
+      <div class="w-sub">5営業日以内に未接触</div>
+    </div>
+
+    <div class="widget span-12">
+      <div class="w-title">⏰ 滞留商談（14日以上更新なし）</div>
+      <table class="tbl" style="margin-top:6px">
+        <thead><tr><th>商談番号</th><th>取引先</th><th>フェーズ</th><th>最終更新</th><th>担当</th><th class="num">経過日数</th></tr></thead>
+        <tbody>
+          <tr><td>OPP-2026-0025</td><td>三国テクノロジー</td><td>詳細商談(50%)</td><td>2026/05/27</td><td>鈴木</td><td class="num"><span class="badge warn">15日</span></td></tr>
+          <tr><td>OPP-2026-0035</td><td>ブルーテレコム</td><td>詳細商談(50%)</td><td>2026/05/21</td><td>田中</td><td class="num"><span class="badge error">21日</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="widget span-12">
+      <div class="w-title">📝 必須項目未入力（フェーズ別）</div>
+      <table class="tbl" style="margin-top:6px">
+        <thead><tr><th>商談番号</th><th>取引先</th><th>フェーズ</th><th>未入力項目</th></tr></thead>
+        <tbody>
+          <tr><td>OPP-2026-0034</td><td>ウィルワークス</td><td>個別面談(30%)</td><td><span class="badge error">受注予定日</span> <span class="badge error">予算感</span></td></tr>
+          <tr><td>OPP-2026-0033</td><td>大成建工</td><td>個別面談(30%)</td><td><span class="badge error">予算感</span></td></tr>
+          <tr><td>OPP-2026-0027</td><td>季報出版</td><td>詳細商談(50%)</td><td><span class="badge error">意思決定者</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="widget span-12">
+      <div class="w-title">📅 リード対応期限超過 ／ 凍結・様子見</div>
+      <table class="tbl" style="margin-top:6px">
+        <thead><tr><th>対象</th><th>取引先</th><th>状況</th><th>担当</th><th>次アクション</th></tr></thead>
+        <tbody>
+          <tr><td>リード</td><td>ウィルワークス</td><td>イベント経由・返信なし</td><td>鈴木</td><td>再コンタクト</td></tr>
+          <tr><td>商談</td><td>墨花堂</td><td><span class="badge gray">凍結</span> 稟議保留</td><td>田中</td><td>3〜4ヶ月後フォロー</td></tr>
+          <tr><td>商談</td><td>エルニード不動産</td><td><span class="badge gray">様子見</span> 架電繋がらず</td><td>田中</td><td>代理店経由でFB確認</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- CHATWORK ⇄ CLAUDE ⇄ SF 連携 -->
+<!-- ========================================= -->
+<div class="page" id="chatwork-flow">
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon chatwork">💬</div>
+      <div class="obj-title">
+        <div class="label">連携</div>
+        <div class="name">ChatWork ⇄ Claude ⇄ Salesforce の自動同期</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>💡 仕組み</strong>　ChatWorkに営業メンバーが投稿 → Claudeが内容を解析 → 該当する商談/リードをSalesforceに自動更新／Salesforceの変化を逆方向に通知することも可能。<br>
+    <strong>メリット</strong>：一部メンバーはSFライセンスなしでも更新できる／普段のチャット会話だけで管理が完結。
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-row">
+      <div class="flow-node chatwork">
+        <div class="ic">💬</div>
+        <div class="nm">ChatWork</div>
+        <div class="sub">#営業ルーム<br>鈴木・渡辺・田中・中村</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node claude">
+        <div class="ic">🧠</div>
+        <div class="nm">Claude</div>
+        <div class="sub">投稿を解析<br>該当レコード特定</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node sf">
+        <div class="ic">☁️</div>
+        <div class="nm">Salesforce</div>
+        <div class="sub">リード・商談・<br>活動を自動更新</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node claude">
+        <div class="ic">🧠</div>
+        <div class="nm">Claude</div>
+        <div class="sub">変更内容を要約</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node chatwork">
+        <div class="ic">💬</div>
+        <div class="nm">ChatWork</div>
+        <div class="sub">#営業ルームに<br>結果通知</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin:20px 0 8px">📨 実例：商談更新フロー</h3>
+
+  <div class="chat-stage">
+    <div class="chat-header">
+      <div class="cw-logo">CW</div>
+      <div>
+        <div class="room">#営業ルーム</div>
+        <div class="room-sub">鈴木 一郎, 山本 花子, 中村 大輔, Claude Bot</div>
+      </div>
+    </div>
+
+    <div class="chat-msg">
+      <div class="avatar a-masaki">正</div>
+      <div class="body">
+        <div class="meta"><span class="name">鈴木 一郎</span> 2026/06/11 09:42</div>
+        <div class="text">@all 明応学園さん、社内稟議で前向きの感触とのこと。
+来週、競合比較の結果をもらえる見込みです。
+上申資料は6/18までに整えます。</div>
+      </div>
+    </div>
+
+    <div class="chat-msg">
+      <div class="avatar a-claude">C</div>
+      <div class="body">
+        <div class="meta"><span class="name">Claude Bot</span> 2026/06/11 09:43 <span class="badge claude">解析中</span></div>
+        <div class="text claude">対象を特定しました：
+・取引先 = 明応学園
+・商談 = OPP-2026-0031
+
+以下を更新します。問題なければ ✅ を、修正があれば返信してください（30秒後に自動実行）。
+
+🔄 更新内容：
+1. 商談 OPP-2026-0031 のフェーズを「5. 見積・開始時期提示(80%)」に維持
+2. 「予算感」を「予算 調整中（要交渉）」に更新
+3. 「回答期限」を「2026/06/25」に設定
+4. タスク「社内稟議向け上申資料の作成（期限6/18、担当：鈴木）」を新規作成</div>
+      </div>
+    </div>
+
+    <div class="chat-msg">
+      <div class="avatar a-masaki">正</div>
+      <div class="body">
+        <div class="meta"><span class="name">鈴木 一郎</span> 2026/06/11 09:43</div>
+        <div class="text">✅</div>
+      </div>
+    </div>
+
+    <div class="chat-msg">
+      <div class="avatar a-sf">☁</div>
+      <div class="body">
+        <div class="meta"><span class="name">Claude Bot</span> 2026/06/11 09:44 <span class="badge success">完了</span></div>
+        <div class="text sf">✅ Salesforce 更新完了
+
+更新したレコード：
+・商談 <a data-go="opp-detail">OPP-2026-0031</a>（予算感 / 回答期限）
+・活動「ChatWork投稿（鈴木）」を商談に紐付け
+・タスク「社内稟議向け上申資料の作成」を新規作成（6/18期限）
+
+ライトニングUIで確認：<a data-go="opp-detail">商談OPP-2026-0031を開く</a></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin:20px 0 8px">🪪 実例：名刺取込みフロー（Claude OCR）</h3>
+
+  <div class="chat-stage">
+    <div class="chat-header">
+      <div class="cw-logo">CW</div>
+      <div>
+        <div class="room">#営業ルーム</div>
+        <div class="room-sub">名刺投稿用</div>
+      </div>
+    </div>
+
+    <div class="chat-msg">
+      <div class="avatar a-masaki">正</div>
+      <div class="body">
+        <div class="meta"><span class="name">鈴木 一郎</span> 2026/06/09 11:08</div>
+        <div class="text">紹介元Bさんの紹介で大成建工の担当Aさんと名刺交換しました。リード化お願いします。
+[📷 名刺_大成建工_担当A様.jpg]</div>
+      </div>
+    </div>
+
+    <div class="chat-msg">
+      <div class="avatar a-claude">C</div>
+      <div class="body">
+        <div class="meta"><span class="name">Claude Bot</span> 2026/06/09 11:09 <span class="badge claude">OCR解析中</span></div>
+        <div class="text claude">名刺をOCR解析しました：
+
+・担当 A様（DX推進担当）／大成建工株式会社
+・紹介者：紹介元 B様
+
+新規リードとして登録します（既存重複なし）。獲得経路は「紹介」、紹介者に紹介元B様を設定します。</div>
+      </div>
+    </div>
+
+    <div class="chat-msg">
+      <div class="avatar a-sf">☁</div>
+      <div class="body">
+        <div class="meta"><span class="name">Claude Bot</span> 2026/06/09 11:10 <span class="badge success">完了</span></div>
+        <div class="text sf">✅ Lead 1件作成
+
+・<a data-go="lead-detail">大成建工 / 担当A様</a>（紹介経由・紹介者 紹介元B様 として登録）
+
+名刺画像はリードに添付済み。<a data-go="lead-list">リード一覧で確認</a></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin:20px 0 8px">📊 実例：SF → ChatWork 通知</h3>
+
+  <div class="chat-stage">
+    <div class="chat-header">
+      <div class="cw-logo">CW</div>
+      <div>
+        <div class="room">#営業ルーム</div>
+        <div class="room-sub">SF変更を逆方向に通知</div>
+      </div>
+    </div>
+
+    <div class="chat-msg">
+      <div class="avatar a-sf">☁</div>
+      <div class="body">
+        <div class="meta"><span class="name">Claude Bot</span> 2026/06/11 09:00 <span class="badge info">朝の自動通知</span></div>
+        <div class="text sf">📅 おはようございます。本日の要対応事項です。
+
+🚨 アラート（3件）
+1. 滞留商談「三国テクノロジー OPP-2026-0025」詳細商談(15日経過)
+2. 滞留商談「ブルーテレコム OPP-2026-0035」詳細商談(21日経過)
+3. 必須項目未入力「ウィルワークス OPP-2026-0034」受注予定日・予算感
+
+📅 本日の予定アポ
+・11:00 全日ロジスティクス Aプラン社内調整フォロー（鈴木）
+・15:00 明応学園 上申資料の方向性すり合わせ（鈴木）
+
+▶ <a data-go="dash-alert">アラートDBで全件確認</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- スプレッドシート同期 -->
+<!-- ========================================= -->
+<div class="page" id="sheet-sync">
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon sheets">📊</div>
+      <div class="obj-title">
+        <div class="label">連携</div>
+        <div class="name">既存の営業管理（スプレッドシート / Notion）⇄ Salesforce の同期</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>💡 仕組み</strong>　現在の営業管理（スプレッドシート / Notion ＋ AI自動収集）をそのまま継続利用しつつ、Claudeが日次でデータを読み取りSFに反映／逆にSFの更新を反映することも可能。<br>
+    <strong>用途</strong>：①移行期間の既存運用維持、②SFライセンスを持たないメンバーが既存シートで更新、③AI自動収集リードの一括取込み。
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-row">
+      <div class="flow-node sheets">
+        <div class="ic">📊</div>
+        <div class="nm">既存の営業管理</div>
+        <div class="sub">スプシ / Notion<br>AI自動収集</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node claude">
+        <div class="ic">🧠</div>
+        <div class="nm">Claude</div>
+        <div class="sub">日次バッチ<br>差分検出</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node sf">
+        <div class="ic">☁️</div>
+        <div class="nm">Salesforce</div>
+        <div class="sub">リード/商談を<br>upsert</div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:14px; color:var(--text-mute); font-size:12px">↑↓ 双方向同期も可能（SF → 既存シート）。リード〜受注の正本は段階的にSFへ移行。</div>
+  </div>
+
+  <h3 style="margin:20px 0 8px">📋 同期対象の例：商談管理（2026年6月度）</h3>
+
+  <div class="sheet-wrap">
+    <div class="sheet-toolbar">
+      <span class="sheets-logo">S</span>
+      <span><strong>AION営業管理_2026年6月.xlsx</strong></span>
+      <span style="color:var(--text-mute)">|</span>
+      <span style="color:var(--text-mute)">最終編集: 2026/06/11 09:30 鈴木一郎</span>
+      <span style="margin-left:auto" class="badge sheets">同期済み（最終: 09:35）</span>
+    </div>
+    <table class="sheet-tbl">
+      <thead>
+        <tr>
+          <th class="row-num"></th>
+          <th>取引先</th>
+          <th>担当</th>
+          <th>経路</th>
+          <th>フェーズ</th>
+          <th>確度</th>
+          <th>予定金額</th>
+          <th>受注予定日</th>
+          <th>最終接触</th>
+          <th>備考</th>
+          <th>SF同期</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-num">1</td>
+          <td>明応学園</td>
+          <td>鈴木</td>
+          <td>アウトバウンド</td>
+          <td>見積提示</td>
+          <td>80%</td>
+          <td>3,000,000</td>
+          <td>2026/06/30</td>
+          <td>2026/06/11</td>
+          <td>競合3社比較中・社内稟議で前向き</td>
+          <td><span class="badge success">✓</span></td>
+        </tr>
+        <tr>
+          <td class="row-num">2</td>
+          <td>全日ロジスティクス</td>
+          <td>鈴木</td>
+          <td>アウトバウンド</td>
+          <td>上申中</td>
+          <td>60%</td>
+          <td>2,800,000</td>
+          <td>2026/07/31</td>
+          <td>2026/06/10</td>
+          <td>Aプランで社内調整・決算期で4月以降の可能性</td>
+          <td><span class="badge success">✓</span></td>
+        </tr>
+        <tr>
+          <td class="row-num">3</td>
+          <td>ブルーテレコム</td>
+          <td>田中</td>
+          <td>アウトバウンド</td>
+          <td>詳細商談</td>
+          <td>50%</td>
+          <td>5,000,000</td>
+          <td>2026/07/31</td>
+          <td>2026/05/21</td>
+          <td>現場意見集約中・先方主導で待ち</td>
+          <td><span class="badge success">✓</span></td>
+        </tr>
+        <tr>
+          <td class="row-num">4</td>
+          <td>松風堂</td>
+          <td>渡辺</td>
+          <td>アウトバウンド</td>
+          <td>詳細商談</td>
+          <td>50%</td>
+          <td>2,000,000</td>
+          <td>2026/07/15</td>
+          <td>2026/05/25</td>
+          <td>スモールスタート（1〜2店舗）で進行</td>
+          <td><span class="badge success">✓</span></td>
+        </tr>
+        <tr style="background:#fff7e6">
+          <td class="row-num">5</td>
+          <td>大成建工</td>
+          <td>鈴木</td>
+          <td>紹介</td>
+          <td>個別面談</td>
+          <td>30%</td>
+          <td>4,000,000</td>
+          <td>2026/08/31</td>
+          <td>2026/06/09</td>
+          <td><strong>名刺OCRで新規追加（本日）</strong></td>
+          <td><span class="badge warn">同期待ち</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="margin:20px 0 8px">🔄 直近の同期ログ</h3>
+  <table class="tbl">
+    <thead><tr><th>日時</th><th>方向</th><th>対象</th><th>処理件数</th><th>結果</th></tr></thead>
+    <tbody>
+      <tr><td>2026/06/11 09:35</td><td>Sheet → SF</td><td>AION営業管理_2026年6月</td><td>差分 3件（更新2 / 新規1）</td><td><span class="badge success">成功</span></td></tr>
+      <tr><td>2026/06/11 09:00</td><td>SF → Sheet</td><td>AION営業管理_2026年6月</td><td>SFのフェーズ変更 2件 → 反映</td><td><span class="badge success">成功</span></td></tr>
+      <tr><td>2026/06/10 09:35</td><td>AI → SF</td><td>リード自動収集（Notion）</td><td>新規 2件追加</td><td><span class="badge success">成功</span></td></tr>
+      <tr><td>2026/06/10 09:00</td><td>SF → Sheet</td><td>AION営業管理_2026年6月</td><td>0件</td><td><span class="badge gray">変更なし</span></td></tr>
+      <tr><td>2026/06/09 09:35</td><td>Sheet → SF</td><td>AION営業管理_2026年6月</td><td>更新 1件</td><td><span class="badge warn">1件は重複の可能性 → 手動確認</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin:20px 0 8px">⚙️ 同期設定</h3>
+  <div class="card">
+    <div class="card-body">
+      <div class="field-grid">
+        <div class="field"><div class="lbl">Sheet → SF 取込み頻度</div><div class="val">日次 09:35（営業日のみ）</div></div>
+        <div class="field"><div class="lbl">SF → Sheet 反映頻度</div><div class="val">日次 09:00（営業日のみ）</div></div>
+        <div class="field"><div class="lbl">マッチングキー</div><div class="val">取引先名 + 担当者名（曖昧マッチはClaudeが判定）</div></div>
+        <div class="field"><div class="lbl">競合解決</div><div class="val">SF側を優先（ただし当日中の編集はSheet優先）</div></div>
+        <div class="field full"><div class="lbl">対象ソース</div><div class="val">
+          ・AION営業管理シート（スプレッドシート）<br>
+          ・AION営業管理 Notion（AIリード自動収集・メール送付）<br>
+          ・名刺取込み（ChatWorkからの自動投入専用）
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ========================================= -->
+<!-- MODAL: PDF Preview -->
+<!-- ========================================= -->
+<div class="modal-bg" id="modal-pdf">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="title">📄 見積書プレビュー（PDF）</div>
+      <div class="close" onclick="closeModal()">×</div>
+    </div>
+    <div class="modal-body">
+      <div style="background:#fafaf9; padding:30px; border:1px solid var(--border); border-radius:4px">
+        <div style="text-align:right; font-size:11px; color:var(--text-mute)">QUO-2026-0012</div>
+        <h2 style="text-align:center; margin:10px 0">御 見 積 書</h2>
+        <div style="margin-top:20px"><strong>明応学園 御中</strong></div>
+        <div style="text-align:right; margin-top:20px">
+          AION株式会社<br>
+          〒xxx-xxxx 東京都xxx<br>
+          TEL: 03-xxxx-xxxx
+        </div>
+        <table class="tbl" style="margin-top:20px">
+          <thead><tr><th>項目</th><th class="num">数量</th><th class="num">単価</th><th class="num">金額</th></tr></thead>
+          <tbody>
+            <tr><td>初期導入費</td><td class="num">1</td><td class="num">¥1,800,000</td><td class="num">¥1,800,000</td></tr>
+            <tr><td>導入支援・カスタマイズ</td><td class="num">1</td><td class="num">¥900,000</td><td class="num">¥900,000</td></tr>
+            <tr><td>初期トレーニング</td><td class="num">1</td><td class="num">¥300,000</td><td class="num">¥300,000</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="3" class="num">合計（税抜）</td><td class="num"><b>¥3,000,000</b></td></tr>
+          </tfoot>
+        </table>
+        <div style="text-align:right; margin-top:30px; color:var(--text-mute); font-size:11px">
+          有効期限: 2026/06/25
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab navigation
+document.querySelectorAll('[data-page]').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    const target = t.getAttribute('data-page');
+    goPage(target);
+    document.querySelectorAll('.app-bar .tab').forEach(tab=>{
+      tab.classList.toggle('active', tab.getAttribute('data-page')===target);
+    });
+  });
+});
+
+// data-go links (in-page navigation)
+document.querySelectorAll('[data-go]').forEach(a=>{
+  a.style.cursor='pointer';
+  a.addEventListener('click', e=>{
+    e.preventDefault();
+    goPage(a.getAttribute('data-go'));
+  });
+});
+
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el){
+    el.classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+
+function showPdf(){ document.getElementById('modal-pdf').classList.add('active'); }
+function closeModal(){ document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('active')); }
+
+function convertLead(){
+  alert('リード「大成建工株式会社」を商談に変換します。\n\n→ Account作成: 大成建工株式会社\n→ Contact作成: 担当 A様（DX推進担当）\n→ Opportunity作成: OPP-2026-0033（経路: 紹介 / ステージ: 1.個別面談）');
+  goPage('opp-list');
+}
+
+function closeWon(){
+  if(confirm('商談「明応学園 OPP-2026-0031」を「受注（100%）」に更新します。\n\n受注番号が自動採番され、クラウドサインに契約書ドラフトが自動作成されます。よろしいですか？')){
+    alert('✅ 完了\n・受注番号: ORD-2026-0001\n・クラウドサイン書類ID: cs_doc_xxxxx\n・契約書ドラフト送信先: 明応学園 管理部 御中');
+    goPage('order-list');
+  }
+}
+
+function openNewOpp(){
+  alert('新規商談を作成します（モック）');
+}
+</script>
+
+</body>
+</html>
