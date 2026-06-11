@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>京都アソシエイツ｜Agentforce 対話型候補者検索 デモ (v0.1)</title>
+<title>京都アソシエイツ｜Agentforce 対話型候補者検索 デモ (v0.5)</title>
 <style>
   :root {
     --primary: #1e3a8a;
@@ -178,13 +178,53 @@
   pre.soql .f { color: #86efac; }
 
   .note-banner { font-size: 11px; color: var(--muted); background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 8px 10px; margin-bottom: 12px; line-height: 1.5; }
+
+  /* 詳細リスト（検索結果の一覧表示 / v0.5） */
+  .msg.detail { max-width: 96%; align-self: stretch; }
+  .dl-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; width: 100%; }
+  .dl-title { background: var(--primary); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 10px; display: flex; align-items: center; gap: 8px; }
+  .dl-title .dl-csv { margin-left: auto; background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 4px; font-size: 11px; padding: 3px 8px; cursor: pointer; }
+  .dl-title .dl-csv:hover { background: rgba(255,255,255,.32); }
+  .dl-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .dl-table th { background: #f1f5f9; color: var(--muted); text-align: left; padding: 6px 8px; font-weight: 600; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .dl-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .dl-table tr:last-child td { border-bottom: none; }
+  .dl-name { font-weight: 600; white-space: nowrap; }
+  .dl-ng { color: var(--danger); font-weight: 600; }
+
+  /* パーソナライズ・コンテキスト（裏側パネル） */
+  .persona-roadmap { font-size: 11.5px; color: #334155; line-height: 1.6; }
+  .persona-roadmap .pending { display: inline-block; background: #fef3c7; color: #92400e; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 8px; margin-left: 0; margin-top: 6px; }
+  .persona-roadmap .learned { display: inline-block; background: #ecfdf5; color: var(--ok); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 8px; margin-left: 6px; }
+  .persona-roadmap ul { margin: 6px 0 4px; padding-left: 16px; }
+  .persona-roadmap li { padding: 2px 0; }
+  .persona-roadmap b { color: var(--accent); }
+
+  /* アプローチ案（芝原様の流儀で生成 / v0.5） */
+  .msg.detail.approach { max-width: 96%; }
+  .approach-wrap { border: 1px solid var(--accent); border-radius: 8px; overflow: hidden; background: #fff; width: 100%; }
+  .approach-head { background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 10px; display: flex; align-items: center; gap: 8px; }
+  .approach-head .ap-copy { margin-left: auto; background: rgba(255,255,255,.2); color: #fff; border: 1px solid rgba(255,255,255,.45); border-radius: 4px; font-size: 11px; padding: 3px 8px; cursor: pointer; }
+  .approach-head .ap-copy:hover { background: rgba(255,255,255,.34); }
+  .approach-body { padding: 10px 12px; font-size: 12.5px; line-height: 1.7; white-space: pre-wrap; color: var(--text); }
+  .approach-note { font-size: 11px; color: var(--muted); background: #fff7ed; border-top: 1px dashed var(--accent); padding: 6px 10px; }
+
+  /* AIプロンプト（裏側パネル / v0.5） */
+  .prompt-box { width: 100%; min-height: 168px; font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 10.5px; line-height: 1.55; color: #1f2937; background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 8px; resize: vertical; white-space: pre; }
+  .prompt-box:focus { outline: none; border-color: var(--primary); }
+  .prompt-meta { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .prompt-meta b { color: var(--accent); }
+  .prompt-apply { margin-top: 6px; background: var(--primary); color: #fff; border: none; border-radius: 4px; font-size: 11px; padding: 5px 12px; cursor: pointer; }
+  .prompt-apply:hover { background: var(--primary-dark); }
+  .record-prompt { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px; padding: 8px 10px; font-size: 11.5px; line-height: 1.6; margin-top: 10px; color: #334155; }
+  .record-prompt .rp-field { font-weight: 700; color: var(--accent); }
 </style>
 </head>
 <body>
 
 <header>
   <h1>京都アソシエイツ｜Agentforce 対話型候補者検索</h1>
-  <span class="tag">DEMO v0.1</span>
+  <span class="tag">DEMO v0.5</span>
   <div class="controls">
     <label>検索パターン:
       <select id="patternSelector">
@@ -206,14 +246,14 @@
     <div class="chat-header">
       <div class="avatar">京</div>
       <div class="meta">
-        <div class="name">候補者サーチ AI（社内）</div>
+        <div class="name">Chat-kun（社内サーチAI）</div>
         <div class="sub">対話で絞り込みます。一発で結果は出さず、件数と絞り込み軸をご提案します。</div>
       </div>
       <div class="status">オンライン</div>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-row">
-      <input id="userInput" type="text" placeholder="例: Sクラスの人材を出して" autocomplete="off">
+      <input id="userInput" type="text" placeholder="例: Sクラスの人材を出して（Shift+Enter または 送信ボタンで送信）" autocomplete="off">
       <button id="sendBtn">送信</button>
     </div>
     <div class="hints">
@@ -223,6 +263,7 @@
       <code onclick="fillInput(this)">中国で総経理をしてた人材を出して</code>
       <code onclick="fillInput(this)">人事責任者でHRコンプライアンス経験のある人を</code>
       <code onclick="fillInput(this)">アメリカで働いてた財務経験者</code>
+      <div style="margin-top:6px;">⌨️ <b>送信は Shift+Enter</b>（または送信ボタン）。Enter単独では送信しません（誤送信防止）。</div>
     </div>
   </div>
 
@@ -230,6 +271,75 @@
   <div class="admin-pane">
     <div class="note-banner">
       右側は <b>裏側ロジックの可視化</b> です（顧客画面には出ません）。実装では Agentforce の Topic/Action + SOQL/検索Index に置き換えます。
+    </div>
+
+    <h2>パーソナライズ・コンテキスト（学習）</h2>
+    <div class="admin-section">
+      <div class="persona-roadmap">
+        <div style="font-weight:600;color:var(--primary);">芝原様の流儀（学習） <span class="learned">履歴5/5 反映済</span></div>
+        <div style="margin-top:6px;font-weight:600;">① 候補者へのスカウト</div>
+        <ul>
+          <li>「探した」ではなく<b>「打ち合わせで真っ先にお名前が挙がった」</b>（自然な指名感／ヘッドハンター臭は排除）</li>
+          <li>案件は「◯◯募集」でなく<b>「◯◯を変革する」変革ストーリー</b>で語る／社会的意義を訴求</li>
+          <li><b>非公開案件</b>である旨を明記／処遇は<b>現年収以上＋サインオン</b>／日程は<b>土日含め候補者都合</b>に合わせる</li>
+          <li><b>「情報交換から」</b>で心理的ハードルを下げる</li>
+        </ul>
+        <div style="margin-top:4px;font-weight:600;">② クライアント開拓・企業分析</div>
+        <ul>
+          <li>企業の<b>中計・決算資料 → 経営課題を仮説化 →</b> 変革人材支援の文脈で価値訴求</li>
+          <li>候補者宛にも<b>クライアント化を“営業臭なく”匂わせる</b>（御社戦略への関心／中計達成のお手伝い）</li>
+        </ul>
+        <div style="margin-top:4px;font-weight:600;">③ 検索・見極めの思考</div>
+        <ul>
+          <li>LinkedIn Boolean: <b>想定出身企業リスト＋英/日キーワード＋除外条件(NOT)</b>で設計</li>
+          <li><b>除外条件を重視</b>（例: 純医薬MR／単純代理店営業／分析装置専業を除外）</li>
+          <li><b>見極め質問</b>（YES/NOが分かれる問い）で A/B/C 評価</li>
+        </ul>
+        <div style="margin-top:4px;font-weight:600;">④ 呼称・表現</div>
+        <ul>
+          <li>AIの愛称は<b>「Chat-kun」</b>／秘書 <b>島尻 真理子</b> 名義での送信パターンあり</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>AIプロンプト（システム指示・編集可）</h2>
+    <div class="admin-section">
+      <textarea class="prompt-box" id="systemPrompt" spellcheck="false">＝＝ Chat-kun システムプロンプト ＝＝
+# 役割
+あなたは京都アソシエイツ（エグゼクティブサーチ／製造業・テクノロジー中心）の
+社内候補者サーチAI「Chat-kun」。代表・芝原季樹（約18年）の思考と流儀を学習し、
+候補者検索とアプローチ文作成を支援する。
+
+# 検索の基本動作
+- 一発で答えを出さず、まず「件数」と「絞り込み軸」を提示し、対話で 200→30〜50→確定 へ導く。
+- 曖昧入力は辞書で正規化する：
+  ・地名→国/エリアに拡張（中国=上海/北京/深圳、関西=大阪/神戸/京都）
+  ・役割→同義グループ（総経理=人事責任者/大規模MGMT、経営層=CISO/部長以上）
+  ・「Sクラス」= グレード上位 × ポジティブ印象タグ の複合
+- 検索では必ず次を考慮：連絡禁止フラグ／距離感(Closeness A>B>C)／直近トピック。
+  連絡禁止は必ず警告表示する。
+
+# 検索・見極めの思考（芝原流）
+- 候補像は「想定出身企業リスト＋キーワード(英/日)＋除外条件(NOT)」で設計。
+- 除外を重視（例：純医薬MR／単純代理店営業／分析装置専業は外す）。
+- A/B/Cで評価し、判断は「YES/NOが分かれる見極め質問」を起点にする。
+
+# アプローチ文の流儀
+- 「探した」でなく「打ち合わせで真っ先にお名前が挙がった」= 自然な指名感。営業臭は出さない。
+- 案件は「◯◯募集」でなく「◯◯を変革する」変革ストーリーで語り、社会的意義を訴求。
+- 非公開案件である旨を明記。処遇は現年収以上＋サインオンボーナス柔軟協議。
+- 「まずは情報交換から」で心理的ハードルを下げ、日程は土日含め相手都合に合わせる。
+- 候補者が採用側でもある前提で、クライアント化を“営業臭なく”匂わせる。
+- 署名は本人名義／秘書「島尻真理子」名義を選べる。
+
+# トーン
+丁寧・自然・説得力。煽らない。役職表現は精緻に（責任者/技術者で対象の裾野が変わる）。</textarea>
+      <div class="prompt-meta">この指示が Chat-kun の人格・検索動作・アプローチ流儀を規定します。<b>顧客側で編集可能</b>な形で提供（ノタ→SF項目マッピングと同様）。実装時は Agentforce トピック指示／プロンプトテンプレートに反映。</div>
+      <button class="prompt-apply" onclick="alert('実装時は Agentforce のトピック指示／プロンプトテンプレートへ反映します。\nこのデモでは編集内容の保存は行いません。')">この内容で適用</button>
+      <div class="record-prompt">
+        <span class="rp-field">レコード単位の「プロンプト」項目</span>（候補者ごとの自由記述。AIが優先参照）<br>
+        例（田中様）:「製造業CDO。価格より価値提案型で研究/現場の言葉が通じる。PE転身に関心。連絡は平日夜が反応良。関西外への転居は家庭事情で不可。」
+      </div>
     </div>
 
     <h2>検索パターン判定</h2>
@@ -330,6 +440,16 @@ const patterns = {
             { name: '佐藤様', rel: 'B', meta: '連絡禁止フラグなし' }
           ],
           tail: '残り2件は関係性=Cで初回コンタクト要。詳細リストを出しますか？'
+        },
+        detailList: {
+          title: 'Sクラス × 50歳未満 × CD候補（直近6ヶ月）',
+          items: [
+            { name: '田中様', rel: 'A', attr: '48歳・製造業 CDO経験', topic: 'PE業界転身を検討', contact: '可', action: '詳細プロファイル / アプローチ案' },
+            { name: '鈴木様', rel: 'A', attr: '46歳・IT CDO経験', topic: '海外勤務を希望', contact: '可', action: 'アプローチ案作成' },
+            { name: '佐藤様', rel: 'B', attr: '49歳・製造業 DX推進部長', topic: '処遇改善ニーズ', contact: '可', action: '面談設定' },
+            { name: '伊藤様', rel: 'C', attr: '47歳・金融 CDO', topic: '（直近接触なし）', contact: '要初回', action: '初回コンタクト' },
+            { name: '小林様', rel: 'C', attr: '45歳・商社デジタル責任者', topic: '（直近接触なし）', contact: '要初回', action: '初回コンタクト' }
+          ]
         },
         next: ['詳細リストを出す', '田中様の詳細', 'アプローチ案を作る'],
         admin: {
@@ -451,7 +571,14 @@ const patterns = {
           ],
           tail: '両名とも面談実施済・関係性=A。詳細プロファイルとアプローチ案を出しますか？'
         },
-        next: ['詳細プロファイルを出す', 'アプローチ案を作る', '大野様の詳細'],
+        detailList: {
+          title: '中国 × 総経理 × 製造業 × 関西希望',
+          items: [
+            { name: '大野様', rel: 'A', attr: '大阪在住・関西限定希望・現年収1800万', topic: '後継者問題', contact: '可', action: '詳細プロファイル / アプローチ案' },
+            { name: '中村様', rel: 'A', attr: '神戸在住・関西＋東京可・現年収2300万', topic: 'M&A後の統合', contact: '可', action: '詳細プロファイル / アプローチ案' }
+          ]
+        },
+        next: ['詳細リストを出す', 'アプローチ案を作る', '大野様の詳細'],
         admin: {
           filters: ['業界 = 製造業', '希望エリア = 関西'],
           fields: ['DesiredArea__c', 'Closeness__c', 'RecentTopic__c'],
@@ -512,7 +639,16 @@ const patterns = {
           ],
           tail: '早川様向けに案件サーチを並行で動かしますか？'
         },
-        next: ['早川様の案件サーチを動かす', '横山様にアプローチ', 'マッチング結果を書き出す'],
+        detailList: {
+          title: 'CHRO/CHO × 労務×コンプラ × 案件マッチング（連絡禁止1名を除外）',
+          items: [
+            { name: '田島様', rel: 'B', attr: '上場・人的資本開示', topic: '◯◯製薬(CHRO候補) / △△商事(人事部長)', contact: '可', action: '案件提案' },
+            { name: '横山様', rel: 'A', attr: '上場・内部通報制度', topic: '□□HD(IPO準備CHRO) ← フィット度A', contact: '可', action: '優先アプローチ' },
+            { name: '早川様', rel: 'B', attr: '上場・ハラスメント対応', topic: '案件未マッチ', contact: '可', action: '新規BD（案件サーチ）' },
+            { name: '林様', rel: 'A', attr: '上場・人的資本開示', topic: '××銀行(HR規制責任者) ← フィット度A', contact: '可', action: '優先アプローチ' }
+          ]
+        },
+        next: ['詳細リストを出す', '早川様の案件サーチを動かす', '横山様にアプローチ'],
         admin: {
           filters: ['連絡禁止フラグ = 除外', '案件マッチング = ON'],
           fields: ['JobOpening__c（求人）', 'MatchScore__c'],
@@ -674,6 +810,127 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 }
 
+// 詳細リスト（検索結果の一覧表示 / v0.5）
+function renderDetailList(dl) {
+  const items = dl.items || [];
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ai detail';
+  const rows = items.map(it => `
+    <tr>
+      <td class="dl-name">${escapeHtml(it.name)}${it.rel ? ` <span class="rel ${it.rel}">関係 ${escapeHtml(it.rel)}</span>` : ''}</td>
+      <td>${escapeHtml(it.attr || '')}</td>
+      <td>${escapeHtml(it.topic || '')}</td>
+      <td>${it.contact === '要初回' ? '<span class="dl-ng">要初回</span>' : (it.contact === false ? '<span class="dl-ng">連絡禁止</span>' : escapeHtml(it.contact || '可'))}</td>
+      <td>${escapeHtml(it.action || '')}</td>
+    </tr>`).join('');
+  const html = `<div class="bubble" style="padding:0;border:none;background:transparent;">
+    <div class="dl-wrap">
+      <div class="dl-title">${escapeHtml(dl.title || '詳細リスト')}（${items.length}件）
+        <button class="dl-csv" onclick="alert('実装時は Salesforce リストビュー表示 / CSV書き出しに対応します')">CSV / リスト書き出し</button>
+      </div>
+      <table class="dl-table">
+        <thead><tr><th>氏名</th><th>主要属性</th><th>直近トピック</th><th>連絡</th><th>推奨アクション</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+  wrap.innerHTML = `<div class="icon">📋</div>${html}`;
+  messagesEl.appendChild(wrap);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// アプローチ案（芝原様の流儀で生成 / v0.5） — 履歴5/5 から学習したスタイルを反映
+//   role:訴求役割 / strength:指名理由 / client:依頼元 / significance:意義
+//   transform:「◯◯を変革する」ストーリー / screening:面談での見極め質問（YES/NOが分かれる）
+const approachContext = {
+  P1: { role: 'デジタル変革をリードする経営人材', strength: 'CDクラスの第一人者', client: 'ある上場メーカー', significance: '全社のデジタル変革（DX）の中核を担っていただくポジションです。', transform: '「技術の会社」をデジタルで成長企業へ変革する', screening: '経営戦略とデジタル戦略をどう接続し、自ら実行までやり切ったか' },
+  P2: { role: '情報セキュリティを統括する責任者', strength: 'セキュリティ領域の第一人者', client: 'ある上場企業', significance: 'ゼロトラスト／全社ISMSの推進を担う、セキュリティ戦略の要となるポジションです。', transform: 'セキュリティを経営アジェンダに引き上げ全社を変革する', screening: '経営リスクとして自らアジェンダ化し、現場を動かした経験' },
+  P3: { role: '中国事業を統括できる経営人材', strength: '現地経営を実績で牽引してきた第一人者', client: 'ある上場製造業', significance: 'アジア事業の成長を牽引していただくポジションです。', transform: '海外現地法人をゼロから成長軌道へ乗せる', screening: '現地で組織と事業を立ち上げ・スケールさせた実績' },
+  P4: { role: '人的資本経営を推進するCHRO/CHO', strength: 'HRガバナンスの第一人者', client: 'ある上場企業', significance: '人的資本開示を見据えた人事戦略の要となるポジションです。', transform: '昭和的な組織を経営・人材の側面から変革する', screening: '古い組織をどう変えたか／経営戦略と人材戦略をどう接続したか' },
+  P5: { role: 'グローバル財務を担うCFO', strength: '米国財務の実務を知る第一人者', client: 'ある日系グローバル企業', significance: '海外経験を活かし全社財務を牽引していただくポジションです。', transform: '財務を起点に全社のグローバル経営を高度化する', screening: '海外経験を活かし全社の財務戦略をどう主導したか' }
+};
+
+// テキストから対象候補者を特定（名指しがあれば優先、なければ先頭）
+function pickCandidate(step, text) {
+  const pool = (step.detailList && step.detailList.items) || (step.ai && step.ai.cands) || [];
+  const base = text || '';
+  const named = pool.find(c => base.includes(c.name) || base.includes(c.name.replace('様', '')));
+  return named || pool[0] || null;
+}
+
+// state.pattern から ctx を引いて生成（onclickからの再生成用ラッパー）
+function genApproach(name, bySecretary) {
+  const ctx = approachContext[state.pattern];
+  if (ctx) renderApproachDraft(name, ctx, bySecretary);
+}
+
+function renderApproachDraft(name, ctx, bySecretary) {
+  // 名乗り（本人 / 秘書 島尻真理子）
+  const intro = bySecretary
+    ? `京都アソシエイツ株式会社 代表・芝原季樹の秘書を務めております、島尻真理子と申します。\n代表の芝原は約18年間、製造業を中心に経営人材・技術者のサーチに従事しております。`
+    : `京都アソシエイツ代表の芝原と申します。\n約18年間、製造業を中心に経営人材・技術者のサーチに従事しております。`;
+  const sign = bySecretary
+    ? `京都アソシエイツ株式会社\n秘書　島尻 真理子\nhttps://www.kyotoass.com`
+    : `芝原 季樹｜京都アソシエイツ\nhttps://www.kyotoass.com`;
+
+  const draft =
+`件名: ${ctx.role}ポジションのご相談
+
+${name}
+
+突然のご連絡、大変失礼いたします。
+${intro}
+
+今回、${ctx.client}より${ctx.role}のサーチをご依頼いただいております。
+本件は転職マーケットには公開していない非公開のご相談です。
+クライアントとの打ち合わせの中で、${ctx.strength}として${name}のお名前が挙がり、
+ぜひ一度お話をさせていただきたくご連絡を差し上げました。
+
+本件は単なる増員ではなく、${ctx.transform}フェーズを担っていただくポジションです。
+${ctx.significance}
+もし実現すれば、極めて意義の大きなチャレンジになると感じております。
+
+処遇面につきましても、現年収以上を前提に検討しており、
+ご入社のご意思を固めていただけた場合には、サインオンボーナスの支給も含め柔軟に協議したいとの意向をいただいております。
+
+また、普段より${name}のご活動やご所属企業の事業戦略にも関心を持って拝見しております。
+今回の件に限らず、人材マーケットや組織課題についても情報交換させていただければ幸いです。
+
+もちろん、今すぐのご転職意向の有無とは関係なく、まずは情報交換レベルで構いません。
+ご都合に可能な限り合わせて調整いたします（平日朝夕・土日も対応可能です）。
+
+何卒よろしくお願い申し上げます。
+――――――――――
+${sign}
+――――――――――`;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ai detail approach';
+  const toggle = bySecretary
+    ? `<button class="ap-copy" onclick='genApproach(${JSON.stringify(name)}, false)'>芝原様名義に切替</button>`
+    : `<button class="ap-copy" onclick='genApproach(${JSON.stringify(name)}, true)'>秘書名義に切替</button>`;
+  const html = `<div class="bubble" style="padding:0;border:none;background:transparent;">
+    <div class="approach-wrap">
+      <div class="approach-head">アプローチ案（${bySecretary ? '秘書名義' : '芝原様名義'}） ― ${escapeHtml(name)}宛
+        ${toggle}
+        <button class="ap-copy" onclick="copyApproach(this)">本文をコピー</button>
+      </div>
+      <div class="approach-body">${escapeHtml(draft)}</div>
+      <div class="approach-note">学習した流儀: 自然な指名感／非公開案件／「${escapeHtml(ctx.transform)}」変革ストーリー／現年収以上＋サインオン／クライアント化の自然な匂わせ／土日含め日程調整。<br>面談での見極め質問（参考）: <b>${escapeHtml(ctx.screening)}</b></div>
+    </div>
+  </div>`;
+  wrap.innerHTML = `<div class="icon">✍️</div>${html}`;
+  messagesEl.appendChild(wrap);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function copyApproach(btn) {
+  const body = btn.closest('.approach-wrap').querySelector('.approach-body').textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(body);
+  btn.textContent = 'コピーしました';
+  setTimeout(() => { btn.textContent = '本文をコピー'; }, 1500);
+}
+
 // ---------- 会話エンジン ----------
 function handleUserInput(text) {
   if (!text || !text.trim()) return;
@@ -690,6 +947,24 @@ function handleUserInput(text) {
     }
     startPattern(code);
     return;
+  }
+
+  // パターン進行中に「詳細リスト」系の意図 → 一覧表示（ステップは進めない / v0.5）
+  if (/詳細リスト|詳細プロファイル|名の詳細|詳細を出す/.test(text)) {
+    const step = patterns[state.pattern].steps[state.stepIndex];
+    const dl = step.detailList
+      || (step.ai && step.ai.cands
+            ? { title: '詳細リスト', items: step.ai.cands.map(c => ({ name: c.name, rel: c.rel, attr: c.meta })) }
+            : null);
+    if (dl) { setTimeout(() => renderDetailList(dl), 300); return; }
+  }
+
+  // 「アプローチ案」系の意図 → 芝原様の流儀でスカウト文を生成（ステップは進めない / v0.5）
+  if (/アプローチ/.test(text)) {
+    const step = patterns[state.pattern].steps[state.stepIndex];
+    const cand = pickCandidate(step, text);
+    const ctx = approachContext[state.pattern];
+    if (cand && ctx) { setTimeout(() => renderApproachDraft(cand.name, ctx), 300); return; }
   }
 
   // 既にパターン進行中 → 次ステップへ
@@ -785,11 +1060,16 @@ function highlightSoql(sql) {
 // ---------- 入力ハンドラ ----------
 function fillInput(el) { inputEl.value = el.textContent; inputEl.focus(); }
 sendBtn.onclick = () => handleUserInput(inputEl.value);
-inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') handleUserInput(inputEl.value); });
+// 誤送信防止（6/4 MTG 要望）: Enter単独では送信せず、Shift+Enter または 送信ボタンで送信
+inputEl.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  if (e.shiftKey) handleUserInput(inputEl.value);
+});
 document.getElementById('resetBtn').onclick = () => location.reload();
 
 // ---------- 初期メッセージ ----------
-renderAI({ intro: 'こんにちは。候補者サーチAIです。\n自然な言葉で検索条件を入力してください。一発で結果は出さず、件数と絞り込み軸をご提案しながら、200件→30〜50件→確定まで対話で絞り込みます。\n\n下のサンプル入力からお試しいただけます。' });
+renderAI({ intro: 'こんにちは、Chat-kun です。\n自然な言葉で検索条件を入力してください。一発で結果は出さず、件数と絞り込み軸をご提案しながら、200件→30〜50件→確定まで対話で絞り込みます。\n\n下のサンプル入力からお試しいただけます。' });
 </script>
 </body>
 </html>
