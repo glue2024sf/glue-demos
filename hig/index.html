@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HIG社｜Salesforce 画面イメージ デモ (v0.2)</title>
+<style>
+  :root{
+    --brand:#0176d3; --brand-dark:#014486; --brand-light:#e8f4fe;
+    --bg:#f3f3f3; --panel:#fff; --border:#dddbda; --text:#181818; --muted:#706e6b;
+    --ok:#2e844a; --okbg:#ebf7ee; --warn:#dd7a01; --warnbg:#fef5e7; --danger:#ba0517; --dangerbg:#fef1f1;
+    --neutral:#f3f3f3;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;font-family:-apple-system,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif;background:var(--bg);color:var(--text);font-size:13px;}
+  a{color:var(--brand);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* top global bar */
+  .topbar{background:var(--brand);color:#fff;display:flex;align-items:center;gap:14px;padding:8px 16px;}
+  .waffle{font-size:18px;opacity:.9;cursor:pointer;}
+  .appname{font-weight:700;font-size:15px;}
+  .appname small{font-weight:400;opacity:.85;font-size:11px;margin-left:6px;}
+  .topbar .search{flex:1;max-width:520px;background:#fff;border-radius:20px;padding:5px 14px;color:var(--muted);font-size:12px;}
+  .topbar .right{margin-left:auto;display:flex;gap:14px;align-items:center;font-size:12px;opacity:.95;}
+  .demoflag{background:#ffb75d;color:#5b3b00;font-weight:700;font-size:11px;padding:2px 9px;border-radius:10px;}
+
+  /* object tabs */
+  .tabs{background:#fff;border-bottom:1px solid var(--border);display:flex;gap:2px;padding:0 14px;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .tabs .tab{padding:11px 16px;font-size:13px;font-weight:600;color:#444;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+  .tabs .tab:hover{background:#f8f8f8;}
+  .tabs .tab.active{color:var(--brand);border-bottom-color:var(--brand);}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:16px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* generic card */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.05);margin-bottom:14px;}
+  .card h2{margin:0;padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+  .card h2 .i{color:var(--brand);}
+  .card .body{padding:14px 16px;}
+
+  /* list table */
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead th{text-align:left;background:#fafaf9;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;}
+  tbody td{padding:9px 10px;border-bottom:1px solid #f0eff0;vertical-align:top;}
+  tbody tr:hover{background:#f8fbff;cursor:pointer;}
+  .num{text-align:right;font-variant-numeric:tabular-nums;}
+
+  /* chips / badges */
+  .chip{display:inline-block;padding:1px 9px;border-radius:11px;font-size:11px;font-weight:600;white-space:nowrap;}
+  .ch-direct{background:#e6f0ff;color:#0a5bd3;}
+  .ch-matsu{background:#eaf7ee;color:#1f7a3d;}
+  .ch-jtb{background:#fdeede;color:#b25e00;}
+  .ch-tokuhan{background:#f0e9fb;color:#6b3fc0;}
+  .ch-all{background:#eee;color:#555;}
+  .st{display:inline-block;padding:1px 9px;border-radius:11px;font-size:11px;font-weight:700;}
+  .st-info{background:#eef2f7;color:#566;}
+  .st-prop{background:var(--brand-light);color:var(--brand-dark);}
+  .st-int{background:var(--warnbg);color:var(--warn);}
+  .st-won{background:var(--okbg);color:var(--ok);}
+  .st-lost{background:var(--dangerbg);color:var(--danger);}
+  .flag{font-weight:700;}
+  .f-red{color:var(--danger);} .f-yellow{color:var(--warn);} .f-green{color:var(--ok);}
+
+  /* record highlight panel */
+  .rec-head{background:#fff;border:1px solid var(--border);border-radius:8px 8px 0 0;border-bottom:none;padding:14px 18px;display:flex;align-items:flex-start;gap:14px;}
+  .rec-ico{width:42px;height:42px;border-radius:8px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .rec-head .t{flex:1;}
+  .rec-head .crumb{font-size:11px;color:var(--muted);}
+  .rec-head .name{font-size:19px;font-weight:700;margin:2px 0 6px;}
+  .rec-fields{display:flex;flex-wrap:wrap;gap:20px;}
+  .rec-fields .fld{font-size:12px;}
+  .rec-fields .fld .l{color:var(--muted);font-size:10.5px;}
+  .rec-fields .fld .v{font-weight:600;margin-top:1px;}
+  .stage{display:flex;gap:3px;margin:10px 0 0;}
+  .stage .s{flex:1;text-align:center;font-size:10.5px;font-weight:600;padding:5px 4px;background:#eef2f5;color:#789;position:relative;clip-path:polygon(0 0,calc(100% - 9px) 0,100% 50%,calc(100% - 9px) 100%,0 100%,9px 50%);}
+  .stage .s:first-child{clip-path:polygon(0 0,calc(100% - 9px) 0,100% 50%,calc(100% - 9px) 100%,0 100%);}
+  .stage .s.done{background:#c9e7d3;color:#1f6b41;}
+  .stage .s.cur{background:var(--brand);color:#fff;}
+  .stage .s.lost{background:var(--dangerbg);color:var(--danger);}
+
+  .back{display:inline-block;margin-bottom:10px;font-size:12px;cursor:pointer;color:var(--brand);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:840px){.grid2{grid-template-columns:1fr;}}
+
+  .callout{background:var(--brand-light);border-left:4px solid var(--brand);padding:8px 12px;border-radius:4px;font-size:12px;margin-bottom:6px;}
+  .callout.na{background:var(--warnbg);border-left-color:var(--warn);}
+  .timeline .ev{padding:7px 0 7px 16px;border-left:2px solid var(--border);position:relative;font-size:12px;}
+  .timeline .ev::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--brand);position:absolute;left:-5.5px;top:10px;}
+  .timeline .ev .d{color:var(--muted);font-size:11px;}
+
+  /* dashboard */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
+  @media(max-width:840px){.kpis{grid-template-columns:repeat(2,1fr);}}
+  .kpi{background:#fff;border:1px solid var(--border);border-radius:8px;padding:13px 15px;}
+  .kpi .l{color:var(--muted);font-size:11px;}
+  .kpi .v{font-size:22px;font-weight:700;margin-top:3px;}
+  .kpi .s{font-size:11px;margin-top:2px;}
+  .bar{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:12px;}
+  .bar .lab{width:110px;flex-shrink:0;}
+  .bar .track{flex:1;background:#f0eff0;border-radius:4px;height:16px;overflow:hidden;}
+  .bar .fill{height:100%;border-radius:4px;}
+  .bar .val{width:120px;text-align:right;font-variant-numeric:tabular-nums;flex-shrink:0;}
+  .col-trend{display:flex;align-items:flex-end;gap:10px;height:140px;padding:8px 4px;}
+  .col-trend .c{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;height:100%;}
+  .col-trend .c .bar2{width:70%;background:var(--brand);border-radius:4px 4px 0 0;}
+  .col-trend .c .m{font-size:10.5px;color:var(--muted);}
+  .col-trend .c .a{font-size:10px;color:#444;}
+
+  /* axis toggle */
+  .toggle{display:inline-flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;font-size:11px;font-weight:600;}
+  .toggle .opt{padding:4px 10px;color:var(--muted);cursor:pointer;background:#fff;}
+  .toggle .opt+.opt{border-left:1px solid var(--border);}
+  .toggle .opt.active{background:var(--brand);color:#fff;}
+
+  /* activity type chips */
+  .at{display:inline-block;padding:1px 9px;border-radius:11px;font-size:11px;font-weight:700;}
+  .at-visit{background:#e6f0ff;color:#0a5bd3;} .at-tel{background:#eaf7ee;color:#1f7a3d;}
+  .at-dm{background:#fdeede;color:#b25e00;} .at-mail{background:#f0e9fb;color:#6b3fc0;} .at-mtg{background:#eef2f7;color:#566;}
+  .src{display:inline-block;font-size:10px;font-weight:700;color:#b25e00;background:#fef5e7;border-radius:8px;padding:1px 7px;margin-left:6px;}
+
+  .hint{font-size:11px;color:var(--muted);margin-top:6px;}
+  footer{max-width:1180px;margin:0 auto;padding:14px 16px 30px;color:#9a9a9a;font-size:11px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="waffle">▦</span>
+  <span class="appname">HIG Sales Cloud <small>営業支援（デモ画面）</small></span>
+  <div class="search">🔍 取引先・商談・商品を検索...</div>
+  <div class="right">
+    <span class="demoflag">DEMO v0.2</span>
+    <span>⚙</span><span>❓</span><span>👤 営業担当</span>
+  </div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-v="dash">🏠 ホーム</div>
+  <div class="tab" data-v="accounts">🏨 取引先（チェーン）</div>
+  <div class="tab" data-v="opps">💼 商談</div>
+  <div class="tab" data-v="activities">🕑 活動（訪問・TEL・DM）</div>
+  <div class="tab" data-v="samples">🧴 サンプル追客</div>
+  <div class="tab" data-v="products">🏷 商品・価格</div>
+</div>
+
+<div class="wrap">
+
+  <!-- ===== DASHBOARD ===== -->
+  <div class="view active" id="v-dash">
+    <div class="kpis">
+      <div class="kpi"><div class="l">今年度 累計売上（HIGベース）</div><div class="v">¥850.0M</div><div class="s f-red">▼ 昨年比 92%</div></div>
+      <div class="kpi"><div class="l">新規 年間見込（全チャネル）</div><div class="v">¥400.0M</div><div class="s">約 1,000 件</div></div>
+      <div class="kpi"><div class="l">ロスト 年間見込</div><div class="v f-red">¥120.0M</div><div class="s">約 60 件</div></div>
+      <div class="kpi"><div class="l">サンプル追客 未対応</div><div class="v f-yellow">7 件</div><div class="s">期限超過 2 件</div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2><span class="i">📊</span> チャネル別 新規見込（年間）</h2>
+        <div class="body" id="ch-bars"></div>
+      </div>
+      <div class="card">
+        <h2><span class="i">📈</span> 月次売上トレンド
+          <span class="toggle" id="axis-toggle" style="margin-left:auto;">
+            <span class="opt active" data-axis="HIG">HIGベース(4〜3月)</span><span class="opt" data-axis="当社ブランド">ブランド元ベース(1〜12月)</span>
+          </span>
+        </h2>
+        <div class="body">
+          <div class="col-trend" id="trend"></div>
+          <div class="hint">※ 集計の二重軸（HIGベース／ブランド元ベース）はワンクリックで切替。どちらを既定にするかは定例で確定。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="i">🆕</span> 新規・ロスト管理（チャネル別）<span style="margin-left:auto;font-weight:400;color:var(--muted);font-size:11px;">「新規ロスト管理表」の置き換え</span></h2>
+      <div class="body" style="padding:0;">
+        <table>
+          <thead><tr><th>チャネル</th><th class="num">新規 件数</th><th class="num">新規 見込</th><th class="num">ロスト 件数</th><th class="num">ロスト 見込</th><th class="num">純増（見込）</th></tr></thead>
+          <tbody id="nl-rows"></tbody>
+        </table>
+      </div>
+      <div class="hint">月次×チャネルで新規／ロストを自動集計。ロストは商談ステージ「ロスト」＋ロスト理由から積み上げ（手集計のExcelが不要に）。</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="i">⏰</span> 私のネクストアクション（期限が近い商談）</h2>
+      <div class="body" style="padding:0;">
+        <table>
+          <thead><tr><th>取引先</th><th>商談</th><th>チャネル</th><th>ステージ</th><th class="num">見込</th><th>期限</th></tr></thead>
+          <tbody id="na-rows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="hint">このホームは「週次定例で見る順番」を固定したダッシュボードのイメージです。指標・並びは定例で調整します。</div>
+  </div>
+
+  <!-- ===== ACCOUNTS LIST ===== -->
+  <div class="view" id="v-accounts">
+    <div class="card">
+      <h2><span class="i">🏨</span> 取引先（ホテルチェーン運営会社）<span style="margin-left:auto;font-weight:400;color:var(--muted);font-size:11px;">重点チェーンリストの置き換え・抜粋表示</span></h2>
+      <div class="body" style="padding:0;">
+        <table>
+          <thead><tr><th>順位</th><th>運営会社</th><th>チャネル</th><th>担当</th><th>主要ブランド</th><th class="num">軒数</th><th class="num">室数</th><th>営業状況（最新）</th></tr></thead>
+          <tbody id="acc-rows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="hint">行をクリックすると顧客カルテが開きます。</div>
+  </div>
+
+  <!-- ===== ACCOUNT DETAIL ===== -->
+  <div class="view" id="v-accdetail">
+    <span class="back" onclick="show('accounts')">← 取引先一覧へ戻る</span>
+    <div id="acc-detail"></div>
+  </div>
+
+  <!-- ===== OPPS LIST ===== -->
+  <div class="view" id="v-opps">
+    <div class="card">
+      <h2><span class="i">💼</span> 商談</h2>
+      <div class="body" style="padding:0;">
+        <table>
+          <thead><tr><th>商談名</th><th>取引先</th><th>チャネル</th><th>ステージ</th><th>提案アイテム</th><th class="num">見込金額</th><th>期限</th></tr></thead>
+          <tbody id="opp-rows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="hint">行をクリックすると商談詳細（提案明細・想定粗利）が開きます。</div>
+  </div>
+
+  <!-- ===== OPP DETAIL ===== -->
+  <div class="view" id="v-oppdetail">
+    <span class="back" onclick="show('opps')">← 商談一覧へ戻る</span>
+    <div id="opp-detail"></div>
+  </div>
+
+  <!-- ===== ACTIVITIES ===== -->
+  <div class="view" id="v-activities">
+    <div class="card">
+      <h2><span class="i">🕑</span> 活動（訪問・TEL・DM・メール）<span style="margin-left:auto;font-weight:400;color:var(--muted);font-size:11px;">行動分析・出張計画・議事録(OUTLOOK)の置き換え</span></h2>
+      <div class="body" style="padding:0;">
+        <table>
+          <thead><tr><th>日付</th><th>種別</th><th>取引先 / 施設</th><th>担当</th><th>内容</th><th>関連商談</th></tr></thead>
+          <tbody id="act-rows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="hint">「いつ・誰が・どこへ・何をしたか」を取引先／商談に自動で紐付け。<span class="src">ベルセールス</span> 連携時は録音→文字起こし→活動メモへ自動転記（商談項目の設計時に同期）。</div>
+  </div>
+
+  <!-- ===== SAMPLES ===== -->
+  <div class="view" id="v-samples">
+    <div class="card">
+      <h2><span class="i">🧴</span> サンプル出荷（追客ビュー）<span style="margin-left:auto;font-weight:400;color:var(--muted);font-size:11px;">現状の二重/三重管理を1本化</span></h2>
+      <div class="body" style="padding:0;">
+        <table>
+          <thead><tr><th>出荷日</th><th>施設</th><th>サンプル</th><th>種別</th><th>数量</th><th>追客状況</th><th>次回追客期限</th><th></th></tr></thead>
+          <tbody id="smp-rows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="hint">🔴 期限超過は赤フラグ＋担当へ自動アラート（Flow）。「商談に転換」で追客漏れゼロに。</div>
+  </div>
+
+  <!-- ===== PRODUCTS ===== -->
+  <div class="view" id="v-products">
+    <div class="card">
+      <h2><span class="i">🏷</span> 商品・価格（品番マスタ）</h2>
+      <div class="body" style="padding:0;">
+        <table>
+          <thead><tr><th>品番</th><th>商品名</th><th>容量</th><th class="num">ロット</th><th class="num">卸値</th><th class="num">上代</th><th class="num">HIG粗利率</th><th>シリーズ</th></tr></thead>
+          <tbody id="prd-rows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="hint">※ 価格・粗利はデモ用に提供データの構造のみ再現。品番(A95G等)を移行・連携キーに使う想定。</div>
+  </div>
+
+</div>
+
+<footer>
+  株式会社Glue｜HIG社 Salesforce構築 画面イメージ（叩き台 v0.2）　/　データはサンプルデータによる画面イメージです。確定仕様ではありません。<br>v0.2 追加：活動（訪問・TEL・DM）タブ／新規・ロスト管理／集計の二重軸（HIG・ブランド元ベース）切替／経由代理店
+</footer>
+
+<script>
+const channelClass={ '直販':'ch-direct','代理店A':'ch-matsu','代理店B':'ch-jtb','特販':'ch-tokuhan','全チャネル':'ch-all' };
+function chChip(c){const k=channelClass[c]||'ch-all';return `<span class="chip ${k}">${c}</span>`;}
+function stageChip(s){const m={'情報収集':'st-info','提案':'st-prop','内定':'st-int','受注':'st-won','ロスト':'st-lost'};return `<span class="st ${m[s]||'st-info'}">${s}</span>`;}
+const yen=n=>'¥'+n.toLocaleString();
+
+/* ---- 商品マスタ（価格表より構造再現） ---- */
+const products=[
+  {code:'A95G',name:'クレンジングオイル',vol:'3ml',lot:500,oroshi:20.00,jodai:28.00,hig:'42%',series:'OW/パウチ'},
+  {code:'A96G',name:'マイルドソープ',vol:'5g',lot:500,oroshi:22.00,jodai:30.00,hig:'45%',series:'OW/パウチ'},
+  {code:'A98G',name:'マイルドローション',vol:'2ml',lot:500,oroshi:18.00,jodai:25.00,hig:'50%',series:'OW/パウチ'},
+  {code:'A119G',name:'ボディ＆ハンドミルク',vol:'3ml',lot:500,oroshi:24.00,jodai:32.00,hig:'47%',series:'OG'},
+  {code:'A121G',name:'サンスクリーンミルク（UV）',vol:'2ml',lot:500,oroshi:30.00,jodai:40.00,hig:'45%',series:'UV'},
+  {code:'A120G',name:'ヘアミルク',vol:'3ml',lot:500,oroshi:24.00,jodai:32.00,hig:'47%',series:'OG'},
+  {code:'UV-GEL',name:'UVジェル',vol:'-',lot:500,oroshi:'-',jodai:'-',hig:'-',series:'UV/サンプル'},
+  {code:'NEMU',name:'リラックスサプリ',vol:'-',lot:'-',oroshi:'-',jodai:'-',hig:'-',series:'サプリ'},
+];
+
+/* ---- 商談 ---- */
+const opps=[
+  {id:'o1',name:'ホテルチェーンB｜本社登録品 クレンジング切替',acc:'ホテルチェーンB',ch:'直販',agency:'',stage:'提案',items:['A95G','A96G'],amount:730000,due:'2026/06/15',memo:'購買・企画同席商談。リラックスサプリ／特別価格提示／サンプルセット希望。',acts:[['2026/05/14','購買アポ＋企画課同席で全体提案'],['2026/05/08','社長と事前MTG'],['2026/04/13','購買アポ確定']]},
+  {id:'o2',name:'ホテルチェーンC｜クーポン施策＋UV DM',acc:'ホテルチェーンC',ch:'代理店B',agency:'代理店B',stage:'内定',items:['A121G'],amount:7000000,due:'2026/06/02',memo:'クーポン割引券を約7,000室へ配布。UVのDM実施、リスト精査済。',acts:[['2026/05/15','ブランドC 神田店 訪問'],['2026/05/12','ブランドC 羽田店 訪問'],['2026/04/28','ブランドC 蒲田店 訪問']]},
+  {id:'o3',name:'ホテルチェーンD｜UV全店DM＋現場提案',acc:'ホテルチェーンD',ch:'代理店A',agency:'代理店A',stage:'提案',items:['A121G','A119G'],amount:2100000,due:'2026/05/25',memo:'本部長・副部長を現場で抑える。ブランドD 和風店リップセット発注あり。UVのDM代理店A＆代理店B協力出荷。',acts:[['2026/05/21','ブランドD リゾート店 訪問'],['2026/05/12','ブランドD 温泉店 訪問（鈴木・高橋）'],['2026/04/15','ブランドD 北陸店 訪問']]},
+  {id:'o4',name:'ホテルチェーンA｜新パウチ特別価格',acc:'ホテルチェーンA',ch:'直販',agency:'',stage:'情報収集',items:['A95G','A98G'],amount:0,due:'',memo:'2025/9完全ロスト→2026/1営業引継ぎ完了。ブランド委員会を手繰る。',acts:[['2026/05/15','山田フォロー（メール）'],['2026/04/28','本社訪問（社長・山田）']]},
+  {id:'o5',name:'ホテルチェーンF｜定番アイテム',acc:'ホテルチェーンF',ch:'代理店A',agency:'代理店A',stage:'ロスト',items:[],amount:5349000,due:'',memo:'定番アイテム競合切替。社長の鶴の一声。ロスト理由：競合切替（価格）。',acts:[['2026/05/18','ブランドF リゾート店 本社NG']]},
+];
+const oppById=id=>opps.find(o=>o.id===id);
+
+/* ---- 取引先（重点チェーン抜粋） ---- */
+const accounts=[
+  {id:'a1',rank:1,name:'ホテルチェーンA',ch:'直販',owner:'山田',brand:'ブランドA',gyotai:'宿泊主体型',ken:340,shitsu:72000,
+   status:'2025/9完全ロスト。2026/1/27営業引継ぎ完了。4/28本社訪問（社長・山田）→5月下旬フォロー。',
+   next:'ブランド委員会を手繰る（環境対応什器ほか）。5/15メール済→返信フォロー。',
+   facilities:['ブランドA品川','ブランドA蒲田','ブランドA川崎駅前','…ほか約340施設'],
+   opps:['o4'],
+   acts:[['2026/05/15','メール送付（山田）'],['2026/04/28','本社訪問（社長・山田）'],['2026/01/27','営業引継ぎ完了']]},
+  {id:'a2',rank:3,name:'ホテルチェーンB',ch:'直販',owner:'田中',brand:'ブランドB',gyotai:'宿泊主体型・リゾート',ken:360,shitsu:64000,
+   status:'本社購買・企画にアプローチ中。クレンジング(パウチ＆詰替)切替提案。5/14全体的に受け身もリラックスサプリ・共通ボトル・特別価格提示。',
+   next:'■購買：本社登録品クレンジング切替 ■企画：オープン案件をOWリニューアル直販セットで攻める ■サンプルセット手配',
+   facilities:['ブランドB東京','ブランドB 上位店','ブランドB 系列店','…ほか約360施設'],
+   opps:['o1'],
+   acts:[['2026/05/14','購買＋企画 同席商談'],['2026/05/08','社長 事前MTG'],['2026/04/13','購買アポ確定（5/14）']]},
+  {id:'a3',rank:4,name:'ホテルチェーンC',ch:'代理店B',owner:'山田・佐藤',brand:'ブランドC',gyotai:'フルスペック・宿泊主体',ken:180,shitsu:25000,
+   status:'インバス既存フォロー＋盗難防止企画。ワンちゃんアイテム（ペット向けクリーム9件挙手）。クーポン割引券5/1〜配布。',
+   next:'①大浴場スキンケアOGで盗難防止提案（鈴木フォロー）②ペット向けクリーム押込 ③クーポン現場訪問 ④UV DM実施',
+   facilities:['ブランドC 羽田店','ブランドC 神田店','ブランドC 蒲田店','ブランドC 名古屋店','…ほか約180施設'],
+   opps:['o2'],
+   acts:[['2026/05/15','ブランドC 神田店 訪問'],['2026/05/12','ブランドC 羽田店 訪問'],['2026/04/03','社長 打合せ']]},
+  {id:'a4',rank:6,name:'ホテルチェーンD',ch:'代理店A',owner:'山田・鈴木・高橋',brand:'ブランドD',gyotai:'宿泊主体・リゾート',ken:140,shitsu:22000,
+   status:'本社は未開拓。現場は本部長・副部長がキーマン。施設決済のアイテム提案を継続。ブランドD 和風店リップセット発注あり。',
+   next:'①本部長・副部長を現場で抑える ②UV DM代理店A＆代理店B協力出荷 ③ブランドD 温泉店フォロー ④リゾート中日本副部長と関係構築',
+   facilities:['ブランドD 北陸店','ブランドD リゾート店','ブランドD 和風店','ブランドD 温泉店','…ほか約140施設'],
+   opps:['o3'],
+   acts:[['2026/05/21','ブランドD リゾート店 訪問'],['2026/05/12','ブランドD 温泉店 訪問'],['2026/04/15','北陸エリア 副部長商談']]},
+  {id:'a5',rank:9,name:'ホテルチェーンE',ch:'代理店A',owner:'山田',brand:'ブランドE',gyotai:'宿泊主体型',ken:80,shitsu:16000,
+   status:'77件中38件導入中。各地でSH/OW/UV提案中。新規エリア 2026/8オープン（大浴場あり）。',
+   next:'新規オープン上申、UV内定先の追客、プレミアブランドのSRBいたずら防止対応で本社同行打診。',
+   facilities:['ブランドE 新店','ブランドE 仙台店','ブランドE 金沢店','…ほか約75施設'],
+   opps:[],
+   acts:[['2026/05/20','ブランドE 名古屋店 訪問'],['2026/04/23','大分 訪問'],['2026/04/16','ブランドE 金沢店 訪問']]},
+];
+const accById=id=>accounts.find(a=>a.id===id);
+
+/* ---- サンプル追客 ---- */
+const samples=[
+  {date:'2026/05/12',fac:'ブランドC 羽田店',prod:'UVジェル',type:'パウチ',qty:30,status:'未追客',due:'2026/05/26'},
+  {date:'2026/05/15',fac:'ブランドC 神田店',prod:'共通ボトルサンプル',type:'インバス',qty:6,status:'追客中',due:'2026/06/02'},
+  {date:'2026/04/28',fac:'ブランドC 蒲田店',prod:'リップクリーム',type:'その他',qty:50,status:'転換済',due:''},
+  {date:'2026/05/18',fac:'ホテルチェーンG 札幌店',prod:'系列セット（DMサンプル）',type:'パウチ',qty:20,status:'未追客',due:'2026/06/01'},
+  {date:'2026/05/08',fac:'ホテルチェーンH 関西店',prod:'新パウチ試作',type:'パウチ',qty:40,status:'追客中',due:'2026/05/30'},
+  {date:'2026/04/20',fac:'ホテルチェーンI 金沢店',prod:'リラックスサプリ',type:'サプリ',qty:10,status:'見送り',due:''},
+];
+function smpFlag(s){
+  if(s.status==='転換済')return '<span class="flag f-green">🟢 転換済</span>';
+  if(s.status==='見送り')return '<span class="flag" style="color:#999">⚪ 見送り</span>';
+  if(s.status==='追客中')return '<span class="flag f-yellow">🟡 追客中</span>';
+  // 未追客：期限超過判定（デモ基準日 2026/05/27）
+  const over = s.due && s.due < '2026/05/27';
+  return over?'<span class="flag f-red">🔴 未追客（期限超過）</span>':'<span class="flag f-red">🔴 未追客</span>';
+}
+
+/* ---- 活動（訪問・TEL・DM・メール） ---- */
+const actTypeClass={'訪問':'at-visit','TEL':'at-tel','DM':'at-dm','メール':'at-mail','商談':'at-mtg'};
+function atChip(t){return `<span class="at ${actTypeClass[t]||'at-mtg'}">${t}</span>`;}
+const activities=[
+  {date:'2026/05/21',type:'訪問',acc:'ホテルチェーンD',fac:'ブランドD リゾート店',who:'鈴木',subj:'本部長フォロー。UV全店DMの協力出荷を打診。',opp:'o3',src:true},
+  {date:'2026/05/18',type:'訪問',acc:'ホテルチェーンF',fac:'ブランドF リゾート店',who:'山田',subj:'本社NG（社長判断で競合切替）。ロスト確定。',opp:'o5'},
+  {date:'2026/05/15',type:'訪問',acc:'ホテルチェーンC',fac:'ブランドC 神田店',who:'佐藤',subj:'クーポン割引券の現場説明。UV DM反応を確認。',opp:'o2'},
+  {date:'2026/05/15',type:'メール',acc:'ホテルチェーンA',fac:'本社',who:'山田',subj:'ブランド委員会フォロー。返信待ち。',opp:'o4'},
+  {date:'2026/05/14',type:'商談',acc:'ホテルチェーンB',fac:'本社',who:'田中',subj:'購買・企画同席。特別価格提示／サンプルセット希望。',opp:'o1',src:true},
+  {date:'2026/05/12',type:'訪問',acc:'ホテルチェーンC',fac:'ブランドC 羽田店',who:'佐藤',subj:'UVジェルのサンプル設置。追客期限5/26で登録。',opp:'o2'},
+  {date:'2026/05/12',type:'訪問',acc:'ホテルチェーンD',fac:'ブランドD 温泉店',who:'鈴木・高橋',subj:'施設決済アイテム提案。ブランドD 和風店リップセット発注獲得。',opp:'o3'},
+  {date:'2026/05/08',type:'商談',acc:'ホテルチェーンB',fac:'本社',who:'田中',subj:'社長と事前MTG。本社登録品クレンジング切替の方向性合意。',opp:'o1'},
+  {date:'2026/05/01',type:'DM',acc:'ホテルチェーンC',fac:'全44施設',who:'佐藤',subj:'クーポン割引券を約7,000室へ配布開始。',opp:'o2'},
+  {date:'2026/04/28',type:'訪問',acc:'ホテルチェーンA',fac:'本社',who:'山田',subj:'社長同席。2026/1の営業引継ぎ後 初の本社訪問。',opp:'o4'},
+];
+
+/* ---- ダッシュボード data ---- */
+const channelNew=[['代理店A',180000000],['代理店B',150000000],['直販',50000000]];
+const trend=[['1月',153],['2月',153],['3月',178],['4月',277],['5月',140]]; // 百万円, HIGベース(4〜3月)の月並び表示
+const trend当社ブランド=[['1月',188],['2月',171],['3月',165],['4月',277],['5月',140]]; // ブランド元ベース(1〜12月)
+let axis='HIG';
+
+/* ---- 新規・ロスト管理（チャネル別） ---- */
+const newLost=[
+  {ch:'代理店A',nNum:510,nAmt:180000000,lNum:30,lAmt:60000000},
+  {ch:'代理店B',nNum:390,nAmt:150000000,lNum:18,lAmt:40000000},
+  {ch:'直販',nNum:190,nAmt:50000000,lNum:14,lAmt:18000000},
+];
+
+/* ====== render ====== */
+function render(){
+  // dashboard channel bars
+  const maxCh=Math.max(...channelNew.map(c=>c[1]));
+  document.getElementById('ch-bars').innerHTML=channelNew.map(c=>{
+    const w=Math.round(c[1]/maxCh*100);
+    const cls=channelClass[c[0]]||'ch-all';
+    const color={'ch-matsu':'#2e844a','ch-jtb':'#dd7a01','ch-direct':'#0176d3'}[cls]||'#888';
+    return `<div class="bar"><div class="lab">${chChip(c[0])}</div><div class="track"><div class="fill" style="width:${w}%;background:${color}"></div></div><div class="val">${yen(c[1])}</div></div>`;
+  }).join('');
+  // trend (axis-aware)
+  renderTrend();
+  // next action rows (from opps with due)
+  document.getElementById('na-rows').innerHTML=opps.filter(o=>o.due).sort((a,b)=>a.due<b.due?-1:1).map(o=>
+    `<tr onclick="openOpp('${o.id}')"><td>${o.acc}</td><td><a>${o.name}</a></td><td>${chChip(o.ch)}</td><td>${stageChip(o.stage)}</td><td class="num">${o.amount?yen(o.amount):'—'}</td><td>${o.due}</td></tr>`
+  ).join('');
+
+  // accounts list
+  document.getElementById('acc-rows').innerHTML=accounts.map(a=>
+    `<tr onclick="openAcc('${a.id}')"><td class="num">${a.rank}</td><td><a>${a.name}</a></td><td>${chChip(a.ch)}</td><td>${a.owner}</td><td>${a.brand}</td><td class="num">${a.ken}</td><td class="num">${a.shitsu.toLocaleString()}</td><td style="max-width:340px;color:#555">${a.status.slice(0,46)}…</td></tr>`
+  ).join('');
+
+  // opps list
+  document.getElementById('opp-rows').innerHTML=opps.map(o=>
+    `<tr onclick="openOpp('${o.id}')"><td><a>${o.name}</a></td><td>${o.acc}</td><td>${chChip(o.ch)}</td><td>${stageChip(o.stage)}</td><td>${o.items.join(', ')||'—'}</td><td class="num">${o.amount?yen(o.amount):'—'}</td><td>${o.due||'—'}</td></tr>`
+  ).join('');
+
+  // samples
+  document.getElementById('smp-rows').innerHTML=samples.map(s=>
+    `<tr><td>${s.date}</td><td>${s.fac}</td><td>${s.prod}</td><td>${s.type}</td><td class="num">${s.qty}</td><td>${smpFlag(s)}</td><td>${s.due||'—'}</td><td>${s.status==='転換済'?'<span style="color:#999">商談化済</span>':'<a>商談に転換 →</a>'}</td></tr>`
+  ).join('');
+
+  // new / lost (channel)
+  document.getElementById('nl-rows').innerHTML=newLost.map(r=>{
+    const net=r.nAmt-r.lAmt;
+    return `<tr><td>${chChip(r.ch)}</td><td class="num">${r.nNum}</td><td class="num">${yen(r.nAmt)}</td><td class="num f-red">${r.lNum}</td><td class="num f-red">${yen(r.lAmt)}</td><td class="num"><b>${yen(net)}</b></td></tr>`;
+  }).join('');
+
+  // activities
+  document.getElementById('act-rows').innerHTML=activities.map(a=>{
+    const o=a.opp?oppById(a.opp):null;
+    return `<tr ${o?`onclick="openOpp('${a.opp}')" style="cursor:pointer"`:''}><td>${a.date}</td><td>${atChip(a.type)}${a.src?'<span class="src">ベルセールス</span>':''}</td><td>${a.acc}<div style="color:var(--muted);font-size:11px">${a.fac}</div></td><td>${a.who}</td><td style="max-width:360px;color:#555">${a.subj}</td><td>${o?`<a>${o.name.split('｜')[1]||o.name}</a>`:'—'}</td></tr>`;
+  }).join('');
+
+  // products
+  document.getElementById('prd-rows').innerHTML=products.map(p=>
+    `<tr><td><b>${p.code}</b></td><td>${p.name}</td><td>${p.vol}</td><td class="num">${p.lot}</td><td class="num">${p.oroshi==='-'?'—':'¥'+p.oroshi}</td><td class="num">${p.jodai==='-'?'—':'¥'+p.jodai}</td><td class="num">${p.hig==='-'?'—':p.hig}</td><td>${p.series}</td></tr>`
+  ).join('');
+}
+
+function renderTrend(){
+  const data=axis==='当社ブランド'?trend当社ブランド:trend;
+  const maxT=Math.max(...data.map(t=>t[1]));
+  document.getElementById('trend').innerHTML=data.map(t=>{
+    const h=Math.round(t[1]/maxT*100);
+    return `<div class="c"><div class="a">¥${t[1]}M</div><div class="bar2" style="height:${h}%"></div><div class="m">${t[0]}</div></div>`;
+  }).join('');
+}
+document.getElementById('axis-toggle').addEventListener('click',e=>{
+  const o=e.target.closest('.opt'); if(!o)return;
+  axis=o.dataset.axis;
+  document.querySelectorAll('#axis-toggle .opt').forEach(x=>x.classList.toggle('active',x===o));
+  renderTrend();
+});
+
+function openAcc(id){
+  const a=accById(id);
+  const opp=a.opps.map(oid=>oppById(oid));
+  document.getElementById('acc-detail').innerHTML=`
+    <div class="rec-head">
+      <div class="rec-ico">🏨</div>
+      <div class="t">
+        <div class="crumb">取引先（チェーン運営会社）</div>
+        <div class="name">${a.name}</div>
+        <div class="rec-fields">
+          <div class="fld"><div class="l">チャネル</div><div class="v">${chChip(a.ch)}</div></div>
+          <div class="fld"><div class="l">重点リスト順位</div><div class="v">${a.rank} 位</div></div>
+          <div class="fld"><div class="l">主要ブランド</div><div class="v">${a.brand}</div></div>
+          <div class="fld"><div class="l">業態</div><div class="v">${a.gyotai}</div></div>
+          <div class="fld"><div class="l">国内軒数</div><div class="v">${a.ken} 軒</div></div>
+          <div class="fld"><div class="l">国内室数</div><div class="v">${a.shitsu.toLocaleString()} 室</div></div>
+          <div class="fld"><div class="l">営業担当</div><div class="v">${a.owner}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="border-radius:0 0 8px 8px;">
+      <div class="body">
+        <div class="callout"><b>営業状況（最新）</b><br>${a.status}</div>
+        <div class="callout na"><b>ネクストアクション</b><br>${a.next}</div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h2><span class="i">💼</span> 商談（${opp.filter(Boolean).length}）</h2><div class="body" style="padding:0;">
+        <table><tbody>${opp.filter(Boolean).map(o=>`<tr onclick="openOpp('${o.id}')"><td><a>${o.name}</a></td><td>${stageChip(o.stage)}</td><td class="num">${o.amount?yen(o.amount):'—'}</td><td>${o.due||''}</td></tr>`).join('')||'<tr><td style="color:#999;padding:12px">商談なし</td></tr>'}</tbody></table>
+      </div></div>
+      <div class="card"><h2><span class="i">🏨</span> 配下施設（${a.ken}）</h2><div class="body">
+        ${a.facilities.map(f=>`<div style="padding:4px 0;border-bottom:1px solid #f2f2f2">${f}</div>`).join('')}
+        <div class="hint">親子取引先（本社→施設）で階層管理。出荷データは施設単位で紐付け。</div>
+      </div></div>
+    </div>
+    <div class="card"><h2><span class="i">🕑</span> 活動タイムライン</h2><div class="body timeline">
+      ${a.acts.map(e=>`<div class="ev"><div class="d">${e[0]}</div>${e[1]}</div>`).join('')}
+    </div></div>`;
+  show('accdetail');
+}
+
+function openOpp(id){
+  const o=oppById(id);
+  const stages=['情報収集','提案','内定','受注'];
+  let stageHtml;
+  if(o.stage==='ロスト'){
+    stageHtml=stages.map(s=>`<div class="s">${s}</div>`).join('')+`<div class="s lost">✗ ロスト</div>`;
+  }else{
+    const ci=stages.indexOf(o.stage);
+    stageHtml=stages.map((s,i)=>`<div class="s ${i<ci?'done':i===ci?'cur':''}">${s}</div>`).join('');
+  }
+  const lines=o.items.map(code=>{
+    const p=products.find(x=>x.code===code);
+    if(!p)return '';
+    const sub=(typeof p.oroshi==='number')?'¥'+(p.oroshi*p.lot).toLocaleString():'—';
+    return `<tr><td><b>${p.code}</b></td><td>${p.name}</td><td class="num">${p.lot}</td><td class="num">${p.oroshi==='-'?'—':'¥'+p.oroshi}</td><td class="num">${p.jodai==='-'?'—':'¥'+p.jodai}</td><td class="num">${p.hig==='-'?'—':p.hig}</td></tr>`;
+  }).join('');
+  document.getElementById('opp-detail').innerHTML=`
+    <div class="rec-head">
+      <div class="rec-ico">💼</div>
+      <div class="t">
+        <div class="crumb">商談</div>
+        <div class="name">${o.name}</div>
+        <div class="rec-fields">
+          <div class="fld"><div class="l">取引先</div><div class="v"><a onclick="openAccByName('${o.acc}')">${o.acc}</a></div></div>
+          <div class="fld"><div class="l">チャネル</div><div class="v">${chChip(o.ch)}</div></div>
+          <div class="fld"><div class="l">経由代理店</div><div class="v">${o.agency||'<span style="color:#999">直販（なし）</span>'}</div></div>
+          <div class="fld"><div class="l">見込金額（年間）</div><div class="v">${o.amount?yen(o.amount):'—'}</div></div>
+          <div class="fld"><div class="l">ネクストアクション期限</div><div class="v">${o.due||'—'}</div></div>
+        </div>
+        <div class="stage">${stageHtml}</div>
+      </div>
+    </div>
+    <div class="card" style="border-radius:0 0 8px 8px;"><div class="body">
+      <h2 style="border:none;padding:0 0 8px;font-size:13px"><span class="i">🏷</span> 提案アイテム（明細）</h2>
+      ${o.items.length?`<table><thead><tr><th>品番</th><th>商品名</th><th class="num">数量</th><th class="num">卸値</th><th class="num">上代</th><th class="num">HIG粗利率</th></tr></thead><tbody>${lines}</tbody></table>`:'<div style="color:#999">提案アイテムなし（ロスト案件）</div>'}
+      <div class="callout" style="margin-top:12px"><b>営業状況メモ</b><br>${o.memo}</div>
+      ${o.stage==='ロスト'?'<div class="callout na"><b>ロスト理由</b><br>競合切替（価格）／ロスト時は理由を必須化</div>':''}
+    </div></div>
+    <div class="card"><h2><span class="i">🕑</span> 活動</h2><div class="body timeline">
+      ${o.acts.map(e=>`<div class="ev"><div class="d">${e[0]}</div>${e[1]}</div>`).join('')}
+    </div></div>`;
+  show('oppdetail');
+}
+function openAccByName(n){const a=accounts.find(x=>x.name===n);if(a)openAcc(a.id);}
+
+/* tab/view switching */
+function show(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('v-'+v).classList.add('active');
+  const tabMap={dash:'dash',accounts:'accounts',accdetail:'accounts',opps:'opps',oppdetail:'opps',activities:'activities',samples:'samples',products:'products'};
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===tabMap[v]));
+  window.scrollTo(0,0);
+}
+document.getElementById('tabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(t)show(t.dataset.v);});
+
+render();
+</script>
+</body>
+</html>
