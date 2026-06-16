@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>JELLYFISH様｜Salesforce画面モックアップ v0.1</title>
+<title>JELLYFISH様｜Salesforce画面モックアップ v1.0（2026-06-16要件反映）</title>
 <style>
   :root{
     --sf-blue:#0176d3;
@@ -245,13 +245,14 @@
 <body>
 
 <div class="gnav">
-  <div class="app">🪼 JELLYFISH Sales Cloud（モック v0.2）</div>
+  <div class="app">🪼 JELLYFISH Sales Cloud（モック v1.0）</div>
   <div class="tabs">
     <button data-tab="flow" class="active">業務フロー</button>
     <button data-tab="candidate">候補者</button>
     <button data-tab="job">求人</button>
     <button data-tab="selection">選考</button>
     <button data-tab="account">企業</button>
+    <button data-tab="hire">入社・請求</button>
     <button data-tab="slack">Slack連携</button>
     <button data-tab="mail">メール連携</button>
     <button data-tab="dashboard">ダッシュボード</button>
@@ -322,8 +323,8 @@
       <div class="num">4</div>
       <div class="body">
         <div class="st">マッチング・推薦</div>
-        <div class="sd">候補者 × 求人で「選考」レコードを生成。AIが推薦コメントを自動生成（2,000文字単位課金）し、企業へ推薦状を送付。</div>
-        <div class="meta"><span class="obj">📦 選考（Selection）</span><span class="badge amber">🤖 AI推薦コメント</span></div>
+        <div class="sd">候補者 × 求人で「選考（Application__c）」を1対1で生成。AIが推薦コメントを自動生成し、推薦書（PDF/Word）を出力して企業へ送付。面接ごとに選考フィードバックを記録（NG理由を集約）。</div>
+        <div class="meta"><span class="obj">📦 選考（Application__c）</span><span class="obj">🗣 選考FB</span><span class="badge amber">🤖 AI推薦コメント</span></div>
       </div>
       <div class="go"><span class="intg">📧 メール送付</span><button class="jump" data-jump="selection">選考画面を見る ▶</button></div>
     </div>
@@ -352,10 +353,10 @@
       <div class="num">7</div>
       <div class="body">
         <div class="st">入社確定 → 成果報酬 <span class="badge green">入社</span></div>
-        <div class="sd">入社で選考クローズ。入社日・成果報酬を記録し請求につなげる。辞退時は理由（選択リスト）を記録し改善に活用。</div>
-        <div class="meta"><span class="obj">📦 選考（成果）</span></div>
+        <div class="sd">入社で選考クローズ。入社（Placement__c）に入社日・請求金額を記録し入金/返金へ。基本一括（1レコード）。辞退/NG時は理由（選択リスト）を記録し分析に活用。</div>
+        <div class="meta"><span class="obj">📦 入社（Placement__c）</span><span class="obj">💴 入金/返金</span></div>
       </div>
-      <div class="go"><span class="intg">💰 請求連携</span><button class="jump" data-jump="account">企業画面を見る ▶</button></div>
+      <div class="go"><span class="intg">💰 請求連携</span><button class="jump" data-jump="hire">入社・請求を見る ▶</button></div>
     </div>
 
     <div class="stage">
@@ -372,18 +373,26 @@
 
   <!-- データモデル相関図 -->
   <div class="card">
-    <div class="card-header">🗂 データモデル相関図（オブジェクト構成）</div>
+    <div class="card-header">🗂 データモデル相関図（オブジェクト構成 / API名は通例の英語）</div>
     <div class="card-body">
       <div class="model">
-        <div class="ent"><div class="en">企業</div><div class="ef">Account</div></div>
+        <div class="ent"><div class="en">企業</div><div class="ef">Account（標準）</div></div>
         <div class="rel-arrow"><span>1</span><span>—</span><span class="lbl">求人を持つ</span><span>∞</span></div>
-        <div class="ent"><div class="en">求人</div><div class="ef">Job</div></div>
+        <div class="ent"><div class="en">求人</div><div class="ef">Job__c</div></div>
         <div class="rel-arrow"><span>1</span><span>—</span><span class="lbl">選考</span><span>∞</span></div>
-        <div class="ent" style="border-color:var(--sf-amber)"><div class="en">選考</div><div class="ef">Selection（中核）</div></div>
+        <div class="ent" style="border-color:var(--sf-amber)"><div class="en">選考</div><div class="ef">Application__c（中核）</div></div>
         <div class="rel-arrow"><span>∞</span><span>—</span><span class="lbl">候補者</span><span>1</span></div>
-        <div class="ent"><div class="en">候補者</div><div class="ef">Candidate</div></div>
+        <div class="ent"><div class="en">候補者</div><div class="ef">Contact（標準）</div></div>
       </div>
-      <div class="note" style="margin:0">★「選考」が候補者×求人を結ぶ中核オブジェクト。フェーズ履歴・活動（Slack/メール）・推薦コメントはすべて選考に紐付く。企業⇄候補者はメール連携で双方向にも辿れる。</div>
+      <div class="model" style="padding-top:0">
+        <div class="ent" style="border-color:var(--sf-green)"><div class="en">選考FB</div><div class="ef">ApplicationFeedback__c</div></div>
+        <div class="ent" style="border-color:var(--sf-green)"><div class="en">面談メモ</div><div class="ef">InterviewNote__c</div></div>
+        <div class="ent"><div class="en">入社</div><div class="ef">Placement__c</div></div>
+        <div class="ent"><div class="en">入金/返金</div><div class="ef">Payment__c / Refund__c</div></div>
+        <div class="ent"><div class="en">提携先</div><div class="ef">Partner__c</div></div>
+        <div class="ent"><div class="en">予算</div><div class="ef">Budget__c</div></div>
+      </div>
+      <div class="note" style="margin:0">★「選考（Application__c）」が候補者×求人を結ぶ中核。<strong style="color:var(--sf-green)">緑＝今回新規追加</strong>：選考FB（面接ごと・複数記録／NG理由集約）と面談メモ（記録者・記録日を追跡）。入社→入金/返金で成果報酬を管理。予算はダッシュボードで実績対比。</div>
     </div>
   </div>
 </section>
@@ -409,7 +418,7 @@
     <div class="item"><div class="k">現職</div><div class="v">ABC社 / プロダクトマネージャー</div></div>
     <div class="item"><div class="k">希望年収</div><div class="v">800〜900万円</div></div>
     <div class="item"><div class="k">勤務地希望</div><div class="v">東京 / リモート可</div></div>
-    <div class="item"><div class="k">最終接触日</div><div class="v">2026-05-18</div></div>
+    <div class="item"><div class="k">トスアップ日（流入）</div><div class="v">2026-03-12</div></div>
   </div>
 
   <div class="grid">
@@ -419,8 +428,10 @@
         <div class="card-body">
           <div class="kv">
             <div class="k">氏名</div><div>山田 太郎</div>
+            <div class="k">求職者ID</div><div>CP-100245 <span class="badge">外部ID / Slackワークフロー連携キー</span></div>
             <div class="k">メール</div><div>yamada.taro@example.com</div>
             <div class="k">電話</div><div>090-1234-5678</div>
+            <div class="k">候補者ステータス</div><div><span class="badge blue">紹介可能</span></div>
             <div class="k">登録日</div><div>2026-03-12</div>
             <div class="k">経験社数</div><div>3社</div>
             <div class="k">ソース媒体</div><div><span class="badge">HRMOS Hire</span></div>
@@ -449,6 +460,20 @@
             <button class="btn" style="margin-top:8px">▶ AIで再生成（2,000文字単位課金）</button>
           </div>
         </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">🗒 面談メモ（InterviewNote__c）<span class="count">2件 / 記録者・記録日を自動追跡</span>
+          <button class="btn" style="margin-left:auto">＋ 面談メモを記録</button>
+        </div>
+        <table class="rel">
+          <thead><tr><th>面談日</th><th>面談担当</th><th>メモ概要</th><th>記録者</th><th>記録日時</th></tr></thead>
+          <tbody>
+            <tr><td>2026-05-08</td><td>藤本</td><td>初回カウンセリング。SaaS志向強め、年収より裁量重視。</td><td>藤本</td><td>05-08 18:22</td></tr>
+            <tr><td>2026-03-12</td><td>倉島</td><td>登録時ヒアリング。PM経験3社・B2B中心。</td><td>倉島</td><td>03-12 10:05</td></tr>
+          </tbody>
+        </table>
+        <div class="note" style="margin:8px 12px 12px">★ 基本1回。担当変更・再面談時は上書きせず新規レコードで履歴を蓄積。再面談時は求職者ID連携（Slackワークフロー）をトリガーに候補者ステータスを「面談待ち」へ自動切替（要仕様調整）。</div>
       </div>
     </div>
 
@@ -483,7 +508,7 @@
     <div class="rec-icon" style="background:#7c3aed">💼</div>
     <div>
       <h2 class="rec-title">EM募集（株式会社○○）</h2>
-      <div class="rec-sub">求人 / ステータス: <span class="badge amber">推薦中</span> / 取得元: <span class="badge">HRMOS Hire</span></div>
+      <div class="rec-sub">求人 / 求人ステータス: <span class="badge blue">アクティブ</span> / 取得元: <span class="badge">HRMOS Hire</span></div>
     </div>
     <div class="rec-actions">
       <button class="btn">編集</button>
@@ -507,10 +532,20 @@
             <div class="k">ポジション分類</div><div>マネジメント</div>
             <div class="k">募集職種カテゴリ</div><div>エンジニアリングマネージャー</div>
             <div class="k">雇用形態</div><div>正社員</div>
-            <div class="k">ステータス</div><div><span class="badge amber">推薦中</span></div>
-            <div class="k">ステータス遷移日</div><div>2026-05-10</div>
+            <div class="k">求人ステータス</div><div><span class="badge blue">アクティブ</span> ／ <span class="badge">入社あり</span> ／ <span class="badge">クローズ</span></div>
+            <div class="k">更新日</div><div>2026-05-18</div>
             <div class="k">取得元媒体</div><div>HRMOS Hire</div>
           </div>
+          <div class="note" style="margin:10px 0 0">★ 求人ステータスは「アクティブ」を細分化（例: 入社あり）。紐づく選考のいずれかが「入社」になると Flow で自動的に「入社あり」へ更新。アクティブ求人0件で関連通知を制御。</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📄 選考フロー（JD文言をそのまま格納 / 厳密なフェーズ管理は選考側で実施）</div>
+        <div class="card-body">
+          <div style="background:#f7f9fb;padding:10px;border-radius:4px;font-size:12px;line-height:1.7;white-space:pre-line">【選考プロセス】
+書類選考 → 一次面接（現場マネージャー） → 二次面接（部門長） → 最終面接（役員） → 内定
+※ ポジションにより一次・最終のみの場合あり（フェーズ共通化・スキップ運用可）</div>
         </div>
       </div>
 
@@ -562,10 +597,11 @@
     <div class="rec-icon" style="background:#fe9339">🔄</div>
     <div>
       <h2 class="rec-title">山田 太郎 × EM募集（株式会社○○）</h2>
-      <div class="rec-sub">選考 / フェーズ: <span class="badge amber">1次面接</span> / 推薦日: 2026-05-12</div>
+      <div class="rec-sub">選考（Application__c）/ フェーズ: <span class="badge amber">1次面接</span> / 推薦日: 2026-05-12</div>
     </div>
     <div class="rec-actions">
       <button class="btn">編集</button>
+      <button class="btn">📄 推薦書を出力（PDF / Word）</button>
       <button class="btn btn-primary">次フェーズへ進める</button>
     </div>
   </div>
@@ -600,7 +636,8 @@
             <div class="k">2次面接日</div><div>—</div>
             <div class="k">内定日</div><div>—</div>
             <div class="k">入社日</div><div>—</div>
-            <div class="k">結果理由</div><div>—</div>
+            <div class="k">NGフェーズ</div><div>—（選択リスト：書類/一次/二次/最終）</div>
+            <div class="k">NG理由</div><div>—（選択リスト・分析用に集約）</div>
             <div class="k">辞退理由</div><div>—（選択リスト）</div>
           </div>
         </div>
@@ -614,6 +651,20 @@
           </div>
         </div>
       </div>
+
+      <div class="card">
+        <div class="card-header">🗣 選考フィードバック（ApplicationFeedback__c）<span class="count">面接ごとに複数記録</span>
+          <button class="btn btn-primary" style="margin-left:auto">＋ フィードバックを記載</button>
+        </div>
+        <table class="rel">
+          <thead><tr><th>面接フェーズ</th><th>評価</th><th>フィードバック内容</th><th>記録者</th><th>記録日</th></tr></thead>
+          <tbody>
+            <tr><td>書類選考</td><td><span class="badge green">通過</span></td><td>PM経験十分。SaaSグロース実績が要件に合致。</td><td>倉島</td><td>05-13</td></tr>
+            <tr><td>一次面接</td><td><span class="badge amber">保留</span></td><td>マネジメント志向は良いが、技術深度の確認を二次で。</td><td>田中 様</td><td>05-21</td></tr>
+          </tbody>
+        </table>
+        <div class="note" style="margin:8px 12px 12px">★ 1選考に複数のフィードバックを記録。NG時は「NG理由」を選択リストで集約し、将来の分析（書類NG/一次NG等の傾向）に活用。</div>
+      </div>
     </div>
 
     <div>
@@ -626,21 +677,37 @@
       </div>
 
       <div class="card">
-        <div class="card-header">📞 関連活動</div>
+        <div class="card-header">📧 メールセクション <span class="count">進捗に紐付くメール</span></div>
         <div class="card-body">
           <div class="activity">
-            <div class="row"><div class="date">05/20</div><div class="type">面接</div><div class="body">1次面接（オンライン）</div></div>
-            <div class="row"><div class="date">05/13</div><div class="type">メール</div><div class="body">書類送付完了</div></div>
-            <div class="row"><div class="date">05/12</div><div class="type">推薦</div><div class="body">推薦コメント送付</div></div>
+            <div class="row"><div class="date">06/02</div><div class="type">受信</div><div class="body">田中様: 二次面接日程について（→ 進捗に紐付け）</div></div>
+            <div class="row"><div class="date">05/13</div><div class="type">送信</div><div class="body">書類送付完了の連絡</div></div>
+            <div class="row"><div class="date">05/12</div><div class="type">送信</div><div class="body">推薦状送付</div></div>
           </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-header">⏰ リマインド</div>
+        <div class="card-header">💬 Slackセクション <span class="count">スレッド/チャンネル紐付け</span></div>
         <div class="card-body" style="font-size:12px">
-          🔔 05/22 までに1次結果ヒアリング<br>
-          🔔 05/25 候補者フォローアップ
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span class="badge blue">#候補者-山田太郎</span>
+            <button class="btn" style="padding:4px 10px">🔗 Slackで開く ↗</button>
+          </div>
+          <div class="activity">
+            <div class="row"><div class="date">05/22</div><div class="type">Slack</div><div class="body">倉島「1次OK、2次へ」</div></div>
+            <div class="row"><div class="date">05/20</div><div class="type">Slack</div><div class="body">1次面接実施 報告</div></div>
+          </div>
+          <div class="note" style="margin:8px 0 0">★ メールとSlackはセクションを分けて表示（時系列の完全統合はしない）。1候補者1チャンネル（プライベート可）またはスレッドURLを紐付け。スレッド単位通知の可否は要仕様確認。</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">✅ タスク（ToDo）<span class="count">期日・リマインド</span></div>
+        <div class="card-body" style="font-size:12px">
+          ☑ 05/22 1次結果ヒアリング <span class="badge green">完了</span><br>
+          ☐ 05/25 候補者フォローアップ <span class="badge amber">期日</span> 🔔<br>
+          ☐ 06/05 二次面接の日程確定
         </div>
       </div>
     </div>
@@ -671,15 +738,15 @@
   <div class="grid">
     <div>
       <div class="card">
-        <div class="card-header">📑 求人一覧 <span class="count">5件</span></div>
+        <div class="card-header">📑 求人一覧 <span class="count">5件 / 更新日で並び替え ▼</span></div>
         <table class="rel">
-          <thead><tr><th>求人名</th><th>フェーズ</th><th>推薦数</th><th>内定数</th><th>採用担当</th></tr></thead>
+          <thead><tr><th>求人名</th><th>求人ステータス</th><th>推薦数</th><th>内定数</th><th>採用担当</th><th>更新日 ▼</th></tr></thead>
           <tbody>
-            <tr><td><a>EM募集</a></td><td><span class="badge amber">推薦中</span></td><td>5</td><td>1</td><td>田中 様</td></tr>
-            <tr><td><a>PdM求人</a></td><td><span class="badge blue">ヒアリング</span></td><td>0</td><td>0</td><td>田中 様</td></tr>
-            <tr><td><a>SRE募集</a></td><td><span class="badge">クローズ</span></td><td>3</td><td>0</td><td>佐々木 様</td></tr>
-            <tr><td><a>QA Engineer</a></td><td><span class="badge green">入社済</span></td><td>4</td><td>1</td><td>田中 様</td></tr>
-            <tr><td><a>テックリード</a></td><td><span class="badge amber">推薦中</span></td><td>2</td><td>0</td><td>田中 様</td></tr>
+            <tr><td><a>EM募集</a></td><td><span class="badge blue">アクティブ</span></td><td>5</td><td>1</td><td>田中 様</td><td>05-18</td></tr>
+            <tr><td><a>テックリード</a></td><td><span class="badge blue">アクティブ</span></td><td>2</td><td>0</td><td>田中 様</td><td>05-16</td></tr>
+            <tr><td><a>QA Engineer</a></td><td><span class="badge">入社あり</span></td><td>4</td><td>1</td><td>田中 様</td><td>05-09</td></tr>
+            <tr><td><a>PdM求人</a></td><td><span class="badge blue">アクティブ</span></td><td>0</td><td>0</td><td>田中 様</td><td>05-04</td></tr>
+            <tr><td><a>SRE募集</a></td><td><span class="badge">クローズ</span></td><td>3</td><td>0</td><td>佐々木 様</td><td>04-22</td></tr>
           </tbody>
         </table>
       </div>
@@ -720,6 +787,87 @@
             <div class="row"><div class="date">05/12</div><div class="type">メール</div><div class="body">推薦状送付（山田様）</div></div>
             <div class="row"><div class="date">05/01</div><div class="type">MTG</div><div class="body">月次レビュー</div></div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 入社・請求 ========== -->
+<section class="page" id="page-hire">
+  <div class="note">★ 入社（Placement__c）で成果報酬を管理。請求/入金/返金は基本「一括＝1レコード」運用。分割・定期など例外はイレギュラーフラグ＋複数レコードで対応。提携先・予算もここで管理。</div>
+
+  <div class="rec-header">
+    <div class="rec-icon" style="background:#2e844a">💰</div>
+    <div>
+      <h2 class="rec-title">高橋 三郎 × EM募集（株式会社○○）— 入社</h2>
+      <div class="rec-sub">入社（Placement__c）/ 入社ステータス: <span class="badge green">入社済</span> / 入社日: 2026-06-01</div>
+    </div>
+    <div class="rec-actions">
+      <button class="btn">編集</button>
+      <button class="btn btn-primary">＋ 入金を登録</button>
+    </div>
+  </div>
+
+  <div class="hl">
+    <div class="item"><div class="k">企業</div><div class="v">株式会社○○</div></div>
+    <div class="item"><div class="k">請求金額</div><div class="v">¥1,800,000</div></div>
+    <div class="item"><div class="k">入金状況</div><div class="v"><span class="badge green">入金済</span></div></div>
+    <div class="item"><div class="k">イレギュラー</div><div class="v">なし（一括）</div></div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div class="card-header">💴 入金 / 返金（Payment__c / Refund__c）<span class="count">基本1レコード（一括）／複数可</span></div>
+        <table class="rel">
+          <thead><tr><th>種別</th><th>日付</th><th>金額</th><th>区分</th><th>備考</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge green">入金</span></td><td>2026-06-25</td><td>¥1,800,000</td><td>一括</td><td>請求書#INV-0312</td></tr>
+            <tr><td><span class="badge red">返金</span></td><td>—</td><td>—</td><td>—</td><td>早期退職時のみ発生</td></tr>
+          </tbody>
+        </table>
+        <div class="note" style="margin:8px 12px 12px">★ 年数件の定期/分割払いは「イレギュラー」フラグを立て、複数の入金レコードで履歴を残す運用。</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">📋 入社詳細</div>
+        <div class="card-body">
+          <div class="kv">
+            <div class="k">候補者</div><div><a>高橋 三郎</a></div>
+            <div class="k">求人 / 選考</div><div><a>EM募集</a> / <a>高橋三郎 × EM募集</a></div>
+            <div class="k">入社日</div><div>2026-06-01</div>
+            <div class="k">請求金額</div><div>¥1,800,000</div>
+            <div class="k">入社ステータス</div><div><span class="badge green">入社済</span></div>
+            <div class="k">イレギュラーフラグ</div><div>☐ なし</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-header">🤝 提携先（Partner__c）<span class="count">3件</span></div>
+        <table class="rel">
+          <thead><tr><th>提携先</th><th>種別</th><th>紹介数</th></tr></thead>
+          <tbody>
+            <tr><td>提携エージェントA</td><td>RPO</td><td>12</td></tr>
+            <tr><td>媒体パートナーB</td><td>媒体</td><td>8</td></tr>
+            <tr><td>提携エージェントC</td><td>サーチ</td><td>3</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">🎯 予算（Budget__c）<span class="count">当月 / 月次目標</span></div>
+        <div class="card-body" style="font-size:12px">
+          <div class="kv">
+            <div class="k">対象年月</div><div>2026-06</div>
+            <div class="k">売上目標</div><div>¥10,000,000</div>
+            <div class="k">入社目標</div><div>6 件</div>
+            <div class="k">推薦目標</div><div>40 件</div>
+          </div>
+          <div class="note" style="margin:8px 0 0">★ 目標値は予算オブジェクトに月次格納し、ダッシュボードで実績対比（%）。%以外の見せ方は別途サンプル提示。</div>
         </div>
       </div>
     </div>
@@ -946,12 +1094,24 @@
   <div class="rec-header">
     <div class="rec-icon" style="background:#014486">📊</div>
     <div>
-      <h2 class="rec-title">紹介事業 出口KPIダッシュボード</h2>
-      <div class="rec-sub">期間: 2026-04-01 〜 2026-05-19（直近6週間）</div>
+      <h2 class="rec-title">紹介事業 KPIダッシュボード</h2>
+      <div class="rec-sub">集計基準: <span class="badge blue">当月基準（2026-06-01〜06-30）</span> / 月次で繰り返し</div>
     </div>
     <div class="rec-actions">
       <button class="btn">期間変更</button>
       <button class="btn">エクスポート</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">🧭 集計基準（3種類）— 閲覧者ごとに使い分け <span class="count">タブ分け／1タブ内切替は次回確定</span></div>
+    <div class="card-body">
+      <div class="grid-3">
+        <div class="ext"><div class="et">📥 トスアップ日基準</div><div class="ed">流入日（Contact.トスアップ日）で集計。<strong>マーケ/集客</strong>が全体像を把握。</div></div>
+        <div class="ext"><div class="et">📤 推薦日基準</div><div class="ed">推薦日（Application__c.推薦日）で集計。<strong>マッチング担当</strong>が個数（マッチング指標）を把握。</div></div>
+        <div class="ext"><div class="et">💰 当月基準（表示中）</div><div class="ed">入社日（Placement__c.入社日）で集計。<strong>営業</strong>が当月売上予測に使用。</div></div>
+      </div>
+      <div class="note" style="margin:10px 0 0">★ 論点: 基準ごとにタブを3分割するか／1タブ内で期間切替するか。既存制約に引きずられずゼロベースで倉島案を作成して提示。</div>
     </div>
   </div>
 
@@ -964,6 +1124,16 @@
   </div>
 
   <div style="height:12px"></div>
+
+  <div class="card">
+    <div class="card-header">🎯 予算対比（当月 / Budget__c）<span class="count">目標に対する実績</span></div>
+    <div class="card-body" style="font-size:12px">
+      売上　 実績 ¥7.2M / 目標 ¥10M　 <span class="badge amber">72%</span><br>
+      入社数 実績 8 / 目標 6　　　　　 <span class="badge green">133%</span><br>
+      推薦数 実績 132 / 目標 40　　　　 <span class="badge green">330%</span>
+      <div class="note" style="margin:8px 0 0">★ Salesforce標準は%表示が中心。金額差など%以外の見せ方は別途サンプルを提示して確定。</div>
+    </div>
+  </div>
 
   <div class="grid-3">
     <div class="card">
