@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>タスカジ｜Agentforce チャットボット デモ (v0.2)</title>
+<title>タスカジ｜Agentforce チャットボット デモ (v0.3)</title>
 <style>
   :root {
     --primary: #2e8b57;
@@ -356,13 +356,55 @@
     line-height: 1.5;
   }
   .mail-mode-banner b { color: #1e3a8a; }
+
+  /* ===== インシデント（システム障害）モード ===== */
+  #incidentBtn.active {
+    background: var(--escA);
+    border-color: var(--escA);
+    color: #fff;
+    font-weight: 700;
+  }
+  .incident-banner {
+    align-self: stretch;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid var(--escA);
+    color: var(--text);
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    line-height: 1.6;
+    max-width: 100%;
+  }
+  .incident-banner .ib-title { font-weight: 700; color: var(--escA); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .incident-banner a { color: #1d4ed8; word-break: break-all; }
+  .incident-banner .ib-tmpl {
+    background: #fff;
+    border: 1px dashed #fca5a5;
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .incident-status {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: var(--escA);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+  }
 </style>
 </head>
 <body>
 
 <header>
   <h1>タスカジ｜Agentforce サポートチャット</h1>
-  <span class="tag">DEMO v0.2</span>
+  <span class="tag">DEMO v0.3</span>
   <div class="controls">
     <label>シナリオ:
       <select id="scenarioSelector">
@@ -386,6 +428,7 @@
         <option value="closed">営業時間外（夜間/休業）</option>
       </select>
     </label>
+    <button id="incidentBtn" title="システム障害発生時に、定型文と解決策URLを自動提示します">🚨 インシデント</button>
     <button id="resetBtn">リセット</button>
   </div>
 </header>
@@ -457,6 +500,7 @@
 
   <!-- Admin Pane -->
   <div class="admin-pane">
+    <div class="incident-status" id="incidentStatus" style="display:none;">🚨 インシデント発生中 — 定型文・解決策URLを自動提示</div>
     <h2>シナリオ判定</h2>
     <div class="admin-section">
       <div class="row"><span class="key">Scenario</span><span class="val" id="adminScenario">—</span></div>
@@ -473,6 +517,13 @@
     <h2>Slots (収集状況)</h2>
     <div class="admin-section" id="adminSlots">
       <div style="color:var(--muted);font-size:11px;">未収集</div>
+    </div>
+
+    <h2>優先度 (Priority)</h2>
+    <div class="admin-section">
+      <div class="row"><span class="key">判定</span><span class="val" id="adminPriority"><span class="pill idle">—</span></span></div>
+      <div class="row"><span class="key">基準日（入力）</span><span class="val" id="adminPriorityDate">—</span></div>
+      <div style="color:var(--muted);font-size:10.5px;margin-top:6px;line-height:1.5;">※SFのデータ更新は毎朝5〜6時のみ。リアルタイムの緊急度判定は不可のため、ユーザー入力の依頼日で優先度を判定します。</div>
     </div>
 
     <h2>Guardrail / Escalation</h2>
@@ -552,7 +603,7 @@ const scenarios = {
       cancel_fee_rule: {
         flow: [
           { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
-          { type: 'identity', idLabel: '依頼ID' },
+          { type: 'identity', idLabel: 'アカウントID' },
           { type: 'ask', slot: 'reservation_type', text: '対象のご予約はスポット／定期のどちらですか？', options: ['スポット','定期'] },
           { type: 'faq', faqs: ['FAQ_CANCEL_FEE_TIMING — キャンセル料の発生時期'] },
           { type: 'end', level: 'C', text: 'キャンセル料は、依頼日時の何日前にキャンセル操作を行うかで発生条件が変わります。詳細は上記FAQをご確認ください。判断に迷う場合は担当へお繋ぎします。' }
@@ -561,7 +612,7 @@ const scenarios = {
       cancel_procedure: {
         flow: [
           { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
-          { type: 'identity', idLabel: '依頼ID' },
+          { type: 'identity', idLabel: 'アカウントID' },
           { type: 'ask', slot: 'already_cancelled', text: 'すでにアプリ上でキャンセル操作はお済みですか？', options: ['はい','いいえ'] },
           { type: 'branch', on: 'already_cancelled', cases: {
             'はい': [
@@ -585,7 +636,7 @@ const scenarios = {
       schedule_change: {
         flow: [
           { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
-          { type: 'identity', idLabel: '依頼ID' },
+          { type: 'identity', idLabel: 'アカウントID' },
           { type: 'ask', slot: 'change_scope', text: 'ご変更されたい内容を教えてください。', options: ['日程のみ','日程＋住所','住所のみ'] },
           { type: 'ask', slot: 'target_booking_date', text: '対象の予約日はいつですか？', input: 'date' },
           { type: 'ask', slot: 'desired_new_date', text: '変更ご希望日はいつですか？', input: 'date' },
@@ -597,7 +648,7 @@ const scenarios = {
       address_change: {
         flow: [
           { type: 'ai', text: 'ご相談ありがとうございます。AIが一次対応を担当します。' },
-          { type: 'identity', idLabel: '依頼ID' },
+          { type: 'identity', idLabel: 'アカウントID' },
           { type: 'ask', slot: 'target_booking_date', text: '対象の予約日はいつですか？', input: 'date' },
           { type: 'ask', slot: 'id_document_ready_date', text: '新住所の身分証はいつ準備できそうですか？', input: 'date' },
           { type: 'faq', faqs: ['FAQ_ADDRESS_CHANGE — 住所変更（身分証提出）', 'FAQ_ID_VERIFICATION — 本人確認'] },
@@ -711,7 +762,8 @@ let state = {
   faqs: [],
   inquiryName: 'INQ-2026-' + String(Math.floor(Math.random()*9000)+1000),
   awaitingResponse: false,
-  identity: { active: false, phase: null, retries: 0, altIndex: 0, status: null, bookingId: null, label: '依頼ID' },
+  incidentMode: false,
+  identity: { active: false, phase: null, retries: 0, altIndex: 0, status: null, bookingId: null, label: 'アカウントID' },
   conversationLog: []
 };
 
@@ -819,6 +871,40 @@ function finishCountdown(mode) {
 }
 
 
+/* ===== インシデント（システム障害）対応 — 6/10 MTG =====
+   管理画面のインシデント用ボタンをONにすると、問い合わせ急増時でも
+   定型文＋解決策URLを自動提示し、担当者の負荷を抑えて効率的に対応する。 */
+function renderIncidentBanner() {
+  const el = document.createElement('div');
+  el.className = 'incident-banner';
+  el.innerHTML =
+    '<div class="ib-title">🚨 システム障害のお知らせ</div>' +
+    'ただいま一部機能で障害が発生しており、復旧作業を進めております。ご不便をおかけし申し訳ございません。<br>' +
+    '最新の復旧状況・回避策は <a href="https://status.taskaji.jp" target="_blank" rel="noopener">status.taskaji.jp</a> でご確認いただけます。' +
+    '<div class="ib-tmpl">【定型文】現在システム障害により一部のお手続きがご利用いただけません。復旧までいましばらくお待ちください。お急ぎの場合は、復旧後に担当者より改めてご連絡いたします。</div>';
+  messagesEl.appendChild(el);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function applyIncidentUI() {
+  const btn = document.getElementById('incidentBtn');
+  const st = document.getElementById('incidentStatus');
+  if (!btn || !st) return;
+  if (state.incidentMode) { btn.classList.add('active'); st.style.display = 'flex'; }
+  else { btn.classList.remove('active'); st.style.display = 'none'; }
+}
+
+function toggleIncidentMode() {
+  state.incidentMode = !state.incidentMode;
+  applyIncidentUI();
+  if (state.incidentMode) {
+    renderSystem('管理画面: インシデント対応ボタン ON → 定型文・解決策URLを自動提示');
+    renderIncidentBanner();
+  } else {
+    renderSystem('管理画面: インシデント対応を解除 → 通常対応に戻りました');
+  }
+}
+
 // ---------- 4. 会話エンジン ----------
 function startScenario(scenarioCode, intent) {
   state.scenario = scenarioCode;
@@ -915,11 +1001,13 @@ function escalate(level, reason) {
 
 // ---------- 本人特定（ID入力）フロー ----------
 const ID_REGEX = /^TK-\d{4}-\d{6}$/;          // ※実フォーマットは要確認（D4）
-const QR_ID_TOP = ['依頼IDを入力', '確認方法を見る', '分からない／スキップ'];
+const QR_ID_TOP = ['IDを入力', '確認方法を見る', '分からない／スキップ'];
+// 代替特定（6/10 MTG）: ID未所持の非会員（登録前の依頼者・応募者）からは
+// 名前・メールアドレスなど最小限の個人情報を収集。依頼日は優先度判定に使用。
 const ALT_QUEUE = [
-  { key: 'alt_nickname', q: '登録ニックネームを教えてください。' },
-  { key: 'alt_email',    q: '登録メールアドレスを教えてください。' },
-  { key: 'alt_date',     q: '対象のご予約日を教えてください（例: 2026-06-20）。' }
+  { key: 'alt_name',         q: 'お名前（フルネーム）を教えてください。' },
+  { key: 'alt_email',        q: 'ご連絡用のメールアドレスを教えてください。' },
+  { key: 'alt_service_date', q: '対象の依頼日（サービス予定日）を教えてください（例: 2026-06-20）。優先度の判定に使用します。' }
 ];
 
 function startIdentity(idLabel) {
@@ -927,10 +1015,11 @@ function startIdentity(idLabel) {
   state.identity.phase = 'ask';
   state.identity.retries = 0;
   state.identity.altIndex = 0;
-  state.identity.label = idLabel || '依頼ID';
+  state.identity.label = idLabel || 'アカウントID';
   state.awaitingResponse = true;
+  // ※ID入力は「障壁」ではなく利便性訴求（6/10 MTG）: 入力するとご予約に紐づき早く正確に案内できる旨を強調
   renderMessage('ai',
-    `対象のご予約を確認するため、${state.identity.label}を教えていただけますか？\nお手元で分かる場合のみで大丈夫です。分からなければスキップできます。`,
+    `${state.identity.label}をご入力いただくと、ご予約に紐づけて、より早く・正確にご案内できます。\nお手元の${state.identity.label}を教えていただけますか？（お分かりにならない場合はスキップも可能です）`,
     { quickReplies: QR_ID_TOP });
   updateAdmin();
 }
@@ -945,7 +1034,7 @@ function askIdInput() {
 function startAltIdentify() {
   state.identity.phase = 'alt';
   state.identity.altIndex = 0;
-  renderMessage('ai', 'IDが無くても確認できます。差し支えなければ以下を順にお伺いします。（カード番号・口座番号などはお預かりしません）');
+  renderMessage('ai', 'IDが無くても確認できます。ご本人確認のため、お名前・メールアドレスなど最小限の情報のみ順にお伺いします。（カード番号・口座番号などはお預かりしません）');
   setTimeout(askNextAlt, 350);
 }
 
@@ -986,12 +1075,12 @@ function handleIdentityInput(text) {
   // クイックリプライ分岐
   if (t === '確認方法を見る') {
     renderMessage('ai',
-      '依頼IDは アプリの［依頼履歴］→ 対象の予約を開く と、画面上部の「依頼番号」に表示されます（例: TK-2026-013254）。\nWebの場合は マイページ ＞ 予約詳細 のURL末尾の番号です。',
-      { quickReplies: ['依頼IDを入力', '分からない／スキップ'] });
+      `${state.identity.label}は アプリ／Webの ［マイページ］＞［アカウント情報］ でご確認いただけます（例: TK-2026-013254）。\n特定のご予約に関するお問い合わせは、［依頼履歴］から対象の予約を開くと表示される「依頼番号」でもご案内できます。`,
+      { quickReplies: ['IDを入力', '分からない／スキップ'] });
     id.phase = 'ask';
     return;
   }
-  if (t === '依頼IDを入力') { askIdInput(); return; }
+  if (t === 'IDを入力') { askIdInput(); return; }
   if (t === '分からない／スキップ' || t === 'やっぱり分からない') {
     id.status = '未入力';
     renderSystem('ID未入力 → 代替特定へ（離脱させず継続）');
@@ -1014,7 +1103,7 @@ function handleIdentityInput(text) {
       startAltIdentify();
     } else {
       id.phase = 'await_id';
-      renderMessage('ai', '恐れ入ります、依頼IDは「TK-」で始まる番号です（例: TK-2026-013254）。もう一度ご確認いただけますか？',
+      renderMessage('ai', `恐れ入ります、${state.identity.label}は「TK-」で始まる番号です（例: TK-2026-013254）。もう一度ご確認いただけますか？`,
         { quickReplies: ['確認方法を見る', '分からない／スキップ'] });
     }
   }
@@ -1023,6 +1112,12 @@ function handleIdentityInput(text) {
 function handleUserInput(text) {
   if (!text || !text.trim()) return;
   renderMessage('user', text);
+
+  // インシデント中: 問い合わせ急増時は定型文＋解決策URLで自動一次対応（担当者の負荷を抑制）
+  if (state.incidentMode) {
+    renderIncidentBanner();
+    return;
+  }
 
   // 初回入力ならシナリオ判定
   if (!state.scenario) {
@@ -1080,6 +1175,28 @@ function handleUserInput(text) {
 }
 
 // ---------- 5. 管理者ビュー更新 ----------
+// 優先度判定（6/10 MTG）: SF更新は朝5〜6時のみでリアルタイム判定不可のため、
+// ユーザー入力の依頼日（下記キー）と現在時刻の差で緊急度を算出する。
+const PRIORITY_DATE_KEYS = ['service_datetime', 'target_booking_date', 'desired_new_date', 'alt_service_date'];
+function computePriority() {
+  let earliest = null;
+  for (const k of PRIORITY_DATE_KEYS) {
+    const v = state.slots[k];
+    if (!v) continue;
+    const d = new Date(String(v).replace(/\//g, '-'));
+    if (!isNaN(d.getTime())) {
+      if (!earliest || d < earliest) earliest = d;
+    }
+  }
+  if (!earliest) return { level: null, label: '—', date: '—' };
+  const diffH = (earliest - new Date()) / 36e5;
+  let level, label;
+  if (diffH <= 24) { level = 'A'; label = '高（24時間以内）'; }
+  else if (diffH <= 72) { level = 'B'; label = '中（3日以内）'; }
+  else { level = 'C'; label = '低'; }
+  return { level, label, date: earliest.toISOString().slice(0, 10) };
+}
+
 function updateAdmin() {
   document.getElementById('adminScenario').textContent = state.scenario || '—';
   document.getElementById('adminIntent').textContent = state.intent || '—';
@@ -1105,6 +1222,16 @@ function updateAdmin() {
       `<div class="row"><span class="key">${k}</span><span class="val">${Array.isArray(v) ? v.join(', ') : v}</span></div>`
     ).join('');
   }
+
+  // 優先度 (Priority)
+  const pr = computePriority();
+  const prEl = document.getElementById('adminPriority');
+  if (!pr.level) {
+    prEl.innerHTML = '<span class="pill idle">—</span>';
+  } else {
+    prEl.innerHTML = `<span class="pill esc${pr.level}">${pr.label}</span>`;
+  }
+  document.getElementById('adminPriorityDate').textContent = pr.date;
 
   // Guardrail
   const gEl = document.getElementById('adminGuardrail');
@@ -1140,6 +1267,8 @@ function updateAdmin() {
     Intent__c: state.intent || null,
     MatchedBookingId__c: (state.identity && state.identity.bookingId) || null,
     IdentityMatchStatus__c: (state.identity && state.identity.status) || null,
+    Priority__c: pr.level ? `Level ${pr.level}` : null,
+    PriorityBasisDate__c: pr.date !== '—' ? pr.date : null,
     SlotsJson__c: state.slots,
     EscalationLevel__c: state.escalation || null,
     EscalationReason__c: state.escReason || null,
@@ -1166,6 +1295,9 @@ function reset() {
   const toast = document.getElementById('notifyToast');
   if (toast) toast.classList.add('hidden');
 
+  // インシデント状態はリセットしても継続（障害は会話単位ではないため）
+  const incidentWasOn = state.incidentMode;
+
   messagesEl.innerHTML = '';
   state = {
     scenario: null, intent: null,
@@ -1175,11 +1307,13 @@ function reset() {
     guardrails: [], escalation: null, escReason: '', faqs: [],
     inquiryName: 'INQ-2026-' + String(Math.floor(Math.random()*9000)+1000),
     awaitingResponse: false,
-    identity: { active: false, phase: null, retries: 0, altIndex: 0, status: null, bookingId: null, label: '依頼ID' },
+    incidentMode: incidentWasOn,
+    identity: { active: false, phase: null, retries: 0, altIndex: 0, status: null, bookingId: null, label: 'アカウントID' },
     conversationLog: []
   };
   // 入口モーダルを表示（パターンA: 入口で選択）
   showEntryModal();
+  applyIncidentUI();
   updateAdmin();
 }
 
@@ -1210,6 +1344,7 @@ inputEl.addEventListener('keydown', e => {
   if (e.key === 'Enter') { sendBtn.click(); }
 });
 document.getElementById('resetBtn').onclick = reset;
+document.getElementById('incidentBtn').onclick = toggleIncidentMode;
 document.getElementById('userTypeSelector').onchange = () => { state.userType = document.getElementById('userTypeSelector').value; updateAdmin(); };
 
 // 入口モーダルのボタン
