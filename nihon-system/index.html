@@ -126,6 +126,11 @@
 
 <!-- ===================== HOME ===================== -->
 <div class="screen active" id="home">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+    <strong style="font-size:14px">営業ダッシュボード</strong>
+    <span class="seg"><span class="on">全体</span><span>医療(B)</span><span>民事(A)</span></span>
+    <span style="color:var(--muted);font-size:11px">事業区分（商談レコードタイプ）で切替</span>
+  </div>
   <div class="grid g-4" style="margin-bottom:16px">
     <div class="card"><div class="body tile"><span class="lbl">今月の商談（進行中）</span><span class="big">¥48.2M</span><span class="sub up">▲ 12% 前月比</span></div></div>
     <div class="card"><div class="body tile"><span class="lbl">今月の成約</span><span class="big">¥18.5M</span><span class="sub">6件</span></div></div>
@@ -134,7 +139,7 @@
   </div>
   <div class="grid g-2">
     <div class="card">
-      <div class="rel-head"><strong>📋 今日のToDo・活動</strong><a class="lk">すべて表示</a></div>
+      <div class="rel-head"><strong>📋 今日のToDo・活動</strong><span><span class="badge b-blue" style="margin-right:8px">📧 Outlook同期</span><a class="lk">すべて表示</a></span></div>
       <table>
         <tr><th>時刻</th><th>種別</th><th>取引先</th><th>件名</th><th>状態</th></tr>
         <tr><td>10:00</td><td>訪問</td><td class="lk">鹿児島中央病院</td><td>電子カルテ更新提案</td><td><span class="badge b-amber">予定</span></td></tr>
@@ -204,10 +209,10 @@
       <div class="card">
         <div class="rel-head"><strong>💼 商談 <span class="cnt">(3)</span></strong><a class="lk">新規</a></div>
         <table>
-          <tr><th>商談名</th><th>金額</th><th>フェーズ</th></tr>
-          <tr><td class="lk">カルテ更新提案</td><td>¥12.0M</td><td><span class="badge b-blue">提案</span></td></tr>
-          <tr><td class="lk">サーバ更改</td><td>¥4.8M</td><td><span class="badge b-gray">初回接触</span></td></tr>
-          <tr><td class="lk">保守契約更新</td><td>¥1.2M</td><td><span class="badge b-green">受注</span></td></tr>
+          <tr><th>商談名</th><th>区分</th><th>金額</th><th>フェーズ</th></tr>
+          <tr><td class="lk">カルテ更新提案</td><td><span class="badge b-blue">医療B</span></td><td>¥12.0M</td><td><span class="badge b-blue">提案</span></td></tr>
+          <tr><td class="lk">サーバ更改</td><td><span class="badge b-blue">医療B</span></td><td>¥4.8M</td><td><span class="badge b-gray">初回接触</span></td></tr>
+          <tr><td class="lk">保守契約更新</td><td><span class="badge b-gray">民事A</span></td><td>¥1.2M</td><td><span class="badge b-green">受注</span></td></tr>
         </table>
       </div>
       <div class="card">
@@ -222,14 +227,14 @@
       </div>
     </div>
   </div>
-  <div class="footer-note">※ 取引先を起点に「商談・活動・導入システム」を一元可視化。As-IsのExcel横断管理をこの1画面に集約。</div>
+  <div class="footer-note">※ 取引先を起点に「商談・活動・導入システム」を一元可視化。As-IsのExcel横断管理をこの1画面に集約。<br>※ 取引先は事業区分フラグなしで<b>共通管理</b>。医療(B)／民事(A)の区別は<b>商談のレコードタイプ</b>で付与（同一顧客が両方を持てる）。</div>
 </div>
 
 <!-- ===================== OPPORTUNITY ===================== -->
 <div class="screen" id="opp">
   <div class="rhead">
     <div class="ricon" style="background:#e07000">💼</div>
-    <div class="meta"><div class="eyebrow">商談 ・ 鹿児島中央病院</div><h1>カルテ更新提案</h1></div>
+    <div class="meta"><div class="eyebrow">商談 ・ 鹿児島中央病院</div><h1>カルテ更新提案 <span class="badge b-blue" style="vertical-align:middle;font-size:11px">レコードタイプ：医療(B)</span></h1></div>
     <div class="acts"><button class="btn">編集</button><button class="btn primary">✓ フェーズを更新</button></div>
   </div>
   <ul class="path">
@@ -240,7 +245,7 @@
     <li>最終交渉</li>
     <li>受注</li>
   </ul>
-  <div class="note">💡 パスの「提案」段階のガイダンス：□提案書作成 □予算確認 □決裁者の特定 ／ 旧Opportunityの大量チェック項目はパスのガイダンスへ集約し、入力画面はスッキリ。</div>
+  <div class="note">💡 パスの「提案」段階のガイダンス：□提案書作成 □予算確認 □決裁者の特定 ／ 旧Opportunityの大量チェック項目はパスのガイダンスへ集約し、入力画面はスッキリ。<br>💡 <b>レコードタイプで医療(B)／民事・既存(A)を分離</b>：取引先は共通管理のまま商談側でA/Bを切替。既存(A)を一切触らず、医療(B)の新レイアウト・新フェーズを並行構築できる。</div>
   <div class="grid g-2">
     <div class="card">
       <h2><span class="icon" style="background:#e07000">💼</span> 商談 詳細（現場入力＝最小コア）</h2>
@@ -248,6 +253,7 @@
         <div class="fields">
           <div class="field"><div class="lbl">商談名 <span class="pencil">✎</span></div><div class="val">カルテ更新提案</div></div>
           <div class="field"><div class="lbl">取引先名</div><div class="val link">鹿児島中央病院</div></div>
+          <div class="field"><div class="lbl">レコードタイプ</div><div class="val">医療（B）</div></div>
           <div class="field"><div class="lbl">フェーズ</div><div class="val">提案</div></div>
           <div class="field"><div class="lbl">完了予定日</div><div class="val">2026-07-31</div></div>
           <div class="field"><div class="lbl">金額</div><div class="val">¥12,000,000</div></div>
@@ -286,12 +292,12 @@
 
 <!-- ===================== ACTIVITY (modal) ===================== -->
 <div class="screen" id="activity">
-  <div class="note" style="max-width:560px;margin:0 auto 14px">📱 現場のワンタップ活動記録（モバイル/PC共通）。訪問先で1分で記録 → 自動で取引先・商談・日報に紐づく。</div>
+  <div class="note" style="max-width:560px;margin:0 auto 14px">📱 現場のワンタップ活動記録（モバイル/PC共通）。訪問先で1分で記録 → 自動で取引先・商談・日報に紐づく。<br>📧 Outlook（Microsoft 365）の予定とも<b>双方向同期</b>。SFの活動↔365カレンダーが自動連携。</div>
   <div class="modal">
     <div class="mhead">🗓 活動を記録</div>
     <div class="mbody">
       <div class="form-row"><label>種別</label>
-        <div><span class="pill on">訪問</span><span class="pill">電話</span><span class="pill">メール</span><span class="pill">その他</span></div>
+        <div><span class="pill on">訪問</span><span class="pill">電話</span><span class="pill">メール</span><span class="pill">社内・移動</span><span class="pill">その他</span></div>
       </div>
       <div class="form-row"><label>取引先 *</label><div class="inp sel">鹿児島中央病院</div></div>
       <div class="form-row"><label>関連する商談</label><div class="inp sel">カルテ更新提案</div></div>
@@ -304,7 +310,7 @@
     </div>
     <div class="mfoot"><button class="btn">キャンセル</button><button class="btn primary">保存</button></div>
   </div>
-  <div class="footer-note" style="text-align:center">※ 入力項目は最小限（6項目）。役割は旧「経営者/キーマン/担当」を1選択肢に集約。</div>
+  <div class="footer-note" style="text-align:center">※ 入力項目は最小限（6項目）。役割は旧「経営者/キーマン/担当」を1選択肢に集約。<br>※「社内・移動」など顧客に紐づかない内部活動は、取引先に「自社（社内活動）」を選んでプロジェクト箱に集約管理。</div>
 </div>
 
 <!-- ===================== DAILY REPORT ===================== -->
