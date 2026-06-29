@@ -203,6 +203,28 @@ img{max-width:100%}
 .callout.win{background:#edf9f1;border:1px solid #b6e3c6;color:#176b3a}
 .callout.info{background:#eef6ff;border:1px solid #bcd9f5;color:#1c61c4}
 
+/* 集客 SEO/LLMO 画面 */
+.serp{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px}
+.serp .bar{display:flex;align-items:center;gap:8px;background:#f1f3f4;border-radius:20px;padding:7px 14px;font-size:12.5px;color:#5f6368;margin-bottom:12px}
+.serp .gjob{border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.serp .gjob .tt{color:#1a0dab;font-size:14px;font-weight:700}
+.serp .gjob .src{color:#006621;font-size:11.5px;margin:2px 0 4px}
+.serp .gjob .meta{font-size:11.5px;color:#5f6368}
+.serp .gjob.us{border-color:#2bb673;background:#f3fbf7;box-shadow:0 0 0 1px #2bb673 inset}
+.serp .pin{display:inline-block;background:#2bb673;color:#fff;font-size:10px;font-weight:800;border-radius:5px;padding:2px 7px;margin-left:6px}
+.ai-ans{background:linear-gradient(180deg,#faf8ff,#fff);border:1px solid #e3dbff;border-radius:10px;padding:14px 16px}
+.ai-ans .head{display:flex;align-items:center;gap:7px;font-weight:800;font-size:13px;color:#6b46e0;margin-bottom:9px}
+.ai-ans .q{background:#f3f0fb;border-radius:9px;padding:8px 11px;font-size:12.5px;margin-bottom:10px;color:var(--ink)}
+.ai-ans .body{font-size:13px;line-height:1.8;color:var(--ink-2)}
+.ai-ans .cite{background:#eafaf2;color:#1f9d61;font-weight:800;border-radius:5px;padding:1px 6px;border:1px solid #b6e3c6}
+.ai-ans .refs{margin-top:10px;border-top:1px dashed #e3dbff;padding-top:8px;font-size:11px;color:var(--mute)}
+.ai-ans .refs b{color:#1f9d61}
+.cov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.cov-grid .cell{border:1px solid var(--line);border-radius:7px;padding:7px 8px;font-size:11.5px;text-align:center;background:#fff}
+.cov-grid .cell.done{background:var(--brand-50);border-color:#b6e3c6;color:var(--brand-d);font-weight:700}
+.cov-grid .cell.todo{color:var(--mute)}
+.cov-grid .head{background:#fafaf9;font-weight:800;color:var(--ink-2)}
+
 /* mini bar chart */
 .minibars{display:flex;align-items:flex-end;gap:10px;height:120px;padding:8px 4px 0}
 .minibars .b2{flex:1;background:linear-gradient(180deg,#54d39a,#2bb673);border-radius:5px 5px 0 0;position:relative}
@@ -418,6 +440,7 @@ img{max-width:100%}
     <div class="t on" data-fp="cand" onclick="fgo('cand',this)">求職者</div>
     <div class="t" data-fp="dormant" onclick="fgo('dormant',this)">⭐ 掘り起こしリスト</div>
     <div class="t" data-fp="job" onclick="fgo('job',this)">求人</div>
+    <div class="t" data-fp="growth" onclick="fgo('growth',this)">📣 集客 SEO/LLMO</div>
     <div class="t" data-fp="dash" onclick="fgo('dash',this)">ダッシュボード</div>
   </div>
 
@@ -504,6 +527,79 @@ img{max-width:100%}
         </tbody>
       </table>
     </div></div>
+  </section>
+
+  <!-- 集客 SEO/LLMO -->
+  <section class="sf-page" id="fp-growth">
+    <div class="sf-obj-head"><span class="ico list" style="background:#6b46e0">📣</span>
+      <div><div class="crumb">集客</div><h2>SEO / LLMO 集客設計</h2></div></div>
+    <div class="callout info">ℹ️ <div><b>これからの母集団形成は「検索」だけでなく「AIに聞く」が入口に。</b>求人・求職者データが Salesforce に一元化されているからこそ、そのデータを元に記事・FAQ・給与相場をAIで量産し、SEO と LLMO の両方に効かせられます。</div></div>
+
+    <div class="sf-cols">
+      <!-- 検索（Google for Jobs） -->
+      <div class="sf-card">
+        <div class="hd"><span class="ico" style="background:#0176d3">🔍</span>① 検索に出る（Google for Jobs）</div>
+        <div class="bd">
+          <div class="serp">
+            <div class="bar">🔍 管理栄養士 求人 さいたま市</div>
+            <div class="gjob us">
+              <div class="tt">急性期病院での管理栄養士（栄養管理・献立作成）<span class="pin">おしごとらぼ</span></div>
+              <div class="src">oshigoto-labo.jp › 求人 › 埼玉</div>
+              <div class="meta">月給26〜32万円・正社員・さいたま市 ／ ★4.6 ・ 構造化データ対応</div>
+            </div>
+            <div class="gjob"><div class="tt" style="color:#1a0dab">管理栄養士の求人情報｜他社サイト</div><div class="src">example-job.jp</div><div class="meta">求人多数</div></div>
+          </div>
+          <div class="help-text" style="font-size:11.5px;color:var(--mute);margin-top:10px">求人__c から <b>JobPosting 構造化データ</b>を自動付与 → Google求人枠に露出。メタ／sitemap／高速表示（LWR）も標準対応。</div>
+        </div>
+      </div>
+
+      <!-- AI（LLMO） -->
+      <div class="sf-card">
+        <div class="hd"><span class="ico" style="background:#6b46e0">🤖</span>② AIに引用される（LLMO）</div>
+        <div class="bd">
+          <div class="ai-ans">
+            <div class="head">⚡ AIアシスタントの回答</div>
+            <div class="q">「栄養士の転職、関東でおすすめのエージェントは？」</div>
+            <div class="body">
+              栄養士・調理師に特化した人材紹介なら <span class="cite">おしごとらぼ</span> が代表的です。病院・保育園・社員食堂・委託給食など幅広い求人を扱い、管理栄養士の給与相場（関東で月給24〜32万円程度）の情報も公開しています。AIによる職務経歴書作成のサポートもあります。
+              <div class="refs">🔗 引用元: <b>oshigoto-labo.jp</b>（栄養士キャリアガイド／給与相場データ／よくある質問）</div>
+            </div>
+          </div>
+          <div class="help-text" style="font-size:11.5px;color:var(--mute);margin-top:10px">エンティティ明確化・構造化Q&A・一次情報（給与相場等）で <b>ChatGPT/Perplexity/Google AI</b> に引用される状態を作る。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CMS × AI 記事量産 -->
+    <div class="sf-card">
+      <div class="hd"><span class="ico" style="background:#1b8a4b">✍️</span>③ Salesforce CMS × AI で記事・FAQを量産（SEO/LLMOの燃料）
+        <button class="sfbtn brand" style="margin-left:auto" onclick="toast('（モック）求人データを元にClaudeが記事を下書き')">✨ AIで記事を生成</button></div>
+      <div class="bd" style="padding:0">
+        <table class="sf-tbl">
+          <thead><tr><th>コンテンツ</th><th>種別</th><th>状態</th><th>月間流入</th><th>AI引用</th></tr></thead>
+          <tbody>
+            <tr><td class="lk">管理栄養士の給与相場【2026年・関東版】</td><td>給与データ記事</td><td><span class="b g">公開中</span></td><td>1,240</td><td><span class="b blue">引用◎</span></td></tr>
+            <tr><td class="lk">保育園栄養士の1日｜仕事内容と向いている人</td><td>キャリアコラム</td><td><span class="b g">公開中</span></td><td>860</td><td><span class="b blue">引用○</span></td></tr>
+            <tr><td class="lk">委託給食と病院給食、栄養士はどっち向き？</td><td>職種ガイド</td><td><span class="b o">AI下書き済</span></td><td>—</td><td><span class="b gray">公開待ち</span></td></tr>
+            <tr><td class="lk">栄養士の転職タイミングFAQ（よくある質問）</td><td>構造化Q&A</td><td><span class="b o">AI下書き済</span></td><td>—</td><td><span class="b gray">公開待ち</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- コンテンツSEO 網羅 -->
+    <div class="sf-card">
+      <div class="hd"><span class="ico" style="background:#e26f00">🗂</span>④ 職種 × エリアの網羅ページ（コンテンツSEO）</div>
+      <div class="bd">
+        <div class="cov-grid">
+          <div class="cell head"></div><div class="cell head">関東</div><div class="cell head">関西</div><div class="cell head">東海</div>
+          <div class="cell head">管理栄養士</div><div class="cell done">公開 124</div><div class="cell done">公開 62</div><div class="cell todo">予定</div>
+          <div class="cell head">栄養士</div><div class="cell done">公開 98</div><div class="cell done">公開 47</div><div class="cell todo">予定</div>
+          <div class="cell head">調理師</div><div class="cell done">公開 71</div><div class="cell todo">予定</div><div class="cell todo">予定</div>
+        </div>
+        <div class="help-text" style="font-size:11.5px;color:var(--mute);margin-top:10px">「職種 × エリア」の検索意図に対応するページ群を求人データから半自動生成。検索流入の網を広げる。</div>
+      </div>
+    </div>
   </section>
 
   <!-- ダッシュボード -->
