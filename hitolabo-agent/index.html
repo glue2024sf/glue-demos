@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>おしごとらぼ｜栄養士・調理師 求人サイト（Salesforce Experience Cloud デモ）</title>
+<style>
+/* =========================================================
+   おしごとらぼ デモ — 自己完結（単一HTML・全ダミー）
+   2画面世界: ① 求職者向け公開サイト(Experience Cloud/LWR)
+              ② 社内Salesforce(SLDS) ＝ 一元管理の価値
+   ========================================================= */
+:root{
+  --brand:#2bb673; --brand-d:#1f9d61; --brand-50:#eafaf2;
+  --accent:#ff8a3d; --ink:#1f2d3d; --ink-2:#54657a; --mute:#8a99ad;
+  --line:#e6ecf2; --bg:#f5f8fa; --card:#fff;
+  --sf:#0176d3; --sf-bg:#f3f3f3; --sf-head:#16325c;
+  --disc:#7a5cff; --disc-bg:#f1edff; --disc-border:#c9bcff;
+  --ok:#1b8a4b; --warn:#c47d04; --err:#ba0517;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+
+/* ====== モード切替バー（最上段） ====== */
+.mode-bar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;background:#0e1726;color:#fff;padding:8px 18px}
+.mode-bar .logo{font-weight:800;letter-spacing:.02em;font-size:13px;opacity:.92}
+.mode-bar .logo b{color:var(--brand)}
+.mode-seg{display:flex;background:#1d2a3d;border-radius:9px;padding:3px;margin-left:6px}
+.mode-seg button{border:0;background:transparent;color:#a9b6c7;font-weight:700;font-size:12.5px;padding:7px 14px;border-radius:7px;cursor:pointer;font-family:inherit}
+.mode-seg button.active{background:var(--brand);color:#fff}
+.mode-bar .right{margin-left:auto;font-size:11.5px;color:#7e8 ;color:#8595a8}
+.mode-bar .pill{background:#1d2a3d;border:1px solid #2c3c54;border-radius:20px;padding:4px 11px;font-size:11px;color:#aebccd}
+
+.world{display:none}
+.world.active{display:block}
+
+/* =========================================================
+   世界① 求職者向けサイト「おしごとらぼ」
+   ========================================================= */
+.site-header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:42px;z-index:30}
+.site-header .inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:12px 20px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:19px;color:var(--brand-d)}
+.brand .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),#54d39a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px}
+.brand small{display:block;font-size:10px;color:var(--mute);font-weight:600;letter-spacing:.04em}
+.site-nav{display:flex;gap:4px;margin-left:8px}
+.site-nav a{padding:8px 13px;border-radius:8px;font-weight:700;font-size:13px;color:var(--ink-2);cursor:pointer}
+.site-nav a:hover{background:var(--brand-50);color:var(--brand-d)}
+.site-nav a.on{color:var(--brand-d);background:var(--brand-50)}
+.site-header .actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+.lnk-ghost{font-weight:700;font-size:13px;color:var(--ink-2);cursor:pointer}
+.btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:9px;padding:9px 16px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;background:var(--brand);color:#fff;transition:.15s}
+.btn:hover{background:var(--brand-d)}
+.btn.ghost{background:#fff;color:var(--brand-d);border:1.5px solid var(--brand)}
+.btn.accent{background:var(--accent)}.btn.accent:hover{filter:brightness(.95)}
+.btn.sm{padding:6px 12px;font-size:12px;border-radius:8px}
+.btn.lg{padding:13px 26px;font-size:15px;border-radius:11px}
+
+.page{display:none;max-width:1080px;margin:0 auto;padding:24px 20px 70px}
+.page.on{display:block}
+
+/* hero + 検索 */
+.hero{background:linear-gradient(120deg,#eafaf2 0%,#e7f6ff 100%);border-radius:18px;padding:38px 34px;margin-bottom:8px;position:relative;overflow:hidden}
+.hero h1{font-size:30px;margin:0 0 8px;line-height:1.35}
+.hero h1 .hl{color:var(--brand-d)}
+.hero p{color:var(--ink-2);margin:0 0 20px;font-size:14.5px}
+.hero .em{position:absolute;right:24px;top:18px;font-size:104px;opacity:.16}
+.searchbox{background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(20,60,90,.10);padding:16px;display:grid;grid-template-columns:1.3fr 1fr 1fr auto;gap:10px;align-items:end}
+.searchbox .fld label{display:block;font-size:11px;font-weight:800;color:var(--mute);margin:0 0 4px 2px}
+.searchbox select,.searchbox input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 10px;font-size:13.5px;font-family:inherit;background:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 4px}
+.chip{background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:6px 13px;font-size:12.5px;font-weight:700;color:var(--ink-2);cursor:pointer}
+.chip:hover,.chip.on{border-color:var(--brand);color:var(--brand-d);background:var(--brand-50)}
+
+.sec-h{display:flex;align-items:center;gap:10px;margin:26px 0 12px}
+.sec-h h2{font-size:18px;margin:0}
+.sec-h .count{color:var(--mute);font-weight:700;font-size:13px}
+.sec-h .more{margin-left:auto;font-weight:800;color:var(--brand-d);font-size:13px;cursor:pointer}
+
+/* 求人カードグリッド */
+.job-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.job-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 17px;cursor:pointer;transition:.15s;position:relative}
+.job-card:hover{border-color:var(--brand);box-shadow:0 8px 24px rgba(20,60,90,.09);transform:translateY(-2px)}
+.job-card .tagrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.tag{font-size:11px;font-weight:800;border-radius:6px;padding:3px 9px}
+.tag.g{background:var(--brand-50);color:var(--brand-d)}
+.tag.o{background:#fff1e6;color:#c4600a}
+.tag.b{background:#e7f1ff;color:#1c61c4}
+.tag.new{background:var(--accent);color:#fff}
+.job-card h3{font-size:16px;margin:2px 0 6px;line-height:1.4}
+.job-card .co{color:var(--ink-2);font-size:13px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.job-meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2);border-top:1px dashed var(--line);padding-top:10px}
+.job-meta b{color:var(--ink)}
+.fav{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;color:var(--mute)}
+.fav.on{color:var(--accent);border-color:#ffd9bf;background:#fff6f0}
+
+/* 求人詳細 */
+.detail-top{display:grid;grid-template-columns:1fr 300px;gap:20px}
+.dt-main .crumb{font-size:12px;color:var(--mute);margin-bottom:8px}
+.dt-main h1{font-size:25px;margin:4px 0 10px;line-height:1.4}
+.dt-co{display:flex;align-items:center;gap:10px;color:var(--ink-2);margin-bottom:14px}
+.dt-co .ico{width:38px;height:38px;border-radius:9px;background:var(--brand-50);display:flex;align-items:center;justify-content:center;font-size:20px}
+.hl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.hl-grid .it{background:#fff;padding:13px 15px}
+.hl-grid .lbl{font-size:11px;color:var(--mute);font-weight:800;margin-bottom:3px}
+.hl-grid .val{font-size:15px;font-weight:800;color:var(--ink)}
+.detail-body h3{font-size:16px;border-left:4px solid var(--brand);padding-left:10px;margin:22px 0 8px}
+.detail-body p,.detail-body li{color:var(--ink-2);font-size:13.5px}
+.side-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;position:sticky;top:120px}
+.side-card .salary{font-size:22px;font-weight:900;color:var(--brand-d);margin-bottom:2px}
+.side-card .sub{font-size:12px;color:var(--mute);margin-bottom:14px}
+.side-card .btn{width:100%;justify-content:center;margin-bottom:8px}
+.struct{background:#fbfdff;border:1px dashed #bcd6f0;border-radius:10px;padding:11px 13px;font-family:ui-monospace,monospace;font-size:11px;color:#3a5a78;margin-top:16px;white-space:pre-wrap}
+.struct b{color:#1c61c4}
+
+/* AI職務経歴書 */
+.ai-wrap{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.ai-panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
+.ai-panel h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:7px}
+.ai-field{margin-bottom:12px}
+.ai-field label{display:block;font-size:12px;font-weight:800;color:var(--ink-2);margin-bottom:4px}
+.ai-field input,.ai-field textarea,.ai-field select{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:10px;font-size:13px;font-family:inherit}
+.ai-out{background:linear-gradient(180deg,#fffdf8,#fff);border:1.5px solid #ffe2c4}
+.ai-doc{font-size:13px;line-height:1.85;color:var(--ink)}
+.ai-doc .tt{font-weight:800;color:var(--brand-d);margin-top:10px}
+.ai-badge{display:inline-flex;align-items:center;gap:5px;background:#f3eeff;color:#6b46e0;font-weight:800;font-size:11px;padding:4px 10px;border-radius:20px}
+.typing{color:var(--mute)}
+
+/* マイページ */
+.mypage{display:grid;grid-template-columns:230px 1fr;gap:20px}
+.mp-side{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;height:max-content}
+.mp-prof{text-align:center;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.mp-prof .av{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--brand),#54d39a);color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.mp-menu a{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:8px;font-weight:700;font-size:13px;color:var(--ink-2);cursor:pointer}
+.mp-menu a.on,.mp-menu a:hover{background:var(--brand-50);color:var(--brand-d)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.panel h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px}
+.panel h3 .c{color:var(--mute);font-weight:700;font-size:12px}
+.hist-row{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line)}
+.hist-row:last-child{border-bottom:0}
+.hist-row .when{font-size:11.5px;color:var(--mute);width:74px;flex:none}
+.hist-row .t{font-weight:700;font-size:13.5px}
+.hist-row .co{font-size:12px;color:var(--ink-2)}
+.hist-row .st{margin-left:auto;flex:none}
+.b{display:inline-block;font-size:11px;font-weight:800;border-radius:6px;padding:3px 9px}
+.b.g{background:var(--brand-50);color:var(--brand-d)}.b.o{background:#fff1e6;color:#c4600a}
+.b.blue{background:#e7f1ff;color:#1c61c4}.b.gray{background:#eef2f6;color:#647488}
+
+/* 共通フッタ（サイト） */
+.site-foot{background:#0e1726;color:#9fb0c4;margin-top:30px;padding:26px 0;text-align:center;font-size:12px}
+
+/* =========================================================
+   世界② 社内Salesforce (SLDS風)
+   ========================================================= */
+.sf-header{background:var(--sf-head);color:#fff;display:flex;align-items:center;gap:14px;padding:9px 18px;position:sticky;top:42px;z-index:30}
+.sf-header .app{font-weight:800;font-size:15px}
+.sf-header .app .sub{font-weight:500;font-size:11px;opacity:.7;margin-left:6px}
+.sf-header .sf-search{margin-left:18px;background:#fff;border-radius:7px;padding:7px 12px;width:300px;color:var(--mute);font-size:12.5px}
+.sf-header .sf-user{margin-left:auto;width:30px;height:30px;border-radius:50%;background:#0176d3;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px}
+.sf-tabs{background:#fff;border-bottom:1px solid #d8dde6;display:flex;gap:2px;padding:0 16px;position:sticky;top:84px;z-index:29}
+.sf-tabs .t{padding:12px 15px;font-weight:700;font-size:13px;color:var(--ink-2);border-bottom:3px solid transparent;cursor:pointer}
+.sf-tabs .t:hover{background:#f3f7fb}
+.sf-tabs .t.on{color:var(--sf);border-bottom-color:var(--sf)}
+.sf-page{display:none;max-width:1160px;margin:0 auto;padding:18px 18px 70px}
+.sf-page.on{display:block}
+.sf-card{background:#fff;border:1px solid #dddbda;border-radius:8px;margin-bottom:14px}
+.sf-card .hd{display:flex;align-items:center;gap:9px;padding:11px 15px;border-bottom:1px solid #e5e5e5;font-weight:800;font-size:14px}
+.sf-card .hd .ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.ico.cand{background:#9050e9}.ico.job{background:#e26f00}.ico.app{background:#1b8a4b}.ico.list{background:#0176d3}
+.sf-card .bd{padding:15px}
+.sf-obj-head{background:#fff;border:1px solid #dddbda;border-radius:8px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:13px}
+.sf-obj-head .ico{width:42px;height:42px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:21px}
+.sf-obj-head .crumb{font-size:11px;color:var(--mute)}
+.sf-obj-head h2{margin:1px 0 0;font-size:19px}
+.sf-obj-head .acts{margin-left:auto;display:flex;gap:8px}
+.sfbtn{border:1px solid #dddbda;background:#fff;border-radius:6px;padding:7px 13px;font-weight:700;font-size:12.5px;color:#0176d3;cursor:pointer;font-family:inherit}
+.sfbtn.brand{background:#0176d3;color:#fff;border-color:#0176d3}
+.sf-hl{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e5e5e5;border:1px solid #e5e5e5;border-radius:8px;overflow:hidden;margin-bottom:14px}
+.sf-hl .it{background:#fff;padding:11px 14px}
+.sf-hl .lbl{font-size:11px;color:var(--mute);font-weight:700}
+.sf-hl .val{font-size:15px;font-weight:800;margin-top:2px}
+.sf-cols{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;align-items:start}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px 18px}
+.fgrid .f .l{font-size:11px;color:var(--mute);font-weight:700}
+.fgrid .f .v{font-size:13.5px;border-bottom:1px solid #f0f0f0;padding-bottom:5px;margin-top:2px}
+.sec-t{font-weight:800;font-size:12px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em;margin:6px 0 10px;border-bottom:1px solid #eee;padding-bottom:5px}
+.tl{position:relative;padding-left:6px}
+.tl-item{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.tl-ic{width:30px;height:30px;border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
+.tl-ic.view{background:#6b46e0}.tl-ic.fav{background:#e26f00}.tl-ic.app{background:#1b8a4b}.tl-ic.mail{background:#0176d3}
+.tl-bd .tt{font-weight:700;font-size:13px}
+.tl-bd .mt{font-size:11.5px;color:var(--mute)}
+.sf-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.sf-tbl th{text-align:left;background:#fafaf9;border-bottom:1px solid #e5e5e5;padding:9px 11px;font-size:11.5px;color:var(--ink-2);font-weight:800}
+.sf-tbl td{padding:10px 11px;border-bottom:1px solid #f0f0f0}
+.sf-tbl tr:hover td{background:#f8fbfe}
+.sf-tbl .lk{color:#0176d3;font-weight:700;cursor:pointer}
+.score{display:inline-flex;align-items:center;gap:5px;font-weight:800}
+.score .dot{width:8px;height:8px;border-radius:50%}
+.hot .dot{background:#ba0517}.warm .dot{background:#e26f00}.cold .dot{background:#8a99ad}
+.callout{border-radius:8px;padding:11px 14px;font-size:12.5px;margin-bottom:14px;display:flex;gap:9px;align-items:flex-start}
+.callout.win{background:#edf9f1;border:1px solid #b6e3c6;color:#176b3a}
+.callout.info{background:#eef6ff;border:1px solid #bcd9f5;color:#1c61c4}
+
+/* mini bar chart */
+.minibars{display:flex;align-items:flex-end;gap:10px;height:120px;padding:8px 4px 0}
+.minibars .b2{flex:1;background:linear-gradient(180deg,#54d39a,#2bb673);border-radius:5px 5px 0 0;position:relative}
+.minibars .b2 span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11px;font-weight:800;color:var(--ink-2)}
+.minibars .b2 em{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--mute);font-style:normal}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.kpi{background:#fff;border:1px solid #dddbda;border-radius:8px;padding:14px 16px}
+.kpi .l{font-size:11.5px;color:var(--mute);font-weight:700}
+.kpi .v{font-size:26px;font-weight:900;margin-top:2px}
+.kpi .d{font-size:11.5px;font-weight:800;margin-top:2px}
+.kpi .d.up{color:var(--ok)}.kpi .d.dn{color:var(--err)}
+
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:#1f2d3d;color:#fff;padding:12px 20px;border-radius:10px;font-weight:700;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:90}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:880px){
+  .searchbox{grid-template-columns:1fr 1fr}
+  .job-grid,.ai-wrap,.detail-top,.mypage,.sf-cols{grid-template-columns:1fr}
+  .hl-grid,.sf-hl,.kpis{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== モード切替バー ===== -->
+<div class="mode-bar">
+  <div class="logo">Glue デモ｜<b>おしごとらぼ</b> 求人サイト構築（Salesforce Experience Cloud）</div>
+  <div class="mode-seg">
+    <button class="active" data-mode="site" onclick="setMode('site')">👤 求職者向けサイト</button>
+    <button data-mode="sf" onclick="setMode('sf')">🏢 社内Salesforce</button>
+  </div>
+  <div class="right"><span class="pill">全データはダミー</span></div>
+</div>
+
+<!-- =========================================================
+     世界① 求職者向けサイト
+     ========================================================= -->
+<div class="world active" id="world-site">
+  <header class="site-header">
+    <div class="inner">
+      <div class="brand"><span class="mark">🍳</span><div>おしごとらぼ<small>栄養士・調理師の求人サイト</small></div></div>
+      <nav class="site-nav">
+        <a class="on" data-sp="search" onclick="sgo('search',this)">求人を探す</a>
+        <a data-sp="detail" onclick="sgo('detail',this)">求人詳細</a>
+        <a data-sp="ai" onclick="sgo('ai',this)">AI履歴書・職務経歴書</a>
+        <a data-sp="mypage" onclick="sgo('mypage',this)">マイページ</a>
+      </nav>
+      <div class="actions">
+        <span class="lnk-ghost" onclick="toast('（モック）ログイン画面へ')">ログイン</span>
+        <button class="btn sm" onclick="toast('（モック）会員登録 ＝ Experience Cloud セルフ登録')">会員登録</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ① 求人検索 -->
+  <section class="page on" id="sp-search">
+    <div class="hero">
+      <span class="em">🥗</span>
+      <h1>あなたらしく働ける、<span class="hl">栄養士・調理師</span>の仕事に出会う。</h1>
+      <p>病院・保育園・社員食堂・委託給食。エリアと職種で、ぴったりの求人を。</p>
+      <div class="searchbox">
+        <div class="fld"><label>職種</label><select><option>栄養士</option><option>管理栄養士</option><option>調理師</option><option>調理スタッフ</option><option>一般総合職（〜35歳）</option></select></div>
+        <div class="fld"><label>エリア</label><select><option>関東（東京・神奈川・埼玉・千葉）</option><option>関西</option><option>東海</option><option>九州</option></select></div>
+        <div class="fld"><label>こだわり</label><select><option>未経験OK</option><option>日勤のみ</option><option>賞与あり</option><option>残業少なめ</option></select></div>
+        <button class="btn lg" onclick="sgo('search')">検索</button>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chip on">🗺 地図エリアで探す</span><span class="chip">病院</span><span class="chip">保育園・こども園</span>
+      <span class="chip">社員食堂</span><span class="chip">委託給食</span><span class="chip">未経験歓迎</span><span class="chip">管理栄養士</span>
+    </div>
+
+    <div class="sec-h"><h2>新着の求人</h2><span class="count">該当 248 件</span><span class="more" onclick="toast('（モック）一覧へ')">すべて見る ›</span></div>
+    <div class="job-grid">
+      <!-- card 1 -->
+      <div class="job-card" onclick="sgo('detail')">
+        <span class="fav" onclick="favTog(event,this)">♡</span>
+        <div class="tagrow"><span class="tag new">NEW</span><span class="tag g">管理栄養士</span><span class="tag b">日勤のみ</span></div>
+        <h3>急性期病院での管理栄養士（栄養管理・献立作成）</h3>
+        <div class="co">🏥 みどり総合病院（さいたま市）</div>
+        <div class="job-meta"><span>月給 <b>26〜32万円</b></span><span>📍 埼玉県さいたま市</span><span>賞与年2回</span></div>
+      </div>
+      <!-- card 2 -->
+      <div class="job-card" onclick="sgo('detail')">
+        <span class="fav" onclick="favTog(event,this)">♡</span>
+        <div class="tagrow"><span class="tag g">栄養士</span><span class="tag o">未経験OK</span></div>
+        <h3>認可保育園の給食づくり｜栄養士（年間休日120日）</h3>
+        <div class="co">🧸 そらまめ保育園グループ（横浜市）</div>
+        <div class="job-meta"><span>月給 <b>23〜27万円</b></span><span>📍 神奈川県横浜市</span><span>土日休み</span></div>
+      </div>
+      <!-- card 3 -->
+      <div class="job-card" onclick="sgo('detail')">
+        <span class="fav on" onclick="favTog(event,this)">♥</span>
+        <div class="tagrow"><span class="tag g">調理師</span><span class="tag b">賞与あり</span></div>
+        <h3>社員食堂の調理師｜土日祝休み・残業ほぼなし</h3>
+        <div class="co">🍱 フードパートナーズ（東京都中央区）</div>
+        <div class="job-meta"><span>月給 <b>25〜30万円</b></span><span>📍 東京都中央区</span><span>残業少</span></div>
+      </div>
+      <!-- card 4 -->
+      <div class="job-card" onclick="sgo('detail')">
+        <span class="fav" onclick="favTog(event,this)">♡</span>
+        <div class="tagrow"><span class="tag g">管理栄養士</span><span class="tag o">残業少なめ</span></div>
+        <h3>特養での献立・栄養ケアマネジメント（管理栄養士）</h3>
+        <div class="co">🌿 やすらぎ介護福祉会（千葉市）</div>
+        <div class="job-meta"><span>月給 <b>24〜29万円</b></span><span>📍 千葉県千葉市</span><span>マイカー通勤可</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 求人詳細 -->
+  <section class="page" id="sp-detail">
+    <div class="detail-top">
+      <div class="dt-main">
+        <div class="crumb">求人を探す › 管理栄養士 › 埼玉県</div>
+        <h1>急性期病院での管理栄養士（栄養管理・献立作成）</h1>
+        <div class="dt-co"><span class="ico">🏥</span><div><b>みどり総合病院</b><br><span style="font-size:12px;color:var(--mute)">医療法人みどり会／さいたま市・250床</span></div></div>
+        <div class="hl-grid">
+          <div class="it"><div class="lbl">給与</div><div class="val">月給26〜32万</div></div>
+          <div class="it"><div class="lbl">勤務地</div><div class="val">さいたま市</div></div>
+          <div class="it"><div class="lbl">雇用形態</div><div class="val">正社員</div></div>
+          <div class="it"><div class="lbl">休日</div><div class="val">年間120日</div></div>
+          <div class="it"><div class="lbl">賞与</div><div class="val">年2回</div></div>
+          <div class="it"><div class="lbl">応募資格</div><div class="val">管理栄養士</div></div>
+        </div>
+        <div class="detail-body">
+          <h3>仕事内容</h3>
+          <p>入院患者さまの栄養管理、献立作成、栄養指導、NST（栄養サポートチーム）への参加をお任せします。給食委託会社と連携し、安全でおいしい病院食を提供します。</p>
+          <h3>応募資格・歓迎スキル</h3>
+          <ul><li>管理栄養士免許（必須）</li><li>病院・福祉施設での実務経験（歓迎）</li><li>NST活動の経験がある方は優遇</li></ul>
+          <h3>勤務条件</h3>
+          <p>日勤8:30〜17:30／週休2日（シフト制）／賞与年2回／各種社会保険完備／マイカー通勤可。</p>
+          <div class="struct">&lt;script type="application/ld+json"&gt;  ← <b>Google for Jobs 構造化データ（自動生成）</b>
+{ "@type": "<b>JobPosting</b>", "title": "管理栄養士", "hiringOrganization": "みどり総合病院",
+  "jobLocation": "さいたま市", "baseSalary": "260,000–320,000 JPY/月", "employmentType": "FULL_TIME" }</div>
+        </div>
+      </div>
+      <aside>
+        <div class="side-card">
+          <div class="salary">月給 26〜32万円</div>
+          <div class="sub">賞与年2回／年間休日120日</div>
+          <button class="btn lg" onclick="toast('（モック）応募フロー＝応募__c を画面フローで作成')">この求人に応募する</button>
+          <button class="btn ghost lg" style="width:100%;justify-content:center" onclick="favTog(event,this)">♡ お気に入りに保存</button>
+          <p style="font-size:11.5px;color:var(--mute);margin-top:12px">応募・保存には会員登録（無料）が必要です</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ③ AI職務経歴書 -->
+  <section class="page" id="sp-ai">
+    <div class="sec-h"><h2>AI 履歴書・職務経歴書アシスタント</h2><span class="ai-badge">⚡ Powered by Claude</span></div>
+    <div class="ai-wrap">
+      <div class="ai-panel">
+        <h3>📝 あなたの情報を入力</h3>
+        <div class="ai-field"><label>保有資格</label><input value="管理栄養士／栄養士"></div>
+        <div class="ai-field"><label>経験（職場・年数）</label><input value="特別養護老人ホーム 4年（献立作成・栄養ケア）"></div>
+        <div class="ai-field"><label>応募先の求人</label><select><option>急性期病院での管理栄養士（みどり総合病院）</option></select></div>
+        <div class="ai-field"><label>アピールしたいこと</label><textarea rows="2">NST活動に関わり、低栄養患者の改善に貢献した経験</textarea></div>
+        <button class="btn lg" style="width:100%;justify-content:center" onclick="genAI()">✨ AIで履歴書・職務経歴書を作成</button>
+      </div>
+      <div class="ai-panel ai-out">
+        <h3>📄 AIが作成した下書き <span class="ai-badge">編集できます</span></h3>
+        <div class="ai-doc" id="aiDoc">
+          <div class="typing">← 左の情報を入れて「AIで作成」を押すと、ここに志望動機・自己PRの下書きが表示されます。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ マイページ -->
+  <section class="page" id="sp-mypage">
+    <div class="mypage">
+      <div class="mp-side">
+        <div class="mp-prof"><div class="av">田</div><b>田中 はるか さん</b><div style="font-size:12px;color:var(--mute)">管理栄養士／求職中</div></div>
+        <nav class="mp-menu">
+          <a class="on">🕑 閲覧履歴</a><a onclick="toast('（モック）')">♥ お気に入り（3）</a>
+          <a onclick="toast('（モック）')">📨 応募状況（2）</a><a onclick="toast('（モック）')">📄 職務経歴書</a>
+          <a onclick="toast('（モック）')">⚙ プロフィール設定</a>
+        </nav>
+      </div>
+      <div>
+        <div class="panel">
+          <h3>🕑 最近見た求人 <span class="c">直近30日</span></h3>
+          <div class="hist-row"><span class="when">本日 11:40</span><div><div class="t">急性期病院での管理栄養士</div><div class="co">みどり総合病院（さいたま市）</div></div><span class="st"><span class="b o">3回見た</span></span></div>
+          <div class="hist-row"><span class="when">本日 11:32</span><div><div class="t">特養での献立・栄養ケアマネジメント</div><div class="co">やすらぎ介護福祉会（千葉市）</div></div><span class="st"><span class="b gray">1回</span></span></div>
+          <div class="hist-row"><span class="when">6/24</span><div><div class="t">社員食堂の調理師</div><div class="co">フードパートナーズ（中央区）</div></div><span class="st"><span class="b g">♥ 保存済</span></span></div>
+          <div class="hist-row"><span class="when">6/20</span><div><div class="t">認可保育園の給食づくり</div><div class="co">そらまめ保育園（横浜市）</div></div><span class="st"><span class="b gray">1回</span></span></div>
+        </div>
+        <div class="panel">
+          <h3>📨 応募状況</h3>
+          <div class="hist-row"><span class="when">6/26 応募</span><div><div class="t">急性期病院での管理栄養士</div><div class="co">みどり総合病院</div></div><span class="st"><span class="b blue">書類選考中</span></span></div>
+          <div class="hist-row"><span class="when">6/18 応募</span><div><div class="t">委託給食の管理栄養士</div><div class="co">ヘルシーミール</div></div><span class="st"><span class="b g">面接調整中</span></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-foot">© おしごとらぼ（デモ）／ Salesforce Experience Cloud 上に構築 — 全データはダミーです</footer>
+</div>
+
+<!-- =========================================================
+     世界② 社内Salesforce
+     ========================================================= -->
+<div class="world" id="world-sf">
+  <header class="sf-header">
+    <div class="app">おしごとらぼ 運用<span class="sub">Salesforce / 人材紹介CRM</span></div>
+    <div class="sf-search">🔍 検索...</div>
+    <div class="sf-user">CA</div>
+  </header>
+  <div class="sf-tabs">
+    <div class="t on" data-fp="cand" onclick="fgo('cand',this)">求職者</div>
+    <div class="t" data-fp="dormant" onclick="fgo('dormant',this)">⭐ 掘り起こしリスト</div>
+    <div class="t" data-fp="job" onclick="fgo('job',this)">求人</div>
+    <div class="t" data-fp="dash" onclick="fgo('dash',this)">ダッシュボード</div>
+  </div>
+
+  <!-- 求職者レコード -->
+  <section class="sf-page on" id="fp-cand">
+    <div class="sf-obj-head">
+      <span class="ico" style="background:#9050e9">👤</span>
+      <div><div class="crumb">求職者 › 田中 はるか</div><h2>田中 はるか</h2></div>
+      <div class="acts"><button class="sfbtn">編集</button><button class="sfbtn brand" onclick="toast('（モック）Claudeで求人レコメンドメールを下書き')">✨ レコメンド送信</button></div>
+    </div>
+    <div class="sf-hl">
+      <div class="it"><div class="lbl">資格</div><div class="val">管理栄養士</div></div>
+      <div class="it"><div class="lbl">ステータス</div><div class="val">求職中</div></div>
+      <div class="it"><div class="lbl">最終ログイン</div><div class="val">本日 11:40</div></div>
+      <div class="it"><div class="lbl">マッチ度</div><div class="val score hot"><span class="dot"></span>Hot</div></div>
+    </div>
+    <div class="sf-cols">
+      <div class="sf-card">
+        <div class="hd"><span class="ico cand">📋</span>詳細</div>
+        <div class="bd">
+          <div class="sec-t">基本情報</div>
+          <div class="fgrid">
+            <div class="f"><div class="l">氏名</div><div class="v">田中 はるか</div></div>
+            <div class="f"><div class="l">資格</div><div class="v">管理栄養士／栄養士</div></div>
+            <div class="f"><div class="l">希望エリア</div><div class="v">埼玉・東京</div></div>
+            <div class="f"><div class="l">希望職種</div><div class="v">病院・委託給食</div></div>
+            <div class="f"><div class="l">経験年数</div><div class="v">特養 4年</div></div>
+            <div class="f"><div class="l">担当CA</div><div class="v">佐藤（キャリアアドバイザー）</div></div>
+          </div>
+          <div class="sec-t" style="margin-top:16px">サイト行動サマリ（自動集計）</div>
+          <div class="fgrid">
+            <div class="f"><div class="l">直近30日の閲覧</div><div class="v">12件（病院系に集中）</div></div>
+            <div class="f"><div class="l">お気に入り</div><div class="v">3件</div></div>
+            <div class="f"><div class="l">応募</div><div class="v">2件（選考中）</div></div>
+            <div class="f"><div class="l">関心タグ</div><div class="v">日勤のみ・賞与あり</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="sf-card">
+        <div class="hd"><span class="ico cand">🕑</span>活動（サイト連携）</div>
+        <div class="bd">
+          <div class="tl">
+            <div class="tl-item"><div class="tl-ic view">👁</div><div class="tl-bd"><div class="tt">求人を閲覧：急性期病院での管理栄養士</div><div class="mt">本日 11:40・3回目／滞在 4分</div></div></div>
+            <div class="tl-item"><div class="tl-ic app">✓</div><div class="tl-bd"><div class="tt">応募：みどり総合病院</div><div class="mt">6/26・書類選考中</div></div></div>
+            <div class="tl-item"><div class="tl-ic fav">♥</div><div class="tl-bd"><div class="tt">お気に入り保存：社員食堂の調理師</div><div class="mt">6/24</div></div></div>
+            <div class="tl-item"><div class="tl-ic mail">✉</div><div class="tl-bd"><div class="tt">CAメール：おすすめ求人5件を送付</div><div class="mt">6/19・佐藤</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 掘り起こしリスト（眠り客） -->
+  <section class="sf-page" id="fp-dormant">
+    <div class="callout win">✅ <div><b>サイトと顧客管理が一体だからできる掘り起こし。</b>サイトの閲覧行動が求職者レコードにそのまま貯まるから、「最近この求人を見たが応募していない方」を抽出して、キャリアアドバイザーが先回りでご提案できます。</div></div>
+    <div class="sf-card">
+      <div class="hd"><span class="ico list">⭐</span>掘り起こし候補リスト <span style="margin-left:auto;font-weight:600;font-size:12px;color:var(--mute)">条件：最終ログイン14日以上前 ＋ 直近に求人を3回以上閲覧 ＋ 未応募</span></div>
+      <div class="bd" style="padding:0">
+        <table class="sf-tbl">
+          <thead><tr><th>求職者</th><th>資格</th><th>最後に見た求人</th><th>閲覧</th><th>最終ログイン</th><th>マッチ度</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="lk">鈴木 みなと</td><td>栄養士</td><td>保育園の給食づくり</td><td>4回</td><td>16日前</td><td class="score hot"><span class="dot"></span>Hot</td><td><button class="sfbtn brand" onclick="toast('（モック）レコメンドメール下書き by Claude')">✨ アプローチ</button></td></tr>
+            <tr><td class="lk">高橋 ゆい</td><td>管理栄養士</td><td>委託給食の管理栄養士</td><td>6回</td><td>21日前</td><td class="score hot"><span class="dot"></span>Hot</td><td><button class="sfbtn brand" onclick="toast('（モック）アプローチ')">✨ アプローチ</button></td></tr>
+            <tr><td class="lk">伊藤 そうた</td><td>調理師</td><td>社員食堂の調理師</td><td>3回</td><td>18日前</td><td class="score warm"><span class="dot"></span>Warm</td><td><button class="sfbtn" onclick="toast('（モック）アプローチ')">アプローチ</button></td></tr>
+            <tr><td class="lk">渡辺 あおい</td><td>栄養士</td><td>特養での栄養ケア</td><td>3回</td><td>27日前</td><td class="score warm"><span class="dot"></span>Warm</td><td><button class="sfbtn" onclick="toast('（モック）アプローチ')">アプローチ</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 求人オブジェクト -->
+  <section class="sf-page" id="fp-job">
+    <div class="sf-obj-head"><span class="ico job">💼</span><div><div class="crumb">求人</div><h2>求人一覧</h2></div>
+      <div class="acts"><button class="sfbtn brand" onclick="toast('（モック）新規求人＝標準の新規作成画面')">＋ 新規求人</button></div></div>
+    <div class="sf-card"><div class="bd" style="padding:0">
+      <table class="sf-tbl">
+        <thead><tr><th>求人名</th><th>施設</th><th>職種</th><th>勤務地</th><th>掲載状況</th><th>応募</th><th>閲覧(30日)</th></tr></thead>
+        <tbody>
+          <tr><td class="lk">急性期病院での管理栄養士</td><td>みどり総合病院</td><td>管理栄養士</td><td>さいたま市</td><td><span class="b g">公開中</span></td><td>8</td><td>342</td></tr>
+          <tr><td class="lk">認可保育園の給食づくり</td><td>そらまめ保育園</td><td>栄養士</td><td>横浜市</td><td><span class="b g">公開中</span></td><td>5</td><td>210</td></tr>
+          <tr><td class="lk">社員食堂の調理師</td><td>フードパートナーズ</td><td>調理師</td><td>中央区</td><td><span class="b g">公開中</span></td><td>11</td><td>489</td></tr>
+          <tr><td class="lk">委託給食の管理栄養士</td><td>ヘルシーミール</td><td>管理栄養士</td><td>川口市</td><td><span class="b o">下書き</span></td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div></div>
+  </section>
+
+  <!-- ダッシュボード -->
+  <section class="sf-page" id="fp-dash">
+    <div class="kpis">
+      <div class="kpi"><div class="l">今月の新規会員登録</div><div class="v">186</div><div class="d up">▲ 前月比 +24%</div></div>
+      <div class="kpi"><div class="l">求人閲覧数（30日）</div><div class="v">8,420</div><div class="d up">▲ +18%</div></div>
+      <div class="kpi"><div class="l">応募数</div><div class="v">94</div><div class="d up">▲ +12%</div></div>
+      <div class="kpi"><div class="l">掘り起こし成功</div><div class="v">17</div><div class="d up">▲ 眠り客の再応募</div></div>
+    </div>
+    <div class="sf-cols">
+      <div class="sf-card"><div class="hd"><span class="ico list">📈</span>会員登録の推移</div>
+        <div class="bd"><div class="minibars">
+          <div class="b2" style="height:46%"><span>98</span><em>2月</em></div>
+          <div class="b2" style="height:55%"><span>118</span><em>3月</em></div>
+          <div class="b2" style="height:62%"><span>132</span><em>4月</em></div>
+          <div class="b2" style="height:71%"><span>150</span><em>5月</em></div>
+          <div class="b2" style="height:88%"><span>186</span><em>6月</em></div>
+        </div></div></div>
+      <div class="sf-card"><div class="hd"><span class="ico app">🎯</span>応募の職種内訳</div>
+        <div class="bd">
+          <div style="display:flex;flex-direction:column;gap:9px;font-size:13px">
+            <div>管理栄養士 <span style="float:right;font-weight:800">41%</span><div style="height:8px;background:#eef2f6;border-radius:5px;margin-top:3px"><div style="width:41%;height:100%;background:#2bb673;border-radius:5px"></div></div></div>
+            <div>栄養士 <span style="float:right;font-weight:800">33%</span><div style="height:8px;background:#eef2f6;border-radius:5px;margin-top:3px"><div style="width:33%;height:100%;background:#54d39a;border-radius:5px"></div></div></div>
+            <div>調理師 <span style="float:right;font-weight:800">19%</span><div style="height:8px;background:#eef2f6;border-radius:5px;margin-top:3px"><div style="width:19%;height:100%;background:#ff8a3d;border-radius:5px"></div></div></div>
+            <div>一般総合職（7月〜） <span style="float:right;font-weight:800">7%</span><div style="height:8px;background:#eef2f6;border-radius:5px;margin-top:3px"><div style="width:7%;height:100%;background:#9050e9;border-radius:5px"></div></div></div>
+          </div>
+        </div></div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function setMode(m){
+  document.querySelectorAll('.world').forEach(w=>w.classList.remove('active'));
+  document.getElementById('world-'+m).classList.add('active');
+  document.querySelectorAll('.mode-seg button').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+  window.scrollTo(0,0);
+}
+function sgo(p,el){
+  document.querySelectorAll('#world-site .page').forEach(s=>s.classList.remove('on'));
+  document.getElementById('sp-'+p).classList.add('on');
+  document.querySelectorAll('.site-nav a').forEach(a=>a.classList.toggle('on',a.dataset.sp===p));
+  window.scrollTo(0,0);
+}
+function fgo(p,el){
+  document.querySelectorAll('#world-sf .sf-page').forEach(s=>s.classList.remove('on'));
+  document.getElementById('fp-'+p).classList.add('on');
+  document.querySelectorAll('.sf-tabs .t').forEach(t=>t.classList.toggle('on',t.dataset.fp===p));
+  window.scrollTo(0,0);
+}
+function favTog(e,el){e.stopPropagation();el.classList.toggle('on');el.textContent=el.classList.contains('on')?'♥':'♡';}
+let _t;
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_t);_t=setTimeout(()=>t.classList.remove('show'),2200);}
+function genAI(){
+  var out=document.getElementById('aiDoc');
+  out.innerHTML='<span class="typing">✨ Claude が下書きを作成中...</span>';
+  setTimeout(()=>{
+    out.innerHTML=
+     '<div class="tt">■ 志望動機</div>'+
+     '貴院の「栄養サポートチーム（NST）による多職種連携」に強く魅力を感じ志望いたしました。特別養護老人ホームでの4年間、低栄養状態の入居者さまへの栄養ケアに取り組み、献立改善により食事摂取量を向上させた経験があります。この経験を、急性期医療における栄養管理で活かしたいと考えております。'+
+     '<div class="tt">■ 自己PR</div>'+
+     '管理栄養士として、現場の調理スタッフや看護師と連携しながら、一人ひとりに合わせた栄養ケアを設計することを得意としています。NST活動では、医師・看護師とともに低栄養患者の改善に貢献しました。チームで成果を出す姿勢を、貴院でも発揮いたします。'+
+     '<div style="margin-top:12px;font-size:11.5px;color:#8a99ad">（モック）実際はClaude APIへApexコールアウト → 入力内容から下書き生成。求職者は手直しするだけ。</div>';
+  },1100);
+}
+</script>
+</body>
+</html>
