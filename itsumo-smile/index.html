@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>イツモスマイル Salesforce デモ画面（保育シフト自動配置）</title>
+<!-- 開発中は外部参照、配布時は build.sh が <style>/<script> にインライン化する -->
+<style>
+/* =====================================================================
+   demo-base.css — Glue Salesforce デモ 共通スタイル (SLDS Lightning 再現)
+   ---------------------------------------------------------------------
+   ・案件横断で共通の「chrome（ヘッダ/タブ/レコード作法）」と
+     「コンポーネントライブラリ」をここに集約する。
+   ・案件固有の色/業務独自パーツだけを各 index.html の <style> に追記する。
+   ・配布時は build.sh がこのファイルを <style> へインライン展開し、
+     単一HTML（ダブルクリックで開ける / 添付で送れる）にする。
+   ・出典: docs/aion/demo (基準実装) + tsubasa(帳票/フォーム) を統合。
+   ===================================================================== */
+
+:root{
+  --brand:#0176d3; --brand-dark:#014486; --brand-50:#eaf4fb;
+  --bg:#f3f3f3; --card:#ffffff; --border:#dddbda; --border-light:#f3f2f2;
+  --text:#181818; --text-2:#3e3e3c; --text-mute:#706e6b;
+  --success:#2e844a; --success-bg:#cdefc4; --warn:#fe9339; --warn-bg:#fef0e6;
+  --error:#ba0517; --error-bg:#fdd9d4; --info:#0176d3;
+  --shadow-card:0 2px 2px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.06);
+  --shadow-hover:0 2px 4px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.08);
+  --radius:.25rem;
+  /* 外部ツール色（案件で使う/使わないは任意。不要なら無視でOK） */
+  --chatwork:#e57400; --chatwork-bg:#fff4e6;
+  --claude:#cc785c; --claude-bg:#f5e9e2;
+  --sheets:#0f9d58; --sheets-bg:#e6f4ea;
+  /* 論点パネル */
+  --disc:#7a5cff; --disc-bg:#f1edff; --disc-border:#c9bcff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Salesforce Sans","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+  font-size:13px; color:var(--text); background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit; cursor:pointer}
+a{color:var(--brand); text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ===== Global Header ===== */
+.global-header{
+  background:linear-gradient(0deg,#032e61,#0176d3); height:48px;
+  display:flex; align-items:center; padding:0 16px; gap:12px;
+  position:sticky; top:0; z-index:1000;
+}
+.app-launcher{
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.1); border-radius:3px; cursor:pointer;
+}
+.app-launcher:hover{background:rgba(255,255,255,.2)}
+.app-launcher::before{
+  content:""; width:14px;height:14px;
+  background-image:
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px);
+  background-size:5px 5px;
+  background-position:0 0,5px 0,10px 0,0 5px,5px 5px,10px 5px,0 10px,5px 10px,10px 10px;
+  background-repeat:no-repeat;
+}
+.app-name{
+  color:#fff; font-weight:700; font-size:14px;
+  padding-left:12px; border-left:1px solid rgba(255,255,255,.3);
+}
+.app-name .sub{font-weight:400; opacity:.8; margin-left:6px; font-size:12px}
+.gh-spacer{flex:1}
+.gh-search{
+  background:rgba(255,255,255,.95); border-radius:3px; padding:6px 12px;
+  width:380px; display:flex; align-items:center; gap:8px; font-size:13px;
+}
+.gh-search input{border:0;outline:0;flex:1;background:transparent;font-size:13px}
+.gh-actions{display:flex; gap:8px; align-items:center}
+.gh-actions .icon-btn{
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  color:#fff; cursor:pointer; border-radius:50%;
+}
+.gh-actions .icon-btn:hover{background:rgba(255,255,255,.15)}
+.gh-user{
+  width:32px;height:32px;border-radius:50%;
+  background:#a5d8ff;color:#0b4a83;display:flex;align-items:center;justify-content:center;
+  font-weight:700; cursor:pointer; font-size:12px;
+}
+
+/* ===== App Bar (Tabs) ===== */
+.app-bar{
+  background:#fff; border-bottom:1px solid var(--border);
+  display:flex; align-items:stretch; padding:0 16px; height:40px;
+  position:sticky; top:48px; z-index:999; overflow-x:auto;
+}
+.app-bar .tab{
+  padding:0 16px; display:flex; align-items:center; gap:6px; cursor:pointer;
+  border-bottom:3px solid transparent; color:var(--text-2); font-weight:400;
+  font-size:13px; user-select:none; white-space:nowrap;
+}
+.app-bar .tab:hover{background:var(--brand-50)}
+.app-bar .tab.active{border-bottom-color:var(--brand); color:var(--brand); font-weight:700}
+
+/* ===== Main content ===== */
+.main{padding:12px 16px; max-width:1440px; margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+
+/* ===== Object Page Header ===== */
+.obj-header{
+  background:#fff; padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.obj-header .row1{display:flex; align-items:center; gap:12px}
+.obj-icon{
+  width:40px;height:40px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  color:#fff; font-size:18px; font-weight:700;
+}
+/* 標準オブジェクトのアイコン色（SLDS準拠）。案件のカスタムobjは追記する */
+.obj-icon.account{background:#ff9a3c}
+.obj-icon.lead{background:#f88962}
+.obj-icon.opp{background:#fcb95b}
+.obj-icon.contact{background:#7f8de1}
+.obj-icon.quote{background:#a094ed}
+.obj-icon.order{background:#2e844a}
+.obj-icon.case{background:#f2cf5b}
+.obj-icon.report{background:#76ded9}
+.obj-icon.dashboard{background:#e6437f}
+.obj-icon.home{background:#0176d3}
+.obj-icon.custom{background:#5867e8}
+.obj-icon.chatwork{background:var(--chatwork)}
+.obj-icon.claude{background:var(--claude)}
+.obj-icon.sheets{background:var(--sheets)}
+.obj-title{flex:1}
+.obj-title .label{color:var(--text-mute); font-size:12px}
+.obj-title .name{font-size:18px; font-weight:700}
+.obj-actions{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+
+/* ===== Buttons ===== */
+.btn{
+  padding:6px 14px; border:1px solid var(--border); background:#fff;
+  border-radius:var(--radius); font-size:13px; color:var(--text);
+}
+.btn:hover{background:var(--border-light)}
+.btn.primary{background:var(--brand); color:#fff; border-color:var(--brand)}
+.btn.primary:hover{background:var(--brand-dark)}
+.btn.success{background:var(--success); color:#fff; border-color:var(--success)}
+.btn.success:hover{filter:brightness(0.95)}
+.btn.warn{background:var(--warn); color:#fff; border-color:var(--warn)}
+.btn.small{padding:3px 10px; font-size:12px}
+
+/* ===== Highlights Panel ===== */
+.highlights{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  padding:12px 16px; display:flex; gap:32px; margin-bottom:8px; flex-wrap:wrap;
+}
+.highlights .item{min-width:120px}
+.highlights .lbl{color:var(--text-mute); font-size:12px}
+.highlights .val{font-size:15px; font-weight:700; margin-top:2px}
+
+/* ===== Path Component (Sales/Stage Path) ===== */
+.path{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px; display:flex; padding:0; overflow:hidden;
+}
+.path .stage{
+  flex:1; padding:10px 0; text-align:center; position:relative;
+  background:#ecebea; color:var(--text-2); font-size:12px; cursor:pointer;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+  margin-right:-12px; min-width:0;
+}
+.path .stage:first-child{ clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%) }
+.path .stage:last-child{
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%); margin-right:0;
+}
+.path .stage.completed{background:#4bc076; color:#fff}
+.path .stage.current{background:var(--brand); color:#fff; font-weight:700}
+.path .stage:hover{filter:brightness(0.95)}
+.path-label{
+  display:flex; align-items:center; gap:6px;
+  padding:4px 12px 0; font-size:11px; color:var(--text-mute); background:#fff;
+  border:1px solid var(--border); border-bottom:0; border-radius:var(--radius) var(--radius) 0 0;
+}
+.path-label .badge{margin-left:auto}
+
+/* ===== Layout grids ===== */
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.two-col-3{display:grid; grid-template-columns:2fr 1fr; gap:8px}
+@media(max-width:1000px){ .two-col,.two-col-3{grid-template-columns:1fr} }
+
+/* ===== Card ===== */
+.card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.card .card-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.card .card-head .actions{margin-left:auto; display:flex; gap:6px}
+.card .card-body{padding:12px 16px}
+.sec-title{
+  font-size:12px; font-weight:700; color:var(--text-2);
+  padding:8px 16px; background:#fafaf9; border-bottom:1px solid var(--border-light);
+}
+
+/* ===== Field rows (read view) ===== */
+.field-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 24px}
+.field{padding:8px 0; border-bottom:1px solid var(--border-light)}
+.field .lbl{color:var(--text-mute); font-size:12px; margin-bottom:2px}
+.field .val{font-size:13px}
+.field.full{grid-column:1/-1}
+.field .val .ai-source{
+  display:inline-block; padding:1px 6px; border-radius:8px;
+  font-size:10px; background:var(--claude-bg); color:var(--claude);
+  margin-left:6px; vertical-align:middle;
+}
+.field .val .cw-source{ background:var(--chatwork-bg); color:var(--chatwork); }
+
+/* ===== Edit form (inline / modal) ===== */
+.form-2col{display:grid; grid-template-columns:1fr 1fr; gap:12px 24px}
+.form-row{display:flex; flex-direction:column; gap:4px}
+.form-row.full{grid-column:1/-1}
+.form-row label{font-size:12px; color:var(--text-2); font-weight:700}
+.form-row label .req{color:var(--error); margin-left:2px}
+.form-row input,.form-row select,.form-row textarea{
+  font-family:inherit; font-size:13px; padding:6px 10px;
+  border:1px solid var(--border); border-radius:var(--radius); background:#fff; color:var(--text);
+}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{
+  outline:0; border-color:var(--brand); box-shadow:0 0 0 2px var(--brand-50);
+}
+@media(max-width:700px){ .form-2col{grid-template-columns:1fr} }
+
+/* ===== Table ===== */
+.tbl{width:100%; border-collapse:collapse; background:#fff; font-size:13px}
+.tbl th{
+  background:#fafaf9; text-align:left; padding:8px 12px;
+  border-bottom:1px solid var(--border); font-weight:700; color:var(--text-2); font-size:12px;
+}
+.tbl td{padding:8px 12px; border-bottom:1px solid var(--border-light)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .num{text-align:right}
+.tbl tbody tr:hover{background:var(--brand-50)}
+.tbl .name-link{font-weight:700; cursor:pointer; color:var(--brand)}
+
+/* ===== Badges ===== */
+.badge{display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700}
+.badge.info{background:#e0f0fb; color:#0176d3}
+.badge.success{background:var(--success-bg); color:var(--success)}
+.badge.warn{background:var(--warn-bg); color:var(--warn)}
+.badge.error{background:var(--error-bg); color:var(--error)}
+.badge.gray{background:#ecebea; color:var(--text-mute)}
+.badge.cw{background:var(--chatwork-bg); color:var(--chatwork)}
+.badge.claude{background:var(--claude-bg); color:var(--claude)}
+.badge.sheets{background:var(--sheets-bg); color:var(--sheets)}
+
+/* ===== Related list card ===== */
+.related-card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px;
+}
+.related-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.related-head .count{color:var(--text-mute); font-weight:400; font-size:12px}
+.related-head .actions{margin-left:auto}
+
+/* ===== Activity Timeline ===== */
+.timeline{padding:8px 16px}
+.tl-item{display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border-light)}
+.tl-item:last-child{border-bottom:0}
+.tl-icon{
+  width:28px; height:28px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff;
+}
+.tl-icon.call{background:#76ded9}
+.tl-icon.mail{background:#fcb95b}
+.tl-icon.meet{background:#0176d3}
+.tl-icon.task{background:#4bca81}
+.tl-icon.cw{background:var(--chatwork)}
+.tl-icon.claude{background:var(--claude)}
+.tl-body{flex:1}
+.tl-meta{font-size:11px; color:var(--text-mute)}
+.tl-title{font-weight:700; margin-top:1px}
+.tl-desc{color:var(--text-2); margin-top:2px; font-size:12px}
+
+/* ===== Dashboard widgets ===== */
+.dash-grid{display:grid; grid-template-columns:repeat(12,1fr); gap:8px}
+.widget{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px}
+.widget.span-3{grid-column:span 3}
+.widget.span-4{grid-column:span 4}
+.widget.span-6{grid-column:span 6}
+.widget.span-8{grid-column:span 8}
+.widget.span-12{grid-column:span 12}
+.w-title{font-weight:700; font-size:13px; margin-bottom:6px; color:var(--text-2)}
+.w-big{font-size:28px; font-weight:700; line-height:1.1}
+.w-sub{font-size:11px; color:var(--text-mute); margin-top:2px}
+.w-sub.up{color:var(--success)}
+.w-sub.down{color:var(--error)}
+
+/* Bar chart (CSS only) */
+.bar-chart-wrap{padding:8px 0 0}
+.bar-chart{display:flex; align-items:flex-end; gap:6px; height:160px; padding:0 4px}
+.bar-chart .bar{
+  flex:1; background:linear-gradient(0deg,#0176d3,#4faae8);
+  border-radius:3px 3px 0 0; position:relative; display:flex; flex-direction:column;
+  justify-content:flex-end; align-items:center; min-width:0;
+}
+.bar-chart .bar .v{font-size:10px; color:var(--text-2); position:absolute; top:-16px}
+.bar-chart .bar .x{font-size:10px; color:var(--text-mute); position:absolute; bottom:-18px}
+
+/* Donut (conic-gradient) */
+.donut-wrap{display:flex; align-items:center; gap:14px; padding:6px 0}
+.donut{width:120px; height:120px; border-radius:50%}
+.legend{flex:1; font-size:12px}
+.lg-item{display:flex; align-items:center; gap:6px; padding:3px 0}
+.lg-dot{width:10px; height:10px; border-radius:2px}
+
+/* ===== Misc ===== */
+.help-text{color:var(--text-mute); font-size:11px}
+.crumb{font-size:11px; color:var(--text-mute); margin-bottom:4px}
+.crumb a{color:var(--text-mute); cursor:pointer}
+.crumb .sep{margin:0 4px; color:#bbb}
+
+/* ===== Callout (in-screen note) ===== */
+.callout{
+  background:var(--brand-50); border-left:3px solid var(--brand);
+  padding:10px 14px; border-radius:0 var(--radius) var(--radius) 0;
+  margin-bottom:10px; font-size:12px;
+}
+.callout.warn{background:var(--warn-bg); border-color:var(--warn)}
+.callout.success{background:var(--success-bg); border-color:var(--success)}
+.callout strong{font-weight:700}
+
+/* ===== Modal ===== */
+.modal-bg{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.4);
+  z-index:2000; align-items:center; justify-content:center; padding:24px;
+}
+.modal-bg.active{display:flex}
+.modal{
+  background:#fff; border-radius:6px; max-width:880px; width:100%;
+  max-height:90vh; overflow:auto; box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+.modal-head{padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center}
+.modal-head .title{font-weight:700; font-size:15px; flex:1}
+.modal-head .close{cursor:pointer; font-size:20px; color:var(--text-mute)}
+.modal-body{padding:20px}
+.modal-foot{padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end}
+
+/* ===== Toast ===== */
+.toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:#181818; color:#fff; padding:12px 20px; border-radius:6px; font-size:13px;
+  box-shadow:0 4px 16px rgba(0,0,0,.3); opacity:0; pointer-events:none;
+  transition:opacity .25s, transform .25s; z-index:3000; max-width:90vw;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.success{background:#1b5e2f}
+
+/* ===== 帳票 / PDF プレビュー (見積書・請求書・契約書) ===== */
+.pdf-toolbar{
+  background:#3c3c3c; color:#eee; padding:6px 14px; font-size:12px;
+  display:flex; align-items:center; gap:12px; border-radius:6px 6px 0 0;
+}
+.pdf-page{
+  background:#fff; max-width:760px; margin:0 auto; padding:48px 56px;
+  box-shadow:0 2px 12px rgba(0,0,0,.15); font-size:13px; color:#222;
+}
+.pdf-hdr{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px}
+.pdf-title{font-size:24px; font-weight:700; letter-spacing:.3em; border-bottom:2px solid #222; padding-bottom:6px}
+.pdf-tbl{width:100%; border-collapse:collapse; margin:18px 0; font-size:12px}
+.pdf-tbl th{background:#333; color:#fff; padding:8px 10px; text-align:left}
+.pdf-tbl td{padding:8px 10px; border-bottom:1px solid #ddd}
+.pdf-tbl .num{text-align:right}
+.pdf-amount-box{border:2px solid #222; padding:10px 16px; display:inline-block; font-size:18px; font-weight:700; margin:10px 0}
+.pdf-stamp{
+  width:64px;height:64px;border:2px solid #d33;border-radius:50%;color:#d33;
+  display:flex;align-items:center;justify-content:center;font-size:11px;transform:rotate(-12deg);
+}
+.pdf-bottom{margin-top:32px; font-size:11px; color:#555}
+
+/* =====================================================================
+   論点パネル (.disc) ── デモ品質の核
+   画面ごとに「出典 / 論点 / ※要確認」を載せ、デモを意思決定文書にする。
+   bodyに class="disc-on" が付くと表示。右下トグルで全画面ON/OFF。
+   プレゼン中は隠し(clean)、FB/レビュー時は表示に切替える運用。
+   ===================================================================== */
+.disc{display:none}
+body.disc-on .disc{
+  display:block;
+  background:var(--disc-bg); border:1px solid var(--disc-border); border-left:4px solid var(--disc);
+  border-radius:0 var(--radius) var(--radius) 0; padding:10px 14px; margin:0 0 10px; font-size:12px;
+}
+.disc .disc-q{font-weight:700; color:var(--disc); margin-bottom:3px}
+.disc .disc-src{font-size:11px; color:var(--text-mute); margin-bottom:4px}
+.disc .disc-src::before{content:"📎 出典: "}
+.disc .disc-body{color:var(--text-2); line-height:1.6}
+.disc .disc-flag{
+  display:inline-block; background:var(--warn-bg); color:var(--warn);
+  font-weight:700; font-size:11px; padding:1px 7px; border-radius:8px; margin:0 2px;
+}
+.disc .disc-flag::before{content:"※要確認 "}
+/* 論点トグル（右下固定） */
+.disc-toggle{
+  position:fixed; right:18px; bottom:18px; z-index:2500;
+  background:var(--disc); color:#fff; border:0; border-radius:20px;
+  padding:9px 16px; font-size:13px; font-weight:700; box-shadow:0 3px 10px rgba(0,0,0,.25);
+}
+.disc-toggle:hover{filter:brightness(1.05)}
+body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid var(--disc-border)}
+
+/* ===== Responsive ===== */
+@media(max-width:1000px){
+  .dash-grid{grid-template-columns:repeat(4,1fr)}
+  .widget.span-3,.widget.span-4{grid-column:span 2}
+  .widget.span-6,.widget.span-8,.widget.span-12{grid-column:span 4}
+  .gh-search{display:none}
+}
+</style>
+<style>
+/* === イツモスマイル固有スタイル === */
+.obj-icon.shift{background:#2e844a}    /* シフト */
+.obj-icon.staff{background:#0176d3}    /* 職員 */
+.obj-icon.assign{background:#7a5cff}   /* 自動生成 */
+.obj-icon.request{background:#e57400}  /* 申請 */
+:root{ --community:#0b827c; --community-bg:#e3f7f4; --slack:#4a154b; }
+
+/* ペルソナ切替バッジ */
+.persona{display:flex;gap:6px;align-items:center;margin-left:10px}
+.persona .pbtn{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.5);color:#fff;cursor:pointer;background:rgba(255,255,255,.12)}
+.persona .pbtn.on{background:#fff;color:var(--brand-dark)}
+body.community-mode .sc-only{display:none}
+body:not(.community-mode) .cm-only{display:none}
+
+/* 月間シフト表（Excel踏襲・カスタム部品） */
+.shift-tbl{border-collapse:collapse;font-size:11px;width:100%;margin-top:8px}
+.shift-tbl th,.shift-tbl td{border:1px solid var(--border);padding:3px 4px;text-align:center;white-space:nowrap}
+.shift-tbl th{background:var(--brand-50);position:sticky;top:0}
+.shift-tbl td.name{text-align:left;font-weight:600;position:sticky;left:0;background:#fff;z-index:1}
+.shift-tbl td.meta{color:var(--text-mute);text-align:left}
+.shift-tbl .sun{background:#fde7ea}
+.shift-tbl .sat{background:#e8f1fb}
+.code{font-weight:700}
+.code.early{color:#0b6b3a}   /* 早番系 */
+.code.late{color:#8a4b00}    /* 遅番系 */
+.code.off{color:var(--text-mute)}
+.code.viol{background:var(--error);color:#fff;border-radius:3px;padding:0 3px}
+.tally{background:var(--brand-50)}
+.tally.bad{background:var(--error-bg);color:var(--error);font-weight:700}
+.scroll-x{overflow-x:auto;border:1px solid var(--border-light);border-radius:6px}
+
+/* 記号凡例 */
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.legend .lg{font-size:11px;border:1px solid var(--border);border-radius:4px;padding:2px 8px;background:#fff}
+.legend .lg b{color:var(--brand-dark)}
+
+/* 日次カバレッジ */
+.cover{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
+.cover .cv{border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:#fff}
+.cover .cv .cvt{font-size:12px;font-weight:700}
+.cover .cv .cvn{font-size:20px;font-weight:800;margin:2px 0}
+.cover .cv.ng{border-color:var(--error);background:var(--error-bg)}
+.cover .cv.ok{border-color:var(--success)}
+
+/* 自動生成フロー */
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;margin-top:8px}
+.flow .fbox{flex:1;min-width:130px;border:1px solid var(--border);border-radius:8px;padding:9px 10px;background:#fff;text-align:center}
+.flow .fbox .ft{font-weight:700;font-size:12px;margin-bottom:3px}
+.flow .fbox .fd{font-size:11px;color:var(--text-mute);line-height:1.5}
+.flow .farrow{display:flex;align-items:center;color:var(--brand);font-size:20px;font-weight:700}
+.fbox.rule{background:var(--brand-50);border-color:var(--disc-border)}
+
+/* Community風 */
+.cmcard{border:1px solid var(--community);border-radius:8px;overflow:hidden;margin-top:8px;max-width:560px}
+.cmcard .cm-head{background:var(--community);color:#fff;font-weight:700;font-size:12px;padding:6px 12px}
+.cmcard .cm-body{padding:10px 12px}
+.mini{width:100%;border-collapse:collapse;font-size:12px}
+.mini th,.mini td{border:1px solid var(--border);padding:5px 7px;text-align:left}
+.mini th{background:var(--community-bg)}
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.pill.g{background:var(--success-bg);color:var(--success)} .pill.r{background:var(--error-bg);color:var(--error)} .pill.o{background:var(--warn-bg);color:#a15c00}
+</style>
+</head>
+<body>
+
+<div class="global-header">
+  <div class="app-launcher" title="アプリランチャー"></div>
+  <div class="app-name">スマイル配置管理 <span class="sub">イツモスマイル株式会社</span></div>
+  <div class="persona">
+    <span class="pbtn on" id="p-sc" onclick="setPersona('sc')">👤 管理者(Service Cloud)</span>
+    <span class="pbtn" id="p-cm" onclick="setPersona('cm')">📱 スタッフ(Community)</span>
+  </div>
+  <div class="gh-spacer"></div>
+  <div class="gh-search"><span style="color:#706e6b">🔍</span><input placeholder="検索..."></div>
+  <div class="gh-actions">
+    <div class="icon-btn" title="通知">🔔</div>
+    <div class="icon-btn" title="ヘルプ">❓</div>
+    <div class="gh-user" title="運営管理者">運</div>
+  </div>
+</div>
+
+<div class="app-bar">
+  <!-- 管理者(Service Cloud)タブ -->
+  <div class="tab active sc-only" data-page="home">🏠 ホーム</div>
+  <div class="tab sc-only" data-page="shift-board">📅 月間シフト表</div>
+  <div class="tab sc-only" data-page="auto-gen">⚡ 自動シフト生成</div>
+  <div class="tab sc-only" data-page="staff-list">🧑‍🏫 職員台帳</div>
+  <div class="tab sc-only" data-page="requests">📥 希望・申請</div>
+  <div class="tab sc-only" data-page="reports">📊 集計・配置基準</div>
+  <!-- スタッフ(Community)タブ -->
+  <div class="tab active cm-only" data-page="cm-home">📱 マイシフト</div>
+  <div class="tab cm-only" data-page="cm-request">✋ 希望休を出す</div>
+</div>
+
+<div class="main">
+
+  <!-- ===================== 管理者ホーム ===================== -->
+  <div class="page active" id="home">
+    <div class="disc">
+      <div class="disc-q">論点：管理者が毎月このシフト作成で"効かせたい"のは①制約充足②時間集計③公休管理 のどれを最優先にするか</div>
+      <div class="disc-src">先方Excel（令8年度シフト表）：早番/遅番/出勤人数の必要数、公休日数(正11日)、シフト記号→時間の集計、就業時間との「差」を手管理（`#REF!` も発生）</div>
+      <div class="disc-body">
+        現状Excel＋LINEの運用を、この画面に集約。「今月、配置基準を割る日／公休が足りない職員／時間差」が一目で分かる状態にする。
+        <span class="disc-flag"></span>最初に自動化して一番効くのはどれか（毎月の作成時間が最も溶けている工程）
+      </div>
+    </div>
+    <div class="obj-header">
+      <div class="row1">
+        <div class="obj-icon home">🏠</div>
+        <div class="obj-title"><div class="label">ホーム</div><div class="name">令8年度 5月シフト（作成中）</div></div>
+      </div>
+    </div>
+    <div class="dash-grid">
+      <div class="widget span-3"><div class="w-title">配置基準を割る日</div><div class="w-big" style="color:var(--error)">3</div><div class="w-sub">早番/遅番/出勤6名を下回る日</div></div>
+      <div class="widget span-3"><div class="w-title">公休が足りない職員</div><div class="w-big" style="color:var(--error)">2</div><div class="w-sub">正=11日に未達</div></div>
+      <div class="widget span-3"><div class="w-title">就業時間との差</div><div class="w-big" style="color:var(--warn)">±4名</div><div class="w-sub">過不足あり（手計算を自動化）</div></div>
+      <div class="widget span-3"><div class="w-title">未処理の希望・申請</div><div class="w-big" style="color:var(--warn)">5</div><div class="w-sub">Community/LINEから</div></div>
+
+      <div class="widget span-7">
+        <div class="w-title">⚠️ 要対応（配置基準・公休の不足）</div>
+        <table class="tbl" style="margin-top:6px">
+          <thead><tr><th>状態</th><th>対象</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge error">早番不足</span></td><td><a class="name-link" data-go="shift-board">5/3(日)</a></td><td>早番1名（基準2名）</td></tr>
+            <tr><td><span class="badge error">出勤不足</span></td><td><a class="name-link" data-go="shift-board">5/5(火祝)</a></td><td>出勤5名（基準6名）</td></tr>
+            <tr><td><span class="badge error">クラス欠員</span></td><td><a class="name-link" data-go="auto-gen">5/7 Melon</a></td><td>担任保育士 未配置</td></tr>
+            <tr><td><span class="badge warn">公休未達</span></td><td><a class="name-link" data-go="staff-detail">井上（正）</a></td><td>公休9日（必要11日）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="widget span-5">
+        <div class="w-title">📥 希望・申請（受付）</div>
+        <table class="tbl" style="margin-top:6px">
+          <thead><tr><th>種別</th><th>職員</th><th>状況</th></tr></thead>
+          <tbody>
+            <tr><td>希望休</td><td><a class="name-link" data-go="requests">青木</a></td><td><span class="badge warn">承認待ち</span></td></tr>
+            <tr><td>時間変更</td><td>林（P）</td><td><span class="badge warn">承認待ち</span></td></tr>
+            <tr><td>有休</td><td>中山</td><td><span class="badge info">確認中</span></td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:8px"><button class="btn primary small" onclick="goPage('auto-gen')">⚡ 5月シフトを自動生成する</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 月間シフト表（Excel踏襲） ===================== -->
+  <div class="page" id="shift-board">
+    <div class="disc">
+      <div class="disc-q">論点：使い慣れたExcelの見た目（記号×日付）を保ちつつ、"違反だけ"を自動で赤くする方向でよいか</div>
+      <div class="disc-src">先方Excel：氏名/職種/勤務形態/資格/担当クラス × 日付。記号(A/B/C/D/H/L/M…)で勤務、✕=公休、有=有休。早番2/遅番2/出勤6名が必要</div>
+      <div class="disc-body">
+        Excelの入力体験は変えず、①配置基準を割る日 ②資格・クラス不整合 ③公休/時間の集計 を自動化。赤=違反、青土/桃日。右側に集計を自動表示。
+        <span class="disc-flag"></span>記号体系（A〜Q/半有/有）はこのまま踏襲するか、この機会に整理するか
+        <span class="disc-flag"></span>担当クラス（Melon/Apple/Mango/Grape/フリー/病児）と保育士配置基準（年齢別の必要人数）を紐付けるか
+      </div>
+    </div>
+    <div class="obj-header">
+      <div class="row1">
+        <div class="obj-icon shift">📅</div>
+        <div class="obj-title"><div class="label">月間シフト表</div><div class="name">令8年度 5月（2026/5/1〜）<span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+        <div class="obj-actions"><button class="btn" onclick="toast('（モック）Excel出力')">Excel出力</button><button class="btn primary" onclick="goPage('auto-gen')">⚡ 自動生成</button></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span class="lg"><b>早番</b> 7:00〜（A）</span>
+      <span class="lg"><b>遅番</b> 〜18:00（L）</span>
+      <span class="lg"><b>A/B/C/D</b>=8h</span>
+      <span class="lg"><b>F/G</b>=10h</span>
+      <span class="lg"><b>H</b>=6h</span>
+      <span class="lg"><b>M</b>=5h</span>
+      <span class="lg"><b>✕</b>=公休</span>
+      <span class="lg"><b>有/半有</b>=有休</span>
+      <span class="lg" style="color:var(--error)"><b>赤</b>=基準違反</span>
+    </div>
+
+    <div class="scroll-x">
+      <table class="shift-tbl">
+        <thead>
+          <tr><th class="name">氏名</th><th>資格</th><th>クラス</th>
+            <th>5/1<br>金</th><th class="sat">5/2<br>土</th><th class="sun">5/3<br>日</th><th class="sun">5/4<br>月</th><th>5/5<br>火</th><th>5/6<br>水</th><th>5/7<br>木</th><th>5/8<br>金</th>
+            <th class="tally">公休</th><th class="tally">労働h</th><th class="tally">就業差</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="name">青木（正）</td><td>保育士</td><td>Melon</td>
+            <td><span class="code early">A</span></td><td class="sat"><span class="code">D</span></td><td class="sun"><span class="code late">L</span></td><td class="sun"><span class="code off">✕</span></td><td><span class="code">D</span></td><td><span class="code">C</span></td><td><span class="code off">✕</span></td><td><span class="code early">A</span></td>
+            <td class="tally">11</td><td class="tally">168</td><td class="tally">±0</td></tr>
+          <tr><td class="name">井上（正）</td><td>保育士</td><td>Apple/Mango/Grape</td>
+            <td><span class="code">D</span></td><td class="sat"><span class="code">C</span></td><td class="sun"><span class="code early">A</span></td><td class="sun"><span class="code">D</span></td><td><span class="code">D</span></td><td><span class="code off">✕</span></td><td><span class="code">C</span></td><td><span class="code">D</span></td>
+            <td class="tally bad">9</td><td class="tally">176</td><td class="tally bad">+8h</td></tr>
+          <tr><td class="name">遠藤（正）</td><td>保育士</td><td>フリー</td>
+            <td><span class="code late">L</span></td><td class="sat"><span class="code off">✕</span></td><td class="sun"><span class="code off">✕</span></td><td class="sun"><span class="code late">L</span></td><td><span class="code viol" title="早番不足の日にL">L</span></td><td><span class="code">D</span></td><td><span class="code early">A</span></td><td><span class="code">H</span></td>
+            <td class="tally">11</td><td class="tally">158</td><td class="tally">-2h</td></tr>
+          <tr><td class="name">佐野（正）</td><td>看護師</td><td>病児</td>
+            <td><span class="code">D</span></td><td class="sat"><span class="code off">✕</span></td><td class="sun"><span class="code off">✕</span></td><td class="sun"><span class="code">D</span></td><td><span class="code">D</span></td><td><span class="code">D</span></td><td><span class="code off">✕</span></td><td><span class="code">D</span></td>
+            <td class="tally">11</td><td class="tally">160</td><td class="tally">±0</td></tr>
+          <tr><td class="name">林（P）</td><td>保育士</td><td>フリー</td>
+            <td><span class="code">H</span></td><td class="sat"><span class="code off">✕</span></td><td class="sun"><span class="code off">✕</span></td><td class="sun"><span class="code off">✕</span></td><td><span class="code">M</span></td><td><span class="code">H</span></td><td><span class="code">H</span></td><td><span class="code off">✕</span></td>
+            <td class="tally">19</td><td class="tally">92</td><td class="tally">±0</td></tr>
+          <tr><td class="name">中山（正）</td><td>英語講師</td><td>—</td>
+            <td><span class="code">C</span></td><td class="sat"><span class="code off">✕</span></td><td class="sun"><span class="code off">✕</span></td><td class="sun"><span class="code">有</span></td><td><span class="code">C</span></td><td><span class="code">C</span></td><td><span class="code off">✕</span></td><td><span class="code">C</span></td>
+            <td class="tally">11</td><td class="tally">152</td><td class="tally">±0</td></tr>
+          <tr style="background:var(--brand-50);font-weight:700">
+            <td class="name">日次カバレッジ →</td><td colspan="2">早番2/遅番2/出勤6</td>
+            <td>✔</td><td class="sat">✔</td><td class="sun" style="color:var(--error)">早番1</td><td class="sun">✔</td><td style="color:var(--error)">出勤5</td><td>✔</td><td>✔</td><td>✔</td>
+            <td colspan="3">← 基準を割る日を自動判定</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="help-text" style="margin-top:8px">※ 実データの氏名は伏せ、全てダミー名。就業時間との「差」はExcelでは手計算（`#REF!`が発生）→ 自動集計に置換する想定。</div>
+  </div>
+
+  <!-- ===================== 自動シフト生成（価値の核） ===================== -->
+  <div class="page" id="auto-gen">
+    <div class="disc">
+      <div class="disc-q">論点：自動生成＝「ルールベースの論理配置」でよいか（生成AIではない、を握る）＋ 特化型シフトツールとの差別化</div>
+      <div class="disc-src">6/15 関さんMTGメモ「求めるAIは生成AIでなくマスタ×ルールの論理的自動判断」「特化型シフト管理ツールとの相見積もりリスク」／先方Excel：シフトルーティーン A→D→L→H</div>
+      <div class="disc-body">
+        制約（早番2/遅番2/出勤6/公休正11日/クラス・資格）＋ルーティーン(A→D→L→H)＋希望休 を入力に、満たす配置を自動生成。満たせない日は"埋めずにアラート"。
+        <span class="disc-flag"></span>ハード制約（絶対=配置基準・資格・公休日数）とソフト制約（希望・平準化・ルーティーン）の優先順位はこの並びでよいか
+        <span class="disc-flag"></span>特化型ツールとの差＝「職員(Community)・園児クラス・労務(公休/有休/時間)まで同じ土台で一元管理」で刺さるか
+      </div>
+    </div>
+    <div class="obj-header">
+      <div class="row1">
+        <div class="obj-icon assign">⚡</div>
+        <div class="obj-title"><div class="label">自動シフト生成</div><div class="name">令8年度 5月分を生成</div></div>
+        <div class="obj-actions"><button class="btn primary" onclick="runGen()">▶ 自動生成を実行</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">🧠 配置ロジック（ルールベース・生成AIではない）</div>
+      <div class="card-body">
+        <div class="flow">
+          <div class="fbox"><div class="ft">① 制約</div><div class="fd">早番2/遅番2<br>出勤6名/公休11日<br>クラス・資格</div></div>
+          <div class="farrow">→</div>
+          <div class="fbox"><div class="ft">② 入力</div><div class="fd">職員の資格・勤務形態<br>希望休・勤務可能時間</div></div>
+          <div class="farrow">→</div>
+          <div class="fbox rule"><div class="ft">③ ルール適用</div><div class="fd">ルーティーンA→D→L→H<br>希望＞平準化で並べ替え</div></div>
+          <div class="farrow">→</div>
+          <div class="fbox"><div class="ft">④ 生成</div><div class="fd">記号を自動配置<br>時間・公休を自動集計</div></div>
+          <div class="farrow">→</div>
+          <div class="fbox" style="border-color:var(--error)"><div class="ft" style="color:var(--error)">⑤ アラート</div><div class="fd">満たせない日は<br>埋めずに通知</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="genResult" style="display:none">
+      <div class="card-head">✅ 生成結果プレビュー（確定前・モック）</div>
+      <div class="card-body">
+        <div class="callout success">31日中28日は基準充足。3日は要員不足でアラート、2職員の公休未達を検知。</div>
+        <table class="mini" style="margin-top:6px">
+          <thead><tr><th>日</th><th>早番(2)</th><th>遅番(2)</th><th>出勤(6)</th><th>クラス配置</th><th>判定</th></tr></thead>
+          <tbody>
+            <tr><td>5/1(金)</td><td class="pass">2 ✔</td><td>2 ✔</td><td>7 ✔</td><td>全クラス充足</td><td><span class="badge success">OK</span></td></tr>
+            <tr><td>5/3(日)</td><td style="color:var(--error)">1 ✖</td><td>2 ✔</td><td>6 ✔</td><td>—</td><td><span class="badge error">早番不足</span></td></tr>
+            <tr><td>5/5(火祝)</td><td>2 ✔</td><td>2 ✔</td><td style="color:var(--error)">5 ✖</td><td>Melon欠員</td><td><span class="badge error">出勤/クラス不足</span></td></tr>
+            <tr><td>5/7(木)</td><td>2 ✔</td><td>2 ✔</td><td>6 ✔</td><td>Melon担任未定</td><td><span class="badge warn">要確認</span></td></tr>
+          </tbody>
+        </table>
+        <div class="callout warn" style="margin-top:8px">🔔 公休未達：井上（正）9日／必要11日、遠藤（正）10日／必要11日 → 追加公休の割当が必要</div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn" onclick="toast('（モック）手で調整')">手で調整</button>
+          <button class="btn success" onclick="toast('5月シフトを確定し、Community/LINEへ通知しました（モック）','success')">確定＋職員へ通知</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 職員台帳 ===================== -->
+  <div class="page" id="staff-list">
+    <div class="disc">
+      <div class="disc-q">論点：職員を「職種×勤務形態×資格×担当クラス×公休基準」で管理すれば自動生成の材料は揃うか</div>
+      <div class="disc-src">先方Excel：職種(保育士/看護師/保育補助/調理/栄養士/英語講師/事務)・勤務形態(正/正B/P)・資格・担当クラス・公休日数(形態別)／利用者27名(Community)</div>
+      <div class="disc-body">
+        27名を職種・勤務形態・資格・担当クラス・公休基準で台帳化。これが配置の絶対条件（資格・クラス）と労務管理（公休/時間）の土台。
+        <span class="disc-flag"></span>公休基準は勤務形態から自動（正=11/月 等）か、個別設定か
+      </div>
+    </div>
+    <div class="obj-header">
+      <div class="row1">
+        <div class="obj-icon staff">🧑‍🏫</div>
+        <div class="obj-title"><div class="label">職員</div><div class="name">全職員（27） <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+        <div class="obj-actions"><button class="btn">インポート</button><button class="btn primary" onclick="toast('（モック）新規職員')">新規</button></div>
+      </div>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>氏名</th><th>職種</th><th>勤務形態</th><th>資格</th><th>担当クラス</th><th class="num">公休基準</th><th>状況</th></tr></thead>
+      <tbody>
+        <tr><td><a class="name-link" data-go="staff-detail">青木</a></td><td>保育士</td><td>正</td><td>保育士</td><td>Melon</td><td class="num">11</td><td><span class="badge success">充足</span></td></tr>
+        <tr><td><a class="name-link" data-go="staff-detail">井上</a></td><td>保育士</td><td>正</td><td>保育士</td><td>Apple/Mango/Grape</td><td class="num">11</td><td><span class="badge error">公休9</span></td></tr>
+        <tr><td><a class="name-link" data-go="staff-detail">遠藤</a></td><td>保育士</td><td>正</td><td>保育士</td><td>フリー</td><td class="num">11</td><td><span class="badge warn">公休10</span></td></tr>
+        <tr><td><a class="name-link" data-go="staff-detail">佐野</a></td><td>看護師</td><td>正</td><td>保育補助</td><td>病児</td><td class="num">11</td><td><span class="badge success">充足</span></td></tr>
+        <tr><td><a class="name-link" data-go="staff-detail">林</a></td><td>保育士</td><td>P</td><td>保育士</td><td>フリー</td><td class="num">19</td><td><span class="badge success">充足</span></td></tr>
+        <tr><td><a class="name-link" data-go="staff-detail">中山</a></td><td>英語講師</td><td>正</td><td>英語講師</td><td>—</td><td class="num">11</td><td><span class="badge success">充足</span></td></tr>
+        <tr><td><a class="name-link" data-go="staff-detail">田口</a></td><td>栄養士</td><td>正</td><td>栄養士</td><td>—</td><td class="num">11</td><td><span class="badge success">充足</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===================== 職員詳細 ===================== -->
+  <div class="page" id="staff-detail">
+    <div class="disc">
+      <div class="disc-q">論点：職員1人の「資格・可用性・希望・公休/有休/時間集計」をこの1画面で完結させるか</div>
+      <div class="disc-src">先方Excel：右側で公休/有休/各記号回数→総労働時間を集計し、就業時間との差を算出（現状手計算・#REF!発生）</div>
+      <div class="disc-body">
+        資格＝配置可否の絶対条件、勤務可能時間＝入れる枠、希望休＝制約、公休/有休/時間＝自動集計。Excelの手計算を置換。
+        <span class="disc-flag"></span>「差（就業時間との過不足）」の許容幅と、超過時のアラート閾値を決めたい
+      </div>
+    </div>
+    <div class="crumb"><a data-go="staff-list">職員</a><span class="sep">›</span>井上</div>
+    <div class="obj-header">
+      <div class="row1">
+        <div class="obj-icon staff">🧑‍🏫</div>
+        <div class="obj-title"><div class="label">職員</div><div class="name">井上（正・保育士）</div></div>
+        <div class="obj-actions"><button class="btn" onclick="toast('（モック）編集')">編集</button><button class="btn primary" onclick="goPage('shift-board')">今月のシフトを見る</button></div>
+      </div>
+    </div>
+    <div class="path-label">今月の状態 <span class="badge error" style="margin-left:auto">公休未達</span></div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">担当クラス</div><div class="val">Apple/Mango/Grape</div></div>
+      <div class="item"><div class="lbl">公休</div><div class="val" style="color:var(--error)">9 / 11日</div></div>
+      <div class="item"><div class="lbl">有休</div><div class="val">2日取得</div></div>
+      <div class="item"><div class="lbl">就業時間差</div><div class="val" style="color:var(--error)">+8h</div></div>
+    </div>
+    <div class="two-col-3">
+      <div>
+        <div class="card">
+          <div class="card-head">🎓 資格・担当（配置可否の条件）</div>
+          <div class="card-body">
+            <div class="field-grid">
+              <div class="field"><div class="lbl">保育士</div><div class="val"><span class="badge success">有効</span></div></div>
+              <div class="field"><div class="lbl">担当クラス</div><div class="val">Apple / Mango / Grape</div></div>
+              <div class="field"><div class="lbl">勤務形態</div><div class="val">正社員</div></div>
+              <div class="field"><div class="lbl">公休基準</div><div class="val">11日/月</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">📊 今月の記号集計（自動）</div>
+          <div class="card-body">
+            <table class="mini">
+              <thead><tr><th>記号</th><th>回数</th><th>時間/回</th><th>小計</th></tr></thead>
+              <tbody>
+                <tr><td>A（早番）</td><td>4</td><td>8h</td><td>32h</td></tr>
+                <tr><td>D（中番）</td><td>10</td><td>8h</td><td>80h</td></tr>
+                <tr><td>C</td><td>8</td><td>8h</td><td>64h</td></tr>
+                <tr><td>✕（公休）</td><td>9</td><td>—</td><td>—</td></tr>
+                <tr style="background:var(--brand-50);font-weight:700"><td>労働計</td><td colspan="2">就業176h/契約168h</td><td style="color:var(--error)">+8h</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="related-card">
+          <div class="related-head">✋ 希望休・申請 <span class="count">(1)</span></div>
+          <table class="tbl"><tr><td><a class="name-link" data-go="requests">5/15 希望休</a></td><td><span class="badge warn">承認待ち</span></td></tr></table>
+        </div>
+        <div class="related-card">
+          <div class="related-head">🔔 アラート <span class="count">(2)</span></div>
+          <div class="timeline">
+            <div class="tl-item"><div class="tl-icon" style="background:var(--error)">!</div><div class="tl-body"><div class="tl-meta">自動チェック</div><div class="tl-title">公休未達（9/11日）</div><div class="tl-desc">残り公休2日を今月中に割当する必要</div></div></div>
+            <div class="tl-item"><div class="tl-icon" style="background:var(--warn)">!</div><div class="tl-body"><div class="tl-meta">自動チェック</div><div class="tl-title">就業時間超過 +8h</div><div class="tl-desc">記号配分の見直し候補</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 希望・申請 ===================== -->
+  <div class="page" id="requests">
+    <div class="disc">
+      <div class="disc-q">論点：希望休・時間変更・有休を Community/LINE で受け、シフトに反映する経路をどう設計するか</div>
+      <div class="disc-src">6/15 関さんMTGメモ「Slackを通じた申請受付／担当者不在時のアラート」／方針：利用者27名=Community</div>
+      <div class="disc-body">
+        職員はCommunity（またはLINE連携）から希望休/変更を提出 → 申請レコード化 → 承認で自動生成の制約に反映（＝希望を織り込んで再配置）。
+        <span class="disc-flag"></span>入口はCommunity一本化か、既存LINEも残す併用か（27名の定着しやすさで判断）
+        <span class="disc-flag"></span>承認は1段階（主任のみ）か、主任→園長の2段階か
+      </div>
+    </div>
+    <div class="obj-header">
+      <div class="row1">
+        <div class="obj-icon request">📥</div>
+        <div class="obj-title"><div class="label">希望・申請</div><div class="name">未処理（5） <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      </div>
+    </div>
+    <div class="callout">Community（利用者ライセンス）から出た希望休・変更が、この一覧に自動起票。承認すると自動生成の制約に反映される想定。</div>
+    <table class="tbl">
+      <thead><tr><th>職員</th><th>種別</th><th>対象</th><th>理由</th><th>経路</th><th>状況</th></tr></thead>
+      <tbody>
+        <tr><td>青木</td><td>希望休</td><td>5/20</td><td>私用</td><td>Community</td><td><span class="badge warn">承認待ち</span></td></tr>
+        <tr><td>井上</td><td>希望休</td><td>5/15</td><td>通院</td><td>Community</td><td><span class="badge warn">承認待ち</span></td></tr>
+        <tr><td>林（P）</td><td>時間変更</td><td>5/8 H→M</td><td>短縮希望</td><td>LINE連携</td><td><span class="badge warn">承認待ち</span></td></tr>
+        <tr><td>中山</td><td>有休</td><td>5/4</td><td>有休消化</td><td>Community</td><td><span class="badge info">確認中</span></td></tr>
+        <tr><td>遠藤</td><td>早退</td><td>5/9 15:00</td><td>子の迎え</td><td>LINE連携</td><td><span class="badge info">確認中</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===================== 集計・配置基準 ===================== -->
+  <div class="page" id="reports">
+    <div class="disc">
+      <div class="disc-q">論点：園長/本部が毎月見るのは「配置基準の遵守」「公休/有休の消化」「時間の過不足」で足りるか</div>
+      <div class="disc-src">先方Excel右側の集計群（公休/有休/記号別時間/差）＋配置基準(早番2/遅番2/出勤6)／先方に社内システム部門あり（費用・工数を精査）</div>
+      <div class="disc-body">
+        手計算(#REF!が出る)の集計を自動化し、監査・労基対応にも耐える形で可視化。導入効果（作成時間削減・基準遵守）を数字で語る土台。
+        <span class="disc-flag"></span>社内システム部門への説明に必要な指標（人件費・残業・法定基準）を追加するか
+      </div>
+    </div>
+    <div class="obj-header">
+      <div class="row1">
+        <div class="obj-icon dashboard">📊</div>
+        <div class="obj-title"><div class="label">ダッシュボード</div><div class="name">令8年度 5月 集計</div></div>
+      </div>
+    </div>
+    <div class="dash-grid">
+      <div class="widget span-6">
+        <div class="w-title">配置基準の遵守（今月）</div>
+        <div class="cover">
+          <div class="cv ok"><div class="cvt">早番2名/日</div><div class="cvn">28/31日</div><div class="w-sub">未達3日</div></div>
+          <div class="cv ok"><div class="cvt">遅番2名/日</div><div class="cvn">31/31日</div><div class="w-sub">充足</div></div>
+          <div class="cv ng"><div class="cvt">出勤6名/日</div><div class="cvn" style="color:var(--error)">29/31日</div><div class="w-sub">未達2日</div></div>
+        </div>
+      </div>
+      <div class="widget span-3"><div class="w-title">公休 未達者</div><div class="w-big" style="color:var(--error)">2</div><div class="w-sub">正=11日 に未達</div></div>
+      <div class="widget span-3"><div class="w-title">作成工数（推定）</div><div class="w-big" style="color:var(--success)">-70%</div><div class="w-sub">Excel手作業比（仮説）</div></div>
+
+      <div class="widget span-6">
+        <div class="w-title">就業時間との差（職員別・上位）</div>
+        <div class="bar-chart" style="margin-top:8px">
+          <div class="bar"><span class="bar-lbl">井上</span><div class="bar-track"><div class="bar-fill" style="width:70%;background:var(--error)">+8h</div></div></div>
+          <div class="bar"><span class="bar-lbl">青木</span><div class="bar-track"><div class="bar-fill" style="width:50%">±0</div></div></div>
+          <div class="bar"><span class="bar-lbl">遠藤</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--warn)">-2h</div></div></div>
+        </div>
+      </div>
+      <div class="widget span-6">
+        <div class="w-title">クラス別 保育士充足（配置基準）</div>
+        <table class="tbl" style="margin-top:6px">
+          <thead><tr><th>クラス</th><th>必要保育士/日</th><th class="num">不足日/月</th></tr></thead>
+          <tbody>
+            <tr><td>Melon</td><td>2</td><td class="num" style="color:var(--error)">3</td></tr>
+            <tr><td>Apple/Mango/Grape</td><td>3</td><td class="num" style="color:var(--warn)">1</td></tr>
+            <tr><td>病児</td><td>1（看護師）</td><td class="num">0</td></tr>
+          </tbody>
+        </table>
+        <div class="help-text">→ 有資格者が薄いクラス/曜日が明確に。採用・応援配置の判断に。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== Community：マイシフト（利用者） ===================== -->
+  <div class="page" id="cm-home">
+    <div class="disc">
+      <div class="disc-q">論点：スタッフ(利用者)がCommunityで見るのは「自分の確定シフト・公休/有休残」で足りるか</div>
+      <div class="disc-src">方針：利用者27名=Customer Community。現状はLINEで個別連絡→本人が最新シフトを追えない</div>
+      <div class="disc-body">
+        スタッフはスマホのCommunityで、自分の確定シフト・公休/有休残・希望の反映状況を確認。管理者に電話/LINEで聞かなくて済む状態に。
+        <span class="disc-flag"></span>プッシュ通知はCommunityアプリ通知か、LINE/メール連携か
+      </div>
+    </div>
+    <div class="obj-header">
+      <div class="row1">
+        <div class="obj-icon staff">📱</div>
+        <div class="obj-title"><div class="label">マイシフト</div><div class="name">青木さん（保育士・Melon）</div></div>
+      </div>
+    </div>
+    <div class="cmcard">
+      <div class="cm-head">📅 今週の確定シフト</div>
+      <div class="cm-body">
+        <table class="mini">
+          <thead><tr><th>日付</th><th>勤務</th><th>時間</th></tr></thead>
+          <tbody>
+            <tr><td>5/1(金)</td><td><span class="pill g">A 早番</span></td><td>7:00-16:00</td></tr>
+            <tr><td>5/2(土)</td><td><span class="pill g">D</span></td><td>9:00-18:00</td></tr>
+            <tr><td>5/3(日)</td><td><span class="pill o">L 遅番</span></td><td>9:30-18:30</td></tr>
+            <tr><td>5/4(月)</td><td><span class="pill r">公休</span></td><td>—</td></tr>
+            <tr><td>5/5(火)</td><td><span class="pill g">D</span></td><td>9:00-18:00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="cmcard">
+      <div class="cm-head">🗓 今月の残</div>
+      <div class="cm-body" style="display:flex;gap:24px">
+        <div><div class="w-sub">公休 残</div><div style="font-size:22px;font-weight:800">2 / 11日</div></div>
+        <div><div class="w-sub">有休 残</div><div style="font-size:22px;font-weight:800">8日</div></div>
+        <div style="margin-left:auto"><button class="btn primary" onclick="goPage('cm-request')">✋ 希望休を出す</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== Community：希望休を出す ===================== -->
+  <div class="page" id="cm-request">
+    <div class="disc">
+      <div class="disc-q">論点：希望休の提出をどこまで簡単にするか（スマホで数タップ）＝27名に定着する鍵</div>
+      <div class="disc-src">6/15 関さんMTGメモ「Slackを通じた申請受付」／現状LINEで個別に口頭・文章</div>
+      <div class="disc-body">
+        日付を選んで理由を書くだけ。提出すると管理者の申請一覧に自動起票され、承認されると自動生成の制約に反映。
+        <span class="disc-flag"></span>締切ルール（前月◯日まで）や上限日数をシステムで制御するか
+      </div>
+    </div>
+    <div class="obj-header">
+      <div class="row1">
+        <div class="obj-icon request">✋</div>
+        <div class="obj-title"><div class="label">希望休</div><div class="name">希望休を提出</div></div>
+      </div>
+    </div>
+    <div class="cmcard">
+      <div class="cm-head">✋ 新しい希望休</div>
+      <div class="cm-body">
+        <div class="form-2col">
+          <div class="form-row"><label>日付<span class="req">*</span></label><input value="2026/5/20"></div>
+          <div class="form-row"><label>種別</label><select><option>希望休</option><option>有休</option><option>時間変更</option></select></div>
+          <div class="form-row full"><label>理由</label><textarea rows="2">私用のため</textarea></div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn" onclick="goPage('cm-home')">キャンセル</button>
+          <button class="btn primary" onclick="toast('希望休を提出しました。承認をお待ちください（モック）','success');goPage('cm-home')">提出</button>
+        </div>
+        <div class="help-text">提出内容は管理者の「希望・申請」一覧に届きます。</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.main -->
+
+<button class="disc-toggle" id="discToggle" onclick="toggleDisc()">💡 論点を表示</button>
+
+<script>
+/* =====================================================================
+   demo-base.js — Glue Salesforce デモ 共通スクリプト
+   ---------------------------------------------------------------------
+   ・画面切替（タブ / data-go リンク）と論点パネルのON/OFFだけを担う。
+   ・「本物っぽく動く」演出は最小限に（モックである誠実さを優先）。
+     過度なインタラクションは「できる」と誤認させ要件の合意を歪める。
+   ・案件固有のダミー操作（変換・受注確定 等）は各 index.html 側に書く。
+   ===================================================================== */
+
+// ---- 画面ナビゲーション ----
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el){
+    el.classList.add('active');
+    // タブのactive状態も同期（該当タブがあれば）
+    document.querySelectorAll('.app-bar .tab').forEach(tab=>{
+      tab.classList.toggle('active', tab.getAttribute('data-page')===id);
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+  } else {
+    console.warn('[demo] goPage: 画面が見つかりません →', id);
+  }
+}
+
+// タブクリック
+document.querySelectorAll('[data-page]').forEach(t=>{
+  t.addEventListener('click', ()=> goPage(t.getAttribute('data-page')));
+});
+// ページ内リンク（一覧→詳細など）
+document.querySelectorAll('[data-go]').forEach(a=>{
+  a.style.cursor='pointer';
+  a.addEventListener('click', e=>{ e.preventDefault(); goPage(a.getAttribute('data-go')); });
+});
+
+// ---- 論点パネル ON/OFF ----
+function toggleDisc(){
+  document.body.classList.toggle('disc-on');
+  const btn = document.getElementById('discToggle');
+  if(btn) btn.textContent = document.body.classList.contains('disc-on') ? '💡 論点を隠す' : '💡 論点を表示';
+}
+
+// ---- モーダル ----
+function openModal(id){ const m=document.getElementById(id); if(m) m.classList.add('active'); }
+function closeModal(){ document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('active')); }
+document.addEventListener('click', e=>{ if(e.target.classList && e.target.classList.contains('modal-bg')) closeModal(); });
+
+// ---- トースト（ダミー操作の結果表示）----
+function toast(msg, type){
+  let t = document.getElementById('demoToast');
+  if(!t){ t=document.createElement('div'); t.id='demoToast'; t.className='toast'; document.body.appendChild(t); }
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.textContent = msg;
+  // reflow→show
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+// ---- 起動時 ----
+// 初期表示: 論点OFF（プレゼン用クリーン状態）。URL に #review が付いていれば論点ON。
+window.addEventListener('DOMContentLoaded', ()=>{
+  if(location.hash === '#review') document.body.classList.add('disc-on');
+  const btn = document.getElementById('discToggle');
+  if(btn) btn.textContent = document.body.classList.contains('disc-on') ? '💡 論点を隠す' : '💡 論点を表示';
+});
+</script>
+<script>
+/* === イツモスマイル固有 === */
+function runGen(){
+  document.getElementById('genResult').style.display='';
+  toast('自動生成を実行しました（モック）','success');
+  document.getElementById('genResult').scrollIntoView({behavior:'smooth'});
+}
+// ペルソナ切替（Service Cloud管理者 ⇄ Community利用者）
+function setPersona(p){
+  const cm = p==='cm';
+  document.body.classList.toggle('community-mode', cm);
+  document.getElementById('p-sc').classList.toggle('on', !cm);
+  document.getElementById('p-cm').classList.toggle('on', cm);
+  goPage(cm ? 'cm-home' : 'home');
+}
+</script>
+</body>
+</html>
