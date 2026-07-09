@@ -101,6 +101,16 @@
   .seg span{padding:4px 10px;border-right:1px solid #c9c9c9}
   .seg span:last-child{border:none}
   .seg span.on{background:var(--blue);color:#fff}
+  /* Karte (商談カルテ) */
+  .b-orange{background:#ffe8cc;color:#b25000}
+  .del .lbl,.del .val{color:#b3b3b3}
+  .del .val{text-decoration:line-through}
+  .adminbadge{background:#efe9ff;color:#5a3aa8;font-size:10px;padding:1px 7px;border-radius:9px;font-weight:700;margin-left:6px;vertical-align:middle}
+  .tag{font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:6px;vertical-align:middle}
+  .t-auto{background:var(--blue-light);color:var(--blue-dark)}
+  .t-req{background:#ffe8cc;color:#b25000}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin:4px 0 14px}
+  .legend .dot{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -118,6 +128,7 @@
   <button class="active" data-s="home">ホーム</button>
   <button data-s="account">取引先</button>
   <button data-s="opp">商談</button>
+  <button data-s="karte">商談カルテ</button>
   <button data-s="activity">活動記録</button>
   <button data-s="report">日報</button>
 </div>
@@ -149,14 +160,15 @@
       </table>
     </div>
     <div class="card">
-      <div class="rel-head"><strong>🎯 注力商談（フェーズ別）</strong></div>
+      <div class="rel-head"><strong>🎯 注力商談（見込リスト）</strong><span class="badge b-blue">サンプルデータ反映</span></div>
       <table>
-        <tr><th>商談</th><th>金額</th><th>フェーズ</th></tr>
-        <tr><td class="lk">中央病院 カルテ更新</td><td>¥12.0M</td><td><span class="badge b-blue">提案</span></td></tr>
-        <tr><td class="lk">桜島介護 新規導入</td><td>¥8.4M</td><td><span class="badge b-blue">見積</span></td></tr>
-        <tr><td class="lk">霧島 リース更新</td><td>¥6.2M</td><td><span class="badge b-green">最終交渉</span></td></tr>
-        <tr><td class="lk">指宿 サーバ更改</td><td>¥4.8M</td><td><span class="badge b-gray">初回接触</span></td></tr>
+        <tr><th>商談（顧客）</th><th>担当</th><th>金額</th><th>確度</th></tr>
+        <tr><td class="lk">西村内科・脳神経外科病院 スマカル</td><td>森</td><td>¥50.0M</td><td><span class="badge b-gray">C</span></td></tr>
+        <tr><td class="lk">納病院 SCK</td><td>星原</td><td>¥36.5M</td><td><span class="badge b-amber">B</span></td></tr>
+        <tr><td class="lk">栗生診療所 TX</td><td>森</td><td>¥5.4M</td><td><span class="badge b-green">A</span></td></tr>
+        <tr><td class="lk">だいいちリハビリ病院 リハマネ</td><td>星原</td><td>¥2.0M</td><td><span class="badge b-green">A</span></td></tr>
       </table>
+      <div style="padding:8px 16px;color:var(--muted);font-size:11px">※ クライアント提出のサンプル見込データ（12件）を反映。確度A/B/C/Dは商談カルテの標準項目。</div>
     </div>
   </div>
   <div class="footer-note">※ ホーム＝ログイン直後に「今日やること・注力商談・実績」が一目で分かる。現場はここから活動記録へ最短導線。</div>
@@ -288,6 +300,211 @@
     </div>
   </div>
   <div class="footer-note">※ 現場が触る商談画面は最小項目に削減。金額・粗利・原価などの管理項目は管理者レイアウトへ分離。</div>
+</div>
+
+<!-- ===================== 商談カルテ (KARTE) ===================== -->
+<div class="screen" id="karte">
+  <div class="rhead">
+    <div class="ricon" style="background:#e07000">🗂️</div>
+    <div class="meta"><div class="eyebrow">商談カルテ ・ 西村内科・脳神経外科病院</div><h1>スマカル導入提案 <span class="badge b-blue" style="vertical-align:middle;font-size:11px">レコードタイプ：医療(B)</span></h1></div>
+    <div class="acts"><button class="btn">編集</button><button class="btn primary">✓ フェーズを更新</button></div>
+  </div>
+  <div class="rhead" style="display:block">
+    <div class="highlights">
+      <div class="h"><div class="lbl">受注確度</div><div class="val">C（50%以上）</div></div>
+      <div class="h"><div class="lbl">売上予定額</div><div class="val">¥50,000,000</div></div>
+      <div class="h"><div class="lbl">粗利予定額</div><div class="val">¥20,000,000</div></div>
+      <div class="h"><div class="lbl">受注予定月</div><div class="val">2027-02</div></div>
+      <div class="h"><div class="lbl">担当営業</div><div class="val">森</div></div>
+    </div>
+  </div>
+  <div class="note">🗂️ クライアント提出「商談カルテ項目リスト」を Salesforce 商談の全項目として再現（<b>101項目 → 採用73 / 要検討19 / 削除9</b>）。現場入力コアと<b>管理者/分析セクション</b>を分離。本日はオレンジ＝入力方法の要相談、グレー＝削除予定を確定します。</div>
+  <div class="legend">
+    <span><span class="dot" style="background:#fff"></span>採用（そのまま項目化）</span>
+    <span><span class="tag t-req">要検討</span>入力方法を本日相談（19項目）</span>
+    <span><span class="dot" style="background:#eee;border:1px solid #ccc"></span><span class="del" style="text-decoration:none"><span class="val" style="text-decoration:line-through">削除予定</span></span>（9項目）</span>
+    <span><span class="tag t-auto">自動</span>採番/日付/数式で自動</span>
+    <span><span class="adminbadge">管理者</span>管理者レイアウト（現場は読取）</span>
+  </div>
+
+  <!-- 現場入力コア -->
+  <div class="grid g-2">
+    <div class="card">
+      <h2><span class="icon" style="background:#e07000">📌</span> 基本情報</h2>
+      <div class="body"><div class="fields ksec">
+        <div class="field"><div class="lbl">案件番号 <span class="tag t-auto">自動</span></div><div class="val">NS-2026-0142</div></div>
+        <div class="field"><div class="lbl">案件名</div><div class="val">スマカル導入提案</div></div>
+        <div class="field"><div class="lbl">顧客名</div><div class="val link">西村内科・脳神経外科病院</div></div>
+        <div class="field"><div class="lbl">所在地</div><div class="val">鹿児島県姶良市</div></div>
+        <div class="field"><div class="lbl">病床数</div><div class="val">60 床</div></div>
+        <div class="field"><div class="lbl">診療科目</div><div class="val">内科・脳神経外科</div></div>
+        <div class="field"><div class="lbl">担当営業</div><div class="val">森</div></div>
+        <div class="field"><div class="lbl">作成日 <span class="tag t-req">要検討</span><span class="tag t-auto">自動</span></div><div class="val">2026-07-08</div></div>
+        <div class="field"><div class="lbl">更新日 <span class="tag t-req">要検討</span><span class="tag t-auto">自動</span></div><div class="val">2026-07-09</div></div>
+        <div class="field del"><div class="lbl">営業責任者</div><div class="val">削除予定（不要）</div></div>
+        <div class="field del"><div class="lbl">SE担当</div><div class="val">削除予定（不要）</div></div>
+      </div></div>
+    </div>
+    <div class="card">
+      <h2><span class="icon" style="background:#e07000">🌱</span> 商談発生情報</h2>
+      <div class="body"><div class="fields ksec">
+        <div class="field"><div class="lbl">案件発生年月</div><div class="val">2026-06</div></div>
+        <div class="field"><div class="lbl">商談形態 <span class="tag t-auto">選択</span></div><div class="val">新規</div></div>
+        <div class="field"><div class="lbl">発生形態 <span class="tag t-auto">選択</span></div><div class="val">情報店</div></div>
+        <div class="field"><div class="lbl">紹介元</div><div class="val">SF関様</div></div>
+        <div class="field"><div class="lbl">案件化理由</div><div class="val">電カル更新期・医療DX対応</div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- 顧客情報（人物） -->
+  <div class="card" style="margin-top:16px">
+    <h2><span class="icon" style="background:#7f8de1">👥</span> 顧客情報（人物・組織）
+      <span style="margin-left:auto;font-size:11px;color:var(--muted);font-weight:400">※ 人物は取引先責任者＋役割へ正規化を推奨（本日論点）／パワスト図の自動生成はスコープ外</span></h2>
+    <div class="body"><div class="fields ksec" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="field"><div class="lbl">理事長</div><div class="val">西村 一郎</div></div>
+      <div class="field"><div class="lbl">院長</div><div class="val">西村 太郎</div></div>
+      <div class="field"><div class="lbl">事務長</div><div class="val">田中 花子</div></div>
+      <div class="field"><div class="lbl">看護部長</div><div class="val">佐藤 めぐみ</div></div>
+      <div class="field"><div class="lbl">情報システム担当</div><div class="val">山田 健</div></div>
+      <div class="field"><div class="lbl">キーマン</div><div class="val">事務長 田中</div></div>
+      <div class="field"><div class="lbl">決裁者</div><div class="val">理事長 西村一郎</div></div>
+      <div class="field"><div class="lbl">サポーター情報</div><div class="val">看護部長（新カルテ推進派）</div></div>
+      <div class="field"><div class="lbl">エネミー情報</div><div class="val">情報Sys担当（現ベンダー関係）</div></div>
+      <div class="field"><div class="lbl">検討委員会有無</div><div class="val">有（システム選定委員会）</div></div>
+      <div class="field"><div class="lbl">法人特性</div><div class="val">医療法人・地域中核</div></div>
+      <div class="field del"><div class="lbl">影響者</div><div class="val">削除（サポーター/エネミー枠へ）</div></div>
+    </div></div>
+  </div>
+
+  <!-- 現行システム / 提案内容 -->
+  <div class="grid g-2" style="margin-top:16px">
+    <div class="card">
+      <h2><span class="icon" style="background:#0176d3">💻</span> 現行システム
+        <span style="margin-left:auto;font-size:11px;color:var(--muted);font-weight:400">※ 将来は導入システム子オブジェクトへ正規化</span></h2>
+      <div class="body"><div class="fields ksec">
+        <div class="field"><div class="lbl">現行電子カルテ</div><div class="val">他社製 X-Karte</div></div>
+        <div class="field"><div class="lbl">現行医事システム</div><div class="val">他社医事</div></div>
+        <div class="field"><div class="lbl">PACS</div><div class="val">有</div></div>
+        <div class="field"><div class="lbl">RIS</div><div class="val">有</div></div>
+        <div class="field"><div class="lbl">検査システム</div><div class="val">無</div></div>
+        <div class="field"><div class="lbl">リハシステム</div><div class="val">リハマネ（自社）</div></div>
+        <div class="field"><div class="lbl">介護システム</div><div class="val">無</div></div>
+        <div class="field"><div class="lbl">稼働年数</div><div class="val">7 年</div></div>
+        <div class="field"><div class="lbl">クラウド／オンプレ <span class="tag t-auto">選択</span></div><div class="val">オンプレミス</div></div>
+        <div class="field"><div class="lbl">ベンダー <span class="tag t-req">要検討</span></div><div class="val">A社</div></div>
+        <div class="field"><div class="lbl">保守期限（システム）<span class="tag t-req">要検討</span></div><div class="val">2027-03</div></div>
+        <div class="field"><div class="lbl">保守期限（メインサーバー）<span class="tag t-req">要検討</span></div><div class="val">2026-12</div></div>
+      </div></div>
+    </div>
+    <div class="card">
+      <h2><span class="icon" style="background:#0176d3">📦</span> 提案内容</h2>
+      <div class="body"><div class="fields ksec">
+        <div class="field"><div class="lbl">提案PKG <span class="tag t-auto">選択</span></div><div class="val">スマカル</div></div>
+        <div class="field"><div class="lbl">提案オプション <span class="tag t-req">要検討</span></div><div class="val">予約・Web問診（→見積連携）</div></div>
+        <div class="field"><div class="lbl">関連商材</div><div class="val">サーバ・PC・NW</div></div>
+        <div class="field"><div class="lbl">補助金提案</div><div class="val">医療DX推進体制整備加算</div></div>
+        <div class="field"><div class="lbl">クラウド提案</div><div class="val">クラウド型で提案</div></div>
+        <div class="field"><div class="lbl">AI提案</div><div class="val">AI問診（次期）</div></div>
+        <div class="field"><div class="lbl">連携提案</div><div class="val">法人内リハ連携</div></div>
+        <div class="field"><div class="lbl">差別化ポイント</div><div class="val">現地SE常駐・24hコール</div></div>
+        <div class="field"><div class="lbl">導入メリット <span class="tag t-req">要検討</span></div><div class="val">待ち時間短縮・レセ精度向上</div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ニーズ・課題 / 商談進捗 -->
+  <div class="grid g-2" style="margin-top:16px">
+    <div class="card">
+      <h2><span class="icon" style="background:#2e844a">🎯</span> ニーズ・課題</h2>
+      <div class="body"><div class="fields ksec">
+        <div class="field"><div class="lbl">経営課題 <span class="tag t-req">要検討</span></div><div class="val">収益改善・人材確保</div></div>
+        <div class="field"><div class="lbl">業務課題 <span class="tag t-req">要検討</span></div><div class="val">受付〜会計の待ち時間</div></div>
+        <div class="field"><div class="lbl">医療DX対応</div><div class="val">令和ビジョン2030対応検討中</div></div>
+        <div class="field"><div class="lbl">クラウド希望</div><div class="val">有（BCP観点）</div></div>
+        <div class="field"><div class="lbl">セキュリティ課題</div><div class="val">ランサム対策強化</div></div>
+        <div class="field del"><div class="lbl">現状課題</div><div class="val">削除（経営/業務へ集約）</div></div>
+        <div class="field del"><div class="lbl">スタッフ課題</div><div class="val">削除（〃へ集約）</div></div>
+        <div class="field del"><div class="lbl">診療報酬対策</div><div class="val">削除（死に枠）</div></div>
+      </div></div>
+    </div>
+    <div class="card">
+      <h2><span class="icon" style="background:#2e844a">📈</span> 商談進捗</h2>
+      <div class="body"><div class="fields ksec">
+        <div class="field"><div class="lbl">受注確度 <span class="tag t-auto">選択</span></div><div class="val">C（50%以上）</div></div>
+        <div class="field"><div class="lbl">受注予定月</div><div class="val">2027-02</div></div>
+        <div class="field"><div class="lbl">未解決課題</div><div class="val">予算承認</div></div>
+        <div class="field"><div class="lbl">顧客宿題</div><div class="val">委員会日程調整</div></div>
+        <div class="field"><div class="lbl">自社宿題</div><div class="val">見積再提示</div></div>
+        <div class="field"><div class="lbl">意思決定時期</div><div class="val">2026-12</div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- 管理者：金額情報 / 競合情報 -->
+  <div class="grid g-2" style="margin-top:16px">
+    <div class="card">
+      <h2><span class="icon" style="background:#5a3aa8">💰</span> 金額情報 <span class="adminbadge">管理者</span></h2>
+      <div class="body"><div class="fields ksec">
+        <div class="field"><div class="lbl">売上予定額 <span class="tag t-req">要検討</span></div><div class="val">¥50,000,000</div></div>
+        <div class="field"><div class="lbl">粗利予定額</div><div class="val">¥20,000,000</div></div>
+        <div class="field"><div class="lbl">粗利率 <span class="tag t-auto">数式</span></div><div class="val">40%</div></div>
+        <div class="field"><div class="lbl">納品予定月 <span class="tag t-req">要検討</span></div><div class="val">2027-03</div></div>
+        <div class="field"><div class="lbl">売上予定月 <span class="tag t-req">要検討</span></div><div class="val">2027-02</div></div>
+        <div class="field"><div class="lbl">回収予定月 <span class="tag t-req">要検討</span></div><div class="val">2027-04</div></div>
+        <div class="field"><div class="lbl">クラウド月額（売/粗）</div><div class="val">¥120,000 / ¥60,000</div></div>
+        <div class="field"><div class="lbl">ソフト月額保守（売/粗）</div><div class="val">¥80,000 / ¥40,000</div></div>
+        <div class="field"><div class="lbl">ハード月額保守（売/粗）</div><div class="val">¥50,000 / ¥20,000</div></div>
+        <div class="field"><div class="lbl">補助金額 <span class="tag t-req">要検討</span></div><div class="val">¥8,000,000</div></div>
+        <div class="field"><div class="lbl">実質負担額 <span class="tag t-req">要検討</span><span class="tag t-auto">数式</span></div><div class="val">¥42,000,000</div></div>
+      </div></div>
+    </div>
+    <div class="card">
+      <h2><span class="icon" style="background:#5a3aa8">⚔️</span> 競合情報 <span class="adminbadge">管理者</span></h2>
+      <div class="body"><div class="fields ksec">
+        <div class="field"><div class="lbl">競合ベンダー <span class="tag t-req">要検討</span></div><div class="val">B社 / C社</div></div>
+        <div class="field"><div class="lbl">競合製品</div><div class="val">B-Karte</div></div>
+        <div class="field"><div class="lbl">競合優位点</div><div class="val">価格</div></div>
+        <div class="field"><div class="lbl">競合弱点</div><div class="val">サポート拠点が遠い</div></div>
+        <div class="field"><div class="lbl">顧客評価</div><div class="val">サポート重視でNSK優位</div></div>
+        <div class="field"><div class="lbl">価格情報</div><div class="val">競合 ¥45,000,000 想定</div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- 管理者：勝ち筋分析 / 受注後レビュー -->
+  <div class="grid g-2" style="margin-top:16px">
+    <div class="card">
+      <h2><span class="icon" style="background:#5a3aa8">🏆</span> 勝ち筋分析 <span class="adminbadge">管理者</span></h2>
+      <div class="body"><div class="fields ksec">
+        <div class="field"><div class="lbl">決裁ポイント <span class="tag t-req">要検討</span></div><div class="val">コスト対効果・サポート体制</div></div>
+        <div class="field"><div class="lbl">キラートーク</div><div class="val">地域No.1サポート実績</div></div>
+        <div class="field"><div class="lbl">競合との差</div><div class="val">現地SE常駐</div></div>
+        <div class="field"><div class="lbl">顧客感触</div><div class="val">前向き</div></div>
+        <div class="field"><div class="lbl">勝敗要因</div><div class="val">価格と委員会の合意形成</div></div>
+        <div class="field"><div class="lbl">リスク要因</div><div class="val">予算縮小</div></div>
+        <div class="field"><div class="lbl">受注シナリオ</div><div class="val">12月委員会→年度内契約</div></div>
+        <div class="field del"><div class="lbl">採用理由</div><div class="val">削除（決裁ポイントへ統合）</div></div>
+        <div class="field del"><div class="lbl">顧客が重視すること</div><div class="val">削除（決裁ポイントへ統合）</div></div>
+        <div class="field del"><div class="lbl">最重要人物</div><div class="val">削除（キーマンと同義）</div></div>
+      </div></div>
+    </div>
+    <div class="card">
+      <h2><span class="icon" style="background:#5a3aa8">📋</span> 受注後レビュー <span class="adminbadge">管理者</span></h2>
+      <div class="body"><div class="fields ksec">
+        <div class="field"><div class="lbl">受注要因</div><div class="val" style="color:#bbb">— 受注後に記録 —</div></div>
+        <div class="field"><div class="lbl">失注要因</div><div class="val" style="color:#bbb">— 受注後に記録 —</div></div>
+        <div class="field"><div class="lbl">成功事例化</div><div class="val" style="color:#bbb">—</div></div>
+        <div class="field"><div class="lbl">反省点</div><div class="val" style="color:#bbb">—</div></div>
+        <div class="field"><div class="lbl">顧客満足度</div><div class="val" style="color:#bbb">—</div></div>
+        <div class="field"><div class="lbl">紹介獲得可能性</div><div class="val" style="color:#bbb">—</div></div>
+        <div class="field"><div class="lbl">次回活用ポイント <span class="tag t-req">要検討</span></div><div class="val" style="color:#bbb">—</div></div>
+        <div class="field"><div class="lbl">追加提案候補 <span class="tag t-req">要検討</span></div><div class="val" style="color:#bbb">—</div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="footer-note">※ このカルテ＝Salesforce商談の全項目（レコードタイプ 医療(B)）。<b>現場入力コア</b>（基本情報・発生・進捗・提案）と<b>管理者/分析</b>（金額・競合・勝ち筋・受注後レビュー）をレイアウトで分離し、現場の入力負荷を最小化。<br>⚠️ 約90項目は大型のため、必須（案件名/顧客/担当/確度/発生年月ほか）以外は任意＋段階運用を推奨。埋まらない「死に枠」を作らない運用を本日すり合わせ。</div>
 </div>
 
 <!-- ===================== ACTIVITY (modal) ===================== -->
