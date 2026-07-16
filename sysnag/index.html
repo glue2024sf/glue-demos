@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SYSNAG様 Salesforce デモ画面（SES・PMO 商談／人材／アサイン管理）</title>
+<!-- 開発中は外部参照、配布時は build.sh が <style>/<script> にインライン化する -->
+<style>
+/* =====================================================================
+   demo-base.css — Glue Salesforce デモ 共通スタイル (SLDS Lightning 再現)
+   ---------------------------------------------------------------------
+   ・案件横断で共通の「chrome（ヘッダ/タブ/レコード作法）」と
+     「コンポーネントライブラリ」をここに集約する。
+   ・案件固有の色/業務独自パーツだけを各 index.html の <style> に追記する。
+   ・配布時は build.sh がこのファイルを <style> へインライン展開し、
+     単一HTML（ダブルクリックで開ける / 添付で送れる）にする。
+   ・出典: docs/aion/demo (基準実装) + tsubasa(帳票/フォーム) を統合。
+   ===================================================================== */
+
+:root{
+  --brand:#0176d3; --brand-dark:#014486; --brand-50:#eaf4fb;
+  --bg:#f3f3f3; --card:#ffffff; --border:#dddbda; --border-light:#f3f2f2;
+  --text:#181818; --text-2:#3e3e3c; --text-mute:#706e6b;
+  --success:#2e844a; --success-bg:#cdefc4; --warn:#fe9339; --warn-bg:#fef0e6;
+  --error:#ba0517; --error-bg:#fdd9d4; --info:#0176d3;
+  --shadow-card:0 2px 2px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.06);
+  --shadow-hover:0 2px 4px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.08);
+  --radius:.25rem;
+  /* 外部ツール色（案件で使う/使わないは任意。不要なら無視でOK） */
+  --chatwork:#e57400; --chatwork-bg:#fff4e6;
+  --claude:#cc785c; --claude-bg:#f5e9e2;
+  --sheets:#0f9d58; --sheets-bg:#e6f4ea;
+  /* 論点パネル */
+  --disc:#7a5cff; --disc-bg:#f1edff; --disc-border:#c9bcff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Salesforce Sans","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+  font-size:13px; color:var(--text); background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit; cursor:pointer}
+a{color:var(--brand); text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ===== Global Header ===== */
+.global-header{
+  background:linear-gradient(0deg,#032e61,#0176d3); height:48px;
+  display:flex; align-items:center; padding:0 16px; gap:12px;
+  position:sticky; top:0; z-index:1000;
+}
+.app-launcher{
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.1); border-radius:3px; cursor:pointer;
+}
+.app-launcher:hover{background:rgba(255,255,255,.2)}
+.app-launcher::before{
+  content:""; width:14px;height:14px;
+  background-image:
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px);
+  background-size:5px 5px;
+  background-position:0 0,5px 0,10px 0,0 5px,5px 5px,10px 5px,0 10px,5px 10px,10px 10px;
+  background-repeat:no-repeat;
+}
+.app-name{
+  color:#fff; font-weight:700; font-size:14px;
+  padding-left:12px; border-left:1px solid rgba(255,255,255,.3);
+}
+.app-name .sub{font-weight:400; opacity:.8; margin-left:6px; font-size:12px}
+.gh-spacer{flex:1}
+.gh-search{
+  background:rgba(255,255,255,.95); border-radius:3px; padding:6px 12px;
+  width:380px; display:flex; align-items:center; gap:8px; font-size:13px;
+}
+.gh-search input{border:0;outline:0;flex:1;background:transparent;font-size:13px}
+.gh-actions{display:flex; gap:8px; align-items:center}
+.gh-actions .icon-btn{
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  color:#fff; cursor:pointer; border-radius:50%;
+}
+.gh-actions .icon-btn:hover{background:rgba(255,255,255,.15)}
+.gh-user{
+  width:32px;height:32px;border-radius:50%;
+  background:#a5d8ff;color:#0b4a83;display:flex;align-items:center;justify-content:center;
+  font-weight:700; cursor:pointer; font-size:12px;
+}
+
+/* ===== App Bar (Tabs) ===== */
+.app-bar{
+  background:#fff; border-bottom:1px solid var(--border);
+  display:flex; align-items:stretch; padding:0 16px; height:40px;
+  position:sticky; top:48px; z-index:999; overflow-x:auto;
+}
+.app-bar .tab{
+  padding:0 16px; display:flex; align-items:center; gap:6px; cursor:pointer;
+  border-bottom:3px solid transparent; color:var(--text-2); font-weight:400;
+  font-size:13px; user-select:none; white-space:nowrap;
+}
+.app-bar .tab:hover{background:var(--brand-50)}
+.app-bar .tab.active{border-bottom-color:var(--brand); color:var(--brand); font-weight:700}
+
+/* ===== Main content ===== */
+.main{padding:12px 16px; max-width:1440px; margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+
+/* ===== Object Page Header ===== */
+.obj-header{
+  background:#fff; padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.obj-header .row1{display:flex; align-items:center; gap:12px}
+.obj-icon{
+  width:40px;height:40px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  color:#fff; font-size:18px; font-weight:700;
+}
+/* 標準オブジェクトのアイコン色（SLDS準拠）。案件のカスタムobjは追記する */
+.obj-icon.account{background:#ff9a3c}
+.obj-icon.lead{background:#f88962}
+.obj-icon.opp{background:#fcb95b}
+.obj-icon.contact{background:#7f8de1}
+.obj-icon.quote{background:#a094ed}
+.obj-icon.order{background:#2e844a}
+.obj-icon.case{background:#f2cf5b}
+.obj-icon.report{background:#76ded9}
+.obj-icon.dashboard{background:#e6437f}
+.obj-icon.home{background:#0176d3}
+.obj-icon.custom{background:#5867e8}
+.obj-icon.chatwork{background:var(--chatwork)}
+.obj-icon.claude{background:var(--claude)}
+.obj-icon.sheets{background:var(--sheets)}
+.obj-title{flex:1}
+.obj-title .label{color:var(--text-mute); font-size:12px}
+.obj-title .name{font-size:18px; font-weight:700}
+.obj-actions{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+
+/* ===== Buttons ===== */
+.btn{
+  padding:6px 14px; border:1px solid var(--border); background:#fff;
+  border-radius:var(--radius); font-size:13px; color:var(--text);
+}
+.btn:hover{background:var(--border-light)}
+.btn.primary{background:var(--brand); color:#fff; border-color:var(--brand)}
+.btn.primary:hover{background:var(--brand-dark)}
+.btn.success{background:var(--success); color:#fff; border-color:var(--success)}
+.btn.success:hover{filter:brightness(0.95)}
+.btn.warn{background:var(--warn); color:#fff; border-color:var(--warn)}
+.btn.small{padding:3px 10px; font-size:12px}
+
+/* ===== Highlights Panel ===== */
+.highlights{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  padding:12px 16px; display:flex; gap:32px; margin-bottom:8px; flex-wrap:wrap;
+}
+.highlights .item{min-width:120px}
+.highlights .lbl{color:var(--text-mute); font-size:12px}
+.highlights .val{font-size:15px; font-weight:700; margin-top:2px}
+
+/* ===== Path Component (Sales/Stage Path) ===== */
+.path{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px; display:flex; padding:0; overflow:hidden;
+}
+.path .stage{
+  flex:1; padding:10px 0; text-align:center; position:relative;
+  background:#ecebea; color:var(--text-2); font-size:12px; cursor:pointer;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+  margin-right:-12px; min-width:0;
+}
+.path .stage:first-child{ clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%) }
+.path .stage:last-child{
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%); margin-right:0;
+}
+.path .stage.completed{background:#4bc076; color:#fff}
+.path .stage.current{background:var(--brand); color:#fff; font-weight:700}
+.path .stage:hover{filter:brightness(0.95)}
+.path-label{
+  display:flex; align-items:center; gap:6px;
+  padding:4px 12px 0; font-size:11px; color:var(--text-mute); background:#fff;
+  border:1px solid var(--border); border-bottom:0; border-radius:var(--radius) var(--radius) 0 0;
+}
+.path-label .badge{margin-left:auto}
+
+/* ===== Layout grids ===== */
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.two-col-3{display:grid; grid-template-columns:2fr 1fr; gap:8px}
+@media(max-width:1000px){ .two-col,.two-col-3{grid-template-columns:1fr} }
+
+/* ===== Card ===== */
+.card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.card .card-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.card .card-head .actions{margin-left:auto; display:flex; gap:6px}
+.card .card-body{padding:12px 16px}
+.sec-title{
+  font-size:12px; font-weight:700; color:var(--text-2);
+  padding:8px 16px; background:#fafaf9; border-bottom:1px solid var(--border-light);
+}
+
+/* ===== Field rows (read view) ===== */
+.field-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 24px}
+.field{padding:8px 0; border-bottom:1px solid var(--border-light)}
+.field .lbl{color:var(--text-mute); font-size:12px; margin-bottom:2px}
+.field .val{font-size:13px}
+.field.full{grid-column:1/-1}
+.field .val .ai-source{
+  display:inline-block; padding:1px 6px; border-radius:8px;
+  font-size:10px; background:var(--claude-bg); color:var(--claude);
+  margin-left:6px; vertical-align:middle;
+}
+.field .val .cw-source{ background:var(--chatwork-bg); color:var(--chatwork); }
+
+/* ===== Edit form (inline / modal) ===== */
+.form-2col{display:grid; grid-template-columns:1fr 1fr; gap:12px 24px}
+.form-row{display:flex; flex-direction:column; gap:4px}
+.form-row.full{grid-column:1/-1}
+.form-row label{font-size:12px; color:var(--text-2); font-weight:700}
+.form-row label .req{color:var(--error); margin-left:2px}
+.form-row input,.form-row select,.form-row textarea{
+  font-family:inherit; font-size:13px; padding:6px 10px;
+  border:1px solid var(--border); border-radius:var(--radius); background:#fff; color:var(--text);
+}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{
+  outline:0; border-color:var(--brand); box-shadow:0 0 0 2px var(--brand-50);
+}
+@media(max-width:700px){ .form-2col{grid-template-columns:1fr} }
+
+/* ===== Table ===== */
+.tbl{width:100%; border-collapse:collapse; background:#fff; font-size:13px}
+.tbl th{
+  background:#fafaf9; text-align:left; padding:8px 12px;
+  border-bottom:1px solid var(--border); font-weight:700; color:var(--text-2); font-size:12px;
+}
+.tbl td{padding:8px 12px; border-bottom:1px solid var(--border-light)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .num{text-align:right}
+.tbl tbody tr:hover{background:var(--brand-50)}
+.tbl .name-link{font-weight:700; cursor:pointer; color:var(--brand)}
+
+/* ===== Badges ===== */
+.badge{display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700}
+.badge.info{background:#e0f0fb; color:#0176d3}
+.badge.success{background:var(--success-bg); color:var(--success)}
+.badge.warn{background:var(--warn-bg); color:var(--warn)}
+.badge.error{background:var(--error-bg); color:var(--error)}
+.badge.gray{background:#ecebea; color:var(--text-mute)}
+.badge.cw{background:var(--chatwork-bg); color:var(--chatwork)}
+.badge.claude{background:var(--claude-bg); color:var(--claude)}
+.badge.sheets{background:var(--sheets-bg); color:var(--sheets)}
+
+/* ===== Related list card ===== */
+.related-card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px;
+}
+.related-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.related-head .count{color:var(--text-mute); font-weight:400; font-size:12px}
+.related-head .actions{margin-left:auto}
+
+/* ===== Activity Timeline ===== */
+.timeline{padding:8px 16px}
+.tl-item{display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border-light)}
+.tl-item:last-child{border-bottom:0}
+.tl-icon{
+  width:28px; height:28px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff;
+}
+.tl-icon.call{background:#76ded9}
+.tl-icon.mail{background:#fcb95b}
+.tl-icon.meet{background:#0176d3}
+.tl-icon.task{background:#4bca81}
+.tl-icon.cw{background:var(--chatwork)}
+.tl-icon.claude{background:var(--claude)}
+.tl-body{flex:1}
+.tl-meta{font-size:11px; color:var(--text-mute)}
+.tl-title{font-weight:700; margin-top:1px}
+.tl-desc{color:var(--text-2); margin-top:2px; font-size:12px}
+
+/* ===== Dashboard widgets ===== */
+.dash-grid{display:grid; grid-template-columns:repeat(12,1fr); gap:8px}
+.widget{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px}
+.widget.span-3{grid-column:span 3}
+.widget.span-4{grid-column:span 4}
+.widget.span-6{grid-column:span 6}
+.widget.span-8{grid-column:span 8}
+.widget.span-12{grid-column:span 12}
+.w-title{font-weight:700; font-size:13px; margin-bottom:6px; color:var(--text-2)}
+.w-big{font-size:28px; font-weight:700; line-height:1.1}
+.w-sub{font-size:11px; color:var(--text-mute); margin-top:2px}
+.w-sub.up{color:var(--success)}
+.w-sub.down{color:var(--error)}
+
+/* Bar chart (CSS only) */
+.bar-chart-wrap{padding:8px 0 0}
+.bar-chart{display:flex; align-items:flex-end; gap:6px; height:160px; padding:0 4px}
+.bar-chart .bar{
+  flex:1; background:linear-gradient(0deg,#0176d3,#4faae8);
+  border-radius:3px 3px 0 0; position:relative; display:flex; flex-direction:column;
+  justify-content:flex-end; align-items:center; min-width:0;
+}
+.bar-chart .bar .v{font-size:10px; color:var(--text-2); position:absolute; top:-16px}
+.bar-chart .bar .x{font-size:10px; color:var(--text-mute); position:absolute; bottom:-18px}
+
+/* Donut (conic-gradient) */
+.donut-wrap{display:flex; align-items:center; gap:14px; padding:6px 0}
+.donut{width:120px; height:120px; border-radius:50%}
+.legend{flex:1; font-size:12px}
+.lg-item{display:flex; align-items:center; gap:6px; padding:3px 0}
+.lg-dot{width:10px; height:10px; border-radius:2px}
+
+/* ===== Misc ===== */
+.help-text{color:var(--text-mute); font-size:11px}
+.crumb{font-size:11px; color:var(--text-mute); margin-bottom:4px}
+.crumb a{color:var(--text-mute); cursor:pointer}
+.crumb .sep{margin:0 4px; color:#bbb}
+
+/* ===== Callout (in-screen note) ===== */
+.callout{
+  background:var(--brand-50); border-left:3px solid var(--brand);
+  padding:10px 14px; border-radius:0 var(--radius) var(--radius) 0;
+  margin-bottom:10px; font-size:12px;
+}
+.callout.warn{background:var(--warn-bg); border-color:var(--warn)}
+.callout.success{background:var(--success-bg); border-color:var(--success)}
+.callout strong{font-weight:700}
+
+/* ===== Modal ===== */
+.modal-bg{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.4);
+  z-index:2000; align-items:center; justify-content:center; padding:24px;
+}
+.modal-bg.active{display:flex}
+.modal{
+  background:#fff; border-radius:6px; max-width:880px; width:100%;
+  max-height:90vh; overflow:auto; box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+.modal-head{padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center}
+.modal-head .title{font-weight:700; font-size:15px; flex:1}
+.modal-head .close{cursor:pointer; font-size:20px; color:var(--text-mute)}
+.modal-body{padding:20px}
+.modal-foot{padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end}
+
+/* ===== Toast ===== */
+.toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:#181818; color:#fff; padding:12px 20px; border-radius:6px; font-size:13px;
+  box-shadow:0 4px 16px rgba(0,0,0,.3); opacity:0; pointer-events:none;
+  transition:opacity .25s, transform .25s; z-index:3000; max-width:90vw;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.success{background:#1b5e2f}
+
+/* ===== 帳票 / PDF プレビュー (見積書・請求書・契約書) ===== */
+.pdf-toolbar{
+  background:#3c3c3c; color:#eee; padding:6px 14px; font-size:12px;
+  display:flex; align-items:center; gap:12px; border-radius:6px 6px 0 0;
+}
+.pdf-page{
+  background:#fff; max-width:760px; margin:0 auto; padding:48px 56px;
+  box-shadow:0 2px 12px rgba(0,0,0,.15); font-size:13px; color:#222;
+}
+.pdf-hdr{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px}
+.pdf-title{font-size:24px; font-weight:700; letter-spacing:.3em; border-bottom:2px solid #222; padding-bottom:6px}
+.pdf-tbl{width:100%; border-collapse:collapse; margin:18px 0; font-size:12px}
+.pdf-tbl th{background:#333; color:#fff; padding:8px 10px; text-align:left}
+.pdf-tbl td{padding:8px 10px; border-bottom:1px solid #ddd}
+.pdf-tbl .num{text-align:right}
+.pdf-amount-box{border:2px solid #222; padding:10px 16px; display:inline-block; font-size:18px; font-weight:700; margin:10px 0}
+.pdf-stamp{
+  width:64px;height:64px;border:2px solid #d33;border-radius:50%;color:#d33;
+  display:flex;align-items:center;justify-content:center;font-size:11px;transform:rotate(-12deg);
+}
+.pdf-bottom{margin-top:32px; font-size:11px; color:#555}
+
+/* =====================================================================
+   論点パネル (.disc) ── デモ品質の核
+   画面ごとに「出典 / 論点 / ※要確認」を載せ、デモを意思決定文書にする。
+   bodyに class="disc-on" が付くと表示。右下トグルで全画面ON/OFF。
+   プレゼン中は隠し(clean)、FB/レビュー時は表示に切替える運用。
+   ===================================================================== */
+.disc{display:none}
+body.disc-on .disc{
+  display:block;
+  background:var(--disc-bg); border:1px solid var(--disc-border); border-left:4px solid var(--disc);
+  border-radius:0 var(--radius) var(--radius) 0; padding:10px 14px; margin:0 0 10px; font-size:12px;
+}
+.disc .disc-q{font-weight:700; color:var(--disc); margin-bottom:3px}
+.disc .disc-src{font-size:11px; color:var(--text-mute); margin-bottom:4px}
+.disc .disc-src::before{content:"📎 出典: "}
+.disc .disc-body{color:var(--text-2); line-height:1.6}
+.disc .disc-flag{
+  display:inline-block; background:var(--warn-bg); color:var(--warn);
+  font-weight:700; font-size:11px; padding:1px 7px; border-radius:8px; margin:0 2px;
+}
+.disc .disc-flag::before{content:"※要確認 "}
+/* 論点トグル（右下固定） */
+.disc-toggle{
+  position:fixed; right:18px; bottom:18px; z-index:2500;
+  background:var(--disc); color:#fff; border:0; border-radius:20px;
+  padding:9px 16px; font-size:13px; font-weight:700; box-shadow:0 3px 10px rgba(0,0,0,.25);
+}
+.disc-toggle:hover{filter:brightness(1.05)}
+body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid var(--disc-border)}
+
+/* ===== Responsive ===== */
+@media(max-width:1000px){
+  .dash-grid{grid-template-columns:repeat(4,1fr)}
+  .widget.span-3,.widget.span-4{grid-column:span 2}
+  .widget.span-6,.widget.span-8,.widget.span-12{grid-column:span 4}
+  .gh-search{display:none}
+}
+</style>
+<style>
+/* === SYSNAG固有スタイル === */
+.obj-icon.project{background:#5867e8}   /* 案件 */
+.obj-icon.talent{background:#0b827c}    /* タレント(人材) */
+.obj-icon.assign{background:#e6437f}    /* アサイン */
+:root{ --ses:#5867e8; --ses-bg:#eceafe; --pmo:#0b827c; --pmo-bg:#e3f7f4; --sander:#c23934; --sander-bg:#fde7e6; }
+
+/* 事業(SES/PMO)切替バッジ */
+.biz{display:flex;gap:6px;align-items:center;margin-left:12px}
+.biz .bbtn{font-size:11px;font-weight:700;padding:3px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.5);color:#fff;cursor:pointer;background:rgba(255,255,255,.12)}
+.biz .bbtn.on{background:#fff;color:var(--brand-dark)}
+
+/* カンバン（案件パイプライン） */
+.kanban{display:flex;gap:10px;overflow-x:auto;padding:4px 0 10px}
+.kb-col{flex:0 0 210px;background:#f1f2f5;border-radius:8px;padding:8px;min-height:120px}
+.kb-col .kb-head{font-size:12px;font-weight:700;color:var(--text-2);display:flex;justify-content:space-between;padding:2px 4px 8px}
+.kb-col .kb-head .n{color:var(--text-mute);font-weight:400}
+.kb-card{background:#fff;border:1px solid var(--border);border-left:3px solid var(--ses);border-radius:6px;padding:8px 10px;margin-bottom:8px;cursor:pointer}
+.kb-card:hover{box-shadow:var(--shadow-hover)}
+.kb-card.pmo{border-left-color:var(--pmo)}
+.kb-card .t{font-weight:700;font-size:12px;margin-bottom:3px}
+.kb-card .c{font-size:11px;color:var(--text-mute)}
+.kb-card .r{font-size:11px;margin-top:4px;display:flex;justify-content:space-between}
+.kb-card .r b{color:var(--text)}
+
+/* スキルバッジ */
+.skills{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.skill{font-size:11px;background:var(--brand-50);color:var(--brand-dark);border:1px solid #cfe4f6;border-radius:4px;padding:1px 7px;font-weight:600}
+.skill.hit{background:var(--success-bg);color:var(--success);border-color:#a5dfa0}
+.skill.miss{background:#f1f0f0;color:var(--text-mute);border-color:var(--border)}
+
+/* マッチングスコア */
+.match-row{display:grid;grid-template-columns:150px 1fr 132px 96px;gap:10px;align-items:center;padding:9px 6px;border-bottom:1px solid var(--border-light)}
+.match-row.head{font-size:12px;font-weight:700;color:var(--text-2);background:#fafaf9}
+.score-bar{height:8px;background:#eee;border-radius:5px;overflow:hidden}
+.score-bar > i{display:block;height:100%;background:linear-gradient(90deg,#2e844a,#7ed957)}
+.score-bar.mid > i{background:linear-gradient(90deg,#fe9339,#ffd27a)}
+.score-bar.low > i{background:linear-gradient(90deg,#ba0517,#f18b82)}
+.score-num{font-weight:800;font-size:15px}
+
+/* 粗利表示 */
+.gp{font-weight:800}
+.gp.good{color:var(--success)} .gp.mid{color:var(--warn)} .gp.bad{color:var(--error)}
+
+/* Sander注記 */
+.sander-note{background:var(--sander-bg);border-left:3px solid var(--sander);padding:8px 12px;border-radius:0 4px 4px 0;font-size:12px;margin-bottom:10px}
+.sander-note b{color:var(--sander)}
+
+/* 稼働ステータス点 */
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.dot.work{background:var(--success)} .dot.wait{background:var(--warn)} .dot.plan{background:var(--brand)} .dot.off{background:var(--text-mute)}
+</style>
+</head>
+<body class="ses-mode">
+
+<!-- ===================== グローバルヘッダ ===================== -->
+<div class="global-header">
+  <div class="app-launcher" title="アプリランチャー"></div>
+  <div class="app-name">商談・人材管理 <span class="sub">株式会社SYSNAG</span></div>
+  <div class="biz">
+    <span class="bbtn on" id="bizSes" onclick="setBiz('ses')">SES事業</span>
+    <span class="bbtn" id="bizPmo" onclick="setBiz('pmo')">PMO事業</span>
+  </div>
+  <div class="gh-spacer"></div>
+  <div class="gh-search"><span style="color:#706e6b">🔍</span><input placeholder="案件・人材・取引先を検索..."></div>
+  <div class="gh-actions">
+    <div class="icon-btn" title="お気に入り">⭐</div>
+    <div class="icon-btn" title="通知">🔔</div>
+    <div class="icon-btn" title="ヘルプ">❓</div>
+    <div class="gh-user" title="後藤 剛">後藤</div>
+  </div>
+</div>
+
+<!-- ===================== アプリバー（業務プロセス順） ===================== -->
+<div class="app-bar">
+  <div class="tab active" data-page="home">🏠 ホーム</div>
+  <div class="tab" data-page="project-list">📁 案件</div>
+  <div class="tab" data-page="match">🎯 マッチング</div>
+  <div class="tab" data-page="talent-list">👤 タレント</div>
+  <div class="tab" data-page="assignment-detail">🔗 アサイン</div>
+  <div class="tab" data-page="account-detail">🏢 取引先</div>
+  <div class="tab" data-page="quote">📄 見積・帳票</div>
+  <div class="tab" data-page="dashboard">📊 分析</div>
+</div>
+
+<div class="main">
+
+  <!-- ===================== HOME ===================== -->
+  <div class="page active" id="home">
+    <div class="disc">
+      <div class="disc-q">論点：ホーム（経営/営業の朝イチ画面）に出すKPIはこの4つで合意できるか</div>
+      <div class="disc-src">要件定義書 §9 ／ KO資料「データドリブンな数値管理」</div>
+      <div class="disc-body">
+        現状スプレッドシート＋i-SeiQで横断が見えない稼働率・粗利・待機・パイプラインを、この1枚に集約する想定。
+        <span class="disc-flag"></span>経営が毎朝見たい指標はこの4つで足りるか（他に見たい軸＝拠点別/事業別 等）
+      </div>
+    </div>
+
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon home">🏠</div>
+      <div class="obj-title"><div class="label">ホーム</div><div class="name">おはようございます、後藤さん</div></div>
+      <div class="obj-actions"><button class="btn" onclick="goPage('project-new')">＋ 案件を登録</button><button class="btn primary" onclick="goPage('match')">🎯 マッチング</button></div>
+    </div></div>
+
+    <div class="dash-grid">
+      <div class="widget span-3"><div class="w-title">稼働中エンジニア</div><div class="w-big">38<span style="font-size:14px">名</span></div><div class="w-sub up">稼働率 88.4%（自社43名中）</div></div>
+      <div class="widget span-3"><div class="w-title">待機・終了間近</div><div class="w-big" style="color:var(--warn)">5<span style="font-size:14px">名</span></div><div class="w-sub">待機2 / 30日内終了3</div></div>
+      <div class="widget span-3"><div class="w-title">今月 粗利（見込）</div><div class="w-big">¥6.42<span style="font-size:14px">M</span></div><div class="w-sub up">前月比 +4.1%</div></div>
+      <div class="widget span-3"><div class="w-title">パイプライン</div><div class="w-big">¥18.6<span style="font-size:14px">M</span></div><div class="w-sub">提案中12件 / 面談待ち7件</div></div>
+
+      <div class="widget span-8">
+        <div class="w-title">⚠ 要対応（終了間近アサイン・停滞案件）</div>
+        <table class="tbl" style="margin-top:6px">
+          <thead><tr><th>種別</th><th>対象</th><th>内容</th><th class="num">期日/停滞</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge warn">終了間近</span></td><td><a class="name-link" data-go="assignment-detail">K.S / トパーズ物流PJ</a></td><td>契約終了・更新確認</td><td class="num">残 18日</td></tr>
+            <tr><td><span class="badge warn">終了間近</span></td><td><a class="name-link" data-go="talent-detail">M.T / 次アサイン手配</a></td><td>8/31稼働終了→待機化リスク</td><td class="num">残 27日</td></tr>
+            <tr><td><span class="badge error">停滞</span></td><td><a class="name-link" data-go="project-detail">ネビュラ会計SaaS 基盤更改</a></td><td>提案中のまま動きなし</td><td class="num">14日停滞</td></tr>
+            <tr><td><span class="badge info">面談待ち</span></td><td><a class="name-link" data-go="project-detail">オリオン銀行 PMO支援</a></td><td>面談日程の返答待ち</td><td class="num">3日</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="widget span-4">
+        <div class="w-title">待機タレント（早く当てたい）</div>
+        <table class="tbl" style="margin-top:6px">
+          <tbody>
+            <tr><td><span class="dot wait"></span><a class="name-link" data-go="talent-detail">R.I（Java/AWS・8年）</a></td><td class="num">即日</td></tr>
+            <tr><td><span class="dot plan"></span>Y.N（PM/PMO・12年）</td><td class="num">8/1〜</td></tr>
+            <tr><td><span class="dot plan"></span>A.K（React/TS・5年）</td><td class="num">8/15〜</td></tr>
+          </tbody>
+        </table>
+        <div class="help-text" style="margin-top:6px">※ マッチング画面から候補提案できます</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 案件 一覧（カンバン） ===================== -->
+  <div class="page" id="project-list">
+    <div class="disc">
+      <div class="disc-q">論点：案件のステージ（パイプライン）はこの8段でSES/PMO両方を表せるか</div>
+      <div class="disc-src">要件定義書 §3-2 Project__c.Stage__c ／ KO資料「PMO・SESで管理項目に違いあり」</div>
+      <div class="disc-body">
+        引合→提案中→面談調整→面談済→内定→参画(受注)→終了／失注 を想定。SES/PMOはレコードタイプで項目差を吸収。
+        <span class="disc-flag"></span>SESとPMOでステージ名・数を分けるか（PMOは面談が無いケースあり）
+      </div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon project">📁</div>
+      <div class="obj-title"><div class="label">案件</div><div class="name"><span class="ses-only">SES案件</span><span class="pmo-only">PMO案件</span> ・ パイプライン <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      <div class="obj-actions"><button class="btn" onclick="toast('リストビュー表示（モック）')">☰ リスト</button><button class="btn primary" onclick="goPage('project-new')">新規</button></div>
+    </div></div>
+
+    <div class="kanban">
+      <div class="kb-col"><div class="kb-head">引合 <span class="n">3</span></div>
+        <div class="kb-card ses-card" data-go="project-detail"><div class="t">ネビュラ会計SaaS 基盤更改</div><div class="c">🏢 ネビュラソフト</div><div class="r"><span>Java/AWS ×2</span><b>¥1.4M/月</b></div></div>
+        <div class="kb-card ses-card"><div class="t">クロノス物流 WMS改修</div><div class="c">🏢 クロノスHD</div><div class="r"><span>PHP ×1</span><b>¥0.75M/月</b></div></div>
+      </div>
+      <div class="kb-col"><div class="kb-head">提案中 <span class="n">4</span></div>
+        <div class="kb-card ses-card" data-go="project-detail"><div class="t">オリオン銀行 勘定系保守</div><div class="c">🏢 オリオン銀行（2次）</div><div class="r"><span>COBOL ×3</span><b>¥1.1M/月</b></div></div>
+        <div class="kb-card ses-card"><div class="t">トパーズ物流 配車アプリ</div><div class="c">🏢 トパーズ物流</div><div class="r"><span>React/TS ×2</span><b>¥0.9M/月</b></div></div>
+      </div>
+      <div class="kb-col"><div class="kb-head">面談調整 <span class="n">2</span></div>
+        <div class="kb-card ses-card"><div class="t">ステラ製薬 MES導入</div><div class="c">🏢 ステラ製薬</div><div class="r"><span>SAP ×1</span><b>¥1.3M/月</b></div></div>
+      </div>
+      <div class="kb-col"><div class="kb-head">面談済/内定 <span class="n">3</span></div>
+        <div class="kb-card ses-card"><div class="t">ベガクラウド SRE支援</div><div class="c">🏢 ベガクラウド</div><div class="r"><span>K8s ×1</span><b>¥1.2M/月</b></div></div>
+      </div>
+      <div class="kb-col"><div class="kb-head">参画(稼働) <span class="n">38</span></div>
+        <div class="kb-card ses-card" data-go="project-detail"><div class="t">トパーズ物流 基幹再構築</div><div class="c">🏢 トパーズ物流</div><div class="r"><span>Java ×3稼働</span><b>¥3.9M/月</b></div></div>
+        <div class="kb-card ses-card"><div class="t">シリウス証券 データ基盤</div><div class="c">🏢 シリウス証券</div><div class="r"><span>AWS/Python ×2</span><b>¥2.6M/月</b></div></div>
+      </div>
+      <div class="kb-col"><div class="kb-head">終了/失注 <span class="n">2</span></div>
+        <div class="kb-card ses-card"><div class="t">アルタイル社内SE支援</div><div class="c">🏢 アルタイル工業</div><div class="r"><span>失注：単価</span><b>—</b></div></div>
+      </div>
+    </div>
+    <div class="callout"><strong>💡 このカンバン＝標準の「パス＋リストビュー（Kanban表示）」で実現。</strong>ドラッグでステージ移動 → 自動で日付/確度更新（本番）。</div>
+  </div>
+
+  <!-- ===================== 案件 詳細 ===================== -->
+  <div class="page" id="project-detail">
+    <div class="disc">
+      <div class="disc-q">論点：案件レコードの項目・関連（アサイン）・マッチング候補の見せ方はこれで合っているか</div>
+      <div class="disc-src">要件定義書 §3-2 Project__c ／ §1 M3・M6</div>
+      <div class="disc-body">
+        案件の要件（必要スキル/単価上限/人数/期間/商流）をハイライトに。右にマッチング候補を出し、その場で提案アサインを作れる導線。
+        <span class="disc-flag"></span>単価は「上限（顧客提示）」を持つ。原価（BP支払）は権限で絞る想定でよいか
+      </div>
+    </div>
+    <div class="crumb"><a data-go="project-list">案件</a><span class="sep">›</span>ネビュラ会計SaaS 基盤更改</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon project">📁</div>
+      <div class="obj-title"><div class="label">案件（SES）</div><div class="name">ネビュラ会計SaaS 基盤更改</div></div>
+      <div class="obj-actions"><button class="btn" onclick="goPage('project-new')">編集</button><button class="btn primary" onclick="goPage('match')">🎯 候補を探す</button></div>
+    </div></div>
+
+    <div class="path-label">ステージ <span class="badge info">提案中</span></div>
+    <div class="path">
+      <div class="stage completed">引合</div>
+      <div class="stage current">提案中</div>
+      <div class="stage">面談調整</div>
+      <div class="stage">面談済</div>
+      <div class="stage">内定</div>
+      <div class="stage">参画(受注)</div>
+      <div class="stage">終了</div>
+    </div>
+
+    <div class="highlights">
+      <div class="item"><div class="lbl">顧客</div><div class="val">株式会社ネビュラソフト</div></div>
+      <div class="item"><div class="lbl">必要スキル</div><div class="val" style="font-size:12px"><div class="skills"><span class="skill">Java</span><span class="skill">AWS</span><span class="skill">Terraform</span></div></div></div>
+      <div class="item"><div class="lbl">単価上限(月)</div><div class="val">¥1,400,000</div></div>
+      <div class="item"><div class="lbl">想定人数</div><div class="val">2 名</div></div>
+      <div class="item"><div class="lbl">期間</div><div class="val">2026/09〜（更新）</div></div>
+      <div class="item"><div class="lbl">商流</div><div class="val">1次（直請）</div></div>
+    </div>
+
+    <div class="two-col-3">
+      <div>
+        <div class="card">
+          <div class="card-head">📝 案件詳細</div>
+          <div class="card-body"><div class="field-grid">
+            <div class="field"><div class="lbl">案件名</div><div class="val">ネビュラ会計SaaS 基盤更改</div></div>
+            <div class="field"><div class="lbl">レコードタイプ</div><div class="val">SES</div></div>
+            <div class="field"><div class="lbl">勤務地/リモート</div><div class="val">一部リモート（週2出社・田町）</div></div>
+            <div class="field"><div class="lbl">確度</div><div class="val">60%（提案中）</div></div>
+            <div class="field"><div class="lbl">担当営業</div><div class="val">後藤 剛</div></div>
+            <div class="field"><div class="lbl">拠点</div><div class="val">東京本社</div></div>
+            <div class="field full"><div class="lbl">要件メモ</div><div class="val">既存オンプレ会計基盤をAWSへ更改。IaC(Terraform)経験必須。9月着手・年内フェーズ1。</div></div>
+          </div></div>
+        </div>
+        <div class="related-card">
+          <div class="related-head">🎯 マッチング候補 <span class="count">(上位3)</span><div class="actions"><button class="btn small" onclick="goPage('match')">すべて見る</button></div></div>
+          <div style="padding:8px 12px">
+            <div class="match-row head"><div>タレント</div><div>スキル一致</div><div>単価(原価/請求)</div><div class="num">スコア</div></div>
+            <div class="match-row"><div><a class="name-link" data-go="talent-detail">R.I（8年）</a><div class="help-text">即日</div></div>
+              <div class="skills"><span class="skill hit">Java</span><span class="skill hit">AWS</span><span class="skill miss">Terraform</span></div>
+              <div style="font-size:12px">¥0.85M / ¥1.30M</div><div class="num"><span class="score-num" style="color:var(--success)">92</span></div></div>
+            <div class="match-row"><div>T.W（6年）<div class="help-text">9/1〜</div></div>
+              <div class="skills"><span class="skill hit">Java</span><span class="skill hit">AWS</span><span class="skill hit">Terraform</span></div>
+              <div style="font-size:12px">¥0.90M / ¥1.35M</div><div class="num"><span class="score-num" style="color:var(--success)">88</span></div></div>
+            <div class="match-row"><div>S.O（BP・7年）<div class="help-text">即日</div></div>
+              <div class="skills"><span class="skill hit">Java</span><span class="skill miss">AWS</span><span class="skill miss">Terraform</span></div>
+              <div style="font-size:12px">¥0.95M / ¥1.30M</div><div class="num"><span class="score-num" style="color:var(--warn)">64</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="related-card">
+          <div class="related-head">🔗 アサイン <span class="count">(1)</span><div class="actions"><button class="btn small" onclick="toast('提案アサイン作成（モック）','success')">＋提案</button></div></div>
+          <table class="tbl"><tr><td><a class="name-link" data-go="assignment-detail">R.I</a></td><td><span class="badge warn">提案中</span></td><td class="num">¥1.30M</td></tr></table>
+        </div>
+        <div class="related-card">
+          <div class="related-head">📞 活動 <span class="count">(3)</span></div>
+          <div class="timeline">
+            <div class="tl-item"><div class="tl-icon mail">M</div><div class="tl-body"><div class="tl-meta">7/15 10:20</div><div class="tl-title">提案書・単価表を送付</div><div class="tl-desc">R.I / T.W の2名で提案。返答待ち。</div></div></div>
+            <div class="tl-item"><div class="tl-icon meet">M</div><div class="tl-body"><div class="tl-meta">7/11 15:00</div><div class="tl-title">要件ヒアリング（先方情シス）</div><div class="tl-desc">Terraform必須・9月着手を確認。</div></div></div>
+            <div class="tl-item"><div class="tl-icon call">C</div><div class="tl-body"><div class="tl-meta">7/8</div><div class="tl-title">引合TEL</div><div class="tl-desc">紹介経由。2枠。</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 案件 新規フォーム ===================== -->
+  <div class="page" id="project-new">
+    <div class="disc">
+      <div class="disc-q">論点：案件登録で営業が迷わず入力できるか（必須・選択肢・SES/PMO差）</div>
+      <div class="disc-src">要件定義書 §3-2 Project__c ／ §6</div>
+      <div class="disc-body"><span class="disc-flag"></span>必須項目（顧客/ステージ/必要スキル/単価上限）はこれで妥当か。案件名は自動採番にするか手入力か</div>
+    </div>
+    <div class="obj-header"><div class="row1"><div class="obj-icon project">📁</div><div class="obj-title"><div class="label">案件</div><div class="name">新規 案件</div></div></div></div>
+    <div class="card"><div class="card-body">
+      <div class="sec-title" style="margin:-12px -16px 12px">基本</div>
+      <div class="form-2col">
+        <div class="form-row"><label>案件名<span class="req">*</span></label><input value="ネビュラ会計SaaS 基盤更改"></div>
+        <div class="form-row"><label>レコードタイプ<span class="req">*</span></label><select><option>SES</option><option>PMO</option></select></div>
+        <div class="form-row"><label>顧客<span class="req">*</span></label><input value="株式会社ネビュラソフト"></div>
+        <div class="form-row"><label>担当営業<span class="req">*</span></label><input value="後藤 剛"></div>
+        <div class="form-row"><label>ステージ<span class="req">*</span></label><select><option>引合</option><option selected>提案中</option><option>面談調整</option><option>面談済</option><option>内定</option><option>参画(受注)</option></select></div>
+        <div class="form-row"><label>商流</label><select><option>直請</option><option selected>1次</option><option>2次</option></select></div>
+      </div>
+      <div class="sec-title" style="margin:16px -16px 12px">要件（マッチング条件）</div>
+      <div class="form-2col">
+        <div class="form-row full"><label>必要スキル</label><input value="Java, AWS, Terraform"></div>
+        <div class="form-row"><label>単価上限(月)<span class="req">*</span></label><input value="1,400,000"></div>
+        <div class="form-row"><label>想定人数</label><input value="2"></div>
+        <div class="form-row"><label>開始</label><input value="2026/09/01"></div>
+        <div class="form-row"><label>勤務地/リモート</label><select><option>常駐</option><option selected>一部リモート</option><option>フルリモート</option></select></div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="goPage('project-list')">キャンセル</button>
+        <button class="btn primary" onclick="toast('案件を保存しました（モック）','success');goPage('project-detail')">保存</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===================== マッチング（レコードハンター簡易版） ===================== -->
+  <div class="page" id="match">
+    <div class="disc">
+      <div class="disc-q">論点：マッチングは「必要スキル×単価×稼働時期」の3軸スコアでどこまでPhase1で作るか</div>
+      <div class="disc-src">要件定義書 §1 M6・§1-2（Phase2高度化）／ KO資料「レコードハンター」</div>
+      <div class="disc-body">
+        Phase1は<b>標準機能（リストビュー/レポート）でのフィルタ候補提示＋簡易スコア</b>を想定。スコアリング自動化・自動レコメンドはPhase2。
+        <span class="disc-flag"></span>スコアの重み付け（スキル一致/単価差/稼働時期）をどう決めるか
+      </div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon assign">🎯</div>
+      <div class="obj-title"><div class="label">マッチング</div><div class="name">候補提示：ネビュラ会計SaaS 基盤更改</div></div>
+    </div></div>
+
+    <div class="card"><div class="card-body" style="display:flex;gap:24px;flex-wrap:wrap">
+      <div><div class="help-text">必要スキル</div><div class="skills"><span class="skill">Java</span><span class="skill">AWS</span><span class="skill">Terraform</span></div></div>
+      <div><div class="help-text">単価上限(請求)</div><div style="font-weight:700">¥1,400,000/月</div></div>
+      <div><div class="help-text">着手</div><div style="font-weight:700">2026/09〜</div></div>
+      <div><div class="help-text">絞り込み</div><div><select style="padding:4px 8px"><option>全タレント</option><option>自社社員のみ</option><option>BP人材のみ</option><option>即日可のみ</option></select></div></div>
+    </div></div>
+
+    <div class="card"><div class="card-body">
+      <div class="match-row head"><div>タレント</div><div>スキル一致 / 稼働</div><div>単価(原価→請求)</div><div class="num">スコア</div></div>
+
+      <div class="match-row"><div><a class="name-link" data-go="talent-detail">R.I</a><div class="help-text">自社・Java8年・即日</div></div>
+        <div><div class="skills"><span class="skill hit">Java</span><span class="skill hit">AWS</span><span class="skill miss">Terraform</span></div><div class="help-text" style="margin-top:3px">2/3一致・即日可</div></div>
+        <div style="font-size:12px">¥0.85M → <b>¥1.30M</b><div class="gp good" style="font-size:11px">粗利 +¥0.45M</div></div>
+        <div class="num"><div class="score-bar"><i style="width:92%"></i></div><div class="score-num" style="color:var(--success)">92</div></div></div>
+
+      <div class="match-row"><div>T.W<div class="help-text">自社・Java6年・9/1〜</div></div>
+        <div><div class="skills"><span class="skill hit">Java</span><span class="skill hit">AWS</span><span class="skill hit">Terraform</span></div><div class="help-text" style="margin-top:3px">3/3一致・着手月◎</div></div>
+        <div style="font-size:12px">¥0.90M → <b>¥1.35M</b><div class="gp good" style="font-size:11px">粗利 +¥0.45M</div></div>
+        <div class="num"><div class="score-bar"><i style="width:88%"></i></div><div class="score-num" style="color:var(--success)">88</div></div></div>
+
+      <div class="match-row"><div>S.O<div class="help-text">BP(協力会社ペガサス)・7年・即日</div></div>
+        <div><div class="skills"><span class="skill hit">Java</span><span class="skill miss">AWS</span><span class="skill miss">Terraform</span></div><div class="help-text" style="margin-top:3px">1/3一致・要育成</div></div>
+        <div style="font-size:12px">¥0.95M → <b>¥1.30M</b><div class="gp mid" style="font-size:11px">粗利 +¥0.35M</div></div>
+        <div class="num"><div class="score-bar mid"><i style="width:64%"></i></div><div class="score-num" style="color:var(--warn)">64</div></div></div>
+
+      <div class="match-row"><div>H.A<div class="help-text">自社・PHP5年・8/15〜</div></div>
+        <div><div class="skills"><span class="skill miss">Java</span><span class="skill hit">AWS</span><span class="skill miss">Terraform</span></div><div class="help-text" style="margin-top:3px">1/3一致</div></div>
+        <div style="font-size:12px">¥0.70M → ¥1.10M<div class="gp mid" style="font-size:11px">粗利 +¥0.40M</div></div>
+        <div class="num"><div class="score-bar low"><i style="width:38%"></i></div><div class="score-num" style="color:var(--error)">38</div></div></div>
+
+      <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn" onclick="toast('候補をスキルシートで出力（モック）')">スキルシート出力</button>
+        <button class="btn primary" onclick="toast('R.I を提案アサインに追加しました（モック）','success');goPage('project-detail')">選択タレントを提案</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ===================== タレント 一覧 ===================== -->
+  <div class="page" id="talent-list">
+    <div class="disc">
+      <div class="disc-q">論点：タレント一覧の列・フィルタ（待機/スキル/単価/稼働時期）はこれで足りるか</div>
+      <div class="disc-src">要件定義書 §3-2 Talent__c ／ §9 待機人材</div>
+      <div class="disc-body">調達担当が「今すぐ当てられる人材」を探す画面。<span class="disc-flag"></span>氏名は実名管理か、イニシャル/コード管理か（個人情報の扱い）</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon talent">👤</div>
+      <div class="obj-title"><div class="label">タレント</div><div class="name">人材マスタ ・ 待機＋稼働 <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      <div class="obj-actions"><button class="btn">インポート</button><button class="btn primary" onclick="toast('新規タレント（モック）')">新規</button></div>
+    </div></div>
+    <table class="tbl">
+      <thead><tr><th>氏名</th><th>区分</th><th>保有スキル</th><th class="num">提示単価(原価)</th><th>稼働ステータス</th><th>稼働可</th></tr></thead>
+      <tbody>
+        <tr><td><a class="name-link" data-go="talent-detail">R.I</a></td><td>自社</td><td><div class="skills"><span class="skill">Java</span><span class="skill">AWS</span><span class="skill">SQL</span></div></td><td class="num">¥850,000</td><td><span class="dot wait"></span>待機</td><td>即日</td></tr>
+        <tr><td>T.W</td><td>自社</td><td><div class="skills"><span class="skill">Java</span><span class="skill">AWS</span><span class="skill">Terraform</span></div></td><td class="num">¥900,000</td><td><span class="dot work"></span>稼働中</td><td>9/1〜</td></tr>
+        <tr><td>Y.N</td><td>自社</td><td><div class="skills"><span class="skill">PM</span><span class="skill">PMO</span></div></td><td class="num">¥1,050,000</td><td><span class="dot plan"></span>参画予定</td><td>8/1〜</td></tr>
+        <tr><td>A.K</td><td>自社</td><td><div class="skills"><span class="skill">React</span><span class="skill">TypeScript</span></div></td><td class="num">¥780,000</td><td><span class="dot wait"></span>待機</td><td>8/15〜</td></tr>
+        <tr><td>S.O</td><td>BP（ペガサス）</td><td><div class="skills"><span class="skill">Java</span><span class="skill">PHP</span></div></td><td class="num">¥950,000</td><td><span class="dot work"></span>稼働中</td><td>—</td></tr>
+        <tr><td>K.S</td><td>自社</td><td><div class="skills"><span class="skill">Java</span><span class="skill">Spring</span></div></td><td class="num">¥880,000</td><td><span class="dot work"></span>稼働中</td><td>9/30終了</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>💡 「待機 かつ 稼働可≦今月」を保存済みリストビューに。</strong>毎朝この一覧＝営業への提案母数。</div>
+  </div>
+
+  <!-- ===================== タレント 詳細 ===================== -->
+  <div class="page" id="talent-detail">
+    <div class="disc">
+      <div class="disc-q">論点：タレント詳細の項目・アサイン履歴・単価の見せ方はこれで合っているか</div>
+      <div class="disc-src">要件定義書 §3-2 Talent__c ／ §4 権限（単価の可視範囲）</div>
+      <div class="disc-body">スキル・単価・稼働ステータスをハイライト。<span class="disc-flag"></span>原価単価/粗利を営業一般に見せるか、経営・調達に限定するか</div>
+    </div>
+    <div class="crumb"><a data-go="talent-list">タレント</a><span class="sep">›</span>R.I</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon talent">👤</div>
+      <div class="obj-title"><div class="label">タレント（自社社員）</div><div class="name">R.I（イニシャル管理）</div></div>
+      <div class="obj-actions"><button class="btn">編集</button><button class="btn primary" onclick="goPage('match')">🎯 案件に当てる</button></div>
+    </div></div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">稼働ステータス</div><div class="val"><span class="dot wait"></span>待機（即日可）</div></div>
+      <div class="item"><div class="lbl">経験年数</div><div class="val">8 年</div></div>
+      <div class="item"><div class="lbl">提示単価(原価)</div><div class="val">¥850,000</div></div>
+      <div class="item"><div class="lbl">直近請求単価</div><div class="val">¥1,250,000</div></div>
+    </div>
+    <div class="two-col-3">
+      <div><div class="card"><div class="card-head">📝 詳細</div><div class="card-body"><div class="field-grid">
+        <div class="field"><div class="lbl">区分</div><div class="val">自社社員</div></div>
+        <div class="field"><div class="lbl">拠点</div><div class="val">東京本社</div></div>
+        <div class="field full"><div class="lbl">保有スキル</div><div class="val"><div class="skills"><span class="skill">Java</span><span class="skill">AWS</span><span class="skill">SQL</span><span class="skill">Spring</span><span class="skill">Docker</span></div></div></div>
+        <div class="field"><div class="lbl">稼働可能時期</div><div class="val">即日</div></div>
+        <div class="field"><div class="lbl">希望勤務地</div><div class="val">都内・一部リモート可</div></div>
+      </div></div></div></div>
+      <div><div class="related-card"><div class="related-head">🔗 アサイン履歴 <span class="count">(3)</span></div>
+        <table class="tbl">
+          <tr><td><a data-go="assignment-detail" class="name-link">トパーズ物流 基幹再構築</a></td><td><span class="badge gray">終了</span></td><td class="num">¥1.25M</td></tr>
+          <tr><td>シリウス証券 データ基盤</td><td><span class="badge gray">終了</span></td><td class="num">¥1.20M</td></tr>
+          <tr><td>ネビュラ会計SaaS（提案中）</td><td><span class="badge warn">提案中</span></td><td class="num">¥1.30M</td></tr>
+        </table>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ===================== アサイン 詳細 ===================== -->
+  <div class="page" id="assignment-detail">
+    <div class="disc">
+      <div class="disc-q">論点：アサイン（案件×人材）で粗利・精算幅をどう持つか</div>
+      <div class="disc-src">要件定義書 §3-2 Assignment__c ／ §5 A1・A5</div>
+      <div class="disc-body">
+        粗利＝請求単価−原価単価を数式で自動計算。精算幅（例140-180h）を持ち、超過/控除の判定に使う（Phase2請求連動）。
+        <span class="disc-flag"></span>精算幅の実際の運用（固定 or 案件ごと）／控除・超過単価の計算式
+      </div>
+    </div>
+    <div class="crumb"><a data-go="project-detail">案件</a><span class="sep">›</span>アサイン<span class="sep">›</span>R.I × ネビュラ会計SaaS</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon assign">🔗</div>
+      <div class="obj-title"><div class="label">アサイン</div><div class="name">R.I × ネビュラ会計SaaS 基盤更改</div></div>
+      <div class="obj-actions"><button class="btn">編集</button><button class="btn success" onclick="toast('稼働開始に更新しました（モック）','success')">稼働開始</button></div>
+    </div></div>
+
+    <div class="path-label">ステータス <span class="badge warn">提案中</span></div>
+    <div class="path">
+      <div class="stage current">提案中</div>
+      <div class="stage">面談待ち</div>
+      <div class="stage">面談済</div>
+      <div class="stage">内定</div>
+      <div class="stage">稼働中</div>
+      <div class="stage">終了</div>
+    </div>
+
+    <div class="highlights">
+      <div class="item"><div class="lbl">請求単価(月)</div><div class="val">¥1,300,000</div></div>
+      <div class="item"><div class="lbl">原価単価(月)</div><div class="val">¥850,000</div></div>
+      <div class="item"><div class="lbl">粗利(月)</div><div class="val gp good">¥450,000</div></div>
+      <div class="item"><div class="lbl">粗利率</div><div class="val gp good">34.6%</div></div>
+      <div class="item"><div class="lbl">精算幅</div><div class="val">140〜180h</div></div>
+    </div>
+    <div class="card"><div class="card-body"><div class="field-grid">
+      <div class="field"><div class="lbl">案件</div><div class="val"><a class="name-link" data-go="project-detail">ネビュラ会計SaaS 基盤更改</a></div></div>
+      <div class="field"><div class="lbl">タレント</div><div class="val"><a class="name-link" data-go="talent-detail">R.I</a></div></div>
+      <div class="field"><div class="lbl">開始予定</div><div class="val">2026/09/01</div></div>
+      <div class="field"><div class="lbl">終了予定</div><div class="val">2027/03/31（更新前提）</div></div>
+      <div class="field"><div class="lbl">商流段数</div><div class="val">1次（直請）</div></div>
+      <div class="field"><div class="lbl">上限超過単価</div><div class="val">¥8,125/h ／ 控除 ¥9,285/h</div></div>
+    </div></div></div>
+    <div class="callout"><strong>💡 粗利・粗利率は数式で自動。</strong>案件（主従）にロールアップ → 案件単位・全社の月次粗利がダッシュボードに直結。</div>
+  </div>
+
+  <!-- ===================== 取引先 詳細 ===================== -->
+  <div class="page" id="account-detail">
+    <div class="disc">
+      <div class="disc-q">論点：取引先を「顧客企業／協力会社(BP)」のレコードタイプ2種で管理してよいか</div>
+      <div class="disc-src">要件定義書 §3-2 Account ／ §1 M1</div>
+      <div class="disc-body">エンド/元請/BPを取引区分で表現。<span class="disc-flag"></span>支払サイト（請求連動）・与信をどこまで持つか</div>
+    </div>
+    <div class="crumb"><a data-go="home">取引先</a><span class="sep">›</span>株式会社トパーズ物流</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon account">🏢</div>
+      <div class="obj-title"><div class="label">取引先（顧客企業）</div><div class="name">株式会社トパーズ物流</div></div>
+      <div class="obj-actions"><button class="btn">編集</button><button class="btn primary" onclick="goPage('project-new')">＋ 案件</button></div>
+    </div></div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">取引区分</div><div class="val">エンド（直請）</div></div>
+      <div class="item"><div class="lbl">支払サイト</div><div class="val">月末締／翌月末</div></div>
+      <div class="item"><div class="lbl">稼働中アサイン</div><div class="val">3 名</div></div>
+      <div class="item"><div class="lbl">取引状況</div><div class="val"><span class="badge success">取引中</span></div></div>
+    </div>
+    <div class="two-col-3">
+      <div><div class="related-card"><div class="related-head">📁 案件 <span class="count">(2)</span></div>
+        <table class="tbl">
+          <tr><td><a class="name-link" data-go="project-detail">基幹再構築</a></td><td><span class="badge success">参画</span></td><td class="num">¥3.9M/月</td></tr>
+          <tr><td>配車アプリ</td><td><span class="badge info">提案中</span></td><td class="num">¥0.9M/月</td></tr>
+        </table>
+      </div></div>
+      <div><div class="related-card"><div class="related-head">👥 取引先責任者 <span class="count">(2)</span></div>
+        <table class="tbl"><tr><td>情シス部長</td><td>決裁</td></tr><tr><td>PJリーダー</td><td>現場窓口</td></tr></table>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ===================== 見積・帳票（APEXボタン + Sander） ===================== -->
+  <div class="page" id="quote">
+    <div class="disc">
+      <div class="disc-q">論点：見積・請求の帳票を「APEXボタン＋Sanderライセンス」で出す前提の技術確認</div>
+      <div class="disc-src">要件定義書 §7 ／ KO資料「AppExchangeカスタムオブジェクトNG→APEXボタン＋Sander(月3,000円)」</div>
+      <div class="disc-body">
+        案件/アサインから1クリックで見積PDF生成→メール送付を想定。<span class="disc-flag"></span>SanderでPDF生成・送付まで可能か、APEX実装分担（Glue/Sander側）はどうなるか（澤田様・三好様に確認）
+      </div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon quote">📄</div>
+      <div class="obj-title"><div class="label">帳票</div><div class="name">見積書プレビュー（モック）</div></div>
+      <div class="obj-actions"><button class="btn" onclick="toast('PDFダウンロード（モック）')">PDF</button><button class="btn primary" onclick="toast('見積書をメール送付しました（モック）','success')">メール送付</button></div>
+    </div></div>
+
+    <div class="sander-note">⚙️ この帳票は <b>APEXボタン「見積書作成」＋Sanderライセンス（月3,000円）</b> で生成する前提のモックです。AppExchangeのカスタムオブジェクト方式はライセンス判定NGのため採用しません。<span style="color:var(--sander)">※Phase1は見積書まで／請求書はPhase2想定</span></div>
+
+    <div class="pdf-toolbar"><span>◀ ▶ 1 / 1</span><span>見積書_ネビュラ会計SaaS_20260717.pdf</span><span style="margin-left:auto">100%</span></div>
+    <div class="pdf-page">
+      <div class="pdf-hdr">
+        <div><div class="pdf-title">御 見 積 書</div><div style="margin-top:16px">株式会社ネビュラソフト 御中</div></div>
+        <div style="text-align:right;font-size:12px">見積番号: Q-2026-0142<br>発行日: 2026/07/17<br><br><b>株式会社SYSNAG</b><br>東京都千代田区丸の内1-9-2<br>グラントウキョウサウスタワー11階</div>
+      </div>
+      <div>下記の通り御見積申し上げます。</div>
+      <div class="pdf-amount-box">御見積金額　¥2,860,000 -（税込）</div>
+      <table class="pdf-tbl">
+        <thead><tr><th>品目</th><th class="num">単価(月)</th><th class="num">人数</th><th class="num">期間</th><th class="num">金額</th></tr></thead>
+        <tbody>
+          <tr><td>SES：Java/AWSエンジニア（基盤更改）</td><td class="num">¥1,300,000</td><td class="num">1</td><td class="num">1ヶ月</td><td class="num">¥1,300,000</td></tr>
+          <tr><td>SES：Java/AWS/Terraformエンジニア</td><td class="num">¥1,350,000</td><td class="num">1</td><td class="num">1ヶ月</td><td class="num">¥1,350,000</td></tr>
+          <tr><td colspan="4" class="num">小計</td><td class="num">¥2,650,000</td></tr>
+          <tr><td colspan="4" class="num">消費税(10%)</td><td class="num">¥265,000</td></tr>
+          <tr><td colspan="4" class="num"><b>合計</b></td><td class="num"><b>¥2,915,000</b></td></tr>
+        </tbody>
+      </table>
+      <div class="pdf-bottom">精算幅: 140〜180h／月　支払条件: 月末締翌月末　有効期限: 発行後30日<br>備考: 稼働開始 2026/09/01 予定。上限超過・下限控除は精算幅に基づき別途調整。</div>
+    </div>
+  </div>
+
+  <!-- ===================== 分析ダッシュボード ===================== -->
+  <div class="page" id="dashboard">
+    <div class="disc">
+      <div class="disc-q">論点：経営ダッシュボードの構成（稼働率・粗利推移・パイプライン・BP別）はこれで意思決定できるか</div>
+      <div class="disc-src">要件定義書 §9</div>
+      <div class="disc-body">全社の数値を1枚で。<span class="disc-flag"></span>集計軸（拠点=東京/福岡/札幌/沖縄・事業=SES/PMO・担当営業）のうち最優先はどれか</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon dashboard">📊</div>
+      <div class="obj-title"><div class="label">ダッシュボード</div><div class="name">経営：稼働・粗利・パイプライン</div></div>
+    </div></div>
+    <div class="dash-grid">
+      <div class="widget span-3"><div class="w-title">稼働率</div><div class="w-big">88.4%</div><div class="w-sub up">目標85% 達成</div></div>
+      <div class="widget span-3"><div class="w-title">月次粗利</div><div class="w-big">¥6.42M</div><div class="w-sub up">前月比 +4.1%</div></div>
+      <div class="widget span-3"><div class="w-title">平均粗利率</div><div class="w-big">31.8%</div><div class="w-sub">目標30%</div></div>
+      <div class="widget span-3"><div class="w-title">待機人材</div><div class="w-big" style="color:var(--warn)">2名</div><div class="w-sub">機会損失 ¥1.7M/月</div></div>
+
+      <div class="widget span-8">
+        <div class="w-title">月次粗利 推移（百万円）</div>
+        <div class="bar-chart-wrap"><div class="bar-chart" style="margin-bottom:22px">
+          <div class="bar" style="height:62%"><span class="v">5.1</span><span class="x">3月</span></div>
+          <div class="bar" style="height:68%"><span class="v">5.5</span><span class="x">4月</span></div>
+          <div class="bar" style="height:64%"><span class="v">5.3</span><span class="x">5月</span></div>
+          <div class="bar" style="height:74%"><span class="v">6.0</span><span class="x">6月</span></div>
+          <div class="bar" style="height:78%"><span class="v">6.2</span><span class="x">7月</span></div>
+          <div class="bar" style="height:82%"><span class="v">6.4</span><span class="x">見込</span></div>
+        </div></div>
+      </div>
+      <div class="widget span-4">
+        <div class="w-title">事業別 稼働（SES/PMO）</div>
+        <div class="donut-wrap">
+          <div class="donut" style="background:conic-gradient(var(--ses) 0 72%, var(--pmo) 72% 100%)"></div>
+          <div class="legend">
+            <div class="lg-item"><span class="lg-dot" style="background:var(--ses)"></span>SES 31名（72%）</div>
+            <div class="lg-item"><span class="lg-dot" style="background:var(--pmo)"></span>PMO 12名（28%）</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="widget span-6">
+        <div class="w-title">パイプライン（ステージ別 見込金額）</div>
+        <table class="tbl" style="margin-top:6px">
+          <tbody>
+            <tr><td>引合</td><td class="num">¥2.9M</td><td><span class="badge gray">3件</span></td></tr>
+            <tr><td>提案中</td><td class="num">¥6.4M</td><td><span class="badge info">4件</span></td></tr>
+            <tr><td>面談調整/面談済</td><td class="num">¥5.1M</td><td><span class="badge info">3件</span></td></tr>
+            <tr><td>内定</td><td class="num">¥4.2M</td><td><span class="badge success">2件</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="widget span-6">
+        <div class="w-title">BP別 調達（協力会社）</div>
+        <table class="tbl" style="margin-top:6px">
+          <thead><tr><th>協力会社</th><th class="num">稼働</th><th class="num">粗利/月</th></tr></thead>
+          <tbody>
+            <tr><td>ペガサスシステムズ</td><td class="num">4名</td><td class="num gp good">¥1.4M</td></tr>
+            <tr><td>ドラコIT</td><td class="num">3名</td><td class="num gp good">¥0.9M</td></tr>
+            <tr><td>フェニックス開発</td><td class="num">2名</td><td class="num gp mid">¥0.5M</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.main -->
+
+<!-- 論点トグル -->
+<button class="disc-toggle" id="discToggle" onclick="toggleDisc()">💡 論点を表示</button>
+
+<script>
+/* =====================================================================
+   demo-base.js — Glue Salesforce デモ 共通スクリプト
+   ---------------------------------------------------------------------
+   ・画面切替（タブ / data-go リンク）と論点パネルのON/OFFだけを担う。
+   ・「本物っぽく動く」演出は最小限に（モックである誠実さを優先）。
+     過度なインタラクションは「できる」と誤認させ要件の合意を歪める。
+   ・案件固有のダミー操作（変換・受注確定 等）は各 index.html 側に書く。
+   ===================================================================== */
+
+// ---- 画面ナビゲーション ----
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el){
+    el.classList.add('active');
+    // タブのactive状態も同期（該当タブがあれば）
+    document.querySelectorAll('.app-bar .tab').forEach(tab=>{
+      tab.classList.toggle('active', tab.getAttribute('data-page')===id);
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+  } else {
+    console.warn('[demo] goPage: 画面が見つかりません →', id);
+  }
+}
+
+// タブクリック
+document.querySelectorAll('[data-page]').forEach(t=>{
+  t.addEventListener('click', ()=> goPage(t.getAttribute('data-page')));
+});
+// ページ内リンク（一覧→詳細など）
+document.querySelectorAll('[data-go]').forEach(a=>{
+  a.style.cursor='pointer';
+  a.addEventListener('click', e=>{ e.preventDefault(); goPage(a.getAttribute('data-go')); });
+});
+
+// ---- 論点パネル ON/OFF ----
+function toggleDisc(){
+  document.body.classList.toggle('disc-on');
+  const btn = document.getElementById('discToggle');
+  if(btn) btn.textContent = document.body.classList.contains('disc-on') ? '💡 論点を隠す' : '💡 論点を表示';
+}
+
+// ---- モーダル ----
+function openModal(id){ const m=document.getElementById(id); if(m) m.classList.add('active'); }
+function closeModal(){ document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('active')); }
+document.addEventListener('click', e=>{ if(e.target.classList && e.target.classList.contains('modal-bg')) closeModal(); });
+
+// ---- トースト（ダミー操作の結果表示）----
+function toast(msg, type){
+  let t = document.getElementById('demoToast');
+  if(!t){ t=document.createElement('div'); t.id='demoToast'; t.className='toast'; document.body.appendChild(t); }
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.textContent = msg;
+  // reflow→show
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+// ---- 起動時 ----
+// 初期表示: 論点OFF（プレゼン用クリーン状態）。URL に #review が付いていれば論点ON。
+window.addEventListener('DOMContentLoaded', ()=>{
+  if(location.hash === '#review') document.body.classList.add('disc-on');
+  const btn = document.getElementById('discToggle');
+  if(btn) btn.textContent = document.body.classList.contains('disc-on') ? '💡 論点を隠す' : '💡 論点を表示';
+});
+</script>
+<script>
+/* === SYSNAG固有：事業(SES/PMO)切替 === */
+function setBiz(kind){
+  document.body.classList.toggle('ses-mode', kind==='ses');
+  document.body.classList.toggle('pmo-mode', kind==='pmo');
+  document.getElementById('bizSes').classList.toggle('on', kind==='ses');
+  document.getElementById('bizPmo').classList.toggle('on', kind==='pmo');
+  toast(kind==='ses' ? 'SES事業ビューに切替（モック）' : 'PMO事業ビューに切替（モック）');
+}
+</script>
+<style>
+/* SES/PMO表示切替の補助（ラベルだけ切替。データはモック共通） */
+body.pmo-mode .ses-only{display:none}
+body.ses-mode .pmo-only{display:none}
+</style>
+</body>
+</html>
