@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>税理士法人マスエージェント様 Salesforce 画面モック（完全版）</title>
+<style>
+/* =====================================================================
+   demo-base.css — Glue Salesforce デモ 共通スタイル (SLDS Lightning 再現)
+   ---------------------------------------------------------------------
+   ・案件横断で共通の「chrome（ヘッダ/タブ/レコード作法）」と
+     「コンポーネントライブラリ」をここに集約する。
+   ・案件固有の色/業務独自パーツだけを各 index.html の <style> に追記する。
+   ・配布時は build.sh がこのファイルを <style> へインライン展開し、
+     単一HTML（ダブルクリックで開ける / 添付で送れる）にする。
+   ・出典: docs/aion/demo (基準実装) + tsubasa(帳票/フォーム) を統合。
+   ===================================================================== */
+
+:root{
+  --brand:#0176d3; --brand-dark:#014486; --brand-50:#eaf4fb;
+  --bg:#f3f3f3; --card:#ffffff; --border:#dddbda; --border-light:#f3f2f2;
+  --text:#181818; --text-2:#3e3e3c; --text-mute:#706e6b;
+  --success:#2e844a; --success-bg:#cdefc4; --warn:#fe9339; --warn-bg:#fef0e6;
+  --error:#ba0517; --error-bg:#fdd9d4; --info:#0176d3;
+  --shadow-card:0 2px 2px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.06);
+  --shadow-hover:0 2px 4px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.08);
+  --radius:.25rem;
+  /* 外部ツール色（案件で使う/使わないは任意。不要なら無視でOK） */
+  --chatwork:#e57400; --chatwork-bg:#fff4e6;
+  --claude:#cc785c; --claude-bg:#f5e9e2;
+  --sheets:#0f9d58; --sheets-bg:#e6f4ea;
+  /* 論点パネル */
+  --disc:#7a5cff; --disc-bg:#f1edff; --disc-border:#c9bcff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Salesforce Sans","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+  font-size:13px; color:var(--text); background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit; cursor:pointer}
+a{color:var(--brand); text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ===== Global Header ===== */
+.global-header{
+  background:linear-gradient(0deg,#032e61,#0176d3); height:48px;
+  display:flex; align-items:center; padding:0 16px; gap:12px;
+  position:sticky; top:0; z-index:1000;
+}
+.app-launcher{
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.1); border-radius:3px; cursor:pointer;
+}
+.app-launcher:hover{background:rgba(255,255,255,.2)}
+.app-launcher::before{
+  content:""; width:14px;height:14px;
+  background-image:
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px);
+  background-size:5px 5px;
+  background-position:0 0,5px 0,10px 0,0 5px,5px 5px,10px 5px,0 10px,5px 10px,10px 10px;
+  background-repeat:no-repeat;
+}
+.app-name{
+  color:#fff; font-weight:700; font-size:14px;
+  padding-left:12px; border-left:1px solid rgba(255,255,255,.3);
+}
+.app-name .sub{font-weight:400; opacity:.8; margin-left:6px; font-size:12px}
+.gh-spacer{flex:1}
+.gh-search{
+  background:rgba(255,255,255,.95); border-radius:3px; padding:6px 12px;
+  width:380px; display:flex; align-items:center; gap:8px; font-size:13px;
+}
+.gh-search input{border:0;outline:0;flex:1;background:transparent;font-size:13px}
+.gh-actions{display:flex; gap:8px; align-items:center}
+.gh-actions .icon-btn{
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  color:#fff; cursor:pointer; border-radius:50%;
+}
+.gh-actions .icon-btn:hover{background:rgba(255,255,255,.15)}
+.gh-user{
+  width:32px;height:32px;border-radius:50%;
+  background:#a5d8ff;color:#0b4a83;display:flex;align-items:center;justify-content:center;
+  font-weight:700; cursor:pointer; font-size:12px;
+}
+
+/* ===== App Bar (Tabs) ===== */
+.app-bar{
+  background:#fff; border-bottom:1px solid var(--border);
+  display:flex; align-items:stretch; padding:0 16px; height:40px;
+  position:sticky; top:48px; z-index:999; overflow-x:auto;
+}
+.app-bar .tab{
+  padding:0 16px; display:flex; align-items:center; gap:6px; cursor:pointer;
+  border-bottom:3px solid transparent; color:var(--text-2); font-weight:400;
+  font-size:13px; user-select:none; white-space:nowrap;
+}
+.app-bar .tab:hover{background:var(--brand-50)}
+.app-bar .tab.active{border-bottom-color:var(--brand); color:var(--brand); font-weight:700}
+
+/* ===== Main content ===== */
+.main{padding:12px 16px; max-width:1440px; margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+
+/* ===== Object Page Header ===== */
+.obj-header{
+  background:#fff; padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.obj-header .row1{display:flex; align-items:center; gap:12px}
+.obj-icon{
+  width:40px;height:40px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  color:#fff; font-size:18px; font-weight:700;
+}
+/* 標準オブジェクトのアイコン色（SLDS準拠）。案件のカスタムobjは追記する */
+.obj-icon.account{background:#ff9a3c}
+.obj-icon.lead{background:#f88962}
+.obj-icon.opp{background:#fcb95b}
+.obj-icon.contact{background:#7f8de1}
+.obj-icon.quote{background:#a094ed}
+.obj-icon.order{background:#2e844a}
+.obj-icon.case{background:#f2cf5b}
+.obj-icon.report{background:#76ded9}
+.obj-icon.dashboard{background:#e6437f}
+.obj-icon.home{background:#0176d3}
+.obj-icon.custom{background:#5867e8}
+.obj-icon.chatwork{background:var(--chatwork)}
+.obj-icon.claude{background:var(--claude)}
+.obj-icon.sheets{background:var(--sheets)}
+.obj-title{flex:1}
+.obj-title .label{color:var(--text-mute); font-size:12px}
+.obj-title .name{font-size:18px; font-weight:700}
+.obj-actions{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+
+/* ===== Buttons ===== */
+.btn{
+  padding:6px 14px; border:1px solid var(--border); background:#fff;
+  border-radius:var(--radius); font-size:13px; color:var(--text);
+}
+.btn:hover{background:var(--border-light)}
+.btn.primary{background:var(--brand); color:#fff; border-color:var(--brand)}
+.btn.primary:hover{background:var(--brand-dark)}
+.btn.success{background:var(--success); color:#fff; border-color:var(--success)}
+.btn.success:hover{filter:brightness(0.95)}
+.btn.warn{background:var(--warn); color:#fff; border-color:var(--warn)}
+.btn.small{padding:3px 10px; font-size:12px}
+
+/* ===== Highlights Panel ===== */
+.highlights{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  padding:12px 16px; display:flex; gap:32px; margin-bottom:8px; flex-wrap:wrap;
+}
+.highlights .item{min-width:120px}
+.highlights .lbl{color:var(--text-mute); font-size:12px}
+.highlights .val{font-size:15px; font-weight:700; margin-top:2px}
+
+/* ===== Path Component (Sales/Stage Path) ===== */
+.path{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px; display:flex; padding:0; overflow:hidden;
+}
+.path .stage{
+  flex:1; padding:10px 0; text-align:center; position:relative;
+  background:#ecebea; color:var(--text-2); font-size:12px; cursor:pointer;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+  margin-right:-12px; min-width:0;
+}
+.path .stage:first-child{ clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%) }
+.path .stage:last-child{
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%); margin-right:0;
+}
+.path .stage.completed{background:#4bc076; color:#fff}
+.path .stage.current{background:var(--brand); color:#fff; font-weight:700}
+.path .stage:hover{filter:brightness(0.95)}
+.path-label{
+  display:flex; align-items:center; gap:6px;
+  padding:4px 12px 0; font-size:11px; color:var(--text-mute); background:#fff;
+  border:1px solid var(--border); border-bottom:0; border-radius:var(--radius) var(--radius) 0 0;
+}
+.path-label .badge{margin-left:auto}
+
+/* ===== Layout grids ===== */
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.two-col-3{display:grid; grid-template-columns:2fr 1fr; gap:8px}
+@media(max-width:1000px){ .two-col,.two-col-3{grid-template-columns:1fr} }
+
+/* ===== Card ===== */
+.card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.card .card-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.card .card-head .actions{margin-left:auto; display:flex; gap:6px}
+.card .card-body{padding:12px 16px}
+.sec-title{
+  font-size:12px; font-weight:700; color:var(--text-2);
+  padding:8px 16px; background:#fafaf9; border-bottom:1px solid var(--border-light);
+}
+
+/* ===== Field rows (read view) ===== */
+.field-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 24px}
+.field{padding:8px 0; border-bottom:1px solid var(--border-light)}
+.field .lbl{color:var(--text-mute); font-size:12px; margin-bottom:2px}
+.field .val{font-size:13px}
+.field.full{grid-column:1/-1}
+.field .val .ai-source{
+  display:inline-block; padding:1px 6px; border-radius:8px;
+  font-size:10px; background:var(--claude-bg); color:var(--claude);
+  margin-left:6px; vertical-align:middle;
+}
+.field .val .cw-source{ background:var(--chatwork-bg); color:var(--chatwork); }
+
+/* ===== Edit form (inline / modal) ===== */
+.form-2col{display:grid; grid-template-columns:1fr 1fr; gap:12px 24px}
+.form-row{display:flex; flex-direction:column; gap:4px}
+.form-row.full{grid-column:1/-1}
+.form-row label{font-size:12px; color:var(--text-2); font-weight:700}
+.form-row label .req{color:var(--error); margin-left:2px}
+.form-row input,.form-row select,.form-row textarea{
+  font-family:inherit; font-size:13px; padding:6px 10px;
+  border:1px solid var(--border); border-radius:var(--radius); background:#fff; color:var(--text);
+}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{
+  outline:0; border-color:var(--brand); box-shadow:0 0 0 2px var(--brand-50);
+}
+@media(max-width:700px){ .form-2col{grid-template-columns:1fr} }
+
+/* ===== Table ===== */
+.tbl{width:100%; border-collapse:collapse; background:#fff; font-size:13px}
+.tbl th{
+  background:#fafaf9; text-align:left; padding:8px 12px;
+  border-bottom:1px solid var(--border); font-weight:700; color:var(--text-2); font-size:12px;
+}
+.tbl td{padding:8px 12px; border-bottom:1px solid var(--border-light)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .num{text-align:right}
+.tbl tbody tr:hover{background:var(--brand-50)}
+.tbl .name-link{font-weight:700; cursor:pointer; color:var(--brand)}
+
+/* ===== Badges ===== */
+.badge{display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700}
+.badge.info{background:#e0f0fb; color:#0176d3}
+.badge.success{background:var(--success-bg); color:var(--success)}
+.badge.warn{background:var(--warn-bg); color:var(--warn)}
+.badge.error{background:var(--error-bg); color:var(--error)}
+.badge.gray{background:#ecebea; color:var(--text-mute)}
+.badge.cw{background:var(--chatwork-bg); color:var(--chatwork)}
+.badge.claude{background:var(--claude-bg); color:var(--claude)}
+.badge.sheets{background:var(--sheets-bg); color:var(--sheets)}
+
+/* ===== Related list card ===== */
+.related-card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px;
+}
+.related-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.related-head .count{color:var(--text-mute); font-weight:400; font-size:12px}
+.related-head .actions{margin-left:auto}
+
+/* ===== Activity Timeline ===== */
+.timeline{padding:8px 16px}
+.tl-item{display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border-light)}
+.tl-item:last-child{border-bottom:0}
+.tl-icon{
+  width:28px; height:28px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff;
+}
+.tl-icon.call{background:#76ded9}
+.tl-icon.mail{background:#fcb95b}
+.tl-icon.meet{background:#0176d3}
+.tl-icon.task{background:#4bca81}
+.tl-icon.cw{background:var(--chatwork)}
+.tl-icon.claude{background:var(--claude)}
+.tl-body{flex:1}
+.tl-meta{font-size:11px; color:var(--text-mute)}
+.tl-title{font-weight:700; margin-top:1px}
+.tl-desc{color:var(--text-2); margin-top:2px; font-size:12px}
+
+/* ===== Dashboard widgets ===== */
+.dash-grid{display:grid; grid-template-columns:repeat(12,1fr); gap:8px}
+.widget{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px}
+.widget.span-3{grid-column:span 3}
+.widget.span-4{grid-column:span 4}
+.widget.span-6{grid-column:span 6}
+.widget.span-8{grid-column:span 8}
+.widget.span-12{grid-column:span 12}
+.w-title{font-weight:700; font-size:13px; margin-bottom:6px; color:var(--text-2)}
+.w-big{font-size:28px; font-weight:700; line-height:1.1}
+.w-sub{font-size:11px; color:var(--text-mute); margin-top:2px}
+.w-sub.up{color:var(--success)}
+.w-sub.down{color:var(--error)}
+
+/* Bar chart (CSS only) */
+.bar-chart-wrap{padding:8px 0 0}
+.bar-chart{display:flex; align-items:flex-end; gap:6px; height:160px; padding:0 4px}
+.bar-chart .bar{
+  flex:1; background:linear-gradient(0deg,#0176d3,#4faae8);
+  border-radius:3px 3px 0 0; position:relative; display:flex; flex-direction:column;
+  justify-content:flex-end; align-items:center; min-width:0;
+}
+.bar-chart .bar .v{font-size:10px; color:var(--text-2); position:absolute; top:-16px}
+.bar-chart .bar .x{font-size:10px; color:var(--text-mute); position:absolute; bottom:-18px}
+
+/* Donut (conic-gradient) */
+.donut-wrap{display:flex; align-items:center; gap:14px; padding:6px 0}
+.donut{width:120px; height:120px; border-radius:50%}
+.legend{flex:1; font-size:12px}
+.lg-item{display:flex; align-items:center; gap:6px; padding:3px 0}
+.lg-dot{width:10px; height:10px; border-radius:2px}
+
+/* ===== Misc ===== */
+.help-text{color:var(--text-mute); font-size:11px}
+.crumb{font-size:11px; color:var(--text-mute); margin-bottom:4px}
+.crumb a{color:var(--text-mute); cursor:pointer}
+.crumb .sep{margin:0 4px; color:#bbb}
+
+/* ===== Callout (in-screen note) ===== */
+.callout{
+  background:var(--brand-50); border-left:3px solid var(--brand);
+  padding:10px 14px; border-radius:0 var(--radius) var(--radius) 0;
+  margin-bottom:10px; font-size:12px;
+}
+.callout.warn{background:var(--warn-bg); border-color:var(--warn)}
+.callout.success{background:var(--success-bg); border-color:var(--success)}
+.callout strong{font-weight:700}
+
+/* ===== Modal ===== */
+.modal-bg{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.4);
+  z-index:2000; align-items:center; justify-content:center; padding:24px;
+}
+.modal-bg.active{display:flex}
+.modal{
+  background:#fff; border-radius:6px; max-width:880px; width:100%;
+  max-height:90vh; overflow:auto; box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+.modal-head{padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center}
+.modal-head .title{font-weight:700; font-size:15px; flex:1}
+.modal-head .close{cursor:pointer; font-size:20px; color:var(--text-mute)}
+.modal-body{padding:20px}
+.modal-foot{padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end}
+
+/* ===== Toast ===== */
+.toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:#181818; color:#fff; padding:12px 20px; border-radius:6px; font-size:13px;
+  box-shadow:0 4px 16px rgba(0,0,0,.3); opacity:0; pointer-events:none;
+  transition:opacity .25s, transform .25s; z-index:3000; max-width:90vw;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.success{background:#1b5e2f}
+
+/* ===== 帳票 / PDF プレビュー (見積書・請求書・契約書) ===== */
+.pdf-toolbar{
+  background:#3c3c3c; color:#eee; padding:6px 14px; font-size:12px;
+  display:flex; align-items:center; gap:12px; border-radius:6px 6px 0 0;
+}
+.pdf-page{
+  background:#fff; max-width:760px; margin:0 auto; padding:48px 56px;
+  box-shadow:0 2px 12px rgba(0,0,0,.15); font-size:13px; color:#222;
+}
+.pdf-hdr{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px}
+.pdf-title{font-size:24px; font-weight:700; letter-spacing:.3em; border-bottom:2px solid #222; padding-bottom:6px}
+.pdf-tbl{width:100%; border-collapse:collapse; margin:18px 0; font-size:12px}
+.pdf-tbl th{background:#333; color:#fff; padding:8px 10px; text-align:left}
+.pdf-tbl td{padding:8px 10px; border-bottom:1px solid #ddd}
+.pdf-tbl .num{text-align:right}
+.pdf-amount-box{border:2px solid #222; padding:10px 16px; display:inline-block; font-size:18px; font-weight:700; margin:10px 0}
+.pdf-stamp{
+  width:64px;height:64px;border:2px solid #d33;border-radius:50%;color:#d33;
+  display:flex;align-items:center;justify-content:center;font-size:11px;transform:rotate(-12deg);
+}
+.pdf-bottom{margin-top:32px; font-size:11px; color:#555}
+
+/* =====================================================================
+   論点パネル (.disc) ── デモ品質の核
+   画面ごとに「出典 / 論点 / ※要確認」を載せ、デモを意思決定文書にする。
+   bodyに class="disc-on" が付くと表示。右下トグルで全画面ON/OFF。
+   プレゼン中は隠し(clean)、FB/レビュー時は表示に切替える運用。
+   ===================================================================== */
+.disc{display:none}
+body.disc-on .disc{
+  display:block;
+  background:var(--disc-bg); border:1px solid var(--disc-border); border-left:4px solid var(--disc);
+  border-radius:0 var(--radius) var(--radius) 0; padding:10px 14px; margin:0 0 10px; font-size:12px;
+}
+.disc .disc-q{font-weight:700; color:var(--disc); margin-bottom:3px}
+.disc .disc-src{font-size:11px; color:var(--text-mute); margin-bottom:4px}
+.disc .disc-src::before{content:"📎 出典: "}
+.disc .disc-body{color:var(--text-2); line-height:1.6}
+.disc .disc-flag{
+  display:inline-block; background:var(--warn-bg); color:var(--warn);
+  font-weight:700; font-size:11px; padding:1px 7px; border-radius:8px; margin:0 2px;
+}
+.disc .disc-flag::before{content:"※要確認 "}
+/* 論点トグル（右下固定） */
+.disc-toggle{
+  position:fixed; right:18px; bottom:18px; z-index:2500;
+  background:var(--disc); color:#fff; border:0; border-radius:20px;
+  padding:9px 16px; font-size:13px; font-weight:700; box-shadow:0 3px 10px rgba(0,0,0,.25);
+}
+.disc-toggle:hover{filter:brightness(1.05)}
+body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid var(--disc-border)}
+
+/* ===== Responsive ===== */
+@media(max-width:1000px){
+  .dash-grid{grid-template-columns:repeat(4,1fr)}
+  .widget.span-3,.widget.span-4{grid-column:span 2}
+  .widget.span-6,.widget.span-8,.widget.span-12{grid-column:span 4}
+  .gh-search{display:none}
+}
+</style>
+<style>
+/* === 案件固有スタイル === */
+.obj-icon.kaikei{background:#3ba755}
+.obj-icon.kessan{background:#1b7f4b}
+.obj-icon.seikyu{background:#c23934}
+.obj-icon.project{background:#5867e8}
+.obj-icon.csnote{background:#e8a33d}
+
+.slim-note{background:#fff7e6;border:1px solid #ffe1a8;border-radius:6px;padding:8px 12px;font-size:12px;color:#7a5b00;margin:8px 0}
+.collapsed-fields{border:1px dashed #c9c7c5;border-radius:6px;padding:8px 12px;color:#706e6b;font-size:12px;background:#fafaf9;cursor:pointer;margin-top:8px}
+
+/* サブナビ（業務内の画面切替） */
+.subnav{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.subnav .btn{font-size:12px}
+.subnav .btn.on{background:#eef4ff;border-color:#1b96ff;color:#1b96ff;font-weight:700}
+
+/* カンバン */
+.kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}
+.kb-col{background:#f3f2f2;border-radius:8px;padding:8px;min-height:120px}
+.kb-col h4{font-size:12px;color:#514f4d;margin:2px 4px 8px;display:flex;justify-content:space-between}
+.kb-col h4 .c{background:#fff;border-radius:10px;padding:0 8px;font-weight:700}
+.kb-card{background:#fff;border:1px solid #e5e5e5;border-left:3px solid #3ba755;border-radius:6px;padding:8px;margin-bottom:8px;font-size:12px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.kb-card:hover{border-left-color:#1b7f4b;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.kb-card .who{color:#706e6b;font-size:11px;margin-top:4px}
+.kb-card.over{border-left-color:#c23934}
+.kb-card.over .due{color:#c23934;font-weight:700}
+
+/* 帳票プレビュー（紙） */
+.paper{background:#fff;border:1px solid #d8d8d8;box-shadow:0 2px 12px rgba(0,0,0,.12);max-width:720px;margin:12px auto;padding:36px 40px;font-size:13px;color:#1a1a1a}
+.paper h2{text-align:center;font-size:20px;letter-spacing:6px;margin:0 0 20px;border-bottom:2px solid #333;padding-bottom:10px}
+.paper .to{font-size:15px;font-weight:700;border-bottom:1px solid #333;display:inline-block;padding-bottom:2px;margin-bottom:4px}
+.paper .from{text-align:right;font-size:12px;line-height:1.7;color:#333}
+.paper .amount-box{background:#f4f8ff;border:1px solid #b8d4ff;padding:10px 14px;font-size:18px;font-weight:700;text-align:center;margin:16px 0}
+.paper table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+.paper table th{background:#333;color:#fff;padding:6px 8px;text-align:left}
+.paper table td{border:1px solid #ccc;padding:6px 8px}
+.paper table td.num{text-align:right}
+.paper .seal{float:right;width:56px;height:56px;border:2px solid #c23934;border-radius:50%;color:#c23934;font-size:10px;display:flex;align-items:center;justify-content:center;text-align:center;transform:rotate(-8deg);line-height:1.2}
+
+/* 自動化フロー図 */
+.flow{display:flex;flex-direction:column;gap:0;margin:14px 0;max-width:640px}
+.flow-node{background:#fff;border:1px solid #d8d8d8;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.flow-node .ic{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex:0 0 auto}
+.flow-node .tx{font-size:13px}.flow-node .tx b{display:block}
+.flow-node .tx small{color:#706e6b}
+.flow-node.trigger .ic{background:#1b96ff}
+.flow-node.action .ic{background:#3ba755}
+.flow-node.wait .ic{background:#e8a33d}
+.flow-node.end .ic{background:#514f4d}
+.flow-arrow{width:2px;height:20px;background:#c9c7c5;margin:0 0 0 28px}
+.flow-arrow::after{content:"▼";color:#c9c7c5;font-size:10px;position:relative;left:-4px;top:8px}
+.flow-branch{font-size:11px;color:#706e6b;margin:0 0 0 42px}
+</style>
+</head>
+<body>
+
+<div class="global-header">
+  <div class="app-launcher" title="アプリランチャー"></div>
+  <div class="app-name">業務OS <span class="sub">税理士法人マスエージェント様</span></div>
+  <div class="gh-spacer"></div>
+  <div class="gh-search"><span style="color:#706e6b">🔍</span><input placeholder="関与先・会計業務を検索..."></div>
+  <div class="gh-actions">
+    <div class="icon-btn" title="お気に入り">⭐</div>
+    <div class="icon-btn" title="通知">🔔</div>
+    <div class="icon-btn" title="ヘルプ">❓</div>
+    <div class="gh-user" title="担当者">MA</div>
+  </div>
+</div>
+
+<div class="app-bar">
+  <div class="tab active" data-page="home">🏠 ホーム</div>
+  <div class="tab" data-page="account-list">🏢 関与先</div>
+  <div class="tab" data-page="kaikei-board">🧾 月次会計</div>
+  <div class="tab" data-page="kessan-list">📗 決算業務</div>
+  <div class="tab" data-page="seikyu-list">💴 請求</div>
+</div>
+
+<div class="main">
+
+  <!-- =================== HOME =================== -->
+  <div class="page active" id="home">
+    <div class="disc">
+      <div class="disc-q">論点：毎朝この4つのKPIを見て動く、で合意できるか</div>
+      <div class="disc-src">出典: 2026-07-03 KO資料「Salesforceを開けば、今やるべき業務・次の担当者への連携が一目で分かる状態」</div>
+      <div class="disc-body">今は進捗がスプレッドシートに分散し「どこが滞っているか」が一覧できない。この画面に集約する想定。<span class="disc-flag"></span>KPIは4つで足りるか、他に毎朝見たい数字は。</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon home">🏠</div>
+      <div class="obj-title"><div class="label">ホーム</div><div class="name">おはようございます — 2026年7月17日（金）</div></div>
+    </div></div>
+    <div class="dash-grid">
+      <div class="widget span-3"><div class="w-title">今月 納品待ち</div><div class="w-big">18</div><div class="w-sub">件 / 月次会計</div></div>
+      <div class="widget span-3"><div class="w-title">期限超過</div><div class="w-big" style="color:var(--error)">4</div><div class="w-sub down">要即対応</div></div>
+      <div class="widget span-3"><div class="w-title">今月 請求予定</div><div class="w-big">¥2.86M</div><div class="w-sub up">前月比 +6%</div></div>
+      <div class="widget span-3"><div class="w-title">案内前（未着手）</div><div class="w-big">7</div><div class="w-sub">件</div></div>
+      <div class="widget span-8">
+        <div class="w-title">🔥 滞留している会計業務（進捗が3日以上動いていない）</div>
+        <table class="tbl" style="margin-top:6px">
+          <thead><tr><th>関与先</th><th>業務種別</th><th>進捗</th><th>担当</th><th class="num">期限</th></tr></thead>
+          <tbody>
+            <tr><td><a class="name-link" data-go="kaikei-detail">さくら製作所</a></td><td>月次会計</td><td><span class="badge warn">提出</span></td><td>田中</td><td class="num" style="color:var(--error)">7/15 超過</td></tr>
+            <tr><td><a class="name-link" data-go="kessan-detail">みどり建設</a></td><td>決算業務</td><td><span class="badge info">電子化</span></td><td>佐藤</td><td class="num" style="color:var(--error)">7/16 超過</td></tr>
+            <tr><td><a class="name-link" data-go="kaikei-detail">あおぞら食品</a></td><td>月次会計</td><td><span class="badge gray">案内</span></td><td>鈴木</td><td class="num">7/20</td></tr>
+            <tr><td><a class="name-link" data-go="kaikei-detail">ひまわり物流</a></td><td>年末調整</td><td><span class="badge info">PDF化</span></td><td>田中</td><td class="num">7/22</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="widget span-4">
+        <div class="w-title">進捗パイプライン（今月・件数）</div>
+        <table class="tbl" style="margin-top:6px"><tbody>
+          <tr><td>① 案内</td><td class="num">7</td></tr>
+          <tr><td>② 電子化</td><td class="num">12</td></tr>
+          <tr><td>③ 提出</td><td class="num">9</td></tr>
+          <tr><td>④ PDF化</td><td class="num">6</td></tr>
+          <tr><td>⑤ 納品</td><td class="num">14</td></tr>
+        </tbody></table>
+        <div class="w-sub" style="margin-top:6px">案内→電子化→提出→PDF化→納品</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== 関与先 一覧 =================== -->
+  <div class="page" id="account-list">
+    <div class="disc">
+      <div class="disc-q">論点：一覧の列とフィルタ（関与状況・決算月・担当）はこれで足りるか</div>
+      <div class="disc-src">出典: 現行 Account は約180項目・リストビュー多数</div>
+      <div class="disc-body">関与先を「担当・決算月・関与状況」で絞れる想定。<span class="disc-flag"></span>営業（アタック状況）と顧問先を同じ一覧で見るか、分けるか。</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon account">🏢</div>
+      <div class="obj-title"><div class="label">関与先</div><div class="name">顧問先 一覧 <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      <div class="obj-actions"><button class="btn">インポート</button><button class="btn primary" onclick="goPage('account-new')">新規</button></div>
+    </div></div>
+    <table class="tbl">
+      <thead><tr><th>関与先</th><th>コード</th><th>法人/個人</th><th>決算月</th><th>会計ソフト</th><th>担当</th><th class="num">月額</th><th>関与状況</th></tr></thead>
+      <tbody>
+        <tr><td><a class="name-link" data-go="account-detail">さくら製作所</a></td><td>A-10428</td><td>法人</td><td>3月</td><td>TKC</td><td>田中</td><td class="num">¥50,000</td><td><span class="badge success">関与中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">みどり建設</a></td><td>A-10233</td><td>法人</td><td>9月</td><td>TKC</td><td>佐藤</td><td class="num">¥45,000</td><td><span class="badge success">関与中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">あおぞら食品</a></td><td>A-10871</td><td>法人</td><td>12月</td><td>弥生</td><td>鈴木</td><td class="num">¥40,000</td><td><span class="badge success">関与中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">ひまわり物流</a></td><td>A-10905</td><td>法人</td><td>6月</td><td>TKC</td><td>田中</td><td class="num">¥50,000</td><td><span class="badge success">関与中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">こもれび歯科</a></td><td>A-11002</td><td>個人</td><td>12月</td><td>弥生</td><td>田中</td><td class="num">¥30,000</td><td><span class="badge warn">新規</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- =================== 関与先 詳細 =================== -->
+  <div class="page" id="account-detail">
+    <div class="disc">
+      <div class="disc-q">論点：関与先を開いて「パッと見たい情報」はこの並びで合っているか</div>
+      <div class="disc-src">出典: 2026-06-08 往訪MTG議事録「関連情報の優先順位整理・不要情報のタブ退避」「進行中PJTを上位」「各項目に最終更新日」</div>
+      <div class="disc-body">進行中プロジェクトを最上部・鮮度（最終更新日）を各値に添える案。約180項目は下部/タブへ退避。<span class="disc-flag"></span>ハイライトに出す項目／タブへ退避する項目の線引きを確認したい。</div>
+    </div>
+    <div class="crumb"><a data-go="account-list">関与先</a><span class="sep">›</span>さくら製作所</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon account">🏢</div>
+      <div class="obj-title"><div class="label">関与先</div><div class="name">さくら製作所</div></div>
+      <div class="obj-actions"><button class="btn" onclick="goPage('account-new')">編集</button><button class="btn primary" onclick="toast('（モック）新規会計業務を起票')">＋ 会計業務</button></div>
+    </div></div>
+    <div class="subnav">
+      <button class="btn small on">詳細</button>
+      <button class="btn small" onclick="goPage('project-detail')">契約・報酬（プロジェクト）</button>
+      <button class="btn small" onclick="goPage('csnote-detail')">CSノート</button>
+    </div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">関与先コード</div><div class="val">A-10428</div></div>
+      <div class="item"><div class="lbl">決算月</div><div class="val">3月</div></div>
+      <div class="item"><div class="lbl">会計ソフト</div><div class="val">TKC</div></div>
+      <div class="item"><div class="lbl">顧問料（月額）</div><div class="val">¥50,000</div></div>
+      <div class="item"><div class="lbl">担当</div><div class="val">田中</div></div>
+    </div>
+    <div class="two-col-3">
+      <div>
+        <div class="card">
+          <div class="card-head">🚧 進行中プロジェクト（最上部に固定表示）</div>
+          <div class="card-body"><table class="tbl">
+            <thead><tr><th>プロジェクト</th><th>進捗</th><th>担当</th><th class="num">次回予定</th></tr></thead>
+            <tbody>
+              <tr><td><a class="name-link" data-go="kaikei-detail">2026年6月 月次会計</a></td><td><span class="badge warn">提出</span></td><td>田中</td><td class="num">7/20</td></tr>
+              <tr><td><a class="name-link" data-go="kessan-detail">2026年3月期 決算</a></td><td><span class="badge info">申告書チェック</span></td><td>佐藤</td><td class="num">7/28</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="card-head">📝 基本情報 <span style="font-weight:400;color:var(--text-mute);font-size:12px">（各値に最終更新日）</span></div>
+          <div class="card-body">
+            <div class="field-grid">
+              <div class="field"><div class="lbl">代表者</div><div class="val">桜井 一郎 <span class="badge gray" style="font-size:10px">更新 6/12</span></div></div>
+              <div class="field"><div class="lbl">法人/個人</div><div class="val">法人</div></div>
+              <div class="field"><div class="lbl">業務委任日</div><div class="val">2019/04/01</div></div>
+              <div class="field"><div class="lbl">給与ソフト</div><div class="val">給与奉行 <span class="badge gray" style="font-size:10px">更新 4/02</span></div></div>
+              <div class="field"><div class="lbl">インボイス番号</div><div class="val">T1234567890123</div></div>
+              <div class="field"><div class="lbl">課税方式</div><div class="val">本則 <span class="badge warn" style="font-size:10px">要確認 昨年更新</span></div></div>
+            </div>
+            <div class="collapsed-fields" onclick="toast('（モック）住所・登記・届出など約160項目をタブへ退避')">▸ その他の項目（住所・登記・各種届出・保険一覧ほか 約160項目）はタブへ退避 — クリックで展開</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="related-card">
+          <div class="related-head">🧾 会計業務 <span class="count">(月次24)</span><div class="actions"><button class="btn small" onclick="goPage('kaikei-board')">ボード</button></div></div>
+          <table class="tbl">
+            <tr><td><a class="name-link" data-go="kaikei-detail">2026年6月</a></td><td><span class="badge warn">提出</span></td></tr>
+            <tr><td><a class="name-link" data-go="kaikei-detail">2026年5月</a></td><td><span class="badge success">納品済</span></td></tr>
+          </table>
+        </div>
+        <div class="related-card">
+          <div class="related-head">📗 決算 <span class="count">(3)</span></div>
+          <table class="tbl"><tr><td><a class="name-link" data-go="kessan-detail">2026年3月期</a></td><td><span class="badge info">進行中</span></td></tr></table>
+        </div>
+        <div class="related-card">
+          <div class="related-head">💡 CSノート <span class="count">(5)</span><div class="actions"><button class="btn small" onclick="goPage('csnote-detail')">開く</button></div></div>
+          <div class="timeline"><div class="tl-item"><div class="tl-icon claude">C</div><div class="tl-body"><div class="tl-meta">2026/06/28</div><div class="tl-title">来期の報酬改定の打診タイミング</div><div class="tl-desc">決算報告時に提示する方針で合意</div></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== 関与先 新規 =================== -->
+  <div class="page" id="account-new">
+    <div class="disc">
+      <div class="disc-q">論点：新規関与先の登録は「最小必須項目」だけで起票できるか</div>
+      <div class="disc-src">出典: 2026-07-03 KO資料「極力楽に入れたい・みんなが入れやすくしたい」</div>
+      <div class="disc-body">登録時は必須6項目のみ、残りは関与開始後に埋める運用。<span class="disc-flag"></span>登録に最低限必要な項目はこれで足りるか。</div>
+    </div>
+    <div class="crumb"><a data-go="account-list">関与先</a><span class="sep">›</span>新規</div>
+    <div class="obj-header"><div class="row1"><div class="obj-icon account">🏢</div><div class="obj-title"><div class="label">関与先</div><div class="name">新規 関与先</div></div></div></div>
+    <div class="card"><div class="card-body">
+      <div class="form-2col">
+        <div class="form-row"><label>関与先名<span class="req">*</span></label><input value="株式会社サンプル"></div>
+        <div class="form-row"><label>法人/個人<span class="req">*</span></label><select><option>法人</option><option>個人</option></select></div>
+        <div class="form-row"><label>決算月<span class="req">*</span></label><select><option>3月</option><option>9月</option><option>12月</option></select></div>
+        <div class="form-row"><label>会計ソフト</label><select><option>TKC</option><option>弥生</option><option>freee</option></select></div>
+        <div class="form-row"><label>業務担当<span class="req">*</span></label><select><option>田中</option><option>佐藤</option><option>鈴木</option></select></div>
+        <div class="form-row"><label>顧問料（月額）</label><input placeholder="¥50,000"></div>
+        <div class="form-row full"><label>事業内容</label><textarea rows="2"></textarea></div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="goPage('account-list')">キャンセル</button>
+        <button class="btn primary" onclick="toast('関与先を登録しました（モック）','success');goPage('account-detail')">保存</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- =================== プロジェクト（契約・報酬）=================== -->
+  <div class="page" id="project-detail">
+    <div class="disc">
+      <div class="disc-q">論点：報酬マスタ（顧問料・記帳代行・決算料…）を年度別プロジェクトで持つ、で良いか</div>
+      <div class="disc-src">出典: Project__c（関与先ごとの契約/報酬マスタ）／ 決算時の報酬改定を次年度Projectに反映</div>
+      <div class="disc-body">年度ごとに報酬を版管理し、請求はここを単価の正とする想定。<span class="disc-flag"></span>報酬改定時に旧年度を残して新年度を作る運用で問題ないか。</div>
+    </div>
+    <div class="crumb"><a data-go="account-detail">さくら製作所</a><span class="sep">›</span>2026年度 契約・報酬</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon project">📁</div>
+      <div class="obj-title"><div class="label">プロジェクト（契約・報酬）</div><div class="name">さくら製作所 ― 2026年度</div></div>
+      <div class="obj-actions"><button class="btn">編集</button><button class="btn primary" onclick="toast('（モック）次年度プロジェクトを複製')">次年度を複製</button></div>
+    </div></div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">年度</div><div class="val">2026</div></div>
+      <div class="item"><div class="lbl">決算月</div><div class="val">3月</div></div>
+      <div class="item"><div class="lbl">会計ソフト</div><div class="val">TKC</div></div>
+      <div class="item"><div class="lbl">有効</div><div class="val">✓</div></div>
+    </div>
+    <div class="card"><div class="card-head">💰 報酬内訳（請求の単価マスタ）</div><div class="card-body">
+      <div class="field-grid">
+        <div class="field"><div class="lbl">顧問料（月額）</div><div class="val">¥50,000</div></div>
+        <div class="field"><div class="lbl">記帳代行料</div><div class="val">¥15,000</div></div>
+        <div class="field"><div class="lbl">決算申告業務</div><div class="val">¥180,000</div></div>
+        <div class="field"><div class="lbl">消費税申告業務</div><div class="val">¥30,000</div></div>
+        <div class="field"><div class="lbl">償却資産税申告</div><div class="val">¥10,000</div></div>
+        <div class="field"><div class="lbl">ソフトレンタル料</div><div class="val">¥3,000</div></div>
+        <div class="field"><div class="lbl">年末調整（基本）</div><div class="val">¥20,000</div></div>
+        <div class="field"><div class="lbl">税務調査日当</div><div class="val">¥50,000</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- =================== CSノート =================== -->
+  <div class="page" id="csnote-detail">
+    <div class="disc">
+      <div class="disc-q">論点：顧客ごとの「学びとNext Action」を蓄積し、全体共有する、で良いか</div>
+      <div class="disc-src">出典: CSNote__c（事実の経緯・学びとNext Action・自己評価・全体共有日）</div>
+      <div class="disc-body">対応の振り返りを関与先に紐付けて蓄積、全体共有日で朝MTGに載せる想定。<span class="disc-flag"></span>分類カテゴリの選択肢は現行のままで良いか。</div>
+    </div>
+    <div class="crumb"><a data-go="account-detail">さくら製作所</a><span class="sep">›</span>CSノート</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon csnote">💡</div>
+      <div class="obj-title"><div class="label">CSノート</div><div class="name">さくら製作所 ― 報酬改定の打診タイミング</div></div>
+      <div class="obj-actions"><button class="btn primary" onclick="toast('（モック）全体共有に載せる')">全体共有</button></div>
+    </div></div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">入力日</div><div class="val">2026/06/28</div></div>
+      <div class="item"><div class="lbl">分類カテゴリ</div><div class="val">報酬・契約</div></div>
+      <div class="item"><div class="lbl">自己評価</div><div class="val">★★★★☆</div></div>
+      <div class="item"><div class="lbl">全体共有日</div><div class="val">2026/07/01</div></div>
+    </div>
+    <div class="card"><div class="card-body">
+      <div class="field-grid">
+        <div class="field full"><div class="lbl">事実の経緯</div><div class="val">月次訪問時に「来期は人員増で顧問工数が上がりそう」と相談あり。現行顧問料が5年据え置きであることを確認。</div></div>
+        <div class="field full"><div class="lbl">学びとNext Action</div><div class="val">値上げ交渉は決算報告の場が最も納得を得やすい。決算業務の最終ステップで「報酬改定確認」を必ず通す運用に。</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- =================== 月次会計 ボード =================== -->
+  <div class="page" id="kaikei-board">
+    <div class="disc">
+      <div class="disc-q">論点：巨大な一覧を「進捗パイプラインのボード」に置き換える、で伝わるか</div>
+      <div class="disc-src">出典: 2026-07-03 KO資料「項目が多すぎて使いづらい・検索性が悪い」／現行 kaikeigyoumu__c は約200項目</div>
+      <div class="disc-body">進捗（案内→電子化→提出→PDF化→納品）でカラム分け、カードは関与先・期限・担当だけ。<span class="disc-flag"></span>ドラッグで進める運用にするか。</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon kaikei">🧾</div>
+      <div class="obj-title"><div class="label">月次会計</div><div class="name">2026年6月度 進捗ボード <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      <div class="obj-actions"><button class="btn primary" onclick="goPage('kaikei-new')">新規</button></div>
+    </div></div>
+    <div class="subnav">
+      <button class="btn small on">ボード</button>
+      <button class="btn small" onclick="goPage('kaikei-list')">一覧</button>
+      <button class="btn small" onclick="goPage('kaikei-detail')">詳細例</button>
+      <button class="btn small" onclick="goPage('kaikei-flow')">⚙ 自動化フロー</button>
+    </div>
+    <div class="kanban">
+      <div class="kb-col"><h4>① 案内 <span class="c">7</span></h4>
+        <div class="kb-card" data-go="kaikei-detail">あおぞら食品<div class="who">鈴木 ・ <span class="due">期限 7/20</span></div></div>
+        <div class="kb-card" data-go="kaikei-detail">こもれび歯科<div class="who">田中 ・ 期限 7/24</div></div>
+      </div>
+      <div class="kb-col"><h4>② 電子化 <span class="c">12</span></h4>
+        <div class="kb-card over" data-go="kaikei-detail">みどり建設<div class="who">佐藤 ・ <span class="due">期限 7/16 超過</span></div></div>
+        <div class="kb-card" data-go="kaikei-detail">かえで運輸<div class="who">鈴木 ・ 期限 7/21</div></div>
+      </div>
+      <div class="kb-col"><h4>③ 提出 <span class="c">9</span></h4>
+        <div class="kb-card over" data-go="kaikei-detail">さくら製作所<div class="who">田中 ・ <span class="due">期限 7/15 超過</span></div></div>
+        <div class="kb-card" data-go="kaikei-detail">はまなす商店<div class="who">佐藤 ・ 期限 7/23</div></div>
+      </div>
+      <div class="kb-col"><h4>④ PDF化 <span class="c">6</span></h4>
+        <div class="kb-card" data-go="kaikei-detail">ひまわり物流<div class="who">田中 ・ 期限 7/22</div></div>
+      </div>
+      <div class="kb-col"><h4>⑤ 納品 <span class="c">14</span></h4>
+        <div class="kb-card" data-go="kaikei-detail">つばき化成<div class="who">鈴木 ・ 完了 7/12</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== 月次会計 一覧 =================== -->
+  <div class="page" id="kaikei-list">
+    <div class="disc">
+      <div class="disc-q">論点：一覧派の担当者向けに、列を絞ったリストビューも用意する、で良いか</div>
+      <div class="disc-src">出典: 現行 kaikeigyoumu__c のリストビュー20種以上（属人化）</div>
+      <div class="disc-body">ボードと同じデータを表でも。列は「関与先・業務月・進捗・担当・期限・請求額」に固定。<span class="disc-flag"></span>属人リストビューを整理・統合してよいか。</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon kaikei">🧾</div>
+      <div class="obj-title"><div class="label">月次会計</div><div class="name">2026年6月度 一覧 <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      <div class="obj-actions"><button class="btn primary" onclick="goPage('kaikei-new')">新規</button></div>
+    </div></div>
+    <div class="subnav">
+      <button class="btn small" onclick="goPage('kaikei-board')">ボード</button>
+      <button class="btn small on">一覧</button>
+      <button class="btn small" onclick="goPage('kaikei-detail')">詳細例</button>
+      <button class="btn small" onclick="goPage('kaikei-flow')">⚙ 自動化フロー</button>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>関与先</th><th>業務月</th><th>進捗</th><th>担当</th><th class="num">期限</th><th class="num">請求額</th></tr></thead>
+      <tbody>
+        <tr><td><a class="name-link" data-go="kaikei-detail">さくら製作所</a></td><td>2026/06</td><td><span class="badge warn">提出</span></td><td>田中</td><td class="num" style="color:var(--error)">7/15</td><td class="num">¥55,000</td></tr>
+        <tr><td><a class="name-link" data-go="kaikei-detail">みどり建設</a></td><td>2026/06</td><td><span class="badge info">電子化</span></td><td>佐藤</td><td class="num">7/16</td><td class="num">¥45,000</td></tr>
+        <tr><td><a class="name-link" data-go="kaikei-detail">あおぞら食品</a></td><td>2026/06</td><td><span class="badge gray">案内</span></td><td>鈴木</td><td class="num">7/20</td><td class="num">¥40,000</td></tr>
+        <tr><td><a class="name-link" data-go="kaikei-detail">つばき化成</a></td><td>2026/06</td><td><span class="badge success">納品済</span></td><td>鈴木</td><td class="num">7/12</td><td class="num">¥48,000</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- =================== 月次会計 詳細 =================== -->
+  <div class="page" id="kaikei-detail">
+    <div class="disc">
+      <div class="disc-q">論点：200項目を「今のステージで必要な項目だけ」に絞る、で回るか</div>
+      <div class="disc-src">出典: 現行 kaikeigyoumu__c 全項目レイアウト vs. 2026-07-03 KO資料「極力楽に入れたい」</div>
+      <div class="disc-body">上部は共通要点、中央は現ステージ＝提出で触る項目だけ、残り約180項目は折りたたみ。<span class="disc-flag"></span>各ステージの“見せる項目セット”をこちらで定義してよいか（業務種別ごとに棚卸し）。</div>
+    </div>
+    <div class="crumb"><a data-go="kaikei-board">月次会計</a><span class="sep">›</span>さくら製作所 2026年6月</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon kaikei">🧾</div>
+      <div class="obj-title"><div class="label">会計業務（月次）</div><div class="name">さくら製作所 ― 2026年6月度</div></div>
+      <div class="obj-actions"><button class="btn" onclick="goPage('kaikei-new')">編集</button><button class="btn success" onclick="toast('進捗を「PDF化」に進めました（モック）','success')">✓ 提出を完了して次へ</button></div>
+    </div></div>
+    <div class="path-label">進捗 <span class="badge info" style="margin-left:auto">現在：提出</span></div>
+    <div class="path">
+      <div class="stage completed">1. 案内</div>
+      <div class="stage completed">2. 電子化</div>
+      <div class="stage current">3. 提出</div>
+      <div class="stage">4. PDF化</div>
+      <div class="stage">5. 納品</div>
+    </div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">業務種別</div><div class="val">月次会計</div></div>
+      <div class="item"><div class="lbl">業務担当</div><div class="val">田中</div></div>
+      <div class="item"><div class="lbl">期限</div><div class="val" style="color:var(--error)">7/15（超過）</div></div>
+      <div class="item"><div class="lbl">会計ソフト</div><div class="val">TKC</div></div>
+      <div class="item"><div class="lbl">請求月</div><div class="val">2026/07</div></div>
+    </div>
+    <div class="slim-note">💡 この画面は「提出」ステージで実際に触る項目のみ表示。前後ステージの項目は自動で隠れる想定（現行は全項目が常時表示）。</div>
+    <div class="two-col-3">
+      <div>
+        <div class="card"><div class="card-head">📤 いま触る項目（提出ステージ）</div><div class="card-body">
+          <div class="field-grid">
+            <div class="field"><div class="lbl">電子送信日</div><div class="val">2026/07/14</div></div>
+            <div class="field"><div class="lbl">提出予定日</div><div class="val">2026/07/15</div></div>
+            <div class="field"><div class="lbl">納付方法</div><div class="val">ダイレクト</div></div>
+            <div class="field"><div class="lbl">会計チェック完了日</div><div class="val">2026/07/12</div></div>
+            <div class="field full"><div class="lbl">月次進捗メモ</div><div class="val">資料回収済。消費税判定=有、提出後にPDF化予定。</div></div>
+          </div>
+          <div class="collapsed-fields" onclick="toast('（モック）残り約180項目を展開')">▸ その他の項目（納特・労保・年調・償却など 約180項目）— クリックで展開</div>
+        </div></div>
+      </div>
+      <div>
+        <div class="related-card"><div class="related-head">🕘 作業履歴 <span class="count">(自動記録)</span></div>
+          <div class="timeline">
+            <div class="tl-item"><div class="tl-icon task">T</div><div class="tl-body"><div class="tl-meta">7/14 田中</div><div class="tl-title">進捗：電子化 → 提出</div><div class="tl-desc">電子送信日をセット</div></div></div>
+            <div class="tl-item"><div class="tl-icon task">T</div><div class="tl-body"><div class="tl-meta">7/12 田中</div><div class="tl-title">会計チェック完了</div></div></div>
+          </div>
+        </div>
+        <div class="related-card"><div class="related-head">💴 請求（この業務から自動連携）</div>
+          <table class="tbl"><tr><td>請求金額 合計</td><td class="num">¥55,000</td></tr><tr><td>請求書発行日</td><td class="num">未</td></tr></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== 月次会計 新規 =================== -->
+  <div class="page" id="kaikei-new">
+    <div class="disc">
+      <div class="disc-q">論点：新規起票は「関与先・業務月・種別・担当」の4項目で足りるか（残りは進捗で追加）</div>
+      <div class="disc-src">出典: 2026-07-03 KO資料「入れないと進まないようにしたい／極力楽に」</div>
+      <div class="disc-body">起票時は最小、以降はステージが進むごとに必要項目が現れる想定。<span class="disc-flag"></span>毎月分の自動起票（次月分を納品時に生成）と手動起票の切り分け。</div>
+    </div>
+    <div class="crumb"><a data-go="kaikei-board">月次会計</a><span class="sep">›</span>新規</div>
+    <div class="obj-header"><div class="row1"><div class="obj-icon kaikei">🧾</div><div class="obj-title"><div class="label">会計業務</div><div class="name">新規 会計業務</div></div></div></div>
+    <div class="card"><div class="card-body">
+      <div class="form-2col">
+        <div class="form-row"><label>関与先<span class="req">*</span></label><input value="さくら製作所"></div>
+        <div class="form-row"><label>業務月<span class="req">*</span></label><input value="2026/07" placeholder="YYYY/MM"></div>
+        <div class="form-row"><label>業務種別<span class="req">*</span></label><select><option>月次会計</option><option>決算業務</option><option>年末調整</option><option>確定申告</option><option>償却資産税</option></select></div>
+        <div class="form-row"><label>業務担当<span class="req">*</span></label><select><option>田中</option><option>佐藤</option><option>鈴木</option></select></div>
+        <div class="form-row"><label>期限</label><input placeholder="2026/08/15"></div>
+        <div class="form-row"><label>会計ソフト</label><input value="TKC"></div>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="goPage('kaikei-board')">キャンセル</button>
+        <button class="btn primary" onclick="toast('会計業務を起票しました（モック）','success');goPage('kaikei-detail')">保存</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- =================== 月次会計 自動化フロー =================== -->
+  <div class="page" id="kaikei-flow">
+    <div class="disc">
+      <div class="disc-q">論点：納品完了→翌月分の自動起票／期限アラートを自動化する、で良いか</div>
+      <div class="disc-src">出典: 2026-06-08 往訪MTG議事録「月次会計業務の成果物格納と業務完了の仕組み化（当月完了→次月分が起票）」</div>
+      <div class="disc-body">当月を「納品」にすると翌月分レコードが自動生成、期限3日前に担当へ通知する想定。<span class="disc-flag"></span>自動起票のタイミング（納品時／月初）と通知先（担当のみ／管理者含む）。</div>
+    </div>
+    <div class="obj-header"><div class="row1"><div class="obj-icon kaikei">⚙</div><div class="obj-title"><div class="label">自動化フロー</div><div class="name">月次会計：納品→翌月起票 ＆ 期限アラート</div></div></div></div>
+    <div class="subnav">
+      <button class="btn small" onclick="goPage('kaikei-board')">ボード</button>
+      <button class="btn small" onclick="goPage('kaikei-list')">一覧</button>
+      <button class="btn small" onclick="goPage('kaikei-detail')">詳細例</button>
+      <button class="btn small on">⚙ 自動化フロー</button>
+    </div>
+    <div class="flow">
+      <div class="flow-node trigger"><div class="ic">▶</div><div class="tx"><b>トリガー：進捗が「納品」になった</b><small>会計業務レコード更新時</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node action"><div class="ic">＋</div><div class="tx"><b>翌月分の会計業務を自動起票</b><small>同じ関与先・担当で業務月+1、進捗=案内</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node action"><div class="ic">💴</div><div class="tx"><b>請求レコードへ金額を連携</b><small>Projectの単価マスタから請求額を自動計算</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node end"><div class="ic">✓</div><div class="tx"><b>完了</b></div></div>
+    </div>
+    <div class="flow" style="margin-top:24px">
+      <div class="flow-node trigger"><div class="ic">⏰</div><div class="tx"><b>トリガー：毎朝8時</b><small>スケジュール実行</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node wait"><div class="ic">!</div><div class="tx"><b>期限3日前 or 超過を抽出</b><small>進捗が「納品」でない会計業務</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node action"><div class="ic">🔔</div><div class="tx"><b>担当へSlackとToDo通知</b><small>ホームの「滞留リスト」にも表示</small></div></div>
+    </div>
+  </div>
+
+  <!-- =================== 決算 一覧 =================== -->
+  <div class="page" id="kessan-list">
+    <div class="disc">
+      <div class="disc-q">論点：決算は「決算月別」に束ねて進捗管理する、で良いか</div>
+      <div class="disc-src">出典: kaikeigyoumu__c RecordType=決算業務 / 決算業務 picklist（2025年X月提出）</div>
+      <div class="disc-body">提出月ごとに決算案件をまとめ、月末の山を可視化する想定。<span class="disc-flag"></span>決算は月次と同じオブジェクトのRecordType運用で良いか、分離するか。</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon kessan">📗</div>
+      <div class="obj-title"><div class="label">決算業務</div><div class="name">2026年7月提出 分 <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      <div class="obj-actions"><button class="btn primary" onclick="toast('（モック）新規決算')">新規</button></div>
+    </div></div>
+    <div class="subnav">
+      <button class="btn small on">一覧</button>
+      <button class="btn small" onclick="goPage('kessan-detail')">詳細例</button>
+      <button class="btn small" onclick="goPage('kessan-report')">📄 決算書プレビュー</button>
+      <button class="btn small" onclick="goPage('kessan-flow')">⚙ 自動化フロー</button>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>関与先</th><th>決算期</th><th>決算フロー</th><th>担当</th><th class="num">決算料</th><th class="num">納品予定</th></tr></thead>
+      <tbody>
+        <tr><td><a class="name-link" data-go="kessan-detail">さくら製作所</a></td><td>2026年3月期</td><td><span class="badge info">申告書チェック</span></td><td>佐藤</td><td class="num">¥180,000</td><td class="num">7/28</td></tr>
+        <tr><td><a class="name-link" data-go="kessan-detail">みどり建設</a></td><td>2025年9月期</td><td><span class="badge warn">決算報告</span></td><td>佐藤</td><td class="num">¥200,000</td><td class="num">7/25</td></tr>
+        <tr><td><a class="name-link" data-go="kessan-detail">かえで運輸</a></td><td>2026年4月期</td><td><span class="badge gray">事前検討</span></td><td>鈴木</td><td class="num">¥160,000</td><td class="num">7/31</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- =================== 決算 詳細 =================== -->
+  <div class="page" id="kessan-detail">
+    <div class="disc">
+      <div class="disc-q">論点：決算業務の最終ステップに「来年度の報酬変更 有無」を組み込む、で良いか</div>
+      <div class="disc-src">出典: 2026-06-08 往訪MTG議事録「決算業務の最終ステップに来年度の報酬変更有無を確認する画面・ボタンを設置」</div>
+      <div class="disc-body">決算報告→申告書チェック→納品の後に「報酬改定の要否」を確認するアクションを設置。<span class="disc-flag"></span>報酬変更“有”のとき、次年度Projectへ自動反映まで自動化してよいか。</div>
+    </div>
+    <div class="crumb"><a data-go="kessan-list">決算業務</a><span class="sep">›</span>さくら製作所 2026年3月期</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon kessan">📗</div>
+      <div class="obj-title"><div class="label">会計業務（決算）</div><div class="name">さくら製作所 ― 2026年3月期 決算</div></div>
+      <div class="obj-actions"><button class="btn" onclick="goPage('kessan-report')">決算書プレビュー</button><button class="btn primary" onclick="openModal('hosyu-modal')">来年度 報酬変更の確認</button></div>
+    </div></div>
+    <div class="path-label">決算フロー <span class="badge info" style="margin-left:auto">現在：申告書チェック</span></div>
+    <div class="path">
+      <div class="stage completed">1. 決算予測/事前検討</div>
+      <div class="stage completed">2. 決算報告</div>
+      <div class="stage current">3. 申告書チェック</div>
+      <div class="stage">4. 納品</div>
+      <div class="stage">5. 報酬改定確認</div>
+    </div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">決算料</div><div class="val">¥180,000</div></div>
+      <div class="item"><div class="lbl">消費税判定</div><div class="val">有</div></div>
+      <div class="item"><div class="lbl">申告書チェック依頼</div><div class="val">2026/07/10</div></div>
+      <div class="item"><div class="lbl">納品予定</div><div class="val">2026/07/28</div></div>
+    </div>
+    <div class="two-col-3">
+      <div>
+        <div class="card"><div class="card-head">📗 決算の要点</div><div class="card-body">
+          <div class="field-grid">
+            <div class="field"><div class="lbl">決算予測/事前検討日</div><div class="val">2026/06/20</div></div>
+            <div class="field"><div class="lbl">決算報告日</div><div class="val">2026/07/03</div></div>
+            <div class="field"><div class="lbl">申告書チェック作成者</div><div class="val">佐藤</div></div>
+            <div class="field"><div class="lbl">書面添付</div><div class="val">有</div></div>
+            <div class="field full"><div class="lbl">申告内容メモ</div><div class="val">繰越欠損金あり。所得拡大税制の適用を確認済。</div></div>
+          </div>
+        </div></div>
+      </div>
+      <div>
+        <div class="related-card"><div class="related-head">📎 成果物（納品物）</div>
+          <table class="tbl"><tr><td>決算書 PDF</td><td><span class="badge info">要作成</span></td></tr><tr><td>申告書 控え</td><td><span class="badge gray">未</span></td></tr></table>
+        </div>
+        <div class="related-card"><div class="related-head">💴 請求（決算料）</div>
+          <table class="tbl"><tr><td>決算料</td><td class="num">¥180,000</td></tr><tr><td>消費税申告</td><td class="num">¥30,000</td></tr></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== 決算書プレビュー（帳票）=================== -->
+  <div class="page" id="kessan-report">
+    <div class="disc">
+      <div class="disc-q">論点：決算書・申告書の納品物をSalesforce内でプレビュー/PDF化する、で良いか</div>
+      <div class="disc-src">出典: 2026-07-03 KO資料「成果物を格納・確認すると次工程に自然につながる」</div>
+      <div class="disc-body">帳票はSF内でプレビュー→PDF化→納品まで一気通貫の想定。<span class="disc-flag"></span>帳票はSF標準（帳票機能）で作るか、既存TKC出力を格納する運用か。</div>
+    </div>
+    <div class="crumb"><a data-go="kessan-detail">2026年3月期 決算</a><span class="sep">›</span>決算書プレビュー</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon kessan">📄</div>
+      <div class="obj-title"><div class="label">帳票プレビュー</div><div class="name">決算報告書（イメージ）</div></div>
+      <div class="obj-actions"><button class="btn" onclick="goPage('kessan-detail')">戻る</button><button class="btn primary" onclick="toast('PDF化して成果物に格納（モック）','success')">PDF化して納品</button></div>
+    </div></div>
+    <div class="paper">
+      <h2>決 算 報 告 書</h2>
+      <div class="from">税理士法人マスエージェント<br>大阪市中央区○○ 1-2-3</div>
+      <div style="margin:14px 0"><span class="to">さくら製作所 御中</span><br><small>2026年3月期（自 2025/04/01 至 2026/03/31）</small></div>
+      <table>
+        <thead><tr><th>科目</th><th>当期</th><th>前期</th></tr></thead>
+        <tbody>
+          <tr><td>売上高</td><td class="num">128,400,000</td><td class="num">121,000,000</td></tr>
+          <tr><td>売上原価</td><td class="num">86,200,000</td><td class="num">83,500,000</td></tr>
+          <tr><td>売上総利益</td><td class="num">42,200,000</td><td class="num">37,500,000</td></tr>
+          <tr><td>販管費</td><td class="num">33,800,000</td><td class="num">31,900,000</td></tr>
+          <tr><td><b>営業利益</b></td><td class="num"><b>8,400,000</b></td><td class="num">5,600,000</td></tr>
+          <tr><td>法人税等</td><td class="num">2,520,000</td><td class="num">1,680,000</td></tr>
+        </tbody>
+      </table>
+      <div class="amount-box">当期純利益　¥5,880,000</div>
+      <div class="seal">マス<br>エージェント<br>印</div>
+      <div style="clear:both"></div>
+    </div>
+  </div>
+
+  <!-- =================== 決算 自動化フロー =================== -->
+  <div class="page" id="kessan-flow">
+    <div class="disc">
+      <div class="disc-q">論点：決算納品→報酬改定確認→次年度Project反映を自動で流す、で良いか</div>
+      <div class="disc-src">出典: 2026-06-08 往訪MTG議事録「受注後の業務連鎖フロー設計」「報酬変更有無→添付・新規起票まで自動化」</div>
+      <div class="disc-body">納品後に報酬改定確認を必須通過、有なら次年度Projectを新単価で自動生成。<span class="disc-flag"></span>改定“無”でも次年度Projectを据え置き複製するか。</div>
+    </div>
+    <div class="obj-header"><div class="row1"><div class="obj-icon kessan">⚙</div><div class="obj-title"><div class="label">自動化フロー</div><div class="name">決算：納品→報酬改定→次年度反映</div></div></div></div>
+    <div class="subnav">
+      <button class="btn small" onclick="goPage('kessan-list')">一覧</button>
+      <button class="btn small" onclick="goPage('kessan-detail')">詳細例</button>
+      <button class="btn small" onclick="goPage('kessan-report')">📄 決算書プレビュー</button>
+      <button class="btn small on">⚙ 自動化フロー</button>
+    </div>
+    <div class="flow">
+      <div class="flow-node trigger"><div class="ic">▶</div><div class="tx"><b>トリガー：決算フローが「納品」になった</b></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node wait"><div class="ic">?</div><div class="tx"><b>「来年度 報酬変更の確認」を必須通過</b><small>担当がモーダルで有/無を入力</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-branch">分岐：報酬変更「有」の場合</div>
+      <div class="flow-node action"><div class="ic">📁</div><div class="tx"><b>次年度プロジェクトを新単価で自動生成</b><small>関与先に紐付け、旧年度は無効化せず保持</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node action"><div class="ic">🔔</div><div class="tx"><b>次年度の初回月次会計を起票＋担当へ通知</b></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node end"><div class="ic">✓</div><div class="tx"><b>完了</b></div></div>
+    </div>
+  </div>
+
+  <!-- =================== 請求 一覧 =================== -->
+  <div class="page" id="seikyu-list">
+    <div class="disc">
+      <div class="disc-q">論点：請求は会計業務から自動集計し、この一覧で発行管理する、で良いか</div>
+      <div class="disc-src">出典: kaikeigyoumu__c の請求項目（請求金額合計・請求書発行日・請求方法 NSS/請求書・追加請求人数）</div>
+      <div class="disc-body">月次・決算・年調の報酬を関与先×請求月で束ね、発行状況を管理する想定。<span class="disc-flag"></span>請求方法（NSS/請求書）で導線を分けるか、帳票はSF内で完結させるか。</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon seikyu">💴</div>
+      <div class="obj-title"><div class="label">請求</div><div class="name">2026年7月 請求予定 <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      <div class="obj-actions"><button class="btn">CSV出力</button><button class="btn primary" onclick="toast('（モック）請求書を一括発行','success')">一括発行</button></div>
+    </div></div>
+    <div class="subnav">
+      <button class="btn small on">一覧</button>
+      <button class="btn small" onclick="goPage('seikyu-detail')">詳細例</button>
+      <button class="btn small" onclick="goPage('seikyu-invoice')">📄 請求書プレビュー</button>
+      <button class="btn small" onclick="goPage('seikyu-flow')">⚙ 自動化フロー</button>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>関与先</th><th>内訳</th><th>請求方法</th><th class="num">請求金額</th><th>発行状況</th></tr></thead>
+      <tbody>
+        <tr><td><a class="name-link" data-go="seikyu-detail">さくら製作所</a></td><td>月次 ¥55,000</td><td>NSS</td><td class="num">¥55,000</td><td><span class="badge gray">未発行</span></td></tr>
+        <tr><td><a class="name-link" data-go="seikyu-detail">みどり建設</a></td><td>決算 ¥180,000＋月次 ¥45,000</td><td>請求書</td><td class="num">¥225,000</td><td><span class="badge warn">発行待ち</span></td></tr>
+        <tr><td><a class="name-link" data-go="seikyu-detail">あおぞら食品</a></td><td>月次 ¥40,000</td><td>NSS</td><td class="num">¥40,000</td><td><span class="badge success">発行済</span></td></tr>
+        <tr><td><a class="name-link" data-go="seikyu-detail">ひまわり物流</a></td><td>年調 ¥60,000＋月次 ¥50,000</td><td>請求書</td><td class="num">¥110,000</td><td><span class="badge gray">未発行</span></td></tr>
+      </tbody>
+      <tfoot><tr><td colspan="3" style="text-align:right;font-weight:700">今月合計</td><td class="num" style="font-weight:700">¥430,000</td><td></td></tr></tfoot>
+    </table>
+  </div>
+
+  <!-- =================== 請求 詳細 =================== -->
+  <div class="page" id="seikyu-detail">
+    <div class="disc">
+      <div class="disc-q">論点：請求は「関与先×請求月」で1レコード、内訳は会計業務からロールアップ、で良いか</div>
+      <div class="disc-src">出典: kaikeigyoumu__c（請求金額合計/追加請求人数/請求方法）＋ Project__c（単価マスタ）</div>
+      <div class="disc-body">複数業務（月次＋決算＋年調）の報酬を1請求に集約、追加請求人数も加味。<span class="disc-flag"></span>年調の人数×単価などの変動費の扱い。</div>
+    </div>
+    <div class="crumb"><a data-go="seikyu-list">請求</a><span class="sep">›</span>みどり建設 2026年7月</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon seikyu">💴</div>
+      <div class="obj-title"><div class="label">請求</div><div class="name">みどり建設 ― 2026年7月請求</div></div>
+      <div class="obj-actions"><button class="btn" onclick="goPage('seikyu-invoice')">請求書プレビュー</button><button class="btn primary" onclick="toast('請求書を発行しました（モック）','success')">発行</button></div>
+    </div></div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">請求月</div><div class="val">2026/07</div></div>
+      <div class="item"><div class="lbl">請求方法</div><div class="val">請求書</div></div>
+      <div class="item"><div class="lbl">請求金額 合計</div><div class="val">¥225,000</div></div>
+      <div class="item"><div class="lbl">発行状況</div><div class="val">発行待ち</div></div>
+    </div>
+    <div class="card"><div class="card-head">🧾 請求内訳（会計業務からロールアップ）</div><div class="card-body">
+      <table class="tbl">
+        <thead><tr><th>業務</th><th>種別</th><th class="num">金額</th></tr></thead>
+        <tbody>
+          <tr><td><a class="name-link" data-go="kessan-detail">2025年9月期 決算</a></td><td>決算料</td><td class="num">¥180,000</td></tr>
+          <tr><td><a class="name-link" data-go="kaikei-detail">2026年6月 月次</a></td><td>顧問料</td><td class="num">¥45,000</td></tr>
+        </tbody>
+        <tfoot><tr><td colspan="2" style="text-align:right;font-weight:700">合計（税抜）</td><td class="num" style="font-weight:700">¥225,000</td></tr></tfoot>
+      </table>
+    </div></div>
+  </div>
+
+  <!-- =================== 請求書プレビュー（帳票）=================== -->
+  <div class="page" id="seikyu-invoice">
+    <div class="disc">
+      <div class="disc-q">論点：請求書のレイアウト・インボイス番号記載はこれで要件を満たすか</div>
+      <div class="disc-src">出典: Account（適格請求書発行事業者登録番号 InvoiceNumber）／ 請求方法 NSS・請求書</div>
+      <div class="disc-body">適格請求書（インボイス）要件を満たすレイアウトの想定。<span class="disc-flag"></span>NSS（口座振替）分は請求書を出さない運用か、控えとして出すか。</div>
+    </div>
+    <div class="crumb"><a data-go="seikyu-detail">みどり建設 2026年7月</a><span class="sep">›</span>請求書プレビュー</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon seikyu">📄</div>
+      <div class="obj-title"><div class="label">帳票プレビュー</div><div class="name">請求書（イメージ）</div></div>
+      <div class="obj-actions"><button class="btn" onclick="goPage('seikyu-detail')">戻る</button><button class="btn primary" onclick="toast('PDF化してメール送付（モック）','success')">PDF化して送付</button></div>
+    </div></div>
+    <div class="paper">
+      <h2>請 求 書</h2>
+      <div class="from">税理士法人マスエージェント<br>大阪市中央区○○ 1-2-3<br>登録番号 T9876543210987</div>
+      <div style="margin:14px 0"><span class="to">みどり建設 御中</span><br><small>請求日 2026/07/31 ／ 支払期限 2026/08/31</small></div>
+      <div class="amount-box">ご請求金額　¥247,500（税込）</div>
+      <table>
+        <thead><tr><th>品目</th><th>数量</th><th class="num">単価</th><th class="num">金額</th></tr></thead>
+        <tbody>
+          <tr><td>2025年9月期 決算申告業務</td><td>1</td><td class="num">180,000</td><td class="num">180,000</td></tr>
+          <tr><td>顧問料（2026年6月分）</td><td>1</td><td class="num">45,000</td><td class="num">45,000</td></tr>
+          <tr><td>消費税（10%)</td><td></td><td class="num"></td><td class="num">22,500</td></tr>
+        </tbody>
+        <tfoot><tr><td colspan="3" class="num"><b>合計</b></td><td class="num"><b>247,500</b></td></tr></tfoot>
+      </table>
+      <div class="seal">マス<br>エージェント<br>印</div>
+      <div style="clear:both"></div>
+    </div>
+  </div>
+
+  <!-- =================== 請求 自動化フロー =================== -->
+  <div class="page" id="seikyu-flow">
+    <div class="disc">
+      <div class="disc-q">論点：会計業務の納品→請求自動集計→発行（NSS/請求書で分岐）を自動化する、で良いか</div>
+      <div class="disc-src">出典: 2026-07-03 KO資料「Salesforceを正として運用」／ 請求方法 NSS・請求書の分岐</div>
+      <div class="disc-body">業務納品時に請求へ金額連携、請求月末に方法別で発行を分岐。<span class="disc-flag"></span>NSS口座振替データの連携先（外部システム）との接続要否。</div>
+    </div>
+    <div class="obj-header"><div class="row1"><div class="obj-icon seikyu">⚙</div><div class="obj-title"><div class="label">自動化フロー</div><div class="name">請求：業務納品→集計→発行</div></div></div></div>
+    <div class="subnav">
+      <button class="btn small" onclick="goPage('seikyu-list')">一覧</button>
+      <button class="btn small" onclick="goPage('seikyu-detail')">詳細例</button>
+      <button class="btn small" onclick="goPage('seikyu-invoice')">📄 請求書プレビュー</button>
+      <button class="btn small on">⚙ 自動化フロー</button>
+    </div>
+    <div class="flow">
+      <div class="flow-node trigger"><div class="ic">▶</div><div class="tx"><b>トリガー：会計業務が「納品」になった</b></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node action"><div class="ic">💴</div><div class="tx"><b>関与先×請求月の請求へ金額を集約</b><small>Projectの単価＋追加請求人数から自動計算</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node wait"><div class="ic">📅</div><div class="tx"><b>請求月末まで待機</b></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-branch">分岐：請求方法</div>
+      <div class="flow-node action"><div class="ic">📄</div><div class="tx"><b>「請求書」→ PDF生成しメール送付</b></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node action"><div class="ic">🏦</div><div class="tx"><b>「NSS」→ 口座振替データを出力</b></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node end"><div class="ic">✓</div><div class="tx"><b>発行済にステータス更新</b></div></div>
+    </div>
+  </div>
+
+</div><!-- /.main -->
+
+<!-- 報酬改定モーダル -->
+<div class="modal-bg" id="hosyu-modal">
+  <div class="modal">
+    <div class="modal-head">来年度 報酬変更の確認 <span class="modal-close" onclick="closeModal()" style="margin-left:auto;cursor:pointer">✕</span></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:#514f4d">決算納品にあたり、来年度の報酬改定の要否を確認します。</p>
+      <div class="form-2col">
+        <div class="form-row"><label>報酬変更<span class="req">*</span></label><select><option>無し（据え置き）</option><option>有り（改定）</option></select></div>
+        <div class="form-row"><label>新 顧問料（月額）</label><input placeholder="¥50,000"></div>
+        <div class="form-row full"><label>メモ</label><textarea rows="2" placeholder="改定理由・提示タイミング"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">キャンセル</button>
+      <button class="btn primary" onclick="closeModal();toast('確認結果を保存。次年度プロジェクトへ反映（モック）','success')">保存して反映</button>
+    </div>
+  </div>
+</div>
+
+<button class="disc-toggle" id="discToggle" onclick="toggleDisc()">💡 論点を表示</button>
+
+<script>
+/* =====================================================================
+   demo-base.js — Glue Salesforce デモ 共通スクリプト
+   ---------------------------------------------------------------------
+   ・画面切替（タブ / data-go リンク）と論点パネルのON/OFFだけを担う。
+   ・「本物っぽく動く」演出は最小限に（モックである誠実さを優先）。
+     過度なインタラクションは「できる」と誤認させ要件の合意を歪める。
+   ・案件固有のダミー操作（変換・受注確定 等）は各 index.html 側に書く。
+   ===================================================================== */
+
+// ---- 画面ナビゲーション ----
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el){
+    el.classList.add('active');
+    // タブのactive状態も同期（該当タブがあれば）
+    document.querySelectorAll('.app-bar .tab').forEach(tab=>{
+      tab.classList.toggle('active', tab.getAttribute('data-page')===id);
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+  } else {
+    console.warn('[demo] goPage: 画面が見つかりません →', id);
+  }
+}
+
+// タブクリック
+document.querySelectorAll('[data-page]').forEach(t=>{
+  t.addEventListener('click', ()=> goPage(t.getAttribute('data-page')));
+});
+// ページ内リンク（一覧→詳細など）
+document.querySelectorAll('[data-go]').forEach(a=>{
+  a.style.cursor='pointer';
+  a.addEventListener('click', e=>{ e.preventDefault(); goPage(a.getAttribute('data-go')); });
+});
+
+// ---- 論点パネル ON/OFF ----
+function toggleDisc(){
+  document.body.classList.toggle('disc-on');
+  const btn = document.getElementById('discToggle');
+  if(btn) btn.textContent = document.body.classList.contains('disc-on') ? '💡 論点を隠す' : '💡 論点を表示';
+}
+
+// ---- モーダル ----
+function openModal(id){ const m=document.getElementById(id); if(m) m.classList.add('active'); }
+function closeModal(){ document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('active')); }
+document.addEventListener('click', e=>{ if(e.target.classList && e.target.classList.contains('modal-bg')) closeModal(); });
+
+// ---- トースト（ダミー操作の結果表示）----
+function toast(msg, type){
+  let t = document.getElementById('demoToast');
+  if(!t){ t=document.createElement('div'); t.id='demoToast'; t.className='toast'; document.body.appendChild(t); }
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.textContent = msg;
+  // reflow→show
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+// ---- 起動時 ----
+// 初期表示: 論点OFF（プレゼン用クリーン状態）。URL に #review が付いていれば論点ON。
+window.addEventListener('DOMContentLoaded', ()=>{
+  if(location.hash === '#review') document.body.classList.add('disc-on');
+  const btn = document.getElementById('discToggle');
+  if(btn) btn.textContent = document.body.classList.contains('disc-on') ? '💡 論点を隠す' : '💡 論点を表示';
+});
+</script>
+</body>
+</html>
