@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.2)</title>
+<style>
+/* SHT 活動記録CRM デモ — Salesforce Lightning 風 / 外部依存なし
+   （glue hig-japan-sf デモの app.css に準拠）— 2026-07-07 定例FB反映版 */
+:root{
+  --blue:#0176d3; --blue-d:#014486; --blue-l:#eef4ff;
+  --bg:#f3f3f3; --card:#fff; --line:#e5e5e5; --line-d:#d8dde6;
+  --ink:#181818; --sub:#5c5c5c; --muted:#8a8a8a;
+  --green:#2e844a; --green-bg:#ecfbef; --red:#ba0517; --red-bg:#fde9e9;
+  --amber:#a86403; --amber-bg:#fef5e7; --pur:#5867e8;
+  --radius:8px; --shadow:0 2px 3px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic UI","Segoe UI",system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);font-size:13px;line-height:1.5}
+a{color:var(--blue);text-decoration:none;cursor:pointer}
+a:hover{text-decoration:underline}
+button{font-family:inherit}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ===== Top app header ===== */
+.appbar{background:var(--blue);color:#fff;display:flex;align-items:center;gap:14px;padding:0 16px;height:50px;position:sticky;top:0;z-index:50}
+.appbar .logo{font-weight:700;font-size:15px;letter-spacing:.5px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.appbar .logo .badge{background:#fff;color:var(--blue);border-radius:5px;padding:1px 7px;font-size:12px}
+.appbar .search{flex:1;max-width:420px}
+.appbar .search input{width:100%;border:0;border-radius:18px;padding:7px 14px;font-size:13px;background:#0b62b0;color:#fff}
+.appbar .search input::placeholder{color:#cfe3f7}
+.appbar .right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.appbar .ico{opacity:.92;cursor:pointer;position:relative;font-size:15px}
+.appbar .ico .n{position:absolute;top:-7px;right:-9px;background:#fff;color:var(--red);font-size:10px;font-weight:800;min-width:16px;height:16px;border-radius:9px;display:grid;place-items:center;padding:0 3px;border:1px solid var(--red-bg)}
+.appbar .avatar{width:30px;height:30px;border-radius:50%;background:#ffd07a;color:#7a4b00;display:flex;align-items:center;justify-content:center;font-weight:700}
+.viewer{display:flex;align-items:center;gap:6px;background:#0b62b0;border-radius:18px;padding:3px}
+.viewer button{border:0;background:transparent;color:#cfe3f7;font-size:12px;font-weight:600;padding:4px 11px;border-radius:15px;cursor:pointer}
+.viewer button.on{background:#fff;color:var(--blue)}
+
+/* ===== Tab nav ===== */
+.tabs{background:#fff;border-bottom:1px solid var(--line-d);display:flex;align-items:center;gap:2px;padding:0 14px;height:42px;position:sticky;top:50px;z-index:40;overflow-x:auto}
+.tabs button{color:var(--sub);padding:0 14px;height:42px;display:flex;align-items:center;gap:7px;font-weight:600;border:0;border-bottom:3px solid transparent;white-space:nowrap;font-size:13px;background:transparent;cursor:pointer}
+.tabs button:hover{color:var(--blue);background:#fafcff}
+.tabs button.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tabs button .tb{background:var(--red);color:#fff;font-size:10px;font-weight:800;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
+.tabs .new{background:var(--green);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:8px}
+
+/* ===== Layout ===== */
+.wrap{max-width:1200px;margin:0 auto;padding:18px}
+.view{display:none}
+.view.on{display:block;animation:fade .22s ease}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.view.on{animation:none}}
+
+.page-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.page-head .icon{width:42px;height:42px;border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto}
+.page-head .eyebrow{color:var(--sub);font-size:11px;letter-spacing:.5px}
+.page-head h1{margin:2px 0 0;font-size:20px;font-weight:700}
+.page-head .sub2{color:var(--muted);font-size:12px;margin-top:3px;max-width:760px}
+.page-head .actions{margin-left:auto;display:flex;gap:8px}
+.demo-note{background:var(--amber-bg);border:1px solid #f0d9a8;color:var(--amber);border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:16px}
+.fb-note{background:var(--green-bg);border:1px solid #b7e4c4;color:var(--green);border-radius:6px;padding:8px 12px;font-size:12px;margin-bottom:16px}
+.fb-note b{color:#1d6535}
+
+/* buttons */
+.btn{border:1px solid var(--line-d);background:#fff;color:var(--blue);border-radius:5px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:#f4f9ff;text-decoration:none}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:var(--blue-d)}
+.btn.confirm{background:var(--green);border-color:var(--green);color:#fff}
+.btn.confirm:hover{background:#256b3c}
+.btn.done{background:var(--green-bg);border-color:transparent;color:var(--green);cursor:default}
+.btn.sm{padding:5px 11px;font-size:12px}
+.btn.lg{padding:10px 20px;font-size:14px}
+
+/* cards & grid */
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1.55fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g5{grid-template-columns:repeat(5,1fr)}
+.g6{grid-template-columns:repeat(6,1fr)}
+@media(max-width:900px){.g2,.g3,.g4,.g5{grid-template-columns:1fr 1fr}.g6{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.g2,.g3,.g4,.g5,.g6{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card .hd{padding:11px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px}
+.card .hd .sub{font-weight:500;color:var(--muted);font-size:11px;margin-left:auto}
+.card .bd{padding:16px}
+.card .bd.flush{padding:0}
+
+/* KPI tiles */
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px}
+.kpi .label{color:var(--sub);font-size:12px}
+.kpi .val{font-size:26px;font-weight:700;margin-top:4px;letter-spacing:-.5px}
+.kpi .val small{font-size:14px;font-weight:600;color:var(--muted)}
+.delta{font-size:12px;font-weight:700;margin-top:4px;display:inline-flex;align-items:center;gap:3px}
+.delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.flat{color:var(--muted)}
+a.kpi:hover{text-decoration:none;border-color:var(--blue);box-shadow:0 3px 8px rgba(1,118,211,.15)}
+
+/* tables */
+table.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{text-align:left;color:var(--sub);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--line-d);background:#fafafa;white-space:nowrap}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tr:hover td{background:#fafcff}
+.tbl td.num,.tbl th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tbl .lk{font-weight:600;color:var(--blue)}
+.tbl-wrap{overflow-x:auto}
+
+table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;border:1px solid var(--line-d);border-radius:0 0 8px 8px;overflow:hidden}
+.lvt th{text-align:left;color:var(--sub);font-weight:600;padding:8px 12px;border-bottom:1px solid var(--line-d);background:#fafafa;white-space:nowrap;font-size:11.5px}
+.lvt td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.lvt tbody tr:hover{background:#f3f9ff}
+.lvt tbody tr.clickable{cursor:pointer}
+.lvt tbody tr.unread td{background:#fffdf5}
+.lvt tbody tr.unread:hover td{background:#fff8e6}
+.lvt .chk{width:34px;text-align:center;color:var(--muted)}
+.lvt .lk{color:var(--blue);font-weight:600}
+.lv-head{display:flex;align-items:flex-start;gap:12px;padding:2px 0 12px}
+.lv-head .meta{flex:1;min-width:0}
+.lv-head .kicker{color:var(--sub);font-size:11px}
+.lv-title{display:flex;align-items:center;gap:6px;font-size:18px;font-weight:700;margin-top:1px}
+.lv-head .sub{color:var(--muted);font-size:12px;margin-top:2px}
+.lv-head .acts{display:flex;gap:8px;align-items:center}
+.lv-tabs{display:flex;gap:0;border-bottom:1px solid var(--line-d)}
+.lv-tabs button{padding:7px 14px;font-size:12.5px;color:var(--sub);border:0;border-bottom:2px solid transparent;font-weight:600;background:transparent;cursor:pointer}
+.lv-tabs button.on{color:var(--blue);border-bottom-color:var(--blue)}
+.lv-toolbar{display:flex;align-items:center;gap:10px;border:1px solid var(--line-d);border-bottom:0;background:#fff;border-radius:8px 8px 0 0;padding:8px 12px;flex-wrap:wrap}
+.lv-toolbar .count{color:var(--sub);font-size:12px}
+.lv-toolbar .spring{flex:1}
+.lv-toolbar input.s{border:1px solid var(--line-d);border-radius:5px;padding:5px 9px;font-size:12px;min-width:150px}
+
+/* badges / pills */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:11px;font-size:11px;font-weight:700;line-height:1.6}
+.pill.green{background:var(--green-bg);color:var(--green)}
+.pill.red{background:var(--red-bg);color:var(--red)}
+.pill.amber{background:var(--amber-bg);color:var(--amber)}
+.pill.blue{background:var(--blue-l);color:var(--blue)}
+.pill.gray{background:#eee;color:var(--sub)}
+.pill.pur{background:#efeafc;color:#5145cd}
+.pill .d{width:6px;height:6px;border-radius:50%;background:currentColor}
+.cat{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700}
+.cat.sales{background:var(--blue-l);color:var(--blue)}
+.cat.meeting{background:#efeafc;color:#5145cd}
+.cat.claim{background:var(--red-bg);color:var(--red)}
+.code{font-family:ui-monospace,"SF Mono",Menlo,monospace;background:#f4f6f9;border:1px solid var(--line-d);border-radius:4px;padding:1px 6px;font-size:11.5px;font-weight:600}
+
+/* bars */
+.bar{display:flex;align-items:center;gap:10px;margin:9px 0}
+.bar .name{width:130px;color:var(--sub);font-size:12px;flex:0 0 auto}
+.bar .track{flex:1;background:#eef1f6;border-radius:6px;height:14px;overflow:hidden}
+.bar .fill{height:100%;background:var(--blue);border-radius:6px}
+.bar .fill.g{background:var(--green)} .bar .fill.a{background:#e0a526} .bar .fill.r{background:var(--red)} .bar .fill.p{background:var(--pur)}
+.bar .v{width:64px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;flex:0 0 auto;font-size:12px}
+
+/* stage path */
+.path{display:flex;border-radius:5px;overflow:hidden;border:1px solid var(--line-d)}
+.path .st{flex:1;text-align:center;padding:7px 4px;font-size:11.5px;font-weight:600;color:var(--sub);background:#f4f6f9;border-right:1px solid var(--line-d);white-space:nowrap}
+.path .st:last-child{border-right:0}
+.path .st.done{background:var(--blue);color:#fff}
+.path .st.cur{background:var(--blue-d);color:#fff}
+.path.claim .st.done{background:#b5535f;color:#fff}
+.path.claim .st.cur{background:#8c2b39;color:#fff}
+
+/* object icons */
+.obj-icon{width:32px;height:32px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex:0 0 auto}
+.obj-icon.lg{width:42px;height:42px;border-radius:8px;font-size:22px}
+.o-acct{background:#7d2fc7}.o-opp{background:#fcb95b;color:#5a3b00}.o-act{background:#6b9e78}
+.o-claim{background:#d0596a}.o-cal{background:#e8638a}.o-dash{background:#0176d3}.o-card{background:#0d9488}.o-prod{background:#44a08d}
+
+/* signal light */
+.signal{display:inline-flex;align-items:center;gap:3px;padding:3px 4px;border-radius:12px;background:#f4f6f9;border:1px solid var(--line-d)}
+.signal i{width:9px;height:9px;border-radius:50%;background:#d3d7de;display:block}
+.signal.g i.g{background:var(--green);box-shadow:0 0 5px rgba(46,132,74,.6)}
+.signal.a i.a{background:#e0a526;box-shadow:0 0 5px rgba(224,165,38,.6)}
+.signal.r i.r{background:var(--red);box-shadow:0 0 5px rgba(186,5,23,.55)}
+
+/* feed */
+.feed{display:flex;flex-direction:column}
+.fitem{display:grid;grid-template-columns:32px 1fr;gap:11px;padding:13px 0;border-bottom:1px solid var(--line)}
+.fitem:last-child{border-bottom:0}
+.fitem .ava{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff}
+.fitem .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fitem .top .nm{font-weight:700}
+.fitem .top .t{font-size:11px;color:var(--muted);margin-left:auto}
+.fitem .ttl{font-weight:600;margin:5px 0 2px}
+.fitem .bd2{color:var(--sub);font-size:12px}
+.fitem .foot{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.attach{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--sub);background:#f4f6f9;border:1px solid var(--line-d);padding:2px 7px;border-radius:5px}
+
+.readers{display:inline-flex;align-items:center;gap:3px;vertical-align:middle}
+.readers .ra{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:700;color:#fff;border:1.5px solid #fff}
+.readers .ra.unread{filter:grayscale(1);opacity:.4}
+.u{display:inline-flex;align-items:center;gap:8px}
+.u .ava{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;flex:0 0 auto}
+.u .nm{font-weight:600}
+.u .rl{font-size:11px;color:var(--muted)}
+
+/* form */
+.field{margin-bottom:13px}
+.field label{display:block;color:var(--sub);font-size:12px;margin-bottom:4px}
+.field label .req{color:var(--red);font-weight:700;margin-right:3px}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line-d);border-radius:5px;padding:8px 10px;font-size:13px;font-family:inherit;background:#fff;color:var(--ink)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l)}
+.field textarea{min-height:64px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.row2{grid-template-columns:1fr}}
+.help{color:var(--muted);font-size:11px;margin-top:4px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-d);border-radius:18px;padding:7px 14px;cursor:pointer;font-size:12.5px;color:var(--ink);background:#fff;font-weight:600}
+.seg button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.dropzone{border:1.5px dashed var(--line-d);border-radius:6px;padding:14px;text-align:center;color:var(--muted);font-size:12px;background:#fafcff}
+.route-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line-d);border-radius:6px;margin-bottom:7px}
+.route-row .u{flex:1}
+.route-row label{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--sub);cursor:pointer}
+.route-row input{accent-color:var(--blue)}
+
+/* calendar */
+.cal-legend{display:flex;gap:14px;font-size:11.5px;color:var(--sub);align-items:center;margin-left:auto;flex-wrap:wrap}
+.cal-legend span{display:inline-flex;align-items:center;gap:5px}
+.cal-legend .sw{width:11px;height:11px;border-radius:3px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal .dow{font-size:11px;font-weight:700;color:var(--sub);text-align:center;padding-bottom:2px}
+.cell{border:1px solid var(--line-d);border-radius:7px;min-height:78px;padding:6px;background:#fff;display:flex;flex-direction:column;gap:4px;position:relative;text-align:left;font-family:inherit;color:inherit;cursor:pointer}
+.cell:hover{border-color:var(--blue);box-shadow:var(--shadow)}
+.cell.pad{background:#fafafa;border-style:dashed;opacity:.5;pointer-events:none}
+.cell .dnum{font-size:11.5px;font-weight:700;color:var(--sub)}
+.cell.today .dnum{background:var(--blue);color:#fff;width:20px;height:20px;border-radius:5px;display:grid;place-items:center}
+.cell .plan{font-size:10.5px;font-weight:600;padding:2px 5px;border-radius:4px;display:flex;align-items:center;gap:4px;line-height:1.3}
+.cell .plan .st{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.cell .plan.filled{background:var(--green-bg);color:var(--green)}.cell .plan.filled .st{background:var(--green)}
+.cell .plan.empty{background:var(--red-bg);color:var(--red)}.cell .plan.empty .st{background:var(--red)}
+.cell .star{position:absolute;top:5px;right:6px;font-size:12px}
+.cell .late{position:absolute;bottom:5px;right:6px;font-size:9px;color:var(--green);font-weight:700}
+
+.section-title{font-weight:700;font-size:12px;color:var(--sub);letter-spacing:.4px;margin:18px 0 10px}
+.callout{display:flex;gap:10px;padding:11px 13px;border-radius:6px;background:var(--blue-l);border:1px solid #cfe0f7;font-size:12px;color:var(--blue-d)}
+
+/* record page */
+.rec-head{background:#fff;border:1px solid var(--line-d);border-radius:8px;padding:12px 16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.rec-top{display:flex;align-items:flex-start;gap:12px}
+.rec-top .meta{flex:1;min-width:0}
+.rec-top .crumb{color:var(--sub);font-size:11px}
+.rec-top h1{font-size:19px;font-weight:700;margin:1px 0 0}
+.rec-top .acts{display:flex;gap:8px;align-items:center}
+.rec-fields{display:flex;flex-wrap:wrap;gap:14px 24px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.rec-fields .rf{font-size:12px}
+.rec-fields .rf .l{color:var(--sub);display:block;font-size:11px}
+.rec-fields .rf .v{font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px}
+.rec-tabs{display:flex;gap:0;border-bottom:1px solid var(--line-d);margin-bottom:14px}
+.rec-tabs button{padding:9px 16px;font-size:13px;color:var(--sub);border:0;border-bottom:2px solid transparent;font-weight:600;background:transparent;cursor:pointer}
+.rec-tabs button.on{color:var(--blue);border-bottom-color:var(--blue)}
+.rec-cols{display:grid;grid-template-columns:1.9fr 1fr;gap:14px;align-items:start}
+@media(max-width:900px){.rec-cols{grid-template-columns:1fr}}
+.detail-sec{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);margin-bottom:14px}
+.detail-sec>h3{font-size:13px;font-weight:700;padding:10px 16px;border-bottom:1px solid var(--line);margin:0;display:flex;align-items:center;gap:6px}
+.detail-sec>h3 .caret{color:var(--sub);font-size:10px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:2px 28px;padding:12px 16px}
+@media(max-width:640px){.fgrid{grid-template-columns:1fr}}
+.fitem2{padding:7px 0;border-bottom:1px solid #f4f4f4}
+.fitem2 .l{color:var(--sub);font-size:11px;display:flex;align-items:center;gap:5px}
+.fitem2 .l .req{color:var(--red)}
+.fitem2 .v{font-size:13px;font-weight:600;margin-top:2px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fitem2 .v .pencil{color:var(--muted);opacity:0;font-size:11px}
+.fitem2:hover .v .pencil{opacity:1}
+.related{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);margin-bottom:14px}
+.related>.rl-hd{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);font-weight:700;font-size:13px}
+.related>.rl-hd .cnt{color:var(--sub);font-weight:600}
+.related>.rl-hd .sp{flex:1}
+.related>.rl-hd .more{font-size:12px;font-weight:600}
+.related .foot{padding:8px 14px;border-top:1px solid var(--line);text-align:center}
+.act-panel .tl{position:relative;padding:10px 14px}
+.act-panel .tl .item{position:relative;padding:0 0 14px 22px;border-left:2px solid var(--line);margin-left:6px}
+.act-panel .tl .item:last-child{border-left-color:transparent}
+.act-panel .tl .item .dot{position:absolute;left:-7px;top:2px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--blue)}
+.act-panel .tl .item .dot.unread{border-color:var(--red)}
+.act-panel .tl .item .when{color:var(--muted);font-size:11px}
+.act-panel .tl .item .body{font-size:12.5px;margin-top:1px}
+
+/* confirm bar on record */
+.confirm-bar{background:#fffdf5;border:1px solid #f0d9a8;border-radius:8px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.confirm-bar .msg{flex:1;font-size:12.5px;color:var(--amber);font-weight:600;min-width:200px}
+.confirm-bar.done{background:var(--green-bg);border-color:#b7e4c4}
+.confirm-bar.done .msg{color:var(--green)}
+.readbody{padding:14px 16px;font-size:13px;line-height:1.8}
+.readbody h4{font-size:12px;color:var(--sub);margin:14px 0 4px;font-weight:700}
+.readbody h4:first-child{margin-top:0}
+
+/* bizcard flow */
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.flow .step{flex:1;min-width:150px;background:#fff;border:1px solid var(--line-d);padding:12px 14px;position:relative}
+.flow .step:first-child{border-radius:8px 0 0 8px}
+.flow .step:last-child{border-radius:0 8px 8px 0}
+.flow .step+.step{border-left:0}
+.flow .step .n{width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;margin-bottom:6px}
+.flow .step .t{font-weight:700;font-size:12.5px}
+.flow .step .d{color:var(--muted);font-size:11px;margin-top:2px}
+@media(max-width:760px){.flow .step{border-radius:8px!important;border-left:1px solid var(--line-d)!important;min-width:100%}}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);background:#032d60;color:#fff;padding:11px 16px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.3);font-size:13px;font-weight:600;display:flex;align-items:center;gap:9px;opacity:0;pointer-events:none;transition:.25s;z-index:80}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast .ck{width:19px;height:19px;border-radius:50%;background:var(--green);display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800}
+</style>
+</head>
+<body>
+<div class="appbar">
+  <div class="logo"><span class="badge">SHT</span> 活動記録CRM</div>
+  <div class="search"><input placeholder="検索（取引先・品番・活動記録…）"></div>
+  <div class="right">
+    <span style="color:#cfe3f7;font-size:10.5px;font-weight:700">閲覧者:</span>
+    <div class="viewer" id="viewer">
+      <button data-user="kurashima" class="on">田中（担当）</button>
+      <button data-user="yoshida">吉田専務（上位職）</button>
+    </div>
+    <span class="ico" id="bell" title="未読通知">🔔<span class="n" id="bell-n">4</span></span>
+    <span class="ico">⚙️</span>
+    <span class="avatar" id="me">田</span>
+  </div>
+</div>
+
+<nav class="tabs" id="tabs">
+  <button data-view="home" class="active">ホーム</button>
+  <button data-view="activity">活動記録</button>
+  <button data-view="inbox">回覧トレイ <span class="tb" id="tab-unread">4</span></button>
+  <button data-view="calendar">カレンダー</button>
+  <button data-view="deals">引合（商談）</button>
+  <button data-view="claims">品質クレーム</button>
+  <button data-view="accounts">取引先 <span class="new">NEW</span></button>
+  <button data-view="cards">名刺取込 <span class="new">NEW</span></button>
+  <button data-view="dash">ダッシュボード</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- ==================== HOME ==================== -->
+  <section class="view on" id="v-home">
+    <div class="page-head">
+      <div class="icon" style="background:var(--blue)">🏠</div>
+      <div>
+        <div class="eyebrow">ホーム</div>
+        <h1>活動記録 — 入力から上長回覧・可視化まで</h1>
+        <div class="sub2">7/7定例でいただいたフィードバックを反映しました。次回 7/22（13:00）で細部をすり合わせます。</div>
+      </div>
+      <div class="actions"><button class="btn primary" data-goto="activity">＋ 活動記録を作成</button></div>
+    </div>
+
+    <div class="fb-note">✅ <b>7/7定例FB 反映済み</b>：①リスト上の確認ボタンを廃止→レコードを開いて確認 ②上位職向けタイトル確認ビュー ③製品品番欄の追加（品番×取引先で横断検索） ④品質クレームのフェーズ管理 ⑤ダッシュボードKPIと役割別表示 ⑥名刺一括取込 ⑦取引先の親会社/商社紐づけ・部署カテゴリ・属性フラグ</div>
+    <div class="demo-note">⚠️ レビュー用デモです。取引先名・担当者名・数値・品番はすべてダミー。スクショや手書きメモでのFBをSlackにお送りください。</div>
+
+    <div class="grid g4" style="margin-bottom:16px">
+      <div class="kpi"><div class="label">今週の活動記録</div><div class="val tnum">38<small> 件</small></div><div class="delta up">▲ 前週比 +12%</div></div>
+      <div class="kpi"><div class="label">未入力の予定（要対応）</div><div class="val tnum" style="color:var(--red)">5<small> 件</small></div><div class="delta down">▼ カレンダー赤表示</div></div>
+      <div class="kpi"><div class="label">あなた宛の未読回覧</div><div class="val tnum" style="color:var(--amber)">4<small> 件</small></div><div class="delta flat">レコードを開いて確認</div></div>
+      <div class="kpi"><div class="label">報告実施率（今週）</div><div class="val tnum" style="color:var(--green)">88<small>%</small></div><div class="delta flat">目標90% / 85%以下=黄 / 70%以下=赤</div></div>
+    </div>
+
+    <div class="grid g2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="hd">最新の活動記録フィード<span class="sub">部門横断・時系列</span></div>
+        <div class="bd"><div class="feed" id="home-feed"></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card">
+          <div class="hd">あなた宛の回覧<span class="pill amber" style="margin-left:auto"><span class="d"></span>未読 4</span></div>
+          <div class="bd flush">
+            <div id="home-inbox"></div>
+            <div style="padding:10px 14px;border-top:1px solid var(--line)"><button class="btn sm" style="width:100%;justify-content:center" data-goto="inbox">回覧トレイを開く</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="hd">報告実施率<span class="sub">担当者別・目標90%</span></div>
+          <div class="bd" id="home-bars"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">オブジェクト（フェーズ1）</div>
+    <div class="grid g6">
+      <a class="kpi" data-goto="deals" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-opp lg">💼</span><div><div class="val" style="font-size:15px">引合（商談）</div><div class="label">標準で開始</div></div></a>
+      <a class="kpi" data-goto="activity" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-act lg">📋</span><div><div class="val" style="font-size:15px">活動記録</div><div class="label">テンプレ3種</div></div></a>
+      <a class="kpi" data-goto="claims" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-claim lg">⚠️</span><div><div class="val" style="font-size:15px">品質クレーム</div><div class="label">フェーズ管理</div></div></a>
+      <a class="kpi" data-goto="accounts" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-acct lg">🏢</span><div><div class="val" style="font-size:15px">取引先</div><div class="label">親会社/商社</div></div></a>
+      <a class="kpi" data-goto="cards" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-card lg">📇</span><div><div class="val" style="font-size:15px">名刺取込</div><div class="label">8月頭 先行提供</div></div></a>
+      <a class="kpi" data-goto="dash" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-dash lg">📊</span><div><div class="val" style="font-size:15px">ダッシュボード</div><div class="label">役割別に切替</div></div></a>
+    </div>
+  </section>
+
+  <!-- ==================== ACTIVITY ==================== -->
+  <section class="view" id="v-activity">
+    <div class="page-head">
+      <div class="icon" style="background:#6b9e78">📝</div>
+      <div>
+        <div class="eyebrow">活動 ・ 記録</div>
+        <h1>活動を記録</h1>
+        <div class="sub2">カテゴリごとにフォームが切り替わります（テンプレ3種）。7/7FBで<b>製品品番</b>欄を追加しました。</div>
+      </div>
+    </div>
+    <div class="fb-note">✅ <b>7/7FB反映</b>：製品品番の入力欄を追加。品番は商品マスターから選択し、取引先とセットで横断検索できます（商品マスターデータ受領後に実データを反映予定）。</div>
+
+    <div class="grid g2">
+      <div class="card">
+        <div class="hd">活動記録（共通モーダル）<span class="sub" id="form-sub">テンプレート: 営業活動</span></div>
+        <div class="bd">
+          <div class="field">
+            <label><span class="req">★</span>カテゴリ（テンプレート）</label>
+            <div class="seg" id="tmpl-seg">
+              <button data-tmpl="sales" class="on">📈 営業活動</button>
+              <button data-tmpl="meeting">👥 社内会議</button>
+              <button data-tmpl="claim">⚠️ 品質クレーム</button>
+            </div>
+            <p class="help">カテゴリは2階層想定。クレーム等は専用フォームに切替。</p>
+          </div>
+
+          <div class="row2">
+            <div class="field"><label><span class="req">★</span>取引先</label>
+              <select id="acct-sel"><option>東海電子工業</option><option>ネクスティエレクトロニクス（商社）</option><option>関西精密コネクタ</option><option>日本マイクロデバイス</option><option>北陸プレシジョン</option></select>
+              <p class="help" id="parent-help">親会社: —</p>
+            </div>
+            <div class="field"><label><span class="req">★</span><span id="l-date">面談日</span></label><input type="date" value="2026-07-17"></div>
+          </div>
+
+          <!-- 製品品番（FB追加）-->
+          <div class="row2 tf tf-sales tf-claim">
+            <div class="field"><label>製品品番（商品マスター）</label>
+              <select><option>CN-320 ／ 基板対基板コネクタ 0.4mm</option><option>CN-220 ／ 端子ユニット</option><option>CN-320H ／ ハイト違い派生品</option><option>ACC-12 ／ 実装治具</option></select>
+              <p class="help">品番＋取引先で関連する活動記録・クレームを横断検索できます</p>
+            </div>
+            <div class="field"><label>関連する引合</label><select><option>CN-320 新型コネクタ 年間契約</option><option>（なし）</option></select></div>
+          </div>
+
+          <div class="row2 tf tf-sales">
+            <div class="field"><label>面談種別</label><select><option>訪問</option><option>Web商談</option><option>電話</option><option>展示会</option></select></div>
+            <div class="field"><label>面談相手</label><input placeholder="購買部 山田様（キーマン）"></div>
+          </div>
+          <div class="row2 tf tf-meeting" hidden>
+            <div class="field"><label>会議区分</label><select><option>役員会</option><option>経営会議</option><option>部門会議</option></select></div>
+            <div class="field"><label>出席者</label><input placeholder="社長・吉田専務・各部長"></div>
+          </div>
+          <div class="row2 tf tf-claim" hidden>
+            <div class="field"><label>ロット番号</label><input placeholder="L2406"></div>
+            <div class="field"><label>重大度</label><select><option>軽微</option><option>中</option><option>重大（出荷停止）</option></select></div>
+          </div>
+          <div class="field tf tf-claim" hidden><label>記録方式</label>
+            <div class="seg"><button class="on" type="button">1レコードに追記更新</button><button type="button">都度 新規レコードを紐づけ</button></div>
+            <p class="help">7/7FB: 発生からクローズまで継続記録するため、両方式に対応</p>
+          </div>
+
+          <div class="field"><label><span class="req">★</span><span id="l-body">活動内容</span></label><textarea id="ta-body" placeholder="面談で確認した事項・次アクションを記入"></textarea></div>
+          <div class="field tf tf-claim" hidden><label>是正処置</label><textarea placeholder="一次対応・恒久対策・水平展開"></textarea></div>
+
+          <div class="field"><label>添付ファイル / リンク</label>
+            <div class="dropzone">📎 ファイルをドロップ、または <span style="color:var(--blue);font-weight:700">リンクを貼付</span></div>
+          </div>
+
+          <div class="field"><label>回覧ルート（配信先）／ 閲覧範囲</label>
+            <div id="route-box"></div>
+            <div class="seg" style="margin-top:8px"><button class="on" type="button">同時配信</button><button type="button">順次回覧</button></div>
+            <p class="help">7/7FB: メールフォルダ型の回覧フロー。同時配信・順次回覧いずれも対応</p>
+          </div>
+
+          <div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--line);padding-top:13px">
+            <button class="btn">下書き保存</button>
+            <button class="btn primary" id="submit-activity">確認送信</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="align-self:start">
+        <div class="hd">品番×取引先 横断検索<span class="sub">FB反映</span></div>
+        <div class="bd">
+          <div class="row2" style="margin-bottom:10px">
+            <div class="field" style="margin:0"><label>品番</label><select id="x-part"><option>CN-320</option><option>CN-220</option><option>ACC-12</option></select></div>
+            <div class="field" style="margin:0"><label>取引先</label><select id="x-acct"><option>すべて</option><option>東海電子工業</option><option>関西精密コネクタ</option></select></div>
+          </div>
+          <button class="btn primary sm" id="x-search" style="width:100%;justify-content:center">この品番の履歴を検索</button>
+          <div id="x-result" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== INBOX ==================== -->
+  <section class="view" id="v-inbox">
+    <div class="lv-head">
+      <span class="obj-icon o-acct lg">📨</span>
+      <div class="meta">
+        <div class="kicker">回覧 ・ 既読/未読管理</div>
+        <div class="lv-title" id="inbox-title">未読の回覧</div>
+        <div class="sub" id="inbox-lead">件名をクリックしてレコードを開くと確認ボタンが表示されます。</div>
+      </div>
+    </div>
+
+    <div class="fb-note">✅ <b>7/7FB反映</b>：読まずに確認できてしまう状態を防ぐため、<b>リスト上の「確認」ボタンは廃止</b>しました。レコードを開いて初めて確認ボタンが表示されます。<span id="simple-hint"></span></div>
+
+    <div class="lv-tabs" id="inbox-filter">
+      <button data-f="unread" class="on">未読のみ</button>
+      <button data-f="all">すべて</button>
+    </div>
+    <div class="lv-toolbar" style="border-radius:0">
+      <span class="count" id="inbox-count">4 件</span>
+      <span class="spring"></span>
+      <div id="simple-toggle-wrap" hidden>
+        <div class="seg" id="simple-toggle" style="gap:0">
+          <button data-mode="full" class="on" style="border-radius:18px 0 0 18px">通常（開いて確認）</button>
+          <button data-mode="simple" style="border-radius:0 18px 18px 0">簡易（タイトル確認）</button>
+        </div>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="lvt" style="border-radius:0 0 8px 8px">
+        <thead><tr><th class="chk"><input type="checkbox"></th><th>報告者 / 種別</th><th>件名</th><th>取引先 / 品番</th><th>既読状況</th><th style="text-align:right"></th></tr></thead>
+        <tbody id="inbox-body"></tbody>
+      </table>
+    </div>
+    <div class="demo-note" style="margin-top:14px">💡 右上「閲覧者」を <b>吉田専務（上位職）</b> に切り替えると、<b>簡易（タイトル確認）ビュー</b>が使えます（7/7FB: 上位職はタイトルだけで確認したい）。見出しの命名ルールは運用側で整備する想定です。</div>
+  </section>
+
+  <!-- ==================== RECORD (activity detail) ==================== -->
+  <section class="view" id="v-record">
+    <div class="rec-head">
+      <div class="rec-top">
+        <span class="obj-icon o-act lg">📋</span>
+        <div class="meta">
+          <div class="crumb"><a data-goto="inbox">回覧トレイ</a> › 活動記録</div>
+          <h1 id="rec-title">—</h1>
+        </div>
+        <div class="acts"><button class="btn">💬 Chatterで返信</button><button class="btn">編集</button></div>
+      </div>
+      <div class="rec-fields" id="rec-fields"></div>
+    </div>
+
+    <div class="confirm-bar" id="confirm-bar">
+      <span class="msg" id="confirm-msg">この記録はまだ確認されていません。内容を読んでから確認してください。</span>
+      <button class="btn confirm lg" id="btn-confirm">✓ 確認する</button>
+    </div>
+
+    <div class="rec-cols">
+      <div>
+        <div class="detail-sec">
+          <h3><span class="caret">▾</span> 記録内容</h3>
+          <div class="readbody" id="rec-body"></div>
+        </div>
+      </div>
+      <div>
+        <div class="related">
+          <div class="rl-hd"><span class="obj-icon o-acct">👁</span> 回覧・既読状況</div>
+          <div class="bd" style="padding:12px 14px"><div id="rec-readers"></div></div>
+        </div>
+        <div class="related act-panel">
+          <div class="rl-hd"><span class="obj-icon o-act">📋</span> 同じ品番の履歴<span class="sp"></span></div>
+          <div class="tl">
+            <div class="item"><span class="dot"></span><div class="when">7/1 ・ Web商談 ・ 田中</div><div class="body">技術仕様の詰め（CN-320）</div></div>
+            <div class="item"><span class="dot"></span><div class="when">6/24 ・ 訪問 ・ 田中</div><div class="body">初回引合ヒアリング（CN-320）</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CALENDAR ==================== -->
+  <section class="view" id="v-calendar">
+    <div class="page-head">
+      <div class="icon" style="background:#e8638a">🗓️</div>
+      <div>
+        <div class="eyebrow">カレンダー ・ 入力有無の可視化</div>
+        <h1>2026年 7月</h1>
+        <div class="sub2">予定に活動記録が入力されたかを色で識別。<b>未入力＝赤 / 入力済＝緑</b>、重要面談は★。</div>
+      </div>
+    </div>
+    <div class="fb-note">✅ <b>7/7FB反映</b>：後付けで登録した記録も<b>緑</b>で表示されます（「後）」マーク付き）。当日入力でなくても報告さえされていれば緑、という運用です。</div>
+    <div class="card">
+      <div class="hd">面談・予定カレンダー
+        <div class="cal-legend">
+          <span><span class="sw" style="background:var(--green)"></span>入力済</span>
+          <span><span class="sw" style="background:var(--red)"></span>未入力</span>
+          <span>★ 重要面談</span><span>後）= 後付け登録</span>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="cal" id="cal"></div>
+        <div class="callout" style="margin-top:14px">💡 赤いセルは「予定はあったが活動記録が未入力」。クリックでその日の状況を確認し、未入力者へリマインドできます。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== DEALS ==================== -->
+  <section class="view" id="v-deals">
+    <div class="lv-head">
+      <span class="obj-icon o-opp lg">💼</span>
+      <div class="meta">
+        <div class="kicker">引合（商談）・ 進捗管理</div>
+        <div class="lv-title">進行中の引合</div>
+        <div class="sub">引合＝標準「商談」で開始する想定。信号機（緑:順調 / 黄:停滞 / 赤:要対応）で可視化。</div>
+      </div>
+      <div class="acts"><button class="btn primary" data-goto="activity">活動を記録</button></div>
+    </div>
+    <div class="lv-toolbar"><span class="count">4 件</span><span class="spring"></span><span class="pill gray">最終接触からの経過で信号機を自動判定</span></div>
+    <div class="tbl-wrap">
+      <table class="lvt"><thead><tr><th class="chk">状態</th><th>引合名</th><th>取引先</th><th>品番</th><th>フェーズ</th><th class="num">見込金額</th><th>最終接触</th><th>担当</th></tr></thead>
+        <tbody id="deals-body"></tbody>
+      </table>
+    </div>
+    <div class="demo-note" style="margin-top:14px">💡 引合名をクリックするとレコード詳細が開きます。</div>
+  </section>
+
+  <!-- ==================== DEAL DETAIL ==================== -->
+  <section class="view" id="v-deal-detail">
+    <div class="rec-head">
+      <div class="rec-top">
+        <span class="obj-icon o-opp lg">💼</span>
+        <div class="meta">
+          <div class="crumb"><a data-goto="deals">引合（商談）</a> › レコード</div>
+          <h1>CN-320 新型コネクタ 年間契約</h1>
+        </div>
+        <div class="acts"><button class="btn" data-goto="activity">活動を記録</button><button class="btn">見積</button><button class="btn primary">編集</button></div>
+      </div>
+      <div class="rec-fields">
+        <div class="rf"><span class="l">取引先</span><span class="v"><a data-goto="accounts">東海電子工業</a></span></div>
+        <div class="rf"><span class="l">商社経由</span><span class="v">ネクスティエレクトロニクス</span></div>
+        <div class="rf"><span class="l">品番</span><span class="v"><span class="code">CN-320</span></span></div>
+        <div class="rf"><span class="l">状態</span><span class="v"><span class="signal g"><i class="g"></i><i class="a"></i><i class="r"></i></span> 順調</span></div>
+        <div class="rf"><span class="l">見込金額</span><span class="v">¥ 8,400,000</span></div>
+        <div class="rf"><span class="l">確度</span><span class="v">60%</span></div>
+        <div class="rf"><span class="l">所有者</span><span class="v">田中（営業部）</span></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div class="path" style="flex:1">
+        <div class="st done">引合受付</div><div class="st done">ニーズ確認</div><div class="st cur">見積提示</div><div class="st">交渉</div><div class="st">受注</div><div class="st">量産フォロー</div>
+      </div>
+      <button class="btn primary">✓ ステージ完了</button>
+    </div>
+    <div class="rec-tabs" id="rec-tabs">
+      <button data-rtab="detail" class="on">詳細</button>
+      <button data-rtab="related">関連</button>
+      <button data-goto="activity">活動</button>
+    </div>
+    <div class="rec-cols">
+      <div>
+        <div class="detail-sec rtab rtab-detail">
+          <h3><span class="caret">▾</span> 引合 情報</h3>
+          <div class="fgrid">
+            <div class="fitem2"><div class="l"><span class="req">*</span>引合名</div><div class="v">CN-320 新型コネクタ 年間契約 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l"><span class="req">*</span>取引先</div><div class="v">東海電子工業 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">商社（販売経路）</div><div class="v">ネクスティエレクトロニクス <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l"><span class="req">*</span>製品品番</div><div class="v">CN-320 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l"><span class="req">*</span>フェーズ</div><div class="v">見積提示 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l"><span class="req">*</span>見込金額</div><div class="v">¥ 8,400,000 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">確度（フェーズ連動）</div><div class="v">60% <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">数量（年間）</div><div class="v">120,000 個 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">ネクストアクション</div><div class="v">7/22 見積提示・技術折衝 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">失注理由</div><div class="v">—（失注時に必須）<span class="pencil">✎</span></div></div>
+          </div>
+        </div>
+        <div class="related rtab rtab-related" hidden>
+          <div class="rl-hd"><span class="obj-icon o-prod">📦</span> 対象品番<span class="cnt">(3)</span><span class="sp"></span><a class="more">品番を追加</a></div>
+          <div class="tbl-wrap"><table class="lvt" style="border:0;border-radius:0">
+            <thead><tr><th>品番</th><th>品名</th><th class="num">単価</th><th class="num">年間数量</th><th class="num">年間金額</th></tr></thead>
+            <tbody>
+              <tr><td><span class="code">CN-320</span></td><td>基板対基板コネクタ 0.4mm</td><td class="num">¥58</td><td class="num">96,000</td><td class="num">¥5.6M</td></tr>
+              <tr><td><span class="code">CN-320H</span></td><td>ハイト違い派生品</td><td class="num">¥64</td><td class="num">18,000</td><td class="num">¥1.2M</td></tr>
+              <tr><td><span class="code">ACC-12</span></td><td>実装治具・付属</td><td class="num">¥320</td><td class="num">5,000</td><td class="num">¥1.6M</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <div>
+        <div class="related act-panel">
+          <div class="rl-hd"><span class="obj-icon o-act">📋</span> 紐付いた活動記録<span class="cnt">(4)</span></div>
+          <div class="tl">
+            <div class="item"><span class="dot"></span><div class="when">7/7 ・ 訪問 ・ 田中</div><div class="body">合同レビュー。年間12万個の内示見込み</div></div>
+            <div class="item"><span class="dot unread"></span><div class="when">7/1 ・ Web商談 ・ 田中</div><div class="body">技術仕様の詰め <span class="pill amber"><span class="d"></span>未読 1</span></div></div>
+            <div class="item"><span class="dot"></span><div class="when">6/24 ・ 訪問 ・ 田中</div><div class="body">初回引合ヒアリング</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CLAIMS ==================== -->
+  <section class="view" id="v-claims">
+    <div class="lv-head">
+      <span class="obj-icon o-claim lg">⚠️</span>
+      <div class="meta">
+        <div class="kicker">品質クレーム ・ 是正管理</div>
+        <div class="lv-title">オープンなクレーム</div>
+        <div class="sub">発生からクローズまで継続記録。引合と同様のフェーズ管理を適用します。</div>
+      </div>
+      <div class="acts"><button class="btn primary" data-goto="activity">クレームを記録</button></div>
+    </div>
+    <div class="fb-note">✅ <b>7/7FB反映</b>：①引合と同様の<b>フェーズ管理</b>を適用 ②<b>製品品番</b>欄を追加し品番×取引先で横断検索 ③1レコード追記更新／都度新規レコード紐づけの両方式に対応</div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="hd">端子めっき剥離（関西精密コネクタ / L2405）— フェーズ</div>
+      <div class="bd">
+        <div class="path claim">
+          <div class="st done">発生受付</div><div class="st done">一次対応</div><div class="st cur">原因調査</div><div class="st">恒久対策</div><div class="st">水平展開</div><div class="st">クローズ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lv-toolbar"><span class="count">3 件</span><span class="spring"></span><input class="s" placeholder="品番で絞り込み..."></div>
+    <div class="tbl-wrap">
+      <table class="lvt"><thead><tr><th class="chk">重大度</th><th>件名</th><th>取引先</th><th>品番 / ロット</th><th>フェーズ</th><th>報告者</th><th>回覧</th></tr></thead>
+        <tbody id="claims-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ==================== ACCOUNTS ==================== -->
+  <section class="view" id="v-accounts">
+    <div class="lv-head">
+      <span class="obj-icon o-acct lg">🏢</span>
+      <div class="meta">
+        <div class="kicker">取引先 ・ 取引先責任者</div>
+        <div class="lv-title">取引先</div>
+        <div class="sub">親会社と販売商社の紐づけ、部署カテゴリ、担当者の属性フラグに対応。</div>
+      </div>
+    </div>
+    <div class="fb-note">✅ <b>7/7FB反映</b>：①<b>親会社と販売商社の紐づけ</b>（例: アイシンへの販売はネクスティエレクトロニクス経由 → 商社にも親会社を紐づけて表示） ②<b>部署カテゴリの独自設定</b>（正式部署名とは別に開発/営業/品質等をタグ付け） ③<b>担当者の属性フラグ</b>（キーマン／一般担当者／事務担当）</div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="hd">親会社 ⇄ 販売商社の紐づけ<span class="sub">商社経由の販売も親会社で串刺し</span></div>
+      <div class="bd">
+        <div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th>取引先</th><th>区分</th><th>親会社（紐づけ）</th><th>販売経路</th><th class="num">直近接触</th></tr></thead>
+          <tbody>
+            <tr><td class="lk">アイシン</td><td><span class="pill blue">親会社</span></td><td>—</td><td>商社経由</td><td class="num">5日前</td></tr>
+            <tr><td class="lk">ネクスティエレクトロニクス</td><td><span class="pill pur">販売商社</span></td><td><b>アイシン</b></td><td>直接</td><td class="num">3日前</td></tr>
+            <tr><td class="lk">東海電子工業</td><td><span class="pill blue">親会社</span></td><td>—</td><td>直販</td><td class="num">3日前</td></tr>
+            <tr><td class="lk">関西精密コネクタ</td><td><span class="pill blue">親会社</span></td><td>—</td><td>直販</td><td class="num">1日前</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout" style="margin-top:12px">💡 商社（ネクスティ）に親会社（アイシン）を紐づけることで、「アイシン向けの活動」を商社経由分も含めて一覧できます。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="hd">取引先責任者<span class="sub">部署カテゴリ・属性フラグ</span></div>
+      <div class="tbl-wrap"><table class="lvt" style="border-radius:0 0 8px 8px">
+        <thead><tr><th>氏名</th><th>取引先</th><th>正式部署名</th><th>部署カテゴリ（独自）</th><th>属性</th></tr></thead>
+        <tbody>
+          <tr><td class="lk">山田 太郎</td><td>東海電子工業</td><td>調達本部 購買二部</td><td><span class="pill blue">営業部門</span></td><td><span class="pill red">キーマン</span></td></tr>
+          <tr><td class="lk">佐々木 健</td><td>東海電子工業</td><td>技術開発センター 第一設計課</td><td><span class="pill pur">開発部門</span></td><td><span class="pill red">キーマン</span></td></tr>
+          <tr><td class="lk">井上 恵</td><td>関西精密コネクタ</td><td>品質保証部</td><td><span class="pill green">品質部門</span></td><td><span class="pill gray">一般担当者</span></td></tr>
+          <tr><td class="lk">中村 明</td><td>ネクスティエレクトロニクス</td><td>業務課</td><td><span class="pill gray">管理部門</span></td><td><span class="pill gray">事務担当</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- ==================== BUSINESS CARDS ==================== -->
+  <section class="view" id="v-cards">
+    <div class="page-head">
+      <div class="icon" style="background:#0d9488">📇</div>
+      <div>
+        <div class="eyebrow">名刺取込 ・ 先行構築</div>
+        <h1>名刺の一括登録</h1>
+        <div class="sub2">他機能に先行して構築・提供します。8月頭のミーティングでアカウント付与とあわせて使い方をご案内します。</div>
+      </div>
+      <div class="actions"><button class="btn primary" id="card-scan">📷 名刺を撮影して登録</button></div>
+    </div>
+    <div class="fb-note">✅ <b>7/7FB反映</b>：導入時の一括登録フローを画面化。運用開始後は<b>新しい名刺で上書き更新</b>するルールで合意済み。名刺のメモ書きは文字情報としてノイズになりにくい想定（社内確認のうえ回答予定）。</div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="hd">導入時 一括登録フロー<span class="sub">全社員 → 約2週間でマージ完了</span></div>
+      <div class="bd">
+        <div class="flow">
+          <div class="step"><div class="n">1</div><div class="t">全社員が撮影</div><div class="d">名刺を写真撮影しSalesforceに登録</div></div>
+          <div class="step"><div class="n">2</div><div class="t">CSV出力</div><div class="d">Excelへ出力</div></div>
+          <div class="step"><div class="n">3</div><div class="t">重複チェック</div><div class="d">メールアドレスを起点に判定</div></div>
+          <div class="step"><div class="n">4</div><div class="t">マージ可否を選択</div><div class="d">列で可否を指定</div></div>
+          <div class="step"><div class="n">5</div><div class="t">マージ処理</div><div class="d">約2週間で完了</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g4" style="margin-bottom:16px">
+      <div class="kpi"><div class="label">登録済み名刺</div><div class="val tnum">1,284<small> 件</small></div><div class="delta up">▲ 全社27名から</div></div>
+      <div class="kpi"><div class="label">重複候補（要判定）</div><div class="val tnum" style="color:var(--amber)">147<small> 件</small></div><div class="delta flat">メール一致</div></div>
+      <div class="kpi"><div class="label">マージ済み</div><div class="val tnum" style="color:var(--green)">96<small> 件</small></div><div class="delta up">▲ 65%</div></div>
+      <div class="kpi"><div class="label">新規 取引先責任者</div><div class="val tnum">1,041<small> 件</small></div><div class="delta flat">重複除外後</div></div>
+    </div>
+
+    <div class="card">
+      <div class="hd">重複チェック（メールアドレス起点）<span class="sub">マージ可否を列で選択</span></div>
+      <div class="tbl-wrap"><table class="lvt" style="border-radius:0 0 8px 8px">
+        <thead><tr><th>メールアドレス</th><th>既存レコード</th><th>取込んだ名刺</th><th>差分</th><th>マージ可否</th></tr></thead>
+        <tbody id="cards-body"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- ==================== DASHBOARD ==================== -->
+  <section class="view" id="v-dash">
+    <div class="page-head">
+      <div class="icon" style="background:var(--blue)">📊</div>
+      <div>
+        <div class="eyebrow">ダッシュボード</div>
+        <h1 id="dash-title">経営ダッシュボード</h1>
+        <div class="sub2">権限・役割ごとに表示内容を切り替えます。集計軸（全社・営業部など）は次回すり合わせ。</div>
+      </div>
+      <div class="actions">
+        <div class="seg" id="dash-role">
+          <button data-role="mgr" class="on">マネージャー</button>
+          <button data-role="rep">担当者</button>
+        </div>
+      </div>
+    </div>
+    <div class="fb-note">✅ <b>7/7FB反映</b>：KPIを「総接触数・未接触先件数・未確認商談数・クレーム是正完了率・接触頻度」に整理し、<b>担当者／マネージャーで表示を切替</b>できるようにしました。</div>
+
+    <div class="grid g5" style="margin-bottom:16px" id="dash-kpi"></div>
+
+    <div class="grid g2">
+      <div class="card">
+        <div class="hd" id="bars-title">取引先別 接触頻度<span class="sub">直近30日</span></div>
+        <div class="bd" id="dash-bars"></div>
+      </div>
+      <div class="card">
+        <div class="hd">未確認 活動記録（既読漏れ）<span class="pill red" style="margin-left:auto"><span class="d"></span>12</span></div>
+        <div class="bd"><div class="feed" id="dash-unread"></div></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"><span class="ck">✓</span><span id="toast-msg">既読にしました</span></div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(s,r){return (r||document).querySelector(s);};
+  var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+  var COLORS={kurashima:'#2f8f8f',yoshida:'#a86403',kida:'#2e844a',tomiyama:'#b0559a',tanaka:'#2f8f8f',sato:'#ba0517',suzuki:'#5867e8'};
+  function ava(nm,key){return '<span class="ava" style="background:'+(COLORS[key]||'#667')+'">'+nm.charAt(0)+'</span>';}
+  function catLabel(c){return c==='sales'?'営業活動':c==='meeting'?'社内会議':'品質クレーム';}
+
+  var feed=[
+    {who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — 新型コネクタ CN-320 引合',body:'購買・技術の合同レビュー。年間12万個の内示見込み。次回7/22に見積提示。',t:'32分前',attach:'議事メモ.pdf',reads:[['木','kida',1],['吉','yoshida',0]]},
+    {who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密コネクタ 品質クレーム — 端子めっき剥離',body:'ロットL2405で剥離3件。一次対応済、原因調査中。重大度:中。',t:'1時間前',attach:'不良写真.zip',reads:[['吉','yoshida',0],['木','kida',1]]},
+    {who:'吉田',key:'yoshida',cat:'meeting',ttl:'7月 経営会議 議事録',body:'上期実績と下期方針。SFA導入の進捗を共有。※閲覧は役員限定。',t:'3時間前',attach:'経営会議_07.pdf',reads:[['田','tanaka',1]]},
+    {who:'鈴木',key:'suzuki',cat:'sales',ttl:'日本マイクロデバイス Web商談 — 既存品リピート',body:'月次発注の継続確認。特段の課題なし。',t:'昨日',attach:null,reads:[['田','tanaka',1],['吉','yoshida',1]]}
+  ];
+
+  var inbox={
+    kurashima:[
+      {id:1,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（L2405）',acct:'関西精密コネクタ',part:'CN-220',read:false,others:[['吉','yoshida',0]],
+       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','CN-220 / L2405'],['重大度','中'],['フェーズ','原因調査'],['報告者','佐藤（品質保証部）'],['発生日','2026-07-15']],
+       body:'<h4>不良内容</h4>ロット L2405 の端子めっきに剥離を3件確認。外観検査で発見、client先での実装工程には未流出。<h4>一次対応</h4>該当ロットを全数隔離。代替ロット L2407 を7/16に出荷済み。<h4>原因調査（進行中）</h4>めっき槽の温度管理記録を確認中。7/20までに一次報告予定。<h4>次アクション</h4>恒久対策案を7/22の定例で共有。'},
+      {id:2,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CN-320 引合（年間12万個の内示）',acct:'東海電子工業',part:'CN-320',read:false,others:[['木','kida',1]],
+       fields:[['取引先','東海電子工業'],['品番','CN-320'],['面談種別','訪問'],['面談相手','購買部 山田様（キーマン）'],['関連引合','CN-320 新型コネクタ 年間契約'],['面談日','2026-07-17']],
+       body:'<h4>活動内容</h4>購買・技術の合同レビューを実施。年間12万個の内示見込みを口頭で確認。<h4>先方コメント</h4>「競合A社と比較検討中だが、実装治具込みの提案は評価できる」<h4>次アクション</h4>7/22に見積提示・技術折衝。ハイト違い派生品（CN-320H）も併せて提案。'},
+      {id:3,who:'鈴木',key:'suzuki',cat:'sales',ttl:'北陸プレシジョン 見積フォロー — 34日間 接触なし',acct:'北陸プレシジョン',part:'ACC-12',read:false,others:[['木','kida',1]],
+       fields:[['取引先','北陸プレシジョン'],['品番','ACC-12'],['面談種別','電話'],['状態','要対応（赤）'],['面談日','2026-07-16']],
+       body:'<h4>活動内容</h4>試作品評価の状況を電話で確認。先方の担当者が異動しており、後任へ引き継ぎ中とのこと。<h4>リスク</h4>34日間接触が空いていた。信号機=赤。<h4>次アクション</h4>後任の方への挨拶訪問を7月中に設定する。'},
+      {id:4,who:'木田',key:'kida',cat:'meeting',ttl:'営業部 週次ミーティング 議事録（7/15）',acct:'（社内）',part:'—',read:false,others:[['田','tanaka',1],['鈴','suzuki',0]],
+       fields:[['会議区分','部門会議'],['出席者','木田・田中・鈴木・佐藤'],['開催日','2026-07-15']],
+       body:'<h4>議題</h4>①各案件の進捗共有 ②CN-320の見積方針 ③クレーム対応状況<h4>決定事項</h4>CN-320は実装治具込みのセット提案で進める。値引きは5%を上限とし、超える場合は専務決裁。<h4>宿題</h4>田中: 7/22までに見積書作成 / 佐藤: めっき剥離の原因一次報告'},
+      {id:5,who:'鈴木',key:'suzuki',cat:'sales',ttl:'日本マイクロデバイス リピート受注',acct:'日本マイクロデバイス',part:'CN-220',read:true,others:[['吉','yoshida',1]],
+       fields:[['取引先','日本マイクロデバイス'],['品番','CN-220'],['面談種別','Web商談']],
+       body:'<h4>活動内容</h4>月次発注の継続確認。特段の課題なし。'}
+    ],
+    yoshida:[
+      {id:11,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CN-320 引合（年間12万個の内示）',acct:'東海電子工業',part:'CN-320',read:false,others:[['木','kida',1]],
+       fields:[['取引先','東海電子工業'],['品番','CN-320'],['見込金額','¥8,400,000'],['面談相手','購買部 山田様（キーマン）'],['面談日','2026-07-17']],
+       body:'<h4>活動内容</h4>購買・技術の合同レビュー。年間12万個の内示見込み。<h4>次アクション</h4>7/22に見積提示。値引きは5%上限、超過時は専務決裁が必要です。'},
+      {id:12,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（重大度:中）',acct:'関西精密コネクタ',part:'CN-220',read:false,others:[['田','tanaka',0]],
+       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','CN-220 / L2405'],['重大度','中'],['フェーズ','原因調査']],
+       body:'<h4>不良内容</h4>端子めっき剥離3件。未流出。<h4>一次対応</h4>全数隔離・代替ロット出荷済み。<h4>次アクション</h4>7/20までに原因一次報告。'},
+      {id:13,who:'木田',key:'kida',cat:'sales',ttl:'大口案件 稟議前 状況共有（CN-320 / 840万円）',acct:'東海電子工業',part:'CN-320',read:false,others:[['田','tanaka',1]],
+       fields:[['取引先','東海電子工業'],['見込金額','¥8,400,000'],['稟議','値引5%超の可能性あり']],
+       body:'<h4>共有事項</h4>CN-320案件、競合A社の価格攻勢により5%を超える値引き要請が入る可能性があります。<h4>ご確認</h4>専務決裁の要否について事前にご相談させてください。'},
+      {id:14,who:'佐藤',key:'sato',cat:'claim',ttl:'月次 品質サマリ（重大クレーム 0件）',acct:'（全社）',part:'—',read:true,others:[['田','tanaka',1]],
+       fields:[['対象','全社'],['重大クレーム','0件']],body:'<h4>サマリ</h4>今月の重大クレームは0件。軽微2件はいずれも是正完了。'}
+    ]
+  };
+
+  var bars=[{l:'田中（営業）',v:96},{l:'鈴木（営業）',v:82},{l:'佐藤（品質）',v:90},{l:'木田（管理）',v:68}];
+  var dashBars=[{l:'東海電子工業',v:100,n:'18件'},{l:'関西精密コネクタ',v:74,n:'13件'},{l:'ネクスティ（商社）',v:61,n:'11件'},{l:'日本マイクロデバイス',v:52,n:'9件'},{l:'北陸プレシジョン',v:40,n:'7件'}];
+  var repBars=[{l:'東海電子工業',v:100,n:'12件'},{l:'関西精密コネクタ',v:58,n:'7件'},{l:'北陸プレシジョン',v:25,n:'3件'}];
+
+  var deals=[
+    {sig:'g',name:'CN-320 新型コネクタ 年間契約',acct:'東海電子工業',part:'CN-320',phase:'見積提示',amt:'¥ 8,400,000',last:'3日前',who:'田中',key:'tanaka'},
+    {sig:'a',name:'端子ユニット 追加発注',acct:'関西精密コネクタ',part:'CN-220',phase:'ニーズ確認',amt:'¥ 2,100,000',last:'19日前',who:'鈴木',key:'suzuki'},
+    {sig:'r',name:'試作品 評価案件',acct:'北陸プレシジョン',part:'ACC-12',phase:'提案',amt:'¥ 5,600,000',last:'34日前',who:'田中',key:'tanaka'},
+    {sig:'g',name:'定期リピート（月次）',acct:'日本マイクロデバイス',part:'CN-220',phase:'受注',amt:'¥ 1,300,000',last:'昨日',who:'鈴木',key:'suzuki'}
+  ];
+  var claims=[
+    {sev:'amber',sevL:'中',ttl:'端子めっき剥離（外観不良）',acct:'関西精密コネクタ',part:'CN-220',lot:'L2405',ph:'原因調査',phc:'amber',who:'佐藤',key:'sato',reads:[['吉','yoshida',0],['木','kida',1]]},
+    {sev:'red',sevL:'重大',ttl:'コネクタ寸法 公差外れ',acct:'東海電子工業',part:'CN-320',lot:'L2312',ph:'恒久対策',phc:'red',who:'佐藤',key:'sato',reads:[['吉','yoshida',1],['田','tanaka',1]]},
+    {sev:'gray',sevL:'軽微',ttl:'梱包ラベル 誤記',acct:'日本マイクロデバイス',part:'ACC-12',lot:'L2404',ph:'クローズ',phc:'green',who:'木田',key:'kida',reads:[['佐','sato',1]]}
+  ];
+  var cardRows=[
+    {mail:'t.yamada@tokai-denshi.co.jp',ex:'山田 太郎（調達本部）',nw:'山田 太郎（購買二部）',diff:'部署変更',ok:'merge'},
+    {mail:'k.sasaki@tokai-denshi.co.jp',ex:'佐々木 健（第一設計課）',nw:'佐々木 健（第一設計課）',diff:'差分なし',ok:'merge'},
+    {mail:'m.inoue@kansai-seimitsu.co.jp',ex:'—（新規）',nw:'井上 恵（品質保証部）',diff:'新規登録',ok:'new'},
+    {mail:'a.nakamura@nexty.co.jp',ex:'中村 明（営業課）',nw:'中村 明（業務課）',diff:'部署変更',ok:'hold'}
+  ];
+  var calData={1:{p:'東海 訪問',f:true},2:{p:'社内 定例',f:true},3:{p:'関西 Web',f:false,star:true},6:{p:'日本MD 訪問',f:true},7:{p:'北陸 面談',f:true,star:true,late:true},8:{p:'品質 会議',f:true},9:{p:'東海 見積',f:false},10:{p:'中部端子 訪問',f:true,late:true},13:{p:'経営会議',f:true,star:true},14:{p:'東海 提示',f:false,star:true},15:{p:'営業部 定例',f:true},16:{p:'北陸 TEL',f:true},17:{p:'東海 訪問',f:true,star:true},21:{p:'SFイベント',f:false},22:{p:'SHT様 定例',f:false,star:true},23:{p:'品質 レビュー',f:false},24:{p:'東海 折衝',f:false}};
+
+  function renderReaders(arr,small){
+    return '<span class="readers">'+arr.map(function(r){return '<span class="ra '+(r[2]?'':'unread')+'" style="background:'+(COLORS[r[1]]||'#667')+(small?';width:20px;height:20px;font-size:9px':'')+'" title="'+(r[2]?'既読':'未読')+'">'+r[0]+'</span>';}).join('')+'</span>';
+  }
+  function renderFeed(el,items,compact){
+    el.innerHTML=items.map(function(f){
+      return '<div class="fitem"><span class="ava" style="background:'+(COLORS[f.key]||'#667')+'">'+f.who.charAt(0)+'</span>'+
+        '<div><div class="top"><span class="nm">'+f.who+'</span><span class="cat '+f.cat+'">'+catLabel(f.cat)+'</span><span class="t">'+f.t+'</span></div>'+
+        '<div class="ttl">'+f.ttl+'</div>'+(compact?'':'<div class="bd2">'+f.body+'</div>')+
+        '<div class="foot">'+(f.attach?'<span class="attach">📎 '+f.attach+'</span>':'')+
+        '<span class="help">既読 '+f.reads.filter(function(r){return r[2];}).length+'/'+f.reads.length+'</span>'+renderReaders(f.reads,true)+'</div></div></div>';
+    }).join('');
+  }
+  function barClass(v){return v>=90?'g':v>70?'a':'r';}
+  function renderBars(el,data,showN){
+    el.innerHTML=data.map(function(b){return '<div class="bar"><span class="name">'+b.l+'</span><span class="track"><span class="fill '+(showN?'':barClass(b.v))+'" style="width:'+b.v+'%"></span></span><span class="v">'+(showN?b.n:b.v+'%')+'</span></div>';}).join('');
+  }
+  function renderHomeInbox(){
+    var items=inbox[state.user].filter(function(i){return !i.read;}).slice(0,4);
+    $('#home-inbox').innerHTML=items.map(function(i){
+      return '<div class="hi" data-open="'+i.id+'" style="display:flex;align-items:center;gap:9px;padding:9px 14px;border-bottom:1px solid var(--line);cursor:pointer">'+
+        '<span style="width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;background:'+(COLORS[i.key]||'#667')+';flex:none">'+i.who.charAt(0)+'</span>'+
+        '<div style="min-width:0;flex:1"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+i.ttl+'</div>'+
+        '<div class="help" style="margin-top:1px">'+i.who+' ・ '+i.acct+'</div></div><span class="cat '+i.cat+'">'+catLabel(i.cat).slice(0,2)+'</span></div>';
+    }).join('')||'<div class="help" style="padding:16px 14px">未読はありません 🎉</div>';
+  }
+  function renderInbox(){
+    var f=state.inboxFilter, simple=(state.user==='yoshida'&&state.inboxMode==='simple');
+    var list=inbox[state.user].filter(function(i){return f==='all'?true:!i.read;});
+    var unread=inbox[state.user].filter(function(i){return !i.read;}).length;
+    $('#inbox-count').textContent=(f==='all'?inbox[state.user].length:unread)+' 件';
+    $('#inbox-title').textContent=(f==='all'?'すべての回覧':'未読の回覧');
+    $('#simple-toggle-wrap').hidden=(state.user!=='yoshida');
+    $('#simple-hint').innerHTML=(state.user==='yoshida')?' 上位職のため<b>簡易（タイトル確認）</b>ビューが利用できます。':'';
+    $('#inbox-body').innerHTML=list.map(function(i){
+      return '<tr class="clickable '+(i.read?'':'unread')+'" data-open="'+i.id+'"><td class="chk"><input type="checkbox" onclick="event.stopPropagation()"></td>'+
+        '<td><span class="u">'+ava(i.who,i.key)+'<span><span class="nm">'+i.who+'</span> <span class="cat '+i.cat+'">'+catLabel(i.cat)+'</span></span></span></td>'+
+        '<td class="lk" style="max-width:320px">'+i.ttl+'</td>'+
+        '<td class="muted">'+i.acct+'<br><span class="code">'+i.part+'</span></td>'+
+        '<td>'+(i.read?'<span class="pill green"><span class="d"></span>既読</span>':'<span class="pill amber"><span class="d"></span>未読</span>')+' '+renderReaders(i.others,true)+'</td>'+
+        '<td style="text-align:right">'+
+          (simple&&!i.read?'<button class="btn confirm sm" data-simple="'+i.id+'" onclick="event.stopPropagation()">✓ タイトルで確認</button>'
+            :(i.read?'<span class="help">確認済</span>':'<span class="help">開いて確認 →</span>'))+
+        '</td></tr>';
+    }).join('')||'<tr><td colspan="6" class="muted" style="text-align:center;padding:28px">該当する回覧はありません</td></tr>';
+    updateBadges();
+  }
+  function openRecord(id){
+    var it=inbox[state.user].filter(function(i){return i.id===id;})[0];
+    if(!it)return;
+    state.rec=id;
+    $('#rec-title').textContent=it.ttl;
+    $('#rec-fields').innerHTML=it.fields.map(function(f){return '<div class="rf"><span class="l">'+f[0]+'</span><span class="v">'+f[1]+'</span></div>';}).join('');
+    $('#rec-body').innerHTML=it.body;
+    var all=[[it.who.charAt(0),it.key,1]].concat(it.others);
+    $('#rec-readers').innerHTML='<table class="tbl"><tr><td>報告者</td><td>'+it.who+'</td></tr>'+
+      '<tr><td>既読</td><td>'+renderReaders(all.filter(function(r){return r[2];}),true)+' '+all.filter(function(r){return r[2];}).length+'名</td></tr>'+
+      '<tr><td>未読</td><td>'+(all.filter(function(r){return !r[2];}).length?renderReaders(all.filter(function(r){return !r[2];}),true)+' <span class="pill amber">未読</span>':'<span class="help">なし</span>')+'</td></tr></table>';
+    var bar=$('#confirm-bar');
+    if(it.read){bar.className='confirm-bar done';$('#confirm-msg').textContent='✓ この記録は確認済みです。';$('#btn-confirm').outerHTML='<button class="btn done lg" id="btn-confirm">✓ 確認済</button>';}
+    else{bar.className='confirm-bar';$('#confirm-msg').textContent='この記録はまだ確認されていません。内容を読んでから確認してください。';
+      $('#btn-confirm').outerHTML='<button class="btn confirm lg" id="btn-confirm">✓ 確認する</button>';
+      $('#btn-confirm').addEventListener('click',function(){confirmRead(id,true);});}
+    setView('record');
+  }
+  function confirmRead(id,fromRecord){
+    var it=inbox[state.user].filter(function(i){return i.id===id;})[0];
+    if(it){it.read=true;renderInbox();renderHomeInbox();updateBadges();
+      toast('確認しました — 報告者に通知されます');
+      if(fromRecord){setTimeout(function(){setView('inbox');},700);}}
+  }
+  function renderDeals(){
+    $('#deals-body').innerHTML=deals.map(function(d){
+      var sig='<span class="signal '+d.sig+'"><i class="g"></i><i class="a"></i><i class="r"></i></span>';
+      return '<tr class="clickable" data-goto="deal-detail"><td>'+sig+'</td><td class="lk">'+d.name+'</td><td class="muted">'+d.acct+'</td>'+
+        '<td><span class="code">'+d.part+'</span></td>'+
+        '<td><span class="pill '+(d.phase==='受注'?'green':d.phase==='提案'?'red':'blue')+'"><span class="d"></span>'+d.phase+'</span></td>'+
+        '<td class="num" style="font-weight:700">'+d.amt+'</td><td class="muted">'+d.last+'</td>'+
+        '<td><span class="u">'+ava(d.who,d.key)+'<span class="nm">'+d.who+'</span></span></td></tr>';
+    }).join('');
+  }
+  function renderClaims(){
+    $('#claims-body').innerHTML=claims.map(function(c){
+      return '<tr><td><span class="pill '+(c.sev==='red'?'red':c.sev==='amber'?'amber':'gray')+'">'+c.sevL+'</span></td>'+
+        '<td class="lk">'+c.ttl+'</td><td class="muted">'+c.acct+'</td><td><span class="code">'+c.part+'</span> / '+c.lot+'</td>'+
+        '<td><span class="pill '+c.phc+'"><span class="d"></span>'+c.ph+'</span></td>'+
+        '<td><span class="u">'+ava(c.who,c.key)+'<span class="nm">'+c.who+'</span></span></td>'+
+        '<td>'+renderReaders(c.reads,true)+'</td></tr>';
+    }).join('');
+  }
+  function renderCards(){
+    $('#cards-body').innerHTML=cardRows.map(function(r){
+      var p=r.ok==='merge'?'<span class="pill green"><span class="d"></span>マージする</span>':r.ok==='new'?'<span class="pill blue"><span class="d"></span>新規登録</span>':'<span class="pill amber"><span class="d"></span>保留（要確認）</span>';
+      return '<tr><td class="lk">'+r.mail+'</td><td class="muted">'+r.ex+'</td><td>'+r.nw+'</td><td>'+r.diff+'</td><td>'+p+'</td></tr>';
+    }).join('');
+  }
+  function renderCal(){
+    var startDow=3,days=31,today=17,dows=['日','月','火','水','木','金','土'];
+    var h=dows.map(function(d){return '<div class="dow">'+d+'</div>';}).join('');
+    for(var i=0;i<startDow;i++){h+='<div class="cell pad"></div>';}
+    for(var d=1;d<=days;d++){
+      var info=calData[d],cls='cell'+(d===today?' today':''),inner='<div class="dnum">'+d+'</div>';
+      if(info){inner+='<div class="plan '+(info.f?'filled':'empty')+'"><span class="st"></span>'+info.p+'</div>';
+        if(info.star){inner+='<span class="star">'+(info.f?'⭐':'☆')+'</span>';}
+        if(info.late){inner+='<span class="late">後）</span>';}}
+      h+='<button class="'+cls+'" data-day="'+d+'">'+inner+'</button>';
+    }
+    $('#cal').innerHTML=h;
+  }
+  function renderRoute(){
+    var route=[{nm:'吉田 専務',rl:'配信先（必須）',key:'yoshida',deliver:true,view:true,lock:true},{nm:'木田（営業部長）',rl:'配信先',key:'kida',deliver:true,view:true},{nm:'富山（管理）',rl:'閲覧のみ',key:'tomiyama',deliver:false,view:true},{nm:'営業部 全員',rl:'閲覧範囲',key:'suzuki',deliver:false,view:true}];
+    $('#route-box').innerHTML=route.map(function(r){
+      return '<div class="route-row"><span class="u">'+ava(r.nm,r.key)+'<span><span class="nm">'+r.nm+'</span><span class="rl">'+r.rl+'</span></span></span>'+
+        '<label><input type="checkbox" '+(r.deliver?'checked':'')+(r.lock?' disabled':'')+'>配信</label>'+
+        '<label><input type="checkbox" '+(r.view?'checked':'')+'>閲覧</label></div>';
+    }).join('');
+  }
+  var KPI={
+    mgr:[{l:'総接触数（今月・全社）',v:'146',u:' 件',c:'',d:'▲ 前月比 +18%',dc:'up'},
+         {l:'未接触先 件数（30日超）',v:'7',u:' 社',c:'var(--amber)',d:'フォロー対象',dc:'flat'},
+         {l:'未確認 商談数',v:'12',u:' 件',c:'var(--red)',d:'▼ 既読漏れ検知',dc:'down'},
+         {l:'クレーム是正 完了率',v:'92',u:'%',c:'var(--green)',d:'▲ 今四半期',dc:'up'},
+         {l:'接触頻度（1社あたり月）',v:'3.2',u:' 回',c:'',d:'目標 3.0回',dc:'up'}],
+    rep:[{l:'あなたの接触数（今月）',v:'38',u:' 件',c:'',d:'▲ 前月比 +9%',dc:'up'},
+         {l:'あなたの未接触先（30日超）',v:'2',u:' 社',c:'var(--amber)',d:'北陸・中部端子',dc:'flat'},
+         {l:'あなた宛の未確認',v:'4',u:' 件',c:'var(--red)',d:'▼ 回覧トレイへ',dc:'down'},
+         {l:'あなたの報告実施率',v:'96',u:'%',c:'var(--green)',d:'▲ 目標90%',dc:'up'},
+         {l:'あなたの接触頻度',v:'4.1',u:' 回',c:'',d:'目標 3.0回',dc:'up'}]
+  };
+  function renderDash(){
+    var r=state.dashRole, k=KPI[r];
+    $('#dash-kpi').innerHTML=k.map(function(x){
+      return '<div class="kpi"><div class="label">'+x.l+'</div><div class="val tnum" style="color:'+(x.c||'inherit')+'">'+x.v+'<small>'+x.u+'</small></div><div class="delta '+x.dc+'">'+x.d+'</div></div>';
+    }).join('');
+    $('#dash-title').textContent=(r==='mgr')?'経営ダッシュボード（マネージャー）':'マイダッシュボード（担当者）';
+    $('#bars-title').innerHTML=(r==='mgr'?'取引先別 接触頻度':'あなたの担当先 接触頻度')+'<span class="sub">直近30日</span>';
+    renderBars($('#dash-bars'),(r==='mgr'?dashBars:repBars),true);
+  }
+
+  var state={view:'home',user:'kurashima',inboxFilter:'unread',inboxMode:'full',tmpl:'sales',dashRole:'mgr',rec:null};
+  function updateBadges(){
+    var n=inbox[state.user].filter(function(i){return !i.read;}).length;
+    $('#tab-unread').textContent=n;$('#tab-unread').style.display=n?'grid':'none';
+    $('#bell-n').textContent=n;$('#bell-n').style.display=n?'grid':'none';
+  }
+  function setRtab(t){
+    $$('#rec-tabs button[data-rtab]').forEach(function(b){b.classList.toggle('on',b.dataset.rtab===t);});
+    $$('.rtab').forEach(function(el){el.hidden=!el.classList.contains('rtab-'+t);});
+  }
+  function setView(v){
+    state.view=v;
+    var tabKey=(v==='deal-detail')?'deals':(v==='record')?'inbox':v;
+    $$('#tabs button').forEach(function(b){b.classList.toggle('active',b.dataset.view===tabKey);});
+    $$('.view').forEach(function(s){s.classList.toggle('on',s.id==='v-'+v);});
+    if(v==='deal-detail'){setRtab('detail');}
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function setUser(u){
+    state.user=u;state.inboxMode='full';
+    $$('#viewer button').forEach(function(b){b.classList.toggle('on',b.dataset.user===u);});
+    $$('#simple-toggle button').forEach(function(b){b.classList.toggle('on',b.dataset.mode==='full');});
+    var me=$('#me');me.textContent=(u==='yoshida')?'吉':'田';
+    $('#inbox-lead').innerHTML=(u==='yoshida')
+      ?'<b>吉田専務</b>の視点。大口案件・クレームは専務を配信先に含めています。上位職は簡易ビューでタイトル確認も可能です。'
+      :'件名をクリックしてレコードを開くと確認ボタンが表示されます。';
+    renderInbox();renderHomeInbox();updateBadges();
+  }
+  function toast(msg){var t=$('#toast');$('#toast-msg').textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},2300);}
+  function setTmpl(t){
+    state.tmpl=t;
+    $$('#tmpl-seg button').forEach(function(b){b.classList.toggle('on',b.dataset.tmpl===t);});
+    $$('.tf').forEach(function(f){f.hidden=!f.classList.contains('tf-'+t);});
+    var subs={sales:'営業活動',meeting:'社内会議',claim:'品質クレーム'};
+    $('#form-sub').textContent='テンプレート: '+subs[t];
+    $('#l-date').textContent=t==='meeting'?'開催日':t==='claim'?'発生日':'面談日';
+    $('#l-body').textContent=t==='claim'?'不良内容':t==='meeting'?'議事内容':'活動内容';
+    $('#ta-body').placeholder=t==='claim'?'不良の症状・発生状況・影響範囲を記入':t==='meeting'?'決定事項・宿題を記入':'面談で確認した事項・次アクションを記入';
+  }
+
+  $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setView(b.dataset.view);});
+  $('#viewer').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setUser(b.dataset.user);});
+  $('#tmpl-seg').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setTmpl(b.dataset.tmpl);});
+  $('#rec-tabs').addEventListener('click',function(e){var b=e.target.closest('button[data-rtab]');if(b)setRtab(b.dataset.rtab);});
+  $('#inbox-filter').addEventListener('click',function(e){var b=e.target.closest('button');if(b){state.inboxFilter=b.dataset.f;$$('#inbox-filter button').forEach(function(x){x.classList.toggle('on',x===b);});renderInbox();}});
+  $('#simple-toggle').addEventListener('click',function(e){var b=e.target.closest('button');if(b){state.inboxMode=b.dataset.mode;$$('#simple-toggle button').forEach(function(x){x.classList.toggle('on',x===b);});renderInbox();
+    toast(b.dataset.mode==='simple'?'簡易ビュー: タイトルだけで確認できます（上位職のみ）':'通常ビュー: レコードを開いて確認します');}});
+  $('#inbox-body').addEventListener('click',function(e){
+    var s=e.target.closest('[data-simple]');if(s){confirmRead(parseInt(s.dataset.simple,10));return;}
+    var r=e.target.closest('[data-open]');if(r)openRecord(parseInt(r.dataset.open,10));
+  });
+  $('#home-inbox').addEventListener('click',function(e){var r=e.target.closest('[data-open]');if(r)openRecord(parseInt(r.dataset.open,10));});
+  document.addEventListener('click',function(e){var g=e.target.closest('[data-goto]');if(g){e.preventDefault();setView(g.dataset.goto);}});
+  $('#bell').addEventListener('click',function(){setView('inbox');});
+  $('#submit-activity').addEventListener('click',function(){toast('確認送信しました — 配信先の未読一覧に追加されます');});
+  $('#card-scan').addEventListener('click',function(){toast('名刺を撮影 → OCRで取引先責任者に登録（8月頭に先行提供）');});
+  $('#x-search').addEventListener('click',function(){
+    var p=$('#x-part').value,a=$('#x-acct').value;
+    $('#x-result').innerHTML='<div class="callout" style="margin-bottom:8px">品番 <b>'+p+'</b>'+(a==='すべて'?'':' × '+a)+' の履歴</div>'+
+      '<table class="tbl"><thead><tr><th>日付</th><th>種別</th><th>件名</th></tr></thead><tbody>'+
+      '<tr><td>7/17</td><td><span class="cat sales">営業</span></td><td>東海電子工業 訪問 — 内示見込み</td></tr>'+
+      '<tr><td>7/15</td><td><span class="cat claim">クレーム</span></td><td>寸法 公差外れ（L2312）</td></tr>'+
+      '<tr><td>7/1</td><td><span class="cat sales">営業</span></td><td>技術仕様の詰め</td></tr></tbody></table>';
+    toast('品番×取引先で活動記録・クレームを横断検索');
+  });
+  $('#dash-role').addEventListener('click',function(e){var b=e.target.closest('button');if(b){state.dashRole=b.dataset.role;$$('#dash-role button').forEach(function(x){x.classList.toggle('on',x===b);});renderDash();}});
+  $('#acct-sel').addEventListener('change',function(){
+    var v=this.value;
+    $('#parent-help').textContent='親会社: '+(v.indexOf('ネクスティ')>=0?'アイシン（商社経由）':'—');
+  });
+  $('#cal').addEventListener('click',function(e){var c=e.target.closest('[data-day]');if(c){var d=c.dataset.day,info=calData[d];
+    toast(info?('7/'+d+'：'+info.p+'（'+(info.f?('入力済 ✓'+(info.late?'／後付け登録':'')):'未入力 — リマインド送信可')+'）'):('7/'+d+'：予定なし'));}});
+
+  renderFeed($('#home-feed'),feed);
+  renderFeed($('#dash-unread'),feed.filter(function(f){return f.reads.some(function(r){return !r[2];});}),true);
+  renderBars($('#home-bars'),bars);
+  renderHomeInbox();renderInbox();renderDeals();renderClaims();renderCards();renderCal();renderRoute();renderDash();setTmpl('sales');updateBadges();
+})();
+</script>
+</body>
+</html>
