@@ -477,6 +477,28 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
 .flow-arrow{width:2px;height:20px;background:#c9c7c5;margin:0 0 0 28px}
 .flow-arrow::after{content:"▼";color:#c9c7c5;font-size:10px;position:relative;left:-4px;top:8px}
 .flow-branch{font-size:11px;color:#706e6b;margin:0 0 0 42px}
+
+/* === ホーム：実orgホーム(FlexiPage) 踏襲 === */
+/* MISSION / 活動方針 バナー */
+.mission{background:linear-gradient(135deg,#f4faf1,#eef7ea);border:1px solid #cfe6c4;border-radius:10px;padding:16px 22px;margin-bottom:12px}
+.mission .mlabel{font-weight:700;color:#b8860b;font-size:13px}
+.mission .mlabel .en{color:#999;font-size:12px;margin-left:6px;font-weight:700}
+.mission .mmain{font-size:26px;font-weight:800;color:#2d5a27;margin:4px 0 2px}
+.mission .msub{font-size:13px;color:#555;margin-bottom:6px}
+.mission .principles{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.mission .pr{background:#fff;border:1px solid #d8e8cf;border-radius:6px;padding:4px 12px;font-size:13px;color:#2d5a27;font-weight:700}
+/* カウントダウン */
+.countdown{display:inline-flex;align-items:center;gap:10px;background:#fef2f2;border:1px solid #fca5a5;color:#c23934;border-radius:8px;padding:7px 16px;font-weight:700;font-size:13px;margin-bottom:12px}
+.countdown .big{font-size:18px;letter-spacing:.5px}
+/* お知らせ（クイックリンク） */
+.ol-row{padding:6px 0;border-bottom:1px dashed #eee;font-size:12px}
+.ol-row:last-child{border-bottom:0}
+.ol-row b{color:#514f4d;display:inline-block;min-width:88px}
+.ol-row a{margin-right:10px}
+/* お知らせ（月次スケジュール） */
+.oshirase-sched{font-size:12px;line-height:1.75;background:#fafaf9;border:1px solid var(--border-light);border-radius:6px;padding:10px 14px}
+.oshirase-sched .mon{font-weight:700;color:#1b7f4b;margin:8px 0 2px;display:block}
+.oshirase-sched .rule{color:#706e6b}
 </style>
 </head>
 <body>
@@ -507,28 +529,76 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <!-- =================== HOME =================== -->
   <div class="page active" id="home">
     <div class="disc">
-      <div class="disc-q">論点：毎朝この4つのKPIを見て動く、で合意できるか</div>
-      <div class="disc-src">出典: 2026-07-03 KO資料「Salesforceを開けば、今やるべき業務・次の担当者への連携が一目で分かる状態」</div>
-      <div class="disc-body">今は進捗がスプレッドシートに分散し「どこが滞っているか」が一覧できない。この画面に集約する想定。<span class="disc-flag"></span>KPIは4つで足りるか、他に毎朝見たい数字は。</div>
+      <div class="disc-q">論点：ホームは現行org（本番環境）のホーム構成を踏襲してよいか</div>
+      <div class="disc-src">出典: 現行org ホームページ（FlexiPage：MISSION／活動方針・お知らせ・カウントダウン・ダッシュボード）</div>
+      <div class="disc-body">現在お使いのホーム（MISSION／活動方針バナー・お知らせ・締切カウントダウン）を新orgでもそのまま再現する想定。<span class="disc-flag"></span>お知らせは手入力運用か、レポート/リストへのリンク集約か（現行はリンク集約）。<span class="disc-flag"></span>公開デモのため氏名・実レポートURLは伏せ・モック化しています。</div>
     </div>
+
+    <!-- MISSION / 活動方針（現行orgホーム踏襲） -->
+    <div class="mission">
+      <div class="mlabel">【MISSION】<span class="en">- Our Mission -</span></div>
+      <div class="mmain">すべてのお客様を豊かにする</div>
+      <div class="msub">　全員が力を合わせて会社の未来を創り、社員の“豊かな心と暮らし”を実現する</div>
+      <div class="mlabel" style="margin-top:8px">【活動方針】<span class="en">- Our Principles -</span></div>
+      <div class="principles">
+        <span class="pr">CHALLENGE ｜ チャレンジする</span>
+        <span class="pr">GROWTH ｜ 着実に組織を成長させる</span>
+        <span class="pr">AESTHETICS ｜ 美意識を高める</span>
+        <span class="pr">BREAKTHROUGH ｜ コンフォートゾーンから抜け出す</span>
+      </div>
+    </div>
+
     <div class="obj-header"><div class="row1">
       <div class="obj-icon home">🏠</div>
       <div class="obj-title"><div class="label">ホーム</div><div class="name">おはようございます — 2026年7月17日（金）</div></div>
+      <div class="obj-actions"><span class="countdown">⏳ 7月決算 電子化・提出まで <span class="big">本日！</span></span></div>
     </div></div>
+
     <div class="dash-grid">
+      <!-- お知らせ（月次スケジュール）＝現行ホーム踏襲 -->
+      <div class="widget span-8">
+        <div class="w-title">📢 お知らせ</div>
+        <div class="oshirase-sched">
+          <span class="rule">決算・予定納税・届出書 PDF納品　┗ 翌月3営業日以内に納品</span>
+          <span class="mon">【7月】</span>
+          4(土)　中間大会<br>
+          📢 マスゼミ　開催日：7/10・7/17・7/24（担当持ち回り）／文言締め 7/6(火)<br>
+          📊 7/3 算定基礎・労働保険 年度更新／7/8 納特<br>
+          📊 決算　14(火) 会計チェック／23(木) 申告チェック／28(火) 電子化・提出期限<br>
+          📝 NSS　24(金) 自振表入力期限／27(月) NSS入力（ワーカー）／28(火) 確認・追加／29(水) 締切<br>
+          😊 マスマスSmile　10月頃発行予定・年始発行に向け準備中
+          <span class="mon">【8月】</span>
+          12〜14　お盆休み
+        </div>
+      </div>
+      <!-- お知らせ（クイックリンク）＝現行ホーム踏襲。実URLはモック化 -->
+      <div class="widget span-4">
+        <div class="w-title">🔗 お知らせ（クイックリンク）</div>
+        <div style="margin-top:4px">
+          <div class="ol-row"><b>週MTG</b><a onclick="toast('2026年_アジェンダ（モック）')">アジェンダ</a><a onclick="toast('決算月早見表（モック）')">決算月早見表</a><a onclick="toast('マスゼミ2026（モック）')">マスゼミ2026</a></div>
+          <div class="ol-row"><b>決算業務 提出</b><a data-go="kessan-list">今月</a><a data-go="kessan-list">来月</a><a onclick="toast('有利判定（モック）')">有利判定</a></div>
+          <div class="ol-row"><b>予定納税 提出</b><a data-go="kessan-list">今月</a><a data-go="kessan-list">来月</a></div>
+          <div class="ol-row"><b>納品確認</b><a data-go="kessan-list">届出書_未納品</a><a data-go="kessan-list">予定納税_未納品</a></div>
+          <div class="ol-row"><b>営業活動</b><a data-go="account-list">ダッシュボード</a><a data-go="account-list">アタックリスト</a></div>
+          <div class="ol-row"><b>CS向上ノート</b><a data-go="csnote-detail">未共有</a></div>
+        </div>
+      </div>
+
+      <!-- KPI（業務進捗の見える化） -->
       <div class="widget span-3"><div class="w-title">今月 納品待ち</div><div class="w-big">18</div><div class="w-sub">件 / 月次会計</div></div>
       <div class="widget span-3"><div class="w-title">期限超過</div><div class="w-big" style="color:var(--error)">4</div><div class="w-sub down">要即対応</div></div>
       <div class="widget span-3"><div class="w-title">今月 請求予定</div><div class="w-big">¥2.86M</div><div class="w-sub up">前月比 +6%</div></div>
       <div class="widget span-3"><div class="w-title">案内前（未着手）</div><div class="w-big">7</div><div class="w-sub">件</div></div>
+
       <div class="widget span-8">
         <div class="w-title">🔥 滞留している会計業務（進捗が3日以上動いていない）</div>
         <table class="tbl" style="margin-top:6px">
           <thead><tr><th>関与先</th><th>業務種別</th><th>進捗</th><th>担当</th><th class="num">期限</th></tr></thead>
           <tbody>
-            <tr><td><a class="name-link" data-go="kaikei-detail">さくら製作所</a></td><td>月次会計</td><td><span class="badge warn">提出</span></td><td>田中</td><td class="num" style="color:var(--error)">7/15 超過</td></tr>
-            <tr><td><a class="name-link" data-go="kessan-detail">みどり建設</a></td><td>決算業務</td><td><span class="badge info">電子化</span></td><td>佐藤</td><td class="num" style="color:var(--error)">7/16 超過</td></tr>
-            <tr><td><a class="name-link" data-go="kaikei-detail">あおぞら食品</a></td><td>月次会計</td><td><span class="badge gray">案内</span></td><td>鈴木</td><td class="num">7/20</td></tr>
-            <tr><td><a class="name-link" data-go="kaikei-detail">ひまわり物流</a></td><td>年末調整</td><td><span class="badge info">PDF化</span></td><td>田中</td><td class="num">7/22</td></tr>
+            <tr><td><a class="name-link" data-go="kaikei-detail">さくら製作所</a></td><td>月次会計</td><td><span class="badge warn">提出</span></td><td>担当A</td><td class="num" style="color:var(--error)">7/15 超過</td></tr>
+            <tr><td><a class="name-link" data-go="kessan-detail">みどり建設</a></td><td>決算業務</td><td><span class="badge info">電子化</span></td><td>担当B</td><td class="num" style="color:var(--error)">7/16 超過</td></tr>
+            <tr><td><a class="name-link" data-go="kaikei-detail">あおぞら食品</a></td><td>月次会計</td><td><span class="badge gray">案内</span></td><td>担当C</td><td class="num">7/20</td></tr>
+            <tr><td><a class="name-link" data-go="kaikei-detail">ひまわり物流</a></td><td>年末調整</td><td><span class="badge info">PDF化</span></td><td>担当A</td><td class="num">7/22</td></tr>
           </tbody>
         </table>
       </div>
