@@ -555,35 +555,6 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
     </div></div>
 
     <div class="dash-grid">
-      <!-- お知らせ（月次スケジュール）＝現行ホーム踏襲 -->
-      <div class="widget span-8">
-        <div class="w-title">📢 お知らせ</div>
-        <div class="oshirase-sched">
-          <span class="rule">決算・予定納税・届出書 PDF納品　┗ 翌月3営業日以内に納品</span>
-          <span class="mon">【7月】</span>
-          4(土)　中間大会<br>
-          📢 マスゼミ　開催日：7/10・7/17・7/24（担当持ち回り）／文言締め 7/6(火)<br>
-          📊 7/3 算定基礎・労働保険 年度更新／7/8 納特<br>
-          📊 決算　14(火) 会計チェック／23(木) 申告チェック／28(火) 電子化・提出期限<br>
-          📝 NSS　24(金) 自振表入力期限／27(月) NSS入力（ワーカー）／28(火) 確認・追加／29(水) 締切<br>
-          😊 マスマスSmile　10月頃発行予定・年始発行に向け準備中
-          <span class="mon">【8月】</span>
-          12〜14　お盆休み
-        </div>
-      </div>
-      <!-- お知らせ（クイックリンク）＝現行ホーム踏襲。実URLはモック化 -->
-      <div class="widget span-4">
-        <div class="w-title">🔗 お知らせ（クイックリンク）</div>
-        <div style="margin-top:4px">
-          <div class="ol-row"><b>週MTG</b><a onclick="toast('2026年_アジェンダ（モック）')">アジェンダ</a><a onclick="toast('決算月早見表（モック）')">決算月早見表</a><a onclick="toast('マスゼミ2026（モック）')">マスゼミ2026</a></div>
-          <div class="ol-row"><b>決算業務 提出</b><a data-go="kessan-list">今月</a><a data-go="kessan-list">来月</a><a onclick="toast('有利判定（モック）')">有利判定</a></div>
-          <div class="ol-row"><b>予定納税 提出</b><a data-go="kessan-list">今月</a><a data-go="kessan-list">来月</a></div>
-          <div class="ol-row"><b>納品確認</b><a data-go="kessan-list">届出書_未納品</a><a data-go="kessan-list">予定納税_未納品</a></div>
-          <div class="ol-row"><b>営業活動</b><a data-go="account-list">ダッシュボード</a><a data-go="account-list">アタックリスト</a></div>
-          <div class="ol-row"><b>CS向上ノート</b><a data-go="csnote-detail">未共有</a></div>
-        </div>
-      </div>
-
       <!-- KPI（業務進捗の見える化） -->
       <div class="widget span-3"><div class="w-title">今月 納品待ち</div><div class="w-big">18</div><div class="w-sub">件 / 月次会計</div></div>
       <div class="widget span-3"><div class="w-title">期限超過</div><div class="w-big" style="color:var(--error)">4</div><div class="w-sub down">要即対応</div></div>
@@ -612,6 +583,35 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
           <tr><td>⑤ 納品</td><td class="num">14</td></tr>
         </tbody></table>
         <div class="w-sub" style="margin-top:6px">案内→電子化→提出→PDF化→納品</div>
+      </div>
+
+      <!-- お知らせ（月次スケジュール）＝現行ホーム踏襲。下部に配置 -->
+      <div class="widget span-8">
+        <div class="w-title">📢 お知らせ</div>
+        <div class="oshirase-sched">
+          <span class="rule">決算・予定納税・届出書 PDF納品　┗ 翌月3営業日以内に納品</span>
+          <span class="mon">【7月】</span>
+          4(土)　中間大会<br>
+          📢 マスゼミ　開催日：7/10・7/17・7/24（担当持ち回り）／文言締め 7/6(火)<br>
+          📊 7/3 算定基礎・労働保険 年度更新／7/8 納特<br>
+          📊 決算　14(火) 会計チェック／23(木) 申告チェック／28(火) 電子化・提出期限<br>
+          📝 NSS　24(金) 自振表入力期限／27(月) NSS入力（ワーカー）／28(火) 確認・追加／29(水) 締切<br>
+          😊 マスマスSmile　10月頃発行予定・年始発行に向け準備中
+          <span class="mon">【8月】</span>
+          12〜14　お盆休み
+        </div>
+      </div>
+      <!-- お知らせ（クイックリンク）＝現行ホーム踏襲。実URLはモック化。下部に配置 -->
+      <div class="widget span-4">
+        <div class="w-title">🔗 お知らせ（クイックリンク）</div>
+        <div style="margin-top:4px">
+          <div class="ol-row"><b>週MTG</b><a onclick="toast('2026年_アジェンダ（モック）')">アジェンダ</a><a onclick="toast('決算月早見表（モック）')">決算月早見表</a><a onclick="toast('マスゼミ2026（モック）')">マスゼミ2026</a></div>
+          <div class="ol-row"><b>決算業務 提出</b><a data-go="kessan-list">今月</a><a data-go="kessan-list">来月</a><a onclick="toast('有利判定（モック）')">有利判定</a></div>
+          <div class="ol-row"><b>予定納税 提出</b><a data-go="kessan-list">今月</a><a data-go="kessan-list">来月</a></div>
+          <div class="ol-row"><b>納品確認</b><a data-go="kessan-list">届出書_未納品</a><a data-go="kessan-list">予定納税_未納品</a></div>
+          <div class="ol-row"><b>営業活動</b><a data-go="account-list">ダッシュボード</a><a data-go="account-list">アタックリスト</a></div>
+          <div class="ol-row"><b>CS向上ノート</b><a data-go="csnote-detail">未共有</a></div>
+        </div>
       </div>
     </div>
   </div>
