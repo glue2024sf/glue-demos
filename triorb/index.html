@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TriOrb 営業（Salesforce標準UI デモ）</title>
+<style>
+  :root{
+    --brand:#0176d3; --brand-dark:#032d60; --brand-light:#eef4ff;
+    --ink:#181818; --sub:#5c5c5c; --line:#dddbda; --bg:#f3f2f2; --card:#fff;
+    --green:#2e844a; --green-bg:#ebf7ee; --amber:#a86403; --amber-bg:#fef5e7;
+    --red:#c23934; --red-bg:#fdeceb; --gray:#706e6b; --gray-bg:#ecebea;
+    --purple:#7526e3; --purple-bg:#f2eafc;
+    --ico-opp:#fcb95b; --ico-lead:#f88962; --ico-acct:#f2cf5b; --ico-task:#4bca81; --ico-order:#f9a825;
+    --shadow:0 2px 3px rgba(0,0,0,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;color:var(--ink);background:var(--bg);font-size:13px;line-height:1.45}
+  /* ===== Global header (Salesforce) ===== */
+  .ghead{background:#fff;height:50px;display:flex;align-items:center;padding:0 14px;gap:14px;border-bottom:1px solid var(--line)}
+  .ghead .waffle{color:var(--sub);font-size:18px;cursor:pointer}
+  .ghead .gsearch{flex:1;max-width:640px;margin:0 auto}
+  .ghead .gsearch input{width:100%;background:#f3f3f3;border:1px solid #e0e0e0;border-radius:20px;padding:8px 16px;font-size:13px}
+  .ghead .gicons{display:flex;align-items:center;gap:16px;color:var(--sub);font-size:16px}
+  .ghead .avatar{width:30px;height:30px;border-radius:50%;background:#7fb3e8;color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+  /* ===== App nav bar ===== */
+  .appnav{background:#fff;height:48px;display:flex;align-items:stretch;padding:0 14px;gap:2px;box-shadow:var(--shadow);position:relative;z-index:10}
+  .appnav .appname{display:flex;align-items:center;font-weight:700;font-size:16px;padding-right:20px;margin-right:6px}
+  .appnav .tab{display:flex;align-items:center;padding:0 15px;color:#080707;text-decoration:none;font-size:13px;font-weight:400;border-bottom:3px solid transparent;cursor:pointer;position:relative}
+  .appnav .tab:hover{background:#f3f3f3;text-decoration:underline}
+  .appnav .tab.active{font-weight:700;border-bottom-color:var(--brand)}
+  .appnav .tab .car{font-size:9px;margin-left:5px;color:var(--sub)}
+  /* ===== Layout ===== */
+  .wrap{padding:14px;max-width:1500px;margin:0 auto}
+  .view{display:none} .view.active{display:block}
+  /* ===== List view header ===== */
+  .lvhead{background:#fff;border-radius:6px 6px 0 0;padding:10px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+  .objico{width:34px;height:34px;border-radius:6px;display:grid;place-items:center;font-size:18px;flex-shrink:0;color:#fff}
+  .lvhead .lvtitle{font-size:11px;color:var(--sub);line-height:1.2}
+  .lvhead .lvtitle b{display:flex;align-items:center;gap:6px;font-size:18px;color:var(--ink);font-weight:700;cursor:pointer}
+  .lvhead .lvtitle b .car{font-size:11px;color:var(--sub)}
+  .lvhead .lvspacer{flex:1}
+  .lvhead .lvbtns{display:flex;gap:6px;align-items:center}
+  .icobtn{width:32px;height:32px;border:1px solid var(--line);background:#fff;border-radius:4px;color:var(--sub);cursor:pointer;font-size:14px}
+  .icobtn:hover{background:#f3f3f3}
+  .btn{border:1px solid #dddbda;background:#fff;color:var(--brand);padding:6px 14px;border-radius:4px;font-weight:600;cursor:pointer;font-size:13px}
+  .btn:hover{background:#f3f3f3}
+  .btn.brand{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .btn.brand:hover{background:#014486}
+  .btn.sm{padding:4px 10px;font-size:12px}
+  .lvsub{background:#fff;padding:6px 16px;font-size:11px;color:var(--sub);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+  .lvsub .filt{margin-left:auto;display:flex;gap:6px}
+  /* ===== Table ===== */
+  .lvtable{background:#fff;border-radius:0 0 6px 6px;overflow-x:auto;box-shadow:var(--shadow)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:#514f4d;font-weight:700;padding:8px 12px;border-bottom:1px solid var(--line);background:#fafaf9;white-space:nowrap;font-size:12px;cursor:pointer;user-select:none}
+  th .sc{color:#b0adab;font-size:9px;margin-left:3px}
+  th.chk,td.chk{width:34px;text-align:center;cursor:default}
+  td{padding:9px 12px;border-bottom:1px solid #f3f2f2;white-space:nowrap;vertical-align:middle}
+  tr.rowlink{cursor:pointer}
+  tr.rowlink:hover{background:#f3f8ff}
+  .link{color:var(--brand);text-decoration:none;cursor:pointer;font-weight:400}
+  .link:hover{text-decoration:underline}
+  .muted{color:var(--sub)}
+  .rowcar{color:var(--sub);text-align:center;width:30px}
+  input[type=checkbox]{width:15px;height:15px;accent-color:var(--brand)}
+  /* ===== Badges ===== */
+  .badge{display:inline-block;padding:2px 9px;border-radius:11px;font-size:11px;font-weight:600;white-space:nowrap}
+  .b-green{background:var(--green-bg);color:var(--green)} .b-amber{background:var(--amber-bg);color:var(--amber)}
+  .b-red{background:var(--red-bg);color:var(--red)} .b-gray{background:var(--gray-bg);color:var(--gray)}
+  .b-blue{background:var(--brand-light);color:var(--brand)} .b-purple{background:var(--purple-bg);color:var(--purple)}
+  /* ===== Record detail ===== */
+  .rdhead{background:#fff;border-radius:6px 6px 0 0;box-shadow:var(--shadow);border-bottom:2px solid #f3f2f2}
+  .rdtop{padding:10px 18px;display:flex;align-items:center;gap:13px}
+  .rdtop .rt-label{font-size:11px;color:var(--sub)}
+  .rdtop .rt-name{font-size:19px;font-weight:700}
+  .rdtop .rdactions{margin-left:auto;display:flex;gap:6px}
+  .rdfields{display:flex;gap:0;padding:2px 18px 12px;flex-wrap:wrap}
+  .rdfields .kf{padding:0 20px 0 0;margin-right:20px;border-right:1px solid var(--line);min-width:120px}
+  .rdfields .kf:last-child{border-right:none}
+  .rdfields .kf .l{font-size:11px;color:var(--sub)}
+  .rdfields .kf .v{font-size:14px;font-weight:600;margin-top:1px}
+  /* Sales path */
+  .path{display:flex;background:#fff;padding:12px 18px;gap:0;overflow-x:auto;align-items:center;box-shadow:var(--shadow);margin-bottom:0}
+  .pathwrap{display:flex;flex:1;overflow-x:auto}
+  .pstep{position:relative;flex:1;min-width:88px;height:34px;background:#ecebea;color:#514f4d;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;margin-right:4px;clip-path:polygon(0 0, calc(100% - 13px) 0, 100% 50%, calc(100% - 13px) 100%, 0 100%, 13px 50%);padding-left:8px}
+  .pstep:first-child{clip-path:polygon(0 0, calc(100% - 13px) 0, 100% 50%, calc(100% - 13px) 100%, 0 100%);padding-left:4px}
+  .pstep.done{background:#c9e7cf;color:#0a5326}
+  .pstep.current{background:var(--brand);color:#fff}
+  .pathbtn{margin-left:14px;flex-shrink:0}
+  /* body split */
+  .rdbody{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;margin-top:14px}
+  @media(max-width:1050px){.rdbody{grid-template-columns:1fr}}
+  .panel{background:#fff;border-radius:6px;box-shadow:var(--shadow);margin-bottom:14px}
+  .ptabs{display:flex;border-bottom:1px solid var(--line);padding:0 6px}
+  .ptabs button{border:none;background:none;padding:11px 15px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;font-size:13px}
+  .ptabs button.active{color:var(--brand);border-bottom-color:var(--brand)}
+  .psec{padding:16px 20px;border-bottom:1px solid #f3f2f2}
+  .psec h4{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 34px}
+  @media(max-width:640px){.fgrid{grid-template-columns:1fr}}
+  .fitem{border-bottom:1px solid #f3f2f2;padding-bottom:7px}
+  .fitem .fl{font-size:11px;color:var(--sub);display:flex;align-items:center;gap:5px}
+  .fitem .fv{font-size:13px;margin-top:2px;font-weight:400;min-height:17px}
+  .fitem .pencil{color:#b0adab;font-size:11px;margin-left:auto}
+  /* related list */
+  .rl .rlhd{padding:11px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
+  .rl .rlhd .rico{width:24px;height:24px;border-radius:4px;display:grid;place-items:center;color:#fff;font-size:12px}
+  .rl .rlhd b{font-size:13px}
+  .rl .rlhd .rc{color:var(--sub);font-weight:400}
+  .rl .rlhd .rlnew{margin-left:auto}
+  /* activity panel */
+  .actcomposer{padding:10px 14px}
+  .actcomposer .actbtns{display:flex;gap:0;border:1px solid var(--line);border-radius:5px;overflow:hidden;margin-bottom:8px}
+  .actcomposer .actbtns button{flex:1;border:none;background:#fff;padding:8px 4px;font-size:12px;font-weight:600;color:var(--brand);cursor:pointer;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:3px}
+  .actcomposer .actbtns button:last-child{border-right:none}
+  .actcomposer .actbtns button:hover{background:#f3f8ff}
+  .actcomposer .actbtns button .ai{font-size:15px}
+  .tl{list-style:none;padding:4px 0}
+  .tl li{display:flex;gap:11px;padding:11px 16px;border-bottom:1px solid #f3f2f2}
+  .tl li:last-child{border-bottom:none}
+  .tl .ti{width:30px;height:30px;border-radius:5px;display:grid;place-items:center;flex-shrink:0;font-size:14px;color:#fff}
+  .tl .tt{font-weight:600;font-size:12px}
+  .tl .ts{font-size:11px;color:var(--sub);margin-top:2px}
+  .tl .td{margin-left:auto;font-size:11px;color:var(--sub);white-space:nowrap}
+  .subtabbar{font-size:11px;color:var(--sub);padding:8px 16px;border-bottom:1px solid var(--line);display:flex;gap:14px}
+  .subtabbar span{cursor:pointer} .subtabbar span.on{color:var(--ink);font-weight:700;border-bottom:2px solid var(--brand);padding-bottom:6px}
+  /* home */
+  .homegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+  .homecard{background:#fff;border-radius:6px;box-shadow:var(--shadow);padding:16px}
+  .homecard .hc-l{font-size:12px;color:var(--sub);font-weight:600}
+  .homecard .hc-v{font-size:28px;font-weight:800;margin-top:6px}
+  /* modal/toast */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-start;justify-content:center;z-index:100;padding:56px 16px;overflow:auto}
+  .overlay.open{display:flex}
+  .modal{background:#fff;border-radius:8px;width:560px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal .mhd{background:var(--brand-dark);color:#fff;padding:13px 20px;border-radius:8px 8px 0 0;font-weight:700;font-size:15px;display:flex;align-items:center;gap:9px}
+  .modal .mbody{padding:18px 22px}
+  .modal .mftr{padding:12px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;background:#fafaf9;border-radius:0 0 8px 8px}
+  .field{margin-bottom:13px} .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field label{display:block;font-size:11px;font-weight:600;color:var(--sub);margin-bottom:4px}
+  .field label .req{color:var(--red)}
+  .field input,.field select,.field textarea{width:100%;border:1px solid #cfcfcf;border-radius:4px;padding:8px 10px;font-size:13px;font-family:inherit}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 3px var(--brand)}
+  .autohint{background:var(--green-bg);color:var(--green);border-radius:5px;padding:7px 11px;font-size:11px;font-weight:600;margin-bottom:13px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(90px);background:#031a3d;color:#fff;padding:12px 22px;border-radius:6px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.3);transition:transform .3s;z-index:200}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .crumb{font-size:12px;color:var(--brand);margin-bottom:8px;cursor:pointer}
+  .crumb:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<!-- global header -->
+<div class="ghead">
+  <span class="waffle">▦</span>
+  <div class="gsearch"><input placeholder="検索..."></div>
+  <div class="gicons"><span>✚</span><span>❓</span><span>⚙️</span><span>🔔</span><div class="avatar">山</div></div>
+</div>
+<!-- app nav -->
+<div class="appnav">
+  <div class="appname">営業</div>
+  <a class="tab" data-tab="home">ホーム</a>
+  <a class="tab" data-tab="lead">リード<span class="car">▾</span></a>
+  <a class="tab" data-tab="account">取引先<span class="car">▾</span></a>
+  <a class="tab active" data-tab="opp">商談<span class="car">▾</span></a>
+  <a class="tab" data-tab="task">活動<span class="car">▾</span></a>
+  <a class="tab" data-tab="order">受注<span class="car">▾</span></a>
+  <a class="tab" data-tab="report">レポート<span class="car">▾</span></a>
+</div>
+
+<div class="wrap">
+
+  <!-- ================= HOME ================= -->
+  <section class="view" id="v-home">
+    <div class="homegrid">
+      <div class="homecard"><div class="hc-l">今日のToDo（活動）</div><div class="hc-v">5<span style="font-size:14px;color:var(--sub)"> 件</span></div><div class="muted" style="margin-top:6px">うち期限超過 <b style="color:var(--red)">2</b> 件</div></div>
+      <div class="homecard"><div class="hc-l">今週の打ち合わせ（行動）</div><div class="hc-v">7<span style="font-size:14px;color:var(--sub)"> 件</span></div><div class="muted" style="margin-top:6px">初回 3 / 継続 4</div></div>
+      <div class="homecard"><div class="hc-l">オープン商談</div><div class="hc-v">21<span style="font-size:14px;color:var(--sub)"> 件</span></div><div class="muted" style="margin-top:6px">¥186M パイプライン</div></div>
+      <div class="homecard"><div class="hc-l">未対応リード</div><div class="hc-v">4<span style="font-size:14px;color:var(--sub)"> 件</span></div><div class="muted" style="margin-top:6px">HP問合せ・資料DL</div></div>
+    </div>
+    <div class="panel" style="margin-top:14px">
+      <div class="rlhd rl" style="padding:11px 16px;border-bottom:1px solid var(--line);font-weight:700">📌 最近の項目</div>
+      <table>
+        <tbody>
+          <tr class="rowlink" onclick="showOpp()"><td style="width:34px">💼</td><td class="link">サンプル製造 定置ライン</td><td class="muted">商談 ・ 09_本格導入受注</td><td class="muted">今日</td></tr>
+          <tr class="rowlink" onclick="showLead()"><td>🎯</td><td class="link">サンプル化学 製造部 佐藤様</td><td class="muted">リード ・ MTG済み</td><td class="muted">今日</td></tr>
+          <tr class="rowlink" onclick="go('task')"><td>✅</td><td class="link">テスト精機 追加提案TEL</td><td class="muted">ToDo ・ 期限超過</td><td class="muted">昨日</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= OPPORTUNITY LIST ================= -->
+  <section class="view active" id="v-opp">
+    <div class="lvhead">
+      <div class="objico" style="background:var(--ico-opp)">💼</div>
+      <div class="lvtitle">商談<br><b>すべての商談 <span class="car">▾</span></b></div>
+      <div class="lvspacer"></div>
+      <div class="lvbtns">
+        <button class="btn sm">インポート</button>
+        <button class="btn brand sm">新規</button>
+        <span class="icobtn">⚙️</span><span class="icobtn">▤</span><span class="icobtn">↻</span>
+      </div>
+    </div>
+    <div class="lvsub">21 件 • 並び替え基準: フェーズ • 数秒前に更新
+      <div class="filt"><span class="icobtn">🔍</span><span class="icobtn">⚙️</span><span class="icobtn">▽</span></div>
+    </div>
+    <div class="lvtable">
+      <table>
+        <thead><tr>
+          <th class="chk"><input type="checkbox"></th>
+          <th>商談名 <span class="sc">▼</span></th><th>取引先名</th><th>フェーズ</th>
+          <th>商談区分</th><th>商談熱</th><th>金額</th><th>完了予定日</th><th>所有者</th><th class="chk"></th>
+        </tr></thead>
+        <tbody id="opptbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= OPPORTUNITY DETAIL ================= -->
+  <section class="view" id="v-oppdetail">
+    <div class="crumb" onclick="go('opp')">‹ 商談 に戻る</div>
+    <div class="rdhead">
+      <div class="rdtop">
+        <div class="objico" style="background:var(--ico-opp)">💼</div>
+        <div><div class="rt-label">商談</div><div class="rt-name">サンプル製造 定置ライン</div></div>
+        <div class="rdactions">
+          <button class="btn sm">＋ フォロー</button><button class="btn sm">編集</button>
+          <button class="btn sm">議事録を新規</button><button class="btn sm">▾</button>
+        </div>
+      </div>
+      <div class="rdfields">
+        <div class="kf"><div class="l">取引先名</div><div class="v link" onclick="go('account')">株式会社サンプル製造</div></div>
+        <div class="kf"><div class="l">金額</div><div class="v">¥11,000,000</div></div>
+        <div class="kf"><div class="l">完了予定日</div><div class="v">2026/09/30</div></div>
+        <div class="kf"><div class="l">商談区分 (DealCategory__c)</div><div class="v">2.ステップ：本導入</div></div>
+        <div class="kf"><div class="l">所有者</div><div class="v">山田</div></div>
+      </div>
+    </div>
+
+    <div class="path">
+      <div class="pathwrap" id="salespath"></div>
+      <button class="btn brand sm pathbtn">✓ 現在のステージとしてマーク</button>
+    </div>
+
+    <div class="rdbody">
+      <!-- left -->
+      <div>
+        <div class="panel">
+          <div class="ptabs">
+            <button class="active">関連</button><button>詳細</button><button>ニュース</button>
+          </div>
+          <!-- 詳細 fields -->
+          <div class="psec">
+            <h4>▸ この商談について</h4>
+            <div class="fgrid">
+              <div class="fitem"><div class="fl">商談名</div><div class="fv">サンプル製造 定置ライン <span class="pencil">✎</span></div></div>
+              <div class="fitem"><div class="fl">取引先名</div><div class="fv link">株式会社サンプル製造</div></div>
+              <div class="fitem"><div class="fl">フェーズ (StageName)</div><div class="fv">09_本格導入受注</div></div>
+              <div class="fitem"><div class="fl">金額 (Amount)</div><div class="fv">¥11,000,000 <span class="pencil">✎</span></div></div>
+              <div class="fitem"><div class="fl">商談区分 (DealCategory__c)</div><div class="fv">2.ステップ：本導入</div></div>
+              <div class="fitem"><div class="fl">商談熱 (DealHeat__c)</div><div class="fv"><span class="badge b-red">A.Hot</span></div></div>
+              <div class="fitem"><div class="fl">商流タイプ (ChannelType__c)</div><div class="fv">直販</div></div>
+              <div class="fitem"><div class="fl">売上種別 (RevenueType__c)</div><div class="fv">ハード</div></div>
+            </div>
+          </div>
+          <div class="psec" style="border-bottom:none">
+            <h4>▸ ファネル連結・PoC</h4>
+            <div class="fgrid">
+              <div class="fitem"><div class="fl">元リード <span class="badge b-purple" style="font-size:9px">追加提案</span></div><div class="fv link" onclick="showLead()">サンプル化学 製造部 佐藤様</div></div>
+              <div class="fitem"><div class="fl">初回接触日 (FirstContactDate__c)</div><div class="fv">2026/05/12</div></div>
+              <div class="fitem"><div class="fl">PoCステータス (PoCStatus__c)</div><div class="fv">完了</div></div>
+              <div class="fitem"><div class="fl">滞留日数 (DaysInStage__c)</div><div class="fv">4 日</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- related lists -->
+        <div class="panel rl">
+          <div class="rlhd"><span class="rico" style="background:var(--ico-opp)">🧩</span><b>商談商品 (OpportunityLineItem)</b><span class="rc">(3)</span><button class="btn sm rlnew">商品を追加</button></div>
+          <div class="subtabbar" style="border-bottom:1px solid var(--line)"><span class="on" style="cursor:default">1顧客＝1商談。フェーズ・売上見込みは<b>商品単位</b>で管理（商品ごとに進捗が異なる）</span></div>
+          <table>
+            <thead><tr><th>商品</th><th>商品種別</th><th>商品フェーズ (Phase__c)</th><th>数量</th><th>見込み金額</th><th>受注済み金額</th></tr></thead>
+            <tbody>
+              <tr class="rowlink"><td class="link">定置搬送ロボット 本体</td><td>本格導入</td><td><span class="badge b-green">09_本格導入受注</span></td><td>1</td><td class="muted">—</td><td>¥8,000,000</td></tr>
+              <tr class="rowlink"><td class="link">制御ソフトウェア一式</td><td>本格導入</td><td><span class="badge b-blue">08_本格導入内定</span></td><td>1</td><td>¥2,000,000</td><td class="muted">—</td></tr>
+              <tr class="rowlink"><td class="link">年間保守パック</td><td>保守</td><td><span class="badge b-amber">06_要求仕様決定</span></td><td>1</td><td>¥1,000,000</td><td class="muted">—</td></tr>
+            </tbody>
+            <tfoot><tr>
+              <td colspan="4" style="text-align:right;font-weight:700;border-top:2px solid var(--line);background:#fafaf9">合計（受注 ¥8.0M ＋ 見込み ¥3.0M）</td>
+              <td style="font-weight:700;border-top:2px solid var(--line);background:#fafaf9">¥3,000,000</td>
+              <td style="font-weight:700;border-top:2px solid var(--line);background:#fafaf9">¥8,000,000</td>
+            </tr></tfoot>
+          </table>
+        </div>
+        <div class="panel rl">
+          <div class="rlhd"><span class="rico" style="background:var(--ico-task)">🗓️</span><b>活動（打ち合わせ・ToDo）</b><span class="rc">(4)</span><button class="btn sm rlnew" onclick="openModal('meeting')">新規</button></div>
+          <div class="subtabbar"><span class="on">すべて</span><span onclick="alert('デモ：初回のみで絞り込み')">初回のみ</span><span onclick="alert('デモ：2回目以降で絞り込み')">2回目以降</span></div>
+          <table>
+            <thead><tr><th>実施日</th><th>件名</th><th>種別</th><th>区分</th><th>結果</th></tr></thead>
+            <tbody>
+              <tr class="rowlink"><td>2026/07/12</td><td class="link">初回提案（来社）</td><td>行動</td><td><span class="badge b-purple">初回</span></td><td><span class="badge b-green">案件化</span></td></tr>
+              <tr class="rowlink"><td>2026/07/16</td><td class="link">見積確認メール</td><td>ToDo</td><td class="muted">—</td><td class="muted">—</td></tr>
+              <tr class="rowlink"><td>2026/07/24</td><td class="link">条件すり合わせ（訪問）</td><td>行動</td><td><span class="badge b-gray">2回目以降</span></td><td><span class="badge b-amber">継続検討</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel rl">
+          <div class="rlhd"><span class="rico" style="background:var(--ico-order)">📦</span><b>受注 (Order)</b><span class="rc">(1)</span><button class="btn sm rlnew">新規</button></div>
+          <table><tbody>
+            <tr class="rowlink" onclick="go('order')"><td style="width:34px">📦</td><td class="link">S-2026-0010</td><td class="muted">出荷済</td><td>¥11,000,000</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <!-- right : activity -->
+      <div>
+        <div class="panel">
+          <div class="ptabs"><button class="active">活動</button><button>Chatter</button></div>
+          <div class="actcomposer">
+            <div class="actbtns">
+              <button onclick="openModal('task')"><span class="ai">✅</span>新規ToDo</button>
+              <button onclick="openModal('call')"><span class="ai">📞</span>ログに記録</button>
+              <button onclick="openModal('meeting')"><span class="ai">🗓️</span>行動</button>
+              <button onclick="openModal('mail')"><span class="ai">✉️</span>メール</button>
+            </div>
+          </div>
+          <div class="subtabbar" style="border-top:1px solid var(--line)"><span class="on">すべての活動</span><span>今後</span><span>過去</span></div>
+          <ul class="tl">
+            <li><span class="ti" style="background:var(--ico-task)">🗓️</span><div><div class="tt">条件すり合わせ（訪問）— 継続検討</div><div class="ts">2回目以降 ・ 次回予定 08/01 ・ 山田</div></div><span class="td">7/24</span></li>
+            <li><span class="ti" style="background:var(--amber)">✉️</span><div><div class="tt">メール：見積確認</div><div class="ts">結論：条件は概ねOK・稟議中 ／ 次回フォロー 07/16</div></div><span class="td">7/16</span></li>
+            <li><span class="ti" style="background:var(--purple)">🗓️</span><div><div class="tt">初回提案（来社）— 案件化</div><div class="ts">初回商談 ・ WEB/来社 ・ 山田</div></div><span class="td">7/12</span></li>
+            <li><span class="ti" style="background:var(--green)">📞</span><div><div class="tt">電話：日程調整</div><div class="ts">結論：来社日程を確定</div></div><span class="td">7/08</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LEAD LIST ================= -->
+  <section class="view" id="v-lead">
+    <div class="lvhead">
+      <div class="objico" style="background:var(--ico-lead)">🎯</div>
+      <div class="lvtitle">リード<br><b>未対応の新規リード <span class="car">▾</span></b></div>
+      <div class="lvspacer"></div>
+      <div class="lvbtns"><button class="btn sm">インポート</button><button class="btn brand sm">新規</button>
+        <span class="icobtn">⚙️</span><span class="icobtn">↻</span></div>
+    </div>
+    <div class="lvsub">4 件 • 並び替え基準: 作成日 • 数秒前に更新</div>
+    <div class="lvtable">
+      <table>
+        <thead><tr><th class="chk"><input type="checkbox"></th>
+          <th>名前 <span class="sc">▼</span></th><th>会社</th><th>リードソース</th><th>状況</th><th>次回フォロー日</th><th>所有者</th><th class="chk"></th></tr></thead>
+        <tbody id="leadtbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= LEAD DETAIL ================= -->
+  <section class="view" id="v-leaddetail">
+    <div class="crumb" onclick="go('lead')">‹ リード に戻る</div>
+    <div class="rdhead">
+      <div class="rdtop">
+        <div class="objico" style="background:var(--ico-lead)">🎯</div>
+        <div><div class="rt-label">リード</div><div class="rt-name">佐藤 太郎（サンプル化学 製造部）</div></div>
+        <div class="rdactions"><button class="btn sm">編集</button><button class="btn brand sm">商談に変換</button><button class="btn sm">▾</button></div>
+      </div>
+      <div class="rdfields">
+        <div class="kf"><div class="l">会社</div><div class="v">サンプル化学株式会社</div></div>
+        <div class="kf"><div class="l">リードソース</div><div class="v">HP問い合わせ</div></div>
+        <div class="kf"><div class="l">状況 (Status)</div><div class="v">MTG済み</div></div>
+        <div class="kf"><div class="l">所有者</div><div class="v">山田</div></div>
+      </div>
+    </div>
+    <!-- lead status path -->
+    <div class="path">
+      <div class="pathwrap" id="leadpath"></div>
+      <button class="btn brand sm pathbtn">✓ 状況を更新</button>
+    </div>
+    <div class="rdbody">
+      <div>
+        <div class="panel">
+          <div class="ptabs"><button class="active">詳細</button><button>関連</button></div>
+          <div class="psec">
+            <h4>▸ リード情報</h4>
+            <div class="fgrid">
+              <div class="fitem"><div class="fl">名前</div><div class="fv">佐藤 太郎</div></div>
+              <div class="fitem"><div class="fl">会社</div><div class="fv">サンプル化学株式会社</div></div>
+              <div class="fitem"><div class="fl">リードソース (LeadSource)</div><div class="fv">HP問い合わせ</div></div>
+              <div class="fitem"><div class="fl">状況 (Status)</div><div class="fv">MTG済み</div></div>
+              <div class="fitem"><div class="fl">初回対応日</div><div class="fv">2026/07/19</div></div>
+              <div class="fitem"><div class="fl">次回フォロー日</div><div class="fv"><span class="badge b-amber">2026/07/21</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel rl">
+          <div class="rlhd"><span class="rico" style="background:var(--ico-task)">✅</span><b>活動（初期対応の記録）</b><span class="rc">(3)</span><button class="btn sm rlnew" onclick="openModal('campaign')">新規</button></div>
+          <table>
+            <thead><tr><th>日付</th><th>対応種別</th><th>結論</th><th>次回フォロー</th></tr></thead>
+            <tbody>
+              <tr class="rowlink"><td>2026/07/19</td><td>資料送付</td><td class="muted">カタログ送付・関心あり</td><td>07/21</td></tr>
+              <tr class="rowlink"><td>2026/07/15</td><td>メール</td><td class="muted">一次返信＋ヒアリング依頼</td><td>07/19</td></tr>
+              <tr class="rowlink"><td>2026/07/12</td><td>電話</td><td class="muted">HP問合せの初回架電</td><td>07/15</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="ptabs"><button class="active">活動</button><button>Chatter</button></div>
+          <div class="actcomposer"><div class="actbtns">
+            <button onclick="openModal('task')"><span class="ai">✅</span>新規ToDo</button>
+            <button onclick="openModal('call')"><span class="ai">📞</span>ログに記録</button>
+            <button onclick="openModal('mail')"><span class="ai">✉️</span>メール</button>
+          </div></div>
+          <ul class="tl">
+            <li><span class="ti" style="background:var(--brand)">📄</span><div><div class="tt">資料送付：製品カタログ</div><div class="ts">結論：関心あり、来週フォロー ／ 次回 07/21</div></div><span class="td">7/19</span></li>
+            <li><span class="ti" style="background:var(--amber)">✉️</span><div><div class="tt">メール：一次返信</div><div class="ts">自動返信＋ヒアリング依頼</div></div><span class="td">7/15</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TASK (活動) LIST ================= -->
+  <section class="view" id="v-task">
+    <div class="lvhead">
+      <div class="objico" style="background:var(--ico-task)">✅</div>
+      <div class="lvtitle">活動（ToDo）<br><b>自分のToDo <span class="car">▾</span></b></div>
+      <div class="lvspacer"></div>
+      <div class="lvbtns"><button class="btn brand sm">新規ToDo</button><span class="icobtn">⚙️</span><span class="icobtn">↻</span></div>
+    </div>
+    <div class="lvsub">6 件 • 並び替え基準: 次回フォロー日 • 数秒前に更新</div>
+    <div class="lvtable">
+      <table>
+        <thead><tr><th class="chk"><input type="checkbox"></th>
+          <th>完了</th><th>件名 <span class="sc">▼</span></th><th>活動種別</th><th>関連先</th><th>結論</th><th>次アクション</th><th>次回フォロー日</th><th class="chk"></th></tr></thead>
+        <tbody id="tasktbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= ORDER LIST ================= -->
+  <section class="view" id="v-order">
+    <div class="lvhead">
+      <div class="objico" style="background:var(--ico-order)">📦</div>
+      <div class="lvtitle">受注<br><b>すべての受注 <span class="car">▾</span></b></div>
+      <div class="lvspacer"></div>
+      <div class="lvbtns"><button class="btn brand sm">新規</button><span class="icobtn">⚙️</span><span class="icobtn">↻</span></div>
+    </div>
+    <div class="lvsub">3 件 • Order → 納品/請求 自動生成（Phase2 実装済み）</div>
+    <div class="lvtable">
+      <table>
+        <thead><tr><th class="chk"><input type="checkbox"></th>
+          <th>受注番号</th><th>商談</th><th>受注ステージ (OrderStage__c)</th><th>納品ステータス</th><th>請求ステータス</th><th>金額</th><th class="chk"></th></tr></thead>
+        <tbody>
+          <tr class="rowlink"><td class="chk"><input type="checkbox"></td><td class="link">S-2026-0012</td><td>サンプルソフト 搬送ロボ 3台</td><td><span class="badge b-blue">アクティブ化</span></td><td><span class="badge b-amber">出荷準備完了</span></td><td><span class="badge b-gray">発行前</span></td><td>¥16,500,000</td><td class="rowcar">▾</td></tr>
+          <tr class="rowlink"><td class="chk"><input type="checkbox"></td><td class="link">S-2026-0011</td><td>テスト精機 AGV 1台</td><td><span class="badge b-green">完了</span></td><td><span class="badge b-green">検収済</span></td><td><span class="badge b-green">入金済</span></td><td>¥8,200,000</td><td class="rowcar">▾</td></tr>
+          <tr class="rowlink"><td class="chk"><input type="checkbox"></td><td class="link">S-2026-0010</td><td>サンプル製造 定置ライン</td><td><span class="badge b-blue">出荷済</span></td><td><span class="badge b-blue">出荷済</span></td><td><span class="badge b-amber">入金待ち</span></td><td>¥11,000,000</td><td class="rowcar">▾</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= ACCOUNT (simple) / REPORT ================= -->
+  <section class="view" id="v-account">
+    <div class="lvhead"><div class="objico" style="background:var(--ico-acct)">🏢</div>
+      <div class="lvtitle">取引先<br><b>すべての取引先 <span class="car">▾</span></b></div></div>
+    <div class="lvsub">デモでは省略（標準の取引先リストビュー）。取引先 › 商談/リード/活動が関連リストで紐づきます。</div>
+  </section>
+
+  <section class="view" id="v-report">
+    <div class="lvhead"><div class="objico" style="background:var(--brand)">📊</div>
+      <div class="lvtitle">レポート<br><b>営業ファネル / CVR <span class="car">▾</span></b></div></div>
+    <div class="panel" style="border-radius:0 0 6px 6px">
+      <div class="psec" style="border-bottom:none">
+        <h4>営業ファネル（活動 → 初回商談 → 継続 → 案件化 → フェーズ進行 → 受注）</h4>
+        <div id="funnel"></div>
+        <p class="muted" style="margin-top:12px">※ これは標準レポート/ダッシュボードで実現する領域です。リスト・詳細の記録が揃うことで、この集計が自動で成立します。</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- modals -->
+<div class="overlay" id="overlay"><div class="modal" id="modalBox"></div></div>
+<div class="toast" id="toast">✔ 保存しました</div>
+
+<script>
+/* ---- data ---- */
+const opps=[
+  ['サンプル製造 定置ライン','株式会社サンプル製造','09_本格導入受注','2.ステップ：本導入','A.Hot','¥11,000,000','2026/09/30','山田','b-green'],
+  ['テスト精機 AGV増設','株式会社テスト精機','07_条件交渉完了','3.ジャンプ：他部門導入','A.Hot','¥8,200,000','2026/09/15','山田','b-blue'],
+  ['サンプルソフト 搬送ロボ 3台','サンプルソフト株式会社','08_本格導入内定','2.ステップ：本導入','B.Warm','¥16,500,000','2026/10/31','鈴木','b-blue'],
+  ['デモ電機 AGV 5台','株式会社デモ電機','05_PoC完了','1.ホップ：有償POC','B.Warm','¥18,500,000','2026/11/30','鈴木','b-amber'],
+  ['サンプル化学 搬送ライン','サンプル化学株式会社','03_PoC検討承諾','1.ホップ：有償POC','C.Cold','¥12,000,000','2026/12/20','山田','b-gray'],
+  ['デモ商事 検証案件','株式会社デモ商事','02_リード受領','1.ホップ：有償POC','C.Cold','¥3,000,000','2027/01/31','高橋','b-gray'],
+];
+const heatB={'A.Hot':'b-red','B.Warm':'b-amber','C.Cold':'b-gray','D.Done':'b-green','F.Failed':'b-gray'};
+document.getElementById('opptbody').innerHTML=opps.map(o=>`
+  <tr class="rowlink" onclick="showOpp()">
+    <td class="chk"><input type="checkbox" onclick="event.stopPropagation()"></td>
+    <td class="link">${o[0]}</td><td class="link">${o[1]}</td><td>${o[2]}</td><td>${o[3]}</td>
+    <td><span class="badge ${heatB[o[4]]}">${o[4]}</span></td><td>${o[5]}</td><td>${o[6]}</td><td>${o[7]}</td>
+    <td class="rowcar">▾</td></tr>`).join('');
+
+const leads=[
+  ['佐藤 太郎','サンプル化学株式会社','HP問い合わせ','MTG済み','2026/07/21','山田'],
+  ['伊藤 健','株式会社デモ商事','展示会','アプローチ中','2026/07/25','高橋'],
+  ['田中 誠','サンプル物流株式会社','資料DL','未着手','2026/07/20','山田'],
+  ['山本 修','株式会社テスト工業','商社紹介','育成中','2026/08/01','鈴木'],
+];
+const stB={'MTG済み':'b-blue','アプローチ中':'b-amber','未着手':'b-gray','育成中':'b-purple'};
+document.getElementById('leadtbody').innerHTML=leads.map(l=>`
+  <tr class="rowlink" onclick="showLead()">
+    <td class="chk"><input type="checkbox" onclick="event.stopPropagation()"></td>
+    <td class="link">${l[0]}</td><td>${l[1]}</td><td>${l[2]}</td>
+    <td><span class="badge ${stB[l[3]]}">${l[3]}</span></td><td>${l[4]}</td><td>${l[5]}</td>
+    <td class="rowcar">▾</td></tr>`).join('');
+
+const tasks=[
+  ['追加提案の日程調整','📞 電話','テスト精機 / AGV増設','来週WEB面談で合意','提案資料を送付','2026/07/14',true],
+  ['見積内容の確認','✉️ メール','サンプル製造 / 定置ライン','条件は概ねOK・稟議中','稟議結果を追客','2026/07/16',true],
+  ['PoC結果ヒアリング','📞 電話','デモ電機 / AGV','精度に好感触','本導入見積を作成','2026/07/22',false],
+  ['製品カタログ送付','📄 資料送付','サンプル化学（リード）','資料DL後の初期対応','反応を電話でフォロー','2026/07/21',false],
+  ['議事メモ共有（Notion）','✉️ メール','サンプルソフト / 搬送ロボ','詳細はNotion参照','発注書の受領待ち','2026/07/24',false],
+  ['展示会フォロー','📞 電話','デモ商事（リード）','再来社の意向あり','来社日程を打診','2026/07/25',false],
+];
+document.getElementById('tasktbody').innerHTML=tasks.map(t=>`
+  <tr class="rowlink">
+    <td class="chk"><input type="checkbox" onclick="event.stopPropagation()"></td>
+    <td style="text-align:center"><input type="checkbox" onclick="event.stopPropagation()"></td>
+    <td class="link">${t[0]}</td><td>${t[1]}</td><td>${t[2]}</td><td class="muted">${t[3]}</td><td>${t[4]}</td>
+    <td>${t[6]?`<span class="badge b-red">${t[5]} 超過</span>`:t[5]}</td><td class="rowcar">▾</td></tr>`).join('');
+
+/* sales path */
+const stages=['01_コンタクト済み','02_リード受領','03_PoC検討承諾','04_PoCサンプル受注','05_PoC完了','06_要求仕様決定','07_条件交渉完了','08_本格導入内定','09_本格導入受注'];
+const cur=8;
+document.getElementById('salespath').innerHTML=stages.map((s,i)=>`<div class="pstep ${i<cur?'done':i===cur?'current':''}">${s}</div>`).join('');
+const lstages=['未着手','アプローチ中','MTG済み','育成中','転換済み'];const lcur=2;
+document.getElementById('leadpath').innerHTML=lstages.map((s,i)=>`<div class="pstep ${i<lcur?'done':i===lcur?'current':''}">${s}</div>`).join('');
+
+/* funnel (report) */
+const fd=[['活動',128,null,'#b0adab'],['初回商談',48,'38%','#5a9bd8'],['継続商談',30,'63%','#0176d3'],['案件化',18,'60%','#032d60'],['フェーズ進行',9,'50%','#a86403'],['受注',5,'56%','#2e844a']];
+document.getElementById('funnel').innerHTML='<div style="display:flex;flex-direction:column;gap:8px;max-width:640px">'+fd.map(f=>`
+  <div style="display:grid;grid-template-columns:96px 1fr 120px;align-items:center;gap:12px">
+    <div style="font-weight:600;font-size:12px">${f[0]}</div>
+    <div style="background:#f3f2f2;border-radius:5px;height:30px;overflow:hidden">
+      <div style="height:100%;width:${Math.max(12,f[1]/128*100)}%;background:${f[3]};color:#fff;font-weight:700;display:flex;align-items:center;padding-left:10px;border-radius:5px">${f[1]}</div></div>
+    <div style="font-size:11px;color:#5c5c5c;text-align:right"><b style="color:#181818">${f[1]}件</b>${f[2]?` <span style="background:#fef5e7;color:#a86403;border-radius:9px;padding:1px 6px;font-weight:700">CVR ${f[2]}</span>`:' 起点'}</div>
+  </div>`).join('')+'</div>';
+
+/* nav */
+function go(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const map={home:'v-home',lead:'v-lead',account:'v-account',opp:'v-opp',task:'v-task',order:'v-order',report:'v-report'};
+  document.getElementById(map[tab]).classList.add('active');window.scrollTo(0,0);
+}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>go(t.dataset.tab));
+function showOpp(){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('v-oppdetail').classList.add('active');document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab==='opp'));window.scrollTo(0,0);}
+function showLead(){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('v-leaddetail').classList.add('active');document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab==='lead'));window.scrollTo(0,0);}
+/* detail ptabs toggle */
+document.querySelectorAll('.ptabs').forEach(pt=>pt.querySelectorAll('button').forEach(b=>b.onclick=()=>{pt.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');}));
+
+/* modals */
+const forms={
+  task:{t:'✅ 新規ToDo（活動）',auto:'',h:`
+    <div class="frow"><div class="field"><label>活動種別 <span class="req">*</span></label><select><option>電話</option><option>メール</option><option>資料送付</option><option>その他</option></select></div>
+    <div class="field"><label>関連先</label><input value="サンプル製造 / 定置ライン"></div></div>
+    <div class="field"><label>件名 <span class="req">*</span></label><input placeholder="例）追加提案の日程調整"></div>
+    <div class="field"><label>結論</label><input placeholder="活動の結果を簡潔に"></div>
+    <div class="frow"><div class="field"><label>次アクション</label><input></div>
+    <div class="field"><label>次回フォロー日 <span class="req">*</span></label><input type="date" value="2026-07-25"></div></div>`},
+  call:{t:'📞 通話をログに記録',auto:'',h:`
+    <div class="field"><label>件名</label><input value="電話：日程調整"></div>
+    <div class="field"><label>結論・メモ</label><textarea rows="3"></textarea></div>
+    <div class="field"><label>次回フォロー日</label><input type="date"></div>`},
+  mail:{t:'✉️ メール',auto:'',h:`
+    <div class="field"><label>宛先</label><input value="佐藤様 <sakito@example.com>"></div>
+    <div class="field"><label>件名</label><input></div>
+    <div class="field"><label>本文</label><textarea rows="4"></textarea></div>`},
+  meeting:{t:'🗓️ 行動（打ち合わせ）',auto:'実施日と関連先から「初回 / 2回目以降」を<b>自動判定</b>します（手入力不要）。',h:`
+    <div class="frow"><div class="field"><label>実施日 <span class="req">*</span></label><input type="date" value="2026-07-18"></div>
+    <div class="field"><label>商談形式 <span class="req">*</span></label><select><option>WEB</option><option>訪問</option><option>来社</option></select></div></div>
+    <div class="frow"><div class="field"><label>関連先</label><input value="サンプル製造 / 定置ライン"></div>
+    <div class="field"><label>商談区分（自動）</label><input value="2回目以降（自動判定）" disabled style="background:#eef8f0;color:#2e844a;font-weight:700"></div></div>
+    <div class="field"><label>商談内容</label><textarea rows="2"></textarea></div>
+    <div class="frow"><div class="field"><label>商談結果 <span class="req">*</span></label><select><option>継続検討</option><option>案件化</option><option>終了</option></select></div>
+    <div class="field"><label>次回予定日</label><input type="date"></div></div>`},
+  campaign:{t:'📣 初期対応を記録（リード）',auto:'活動と<b>同じ粒度</b>で「誰が・いつ・何を」対応したか記録します。',h:`
+    <div class="frow"><div class="field"><label>対応種別 <span class="req">*</span></label><select><option>電話</option><option>メール</option><option>資料送付</option></select></div>
+    <div class="field"><label>ステータス（現状維持）</label><select><option>未着手</option><option>アプローチ中</option><option selected>MTG済み</option><option>育成中</option><option>転換済み</option></select></div></div>
+    <div class="field"><label>対応結果（結論）<span class="req">*</span></label><input placeholder="例）関心あり、来週フォロー"></div>
+    <div class="field"><label>対応内容</label><textarea rows="2"></textarea></div>
+    <div class="frow"><div class="field"><label>次アクション</label><input></div>
+    <div class="field"><label>次回フォロー日</label><input type="date" value="2026-07-21"></div></div>`},
+};
+function openModal(k){const f=forms[k];document.getElementById('modalBox').innerHTML=`
+  <div class="mhd">${f.t}</div>
+  <div class="mbody">${f.auto?`<div class="autohint">⚙️ ${f.auto}</div>`:''}${f.h}</div>
+  <div class="mftr"><button class="btn" onclick="closeModal()">キャンセル</button><button class="btn brand" onclick="saveModal()">保存</button></div>`;
+  document.getElementById('overlay').classList.add('open');}
+function closeModal(){document.getElementById('overlay').classList.remove('open');}
+function saveModal(){closeModal();const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1700);}
+document.getElementById('overlay').onclick=e=>{if(e.target.id==='overlay')closeModal();};
+</script>
+</body>
+</html>
