@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.2)</title>
+<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.3)</title>
 <style>
 /* SHT 活動記録CRM デモ — Salesforce Lightning 風 / 外部依存なし
    （glue hig-japan-sf デモの app.css に準拠）— 2026-07-07 定例FB反映版 */
@@ -237,6 +237,8 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
 
 .section-title{font-weight:700;font-size:12px;color:var(--sub);letter-spacing:.4px;margin:18px 0 10px}
 .callout{display:flex;gap:10px;padding:11px 13px;border-radius:6px;background:var(--blue-l);border:1px solid #cfe0f7;font-size:12px;color:var(--blue-d)}
+.mini-legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.ui3p{animation:fade .2s ease}
 
 /* record page */
 .rec-head{background:#fff;border:1px solid var(--line-d);border-radius:8px;padding:12px 16px;margin-bottom:14px;box-shadow:var(--shadow)}
@@ -323,6 +325,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
 <nav class="tabs" id="tabs">
   <button data-view="home" class="active">ホーム</button>
   <button data-view="activity">活動記録</button>
+  <button data-view="ui3">入力UI 3案 <span class="new">NEW</span></button>
   <button data-view="inbox">回覧トレイ <span class="tb" id="tab-unread">4</span></button>
   <button data-view="calendar">カレンダー</button>
   <button data-view="deals">引合（商談）</button>
@@ -341,12 +344,12 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       <div>
         <div class="eyebrow">ホーム</div>
         <h1>活動記録 — 入力から上長回覧・可視化まで</h1>
-        <div class="sub2">7/7定例でいただいたフィードバックを反映しました。次回 7/22（13:00）で細部をすり合わせます。</div>
+        <div class="sub2">7/22定例のフィードバックを反映（v0.3）。次回 7/30（木）13:00 で「入力UI 3案」の方向性を選定します。</div>
       </div>
-      <div class="actions"><button class="btn primary" data-goto="activity">＋ 活動記録を作成</button></div>
+      <div class="actions"><button class="btn primary" data-goto="ui3">入力UI 3案を見る</button></div>
     </div>
 
-    <div class="fb-note">✅ <b>7/7定例FB 反映済み</b>：①リスト上の確認ボタンを廃止→レコードを開いて確認 ②上位職向けタイトル確認ビュー ③製品品番欄の追加（品番×取引先で横断検索） ④品質クレームのフェーズ管理 ⑤ダッシュボードKPIと役割別表示 ⑥名刺一括取込 ⑦取引先の親会社/商社紐づけ・部署カテゴリ・属性フラグ</div>
+    <div class="fb-note">✅ <b>7/22定例FB 反映（v0.3）</b>：①<b>入力UI 3案</b>で入力負荷を軽減（別タブ） ②活動記録の<b>件名を候補リスト化</b>し表記ゆれ防止 ③<b>品種→品番</b>の階層構造 ④<b>複数取引先</b>への紐付け ⑤取引先選択で当該会社・品番の活動履歴を絞り込み ⑥<b>承認フロー</b>（入口でテンプレ分け、細部の閲覧・変更は承認）</div>
     <div class="demo-note">⚠️ レビュー用デモです。取引先名・担当者名・数値・品番はすべてダミー。スクショや手書きメモでのFBをSlackにお送りください。</div>
 
     <div class="grid g4" style="margin-bottom:16px">
@@ -394,10 +397,10 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       <div>
         <div class="eyebrow">活動 ・ 記録</div>
         <h1>活動を記録</h1>
-        <div class="sub2">カテゴリごとにフォームが切り替わります（テンプレ3種）。7/7FBで<b>製品品番</b>欄を追加しました。</div>
+        <div class="sub2">カテゴリごとにフォームが切り替わります。7/22FBで<b>件名の候補リスト化・品種→品番・複数取引先</b>を反映。入力を楽にする方向性は<a data-goto="ui3">入力UI 3案</a>で比較できます。</div>
       </div>
     </div>
-    <div class="fb-note">✅ <b>7/7FB反映</b>：製品品番の入力欄を追加。品番は商品マスターから選択し、取引先とセットで横断検索できます（商品マスターデータ受領後に実データを反映予定）。</div>
+    <div class="fb-note">✅ <b>7/22FB反映</b>：件名は候補リストから選択（表記ゆれ防止）／品番は<b>品種→品番</b>の2段選択／取引先は<b>複数紐付け</b>可。入力項目が増えすぎないよう、必須は最小限にしています。</div>
 
     <div class="grid g2">
       <div class="card">
@@ -413,19 +416,31 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
             <p class="help">カテゴリは2階層想定。クレーム等は専用フォームに切替。</p>
           </div>
 
-          <div class="row2">
-            <div class="field"><label><span class="req">★</span>取引先</label>
-              <select id="acct-sel"><option>東海電子工業</option><option>ネクスティエレクトロニクス（商社）</option><option>関西精密コネクタ</option><option>日本マイクロデバイス</option><option>北陸プレシジョン</option></select>
-              <p class="help" id="parent-help">親会社: —</p>
-            </div>
-            <div class="field"><label><span class="req">★</span><span id="l-date">面談日</span></label><input type="date" value="2026-07-17"></div>
+          <div class="field"><label><span class="req">★</span>件名 <span class="help" style="display:inline">（候補リストから選択・表記ゆれ防止）</span></label>
+            <input list="subject-candidates" id="subject" placeholder="候補から選ぶか入力（例: 定期訪問／見積提示／クレーム一次対応）">
+            <datalist id="subject-candidates">
+              <option value="定期訪問"></option><option value="新規開拓 訪問"></option><option value="見積提示"></option><option value="価格交渉"></option><option value="技術折衝"></option><option value="サンプル評価フォロー"></option><option value="クレーム一次対応"></option><option value="是正報告"></option><option value="役員会 議事"></option>
+            </datalist>
           </div>
 
-          <!-- 製品品番（FB追加）-->
+          <div class="field"><label><span class="req">★</span>取引先 <span class="help" style="display:inline">（複数紐付け可）</span></label>
+            <div id="acct-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+            <select id="acct-add"><option value="">＋ 取引先を追加…</option><option>東海電子工業</option><option>ネクスティエレクトロニクス（商社）</option><option>関西精密コネクタ</option><option>日本マイクロデバイス</option><option>北陸プレシジョン</option></select>
+            <p class="help" id="parent-help">商社経由の場合は親会社も自動で紐付きます</p>
+          </div>
+
+          <div class="row2">
+            <div class="field tf tf-sales tf-claim"><label>品種（大カテゴリ）</label>
+              <select id="cat-sel"><option>コネクタ</option><option>端子</option><option>治具・付属</option></select>
+            </div>
+            <div class="field"><label><span class="req">★</span><span id="l-date">面談日</span></label><input type="date" value="2026-07-22"></div>
+          </div>
+
+          <!-- 品番（品種で絞り込み）-->
           <div class="row2 tf tf-sales tf-claim">
-            <div class="field"><label>製品品番（商品マスター）</label>
-              <select><option>CN-320 ／ 基板対基板コネクタ 0.4mm</option><option>CN-220 ／ 端子ユニット</option><option>CN-320H ／ ハイト違い派生品</option><option>ACC-12 ／ 実装治具</option></select>
-              <p class="help">品番＋取引先で関連する活動記録・クレームを横断検索できます</p>
+            <div class="field"><label>品番（品種で絞り込み）</label>
+              <select id="part-sel"></select>
+              <p class="help">品種→品番の階層。品番＋取引先で活動履歴・クレームを横断検索できます</p>
             </div>
             <div class="field"><label>関連する引合</label><select><option>CN-320 新型コネクタ 年間契約</option><option>（なし）</option></select></div>
           </div>
@@ -460,9 +475,10 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
             <p class="help">7/7FB: メールフォルダ型の回覧フロー。同時配信・順次回覧いずれも対応</p>
           </div>
 
-          <div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--line);padding-top:13px">
+          <div class="callout" style="margin-top:4px">🔒 承認フロー：入口でテンプレを分け、公開後の<b>細部の閲覧・変更には承認操作</b>が必要です（勝手な書き換えを防止）。</div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--line);padding-top:13px;margin-top:12px">
             <button class="btn">下書き保存</button>
-            <button class="btn primary" id="submit-activity">確認送信</button>
+            <button class="btn primary" id="submit-activity">確認送信（承認へ）</button>
           </div>
         </div>
       </div>
@@ -479,6 +495,114 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- ==================== UI 3案 ==================== -->
+  <section class="view" id="v-ui3">
+    <div class="page-head">
+      <div class="icon" style="background:#7d5fd0">⚡</div>
+      <div>
+        <div class="eyebrow">活動記録 ・ 入力UIの方向性</div>
+        <h1>活動記録の「入力を楽にする」3案</h1>
+        <div class="sub2">7/22でいただいた「要件を満たすと入力項目が増える → いかに入力を楽にするか」への3つの方向性です。7/30で方向性を選定します。</div>
+      </div>
+    </div>
+    <div class="fb-note">✅ <b>7/22FB反映</b>：報告のハードルを下げ、入力率を上げるための入力UIを3案ご用意しました。下のボタンで各案の入力イメージを切り替えてご確認ください。</div>
+
+    <div class="grid g3" style="margin-bottom:16px">
+      <div class="card"><div class="bd">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="pill blue">案A</span><b>クイックメモ型</b></div>
+        <div class="help" style="margin-bottom:8px">件名を候補から選び＋一言で<b>即登録</b>。詳細は後から追記。</div>
+        <div class="mini-legend" style="gap:8px"><span class="pill green">速さ ★★★</span><span class="pill gray">網羅 ★</span></div>
+        <div style="font-size:12px;margin-top:8px"><b>向く</b>：日々の訪問/TELをとにかく残す。報告率を最優先。</div>
+      </div></div>
+      <div class="card"><div class="bd">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="pill pur">案B</span><b>ガイド型ウィザード</b></div>
+        <div class="help" style="margin-bottom:8px">カテゴリ→取引先→品番→内容を<b>1問ずつ</b>。必須だけ表示。</div>
+        <div class="mini-legend" style="gap:8px"><span class="pill gray">速さ ★★</span><span class="pill green">漏れ防止 ★★★</span></div>
+        <div style="font-size:12px;margin-top:8px"><b>向く</b>：入力に不慣れでも漏れなく。表記ゆれゼロ。</div>
+      </div></div>
+      <div class="card"><div class="bd">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="pill amber">案C</span><b>予定連携型</b></div>
+        <div class="help" style="margin-bottom:8px">カレンダーの予定から<b>自動で下ごしらえ</b>。差分だけ入力。</div>
+        <div class="mini-legend" style="gap:8px"><span class="pill green">自動化 ★★★</span><span class="pill gray">要: 予定運用</span></div>
+        <div style="font-size:12px;margin-top:8px"><b>向く</b>：予定ベースで動く営業。二重入力を排除。</div>
+      </div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="hd">入力イメージを試す
+        <div class="seg" id="ui3-seg" style="margin-left:auto">
+          <button data-p="a" class="on">案A クイック</button>
+          <button data-p="b">案B ガイド</button>
+          <button data-p="c">案C 予定連携</button>
+        </div>
+      </div>
+      <div class="bd">
+        <!-- 案A preview -->
+        <div class="ui3p" id="ui3-a">
+          <div style="max-width:560px">
+            <div class="help" style="margin-bottom:8px">💡 件名を選んで一言メモ → 登録。<b>5秒で完了</b>。詳細は後からでOK。</div>
+            <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;background:var(--panel-2, #f6f8fb);border:1px solid var(--line-d);border-radius:8px;padding:12px;background:#fafcff">
+              <div style="flex:1;min-width:160px"><label class="help">件名（候補）</label><select class="inp" style="width:100%;border:1px solid var(--line-d);border-radius:5px;padding:8px 10px"><option>定期訪問</option><option>見積提示</option><option>クレーム一次対応</option></select></div>
+              <div style="flex:2;min-width:200px"><label class="help">ひとことメモ</label><input style="width:100%;border:1px solid var(--line-d);border-radius:5px;padding:8px 10px" placeholder="年間12万個の内示見込み"></div>
+              <button class="btn primary" id="ui3-a-btn">登録</button>
+            </div>
+            <div style="margin-top:8px"><span class="pill gray">取引先・品番・回覧先は前回値を自動セット</span> <a class="help">＋詳細を追記</a></div>
+          </div>
+        </div>
+        <!-- 案B preview -->
+        <div class="ui3p" id="ui3-b" hidden>
+          <div style="max-width:560px">
+            <div class="path" style="margin-bottom:12px"><div class="st done">①カテゴリ</div><div class="st cur">②取引先</div><div class="st">③品番</div><div class="st">④内容</div></div>
+            <div class="help" style="margin-bottom:8px">💡 1画面1問。押すだけで進むので迷いません。</div>
+            <div style="font-weight:700;margin-bottom:8px">取引先を選択</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn" style="justify-content:flex-start" data-ui3b>東海電子工業 <span class="pill gray" style="margin-left:auto">よく使う</span></button>
+              <button class="btn" style="justify-content:flex-start" data-ui3b>関西精密コネクタ</button>
+              <button class="btn" style="justify-content:flex-start" data-ui3b>ネクスティエレクトロニクス（商社）</button>
+            </div>
+            <div style="margin-top:10px"><span class="pill blue">残り2問（品番・内容）</span></div>
+          </div>
+        </div>
+        <!-- 案C preview -->
+        <div class="ui3p" id="ui3-c" hidden>
+          <div style="max-width:600px">
+            <div class="help" style="margin-bottom:8px">💡 カレンダーの予定から起票。取引先・日時・件名が自動で入り、差分だけ入力。</div>
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid var(--line-d);border-radius:8px;padding:10px 12px;background:#fafcff;margin-bottom:10px">
+              <span class="obj-icon o-cal">🗓️</span>
+              <div style="flex:1"><b>7/24（木）14:00 東海電子工業 訪問</b><div class="help">カレンダーの予定</div></div>
+              <button class="btn primary" id="ui3-c-btn">この予定を記録</button>
+            </div>
+            <div id="ui3-c-form" hidden>
+              <div class="fgrid" style="border:1px solid var(--line);border-radius:8px">
+                <div class="fitem2"><div class="l">取引先</div><div class="v">東海電子工業 <span class="pill green">自動</span></div></div>
+                <div class="fitem2"><div class="l">日時</div><div class="v">7/24 14:00 <span class="pill green">自動</span></div></div>
+                <div class="fitem2"><div class="l">件名</div><div class="v">訪問 <span class="pill green">自動</span></div></div>
+                <div class="fitem2"><div class="l">品番</div><div class="v">CN-320 <span class="pill green">前回踏襲</span></div></div>
+              </div>
+              <div class="field" style="margin-top:10px"><label>内容（ここだけ入力）</label><textarea style="width:100%;border:1px solid var(--line-d);border-radius:5px;padding:8px 10px" placeholder="面談で確認した事項・次アクション"></textarea></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="hd">3案の比較</div>
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th>観点</th><th>案A クイックメモ</th><th>案B ガイド</th><th>案C 予定連携</th></tr></thead>
+        <tbody>
+          <tr><td>入力の速さ</td><td>◎ 5秒</td><td>○ 30秒</td><td>◎ 差分のみ</td></tr>
+          <tr><td>入力漏れ防止・表記統一</td><td>△（後追記前提）</td><td>◎</td><td>○</td></tr>
+          <tr><td>自動化・二重入力の排除</td><td>○（前回値踏襲）</td><td>△</td><td>◎</td></tr>
+          <tr><td>向くユーザー</td><td>忙しい営業・報告率重視</td><td>不慣れな人・新人</td><td>予定運用が根付いた組織</td></tr>
+          <tr><td>前提</td><td>—</td><td>—</td><td>予定を先に入れる運用</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="callout">💡 <b>Glueのおすすめ</b>：まずは <b>案A（クイックメモ）＋ 案C（予定連携）のハイブリッド</b>を基本に。予定がある活動は案Cで自動起票→案Aの一言メモで完了、予定外は案Aで即登録。<b>案Bは新人・不慣れな方向けの「ガイドモード」</b>として残す形が、入力率と品質を両立できます。7/30で方向性を選定させてください。</div>
   </section>
 
   <!-- ==================== INBOX ==================== -->
@@ -1105,10 +1229,28 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     toast('品番×取引先で活動記録・クレームを横断検索');
   });
   $('#dash-role').addEventListener('click',function(e){var b=e.target.closest('button');if(b){state.dashRole=b.dataset.role;$$('#dash-role button').forEach(function(x){x.classList.toggle('on',x===b);});renderDash();}});
-  $('#acct-sel').addEventListener('change',function(){
-    var v=this.value;
-    $('#parent-help').textContent='親会社: '+(v.indexOf('ネクスティ')>=0?'アイシン（商社経由）':'—');
-  });
+  // 品種→品番の階層絞り込み（7/22FB）
+  var PARTS={'コネクタ':['CN-320 ／ 基板対基板コネクタ 0.4mm','CN-320H ／ ハイト違い派生品','CN-110 ／ 電源コネクタ'],'端子':['CN-220 ／ 端子ユニット','TM-08 ／ 圧着端子'],'治具・付属':['ACC-12 ／ 実装治具','ACC-30 ／ 検査治具']};
+  function renderParts(){var c=$('#cat-sel');var p=$('#part-sel');if(!c||!p)return;p.innerHTML=(PARTS[c.value]||[]).map(function(x){return '<option>'+x+'</option>';}).join('');}
+  if($('#cat-sel')){$('#cat-sel').addEventListener('change',renderParts);renderParts();}
+  // 複数取引先チップ（7/22FB）
+  var accts=['東海電子工業'];
+  function renderAcctChips(){var el=$('#acct-chips');if(!el)return;
+    el.innerHTML=accts.map(function(a){return '<span class="pill blue" style="gap:6px">'+a+(a.indexOf('ネクスティ')>=0?' <span class="pill gray" style="padding:1px 6px">親: アイシン</span>':'')+' <a data-rm="'+a+'" style="cursor:pointer;font-weight:800">×</a></span>';}).join('')||'<span class="help">取引先を追加してください</span>';}
+  if($('#acct-add')){
+    $('#acct-add').addEventListener('change',function(){var v=this.value;if(v&&accts.indexOf(v)<0){accts.push(v);renderAcctChips();}this.value='';});
+    $('#acct-chips').addEventListener('click',function(e){var r=e.target.closest('[data-rm]');if(r){accts=accts.filter(function(a){return a!==r.dataset.rm;});renderAcctChips();}});
+    renderAcctChips();
+  }
+  // 入力UI 3案
+  if($('#ui3-seg')){
+    $('#ui3-seg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+      $$('#ui3-seg button').forEach(function(x){x.classList.toggle('on',x===b);});
+      ['a','b','c'].forEach(function(k){$('#ui3-'+k).hidden=(k!==b.dataset.p);});});
+    $('#ui3-a-btn').addEventListener('click',function(){toast('登録しました（5秒）— 詳細は後から追記できます');});
+    $('#ui3-c-btn').addEventListener('click',function(){$('#ui3-c-form').hidden=false;toast('予定から自動起票 — 内容だけ入力すれば完了');});
+    $('#ui3-b').addEventListener('click',function(e){var b=e.target.closest('[data-ui3b]');if(b)toast('選択: '+b.textContent.trim().split(' ')[0]+' — 残り2問');});
+  }
   $('#cal').addEventListener('click',function(e){var c=e.target.closest('[data-day]');if(c){var d=c.dataset.day,info=calData[d];
     toast(info?('7/'+d+'：'+info.p+'（'+(info.f?('入力済 ✓'+(info.late?'／後付け登録':'')):'未入力 — リマインド送信可')+'）'):('7/'+d+'：予定なし'));}});
 
