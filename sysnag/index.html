@@ -477,6 +477,74 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
 /* 稼働ステータス点 */
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
 .dot.work{background:var(--success)} .dot.wait{background:var(--warn)} .dot.plan{background:var(--brand)} .dot.off{background:var(--text-mute)}
+
+/* === v0.2 追加（7/17ToDo＋Asana分析反映） === */
+:root{ --asana:#f06a6a; --asana-bg:#fdeeee; }
+
+/* Asana由来であることの明示 */
+.from-asana{
+  font-size:11px;font-weight:400;color:var(--asana);background:var(--asana-bg);
+  border:1px solid #f8caca;border-radius:10px;padding:1px 9px;margin-left:8px;
+}
+.auto-tag{
+  font-size:10px;font-weight:700;color:var(--success);background:var(--success-bg);
+  border-radius:3px;padding:1px 6px;margin-left:6px;vertical-align:middle;
+}
+
+/* リストビューのフィルタバー */
+.filter-bar{
+  display:flex;flex-wrap:wrap;gap:6px;align-items:center;
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:8px 12px;margin-bottom:8px;
+}
+.f-chip{
+  font-size:12px;border:1px solid var(--border);border-radius:14px;padding:3px 11px;
+  color:var(--text-2);background:#fafaf9;cursor:pointer;white-space:nowrap;
+}
+.f-chip.on{background:var(--brand-50);border-color:#a8d3f0;color:var(--brand-dark);font-weight:600}
+.f-chip:hover{background:var(--border-light)}
+
+/* 帳票センターのサブナビ */
+.doc-nav{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.doc-nav .dn{
+  font-size:12px;padding:6px 14px;border:1px solid var(--border);background:#fff;
+  border-radius:16px;cursor:pointer;color:var(--text-2);
+}
+.doc-nav .dn.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.doc-nav .dn:hover{filter:brightness(.97)}
+
+/* 一括発行の選択行 */
+.batch-row td:first-child{width:34px;text-align:center}
+.batch-sum{
+  display:flex;gap:24px;flex-wrap:wrap;align-items:center;
+  background:var(--brand-50);border:1px solid #cfe4f6;border-radius:var(--radius);
+  padding:10px 14px;margin:8px 0;
+}
+.batch-sum .k{font-size:12px;color:var(--text-mute)}
+.batch-sum .v{font-size:16px;font-weight:800}
+
+/* Asana対比（Before / After） */
+.ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+@media(max-width:1000px){ .ba-grid{grid-template-columns:1fr} }
+.ba-col{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.ba-col .ba-head{padding:8px 12px;font-weight:700;font-size:13px;color:#fff}
+.ba-col.before .ba-head{background:var(--asana)}
+.ba-col.after  .ba-head{background:var(--brand)}
+.ba-col .ba-body{padding:12px}
+.asana-card{
+  background:#fff;border:1px solid var(--border);border-left:3px solid var(--asana);
+  border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:12px;
+}
+.asana-note{font-size:11px;color:var(--asana);margin-top:4px}
+.map-tbl td:nth-child(2){text-align:center;color:var(--text-mute);width:30px}
+.pain{
+  background:var(--error-bg);border-left:3px solid var(--error);
+  padding:8px 12px;border-radius:0 4px 4px 0;font-size:12px;margin-bottom:6px;
+}
+.gain{
+  background:var(--success-bg);border-left:3px solid var(--success);
+  padding:8px 12px;border-radius:0 4px 4px 0;font-size:12px;margin-bottom:6px;
+}
 </style>
 </head>
 <body class="ses-mode">
@@ -505,10 +573,12 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="tab" data-page="project-list">📁 案件</div>
   <div class="tab" data-page="match">🎯 マッチング</div>
   <div class="tab" data-page="talent-list">👤 タレント</div>
-  <div class="tab" data-page="assignment-detail">🔗 アサイン</div>
-  <div class="tab" data-page="account-detail">🏢 取引先</div>
-  <div class="tab" data-page="quote">📄 見積・帳票</div>
+  <div class="tab" data-page="assignment-list">🔗 アサイン</div>
+  <div class="tab" data-page="account-list">🏢 取引先</div>
+  <div class="tab" data-page="contact-list">👥 人情報</div>
+  <div class="tab" data-page="doc-list">📄 見積・請求</div>
   <div class="tab" data-page="dashboard">📊 分析</div>
+  <div class="tab" data-page="asana-map">🔄 Asana対比</div>
 </div>
 
 <div class="main">
@@ -776,64 +846,149 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <!-- ===================== タレント 一覧 ===================== -->
   <div class="page" id="talent-list">
     <div class="disc">
-      <div class="disc-q">論点：タレント一覧の列・フィルタ（待機/スキル/単価/稼働時期）はこれで足りるか</div>
-      <div class="disc-src">要件定義書 §3-2 Talent__c ／ §9 待機人材</div>
-      <div class="disc-body">調達担当が「今すぐ当てられる人材」を探す画面。<span class="disc-flag"></span>氏名は実名管理か、イニシャル/コード管理か（個人情報の扱い）</div>
+      <div class="disc-q">論点：タレント一覧の列・フィルタ（待機/スキル/単価/稼働時期/並行状況）はこれで足りるか</div>
+      <div class="disc-src">要件定義書 §3-2 Talent__c ／ §9 待機人材 ／ <b>7/21ご提供のAsana「要員情報」</b></div>
+      <div class="disc-body">
+        調達担当が「今すぐ当てられる人材」を探す画面。Asanaで説明欄に書かれていた【名前】【所属】【最寄】【稼働日】【単価】【並行】【スキル】を項目化しました。
+        <span class="disc-flag"></span>氏名はAsana同様<b>イニシャル運用</b>で確定してよいか（W.K / R.I 等）
+      </div>
     </div>
     <div class="obj-header"><div class="row1">
       <div class="obj-icon talent">👤</div>
       <div class="obj-title"><div class="label">タレント</div><div class="name">人材マスタ ・ 待機＋稼働 <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
       <div class="obj-actions"><button class="btn">インポート</button><button class="btn primary" onclick="toast('新規タレント（モック）')">新規</button></div>
     </div></div>
+    <div class="filter-bar">
+      <span class="f-chip on">稼働ステータス：待機 ×</span>
+      <span class="f-chip on">稼働可 ≦ 今月 ×</span>
+      <span class="f-chip">言語：Java</span>
+      <span class="f-chip">常駐可</span>
+      <span class="f-chip">＋ フィルタを追加</span>
+      <span style="margin-left:auto;color:var(--text-mute);font-size:12px">6 件 ・ 並び替え：稼働可能時期 ↑</span>
+    </div>
     <table class="tbl">
-      <thead><tr><th>氏名</th><th>区分</th><th>保有スキル</th><th class="num">提示単価(原価)</th><th>稼働ステータス</th><th>稼働可</th></tr></thead>
+      <thead><tr><th>氏名</th><th>区分／所属</th><th>言語スキル</th><th class="num">提示単価(原価)</th><th>常駐/リモート</th><th>稼働ステータス</th><th>稼働可</th><th>並行状況</th></tr></thead>
       <tbody>
-        <tr><td><a class="name-link" data-go="talent-detail">R.I</a></td><td>自社</td><td><div class="skills"><span class="skill">Java</span><span class="skill">AWS</span><span class="skill">SQL</span></div></td><td class="num">¥850,000</td><td><span class="dot wait"></span>待機</td><td>即日</td></tr>
-        <tr><td>T.W</td><td>自社</td><td><div class="skills"><span class="skill">Java</span><span class="skill">AWS</span><span class="skill">Terraform</span></div></td><td class="num">¥900,000</td><td><span class="dot work"></span>稼働中</td><td>9/1〜</td></tr>
-        <tr><td>Y.N</td><td>自社</td><td><div class="skills"><span class="skill">PM</span><span class="skill">PMO</span></div></td><td class="num">¥1,050,000</td><td><span class="dot plan"></span>参画予定</td><td>8/1〜</td></tr>
-        <tr><td>A.K</td><td>自社</td><td><div class="skills"><span class="skill">React</span><span class="skill">TypeScript</span></div></td><td class="num">¥780,000</td><td><span class="dot wait"></span>待機</td><td>8/15〜</td></tr>
-        <tr><td>S.O</td><td>BP（ペガサス）</td><td><div class="skills"><span class="skill">Java</span><span class="skill">PHP</span></div></td><td class="num">¥950,000</td><td><span class="dot work"></span>稼働中</td><td>—</td></tr>
-        <tr><td>K.S</td><td>自社</td><td><div class="skills"><span class="skill">Java</span><span class="skill">Spring</span></div></td><td class="num">¥880,000</td><td><span class="dot work"></span>稼働中</td><td>9/30終了</td></tr>
+        <tr><td><a class="name-link" data-go="talent-detail">R.I</a></td><td>自社</td><td><div class="skills"><span class="skill">Java</span><span class="skill">AWS</span><span class="skill">SQL</span></div></td><td class="num">¥850,000</td><td>常駐可／週2</td><td><span class="dot wait"></span>待機</td><td>即日</td><td><span class="badge info">提案1</span> <span class="badge warn">面談1</span></td></tr>
+        <tr><td><a class="name-link" data-go="talent-detail">W.K</a></td><td>BP（1社先・個人事業主）</td><td><div class="skills"><span class="skill">Java</span><span class="skill">Python</span><span class="skill">PL/SQL</span></div></td><td class="num">¥600,000</td><td>常駐可（1h圏）／週1-2</td><td><span class="dot wait"></span>待機</td><td>即日</td><td><span class="badge info">提案1</span> <span class="badge warn">面談1</span></td></tr>
+        <tr><td>T.W</td><td>自社</td><td><div class="skills"><span class="skill">Java</span><span class="skill">AWS</span><span class="skill">Terraform</span></div></td><td class="num">¥900,000</td><td>常駐可／週1</td><td><span class="dot work"></span>稼働中</td><td>9/1〜</td><td>—</td></tr>
+        <tr><td>Y.N</td><td>自社</td><td><div class="skills"><span class="skill">PM</span><span class="skill">PMO</span></div></td><td class="num">¥1,050,000</td><td>常駐可／不可</td><td><span class="dot plan"></span>参画予定</td><td>8/1〜</td><td><span class="badge success">内定1</span></td></tr>
+        <tr><td>A.K</td><td>自社</td><td><div class="skills"><span class="skill">React</span><span class="skill">TypeScript</span></div></td><td class="num">¥780,000</td><td>リモート主／週1出社</td><td><span class="dot wait"></span>待機</td><td>8/15〜</td><td>—</td></tr>
+        <tr><td>S.O</td><td>BP（ペガサス）</td><td><div class="skills"><span class="skill">Java</span><span class="skill">PHP</span></div></td><td class="num">¥950,000</td><td>常駐可／不可</td><td><span class="dot work"></span>稼働中</td><td>—</td><td>—</td></tr>
+        <tr><td>K.S</td><td>自社</td><td><div class="skills"><span class="skill">Java</span><span class="skill">Spring</span></div></td><td class="num">¥880,000</td><td>常駐可／週2</td><td><span class="dot work"></span>稼働中</td><td>9/30終了</td><td>—</td></tr>
       </tbody>
     </table>
-    <div class="callout"><strong>💡 「待機 かつ 稼働可≦今月」を保存済みリストビューに。</strong>毎朝この一覧＝営業への提案母数。</div>
+    <div class="callout"><strong>💡 「待機 かつ 稼働可≦今月」を保存済みリストビューに。</strong>毎朝この一覧＝営業への提案母数。<br>
+    <strong>💡「並行状況」は入力しません。</strong>提案中／面談調整中のアサインを自動で数えて表示します（Asanaでは【並行】提案1件、面談設定1件 と手書きしていた箇所）。</div>
   </div>
 
   <!-- ===================== タレント 詳細 ===================== -->
   <div class="page" id="talent-detail">
     <div class="disc">
-      <div class="disc-q">論点：タレント詳細の項目・アサイン履歴・単価の見せ方はこれで合っているか</div>
-      <div class="disc-src">要件定義書 §3-2 Talent__c ／ §4 権限（単価の可視範囲）</div>
-      <div class="disc-body">スキル・単価・稼働ステータスをハイライト。<span class="disc-flag"></span>原価単価/粗利を営業一般に見せるか、経営・調達に限定するか</div>
+      <div class="disc-q">論点：Asanaの説明欄【】を、この項目構成に置き換えてよいか</div>
+      <div class="disc-src">要件定義書 §3-2 Talent__c ／ §4 権限（単価の可視範囲）／ <b>7/21ご提供のAsana 要員情報カード</b></div>
+      <div class="disc-body">
+        Asanaは「カスタムフィールドなし・説明欄フリーテキスト」でした。そのため絞り込み・並び替え・集計ができません。ここでは【】の項目をすべて構造化しています。
+        <span class="disc-flag"></span>スキルは<b>4カテゴリ（言語／DB・OS／FW・ツール／経験工程）</b>の分け方で合っているか
+        <span class="disc-flag"></span>原価単価/粗利を営業一般に見せるか、経営・調達に限定するか
+      </div>
     </div>
-    <div class="crumb"><a data-go="talent-list">タレント</a><span class="sep">›</span>R.I</div>
+    <div class="crumb"><a data-go="talent-list">タレント</a><span class="sep">›</span>W.K</div>
     <div class="obj-header"><div class="row1">
       <div class="obj-icon talent">👤</div>
-      <div class="obj-title"><div class="label">タレント（自社社員）</div><div class="name">R.I（イニシャル管理）</div></div>
+      <div class="obj-title"><div class="label">タレント（BP・個人事業主）</div><div class="name">W.K（イニシャル管理）</div></div>
       <div class="obj-actions"><button class="btn">編集</button><button class="btn primary" onclick="goPage('match')">🎯 案件に当てる</button></div>
     </div></div>
     <div class="highlights">
       <div class="item"><div class="lbl">稼働ステータス</div><div class="val"><span class="dot wait"></span>待機（即日可）</div></div>
-      <div class="item"><div class="lbl">経験年数</div><div class="val">8 年</div></div>
-      <div class="item"><div class="lbl">提示単価(原価)</div><div class="val">¥850,000</div></div>
-      <div class="item"><div class="lbl">直近請求単価</div><div class="val">¥1,250,000</div></div>
+      <div class="item"><div class="lbl">提示単価</div><div class="val">¥600,000<span style="font-size:11px;color:var(--text-mute)">（税別）</span></div></div>
+      <div class="item"><div class="lbl">並行提案</div><div class="val">1 件</div></div>
+      <div class="item"><div class="lbl">並行面談</div><div class="val">1 件</div></div>
+      <div class="item"><div class="lbl">商流段数</div><div class="val">1社先</div></div>
     </div>
     <div class="two-col-3">
-      <div><div class="card"><div class="card-head">📝 詳細</div><div class="card-body"><div class="field-grid">
-        <div class="field"><div class="lbl">区分</div><div class="val">自社社員</div></div>
-        <div class="field"><div class="lbl">拠点</div><div class="val">東京本社</div></div>
-        <div class="field full"><div class="lbl">保有スキル</div><div class="val"><div class="skills"><span class="skill">Java</span><span class="skill">AWS</span><span class="skill">SQL</span><span class="skill">Spring</span><span class="skill">Docker</span></div></div></div>
-        <div class="field"><div class="lbl">稼働可能時期</div><div class="val">即日</div></div>
-        <div class="field"><div class="lbl">希望勤務地</div><div class="val">都内・一部リモート可</div></div>
-      </div></div></div></div>
-      <div><div class="related-card"><div class="related-head">🔗 アサイン履歴 <span class="count">(3)</span></div>
-        <table class="tbl">
-          <tr><td><a data-go="assignment-detail" class="name-link">トパーズ物流 基幹再構築</a></td><td><span class="badge gray">終了</span></td><td class="num">¥1.25M</td></tr>
-          <tr><td>シリウス証券 データ基盤</td><td><span class="badge gray">終了</span></td><td class="num">¥1.20M</td></tr>
-          <tr><td>ネビュラ会計SaaS（提案中）</td><td><span class="badge warn">提案中</span></td><td class="num">¥1.30M</td></tr>
-        </table>
-      </div></div>
+      <div>
+        <div class="card"><div class="card-head">📝 基本情報 <span class="from-asana">Asana【名前】【所属】【最寄】より</span></div><div class="card-body"><div class="field-grid">
+          <div class="field"><div class="lbl">氏名（イニシャル）</div><div class="val">W.K</div></div>
+          <div class="field"><div class="lbl">年齢 / 性別</div><div class="val">28歳 / 男性</div></div>
+          <div class="field"><div class="lbl">区分</div><div class="val">BP人材（個人事業主）</div></div>
+          <div class="field"><div class="lbl">所属BP</div><div class="val"><a class="name-link" data-go="account-detail">シーカーユニット（仮）</a></div></div>
+          <div class="field"><div class="lbl">商流段数</div><div class="val">1社先</div></div>
+          <div class="field"><div class="lbl">最寄駅</div><div class="val">京王線・仙川駅</div></div>
+        </div></div></div>
+
+        <div class="card"><div class="card-head">🕒 稼働条件 <span class="from-asana">Asana【稼働日】【単価】【並行】より</span></div><div class="card-body"><div class="field-grid">
+          <div class="field"><div class="lbl">稼働可能時期</div><div class="val">即日〜</div></div>
+          <div class="field"><div class="lbl">提示単価</div><div class="val">¥600,000（税別）※案件により相談</div></div>
+          <div class="field"><div class="lbl">常駐可否</div><div class="val">可（通勤1時間圏内が目安）</div></div>
+          <div class="field"><div class="lbl">リモート可否</div><div class="val">併用可（週1〜2日程度）</div></div>
+          <div class="field"><div class="lbl">並行提案数</div><div class="val">1 件 <span class="auto-tag">自動集計</span></div></div>
+          <div class="field"><div class="lbl">並行面談数</div><div class="val">1 件 <span class="auto-tag">自動集計</span></div></div>
+        </div></div></div>
+
+        <div class="card"><div class="card-head">🛠 スキル <span class="from-asana">Asana【スキル】を4カテゴリに分割</span></div><div class="card-body"><div class="field-grid">
+          <div class="field full"><div class="lbl">言語</div><div class="val"><div class="skills"><span class="skill">Java</span><span class="skill">HTML/CSS</span><span class="skill">C++</span><span class="skill">Python</span><span class="skill">JavaScript</span><span class="skill">PL/SQL</span></div></div></div>
+          <div class="field full"><div class="lbl">DB / OS</div><div class="val"><div class="skills"><span class="skill">Oracle</span><span class="skill">PostgreSQL</span><span class="skill">Windows</span><span class="skill">Linux</span></div></div></div>
+          <div class="field full"><div class="lbl">FW / ツール</div><div class="val"><div class="skills"><span class="skill">Spring Framework</span><span class="skill">Struts</span><span class="skill">Git</span><span class="skill">SVN</span></div></div></div>
+          <div class="field full"><div class="lbl">経験工程</div><div class="val"><div class="skills"><span class="skill hit">詳細設計</span><span class="skill hit">製造・実装</span><span class="skill hit">テスト</span><span class="skill hit">運用保守</span><span class="skill">要件定義</span><span class="skill">基本設計</span></div>
+            <div style="font-size:11px;color:var(--text-mute);margin-top:4px">濃色＝1人称で対応可 ／ 淡色＝経験あり</div></div></div>
+          <div class="field full"><div class="lbl">業務経歴</div><div class="val" style="font-size:12px;line-height:1.7">アプリ開発・運用保守：デジタル機器販売アプリの追加機能開発、データ連携バッチ新規開発、および運用保守を担当。詳細設計から実装、テスト、障害発生時の原因調査まで一人称で対応可能。</div></div>
+        </div></div></div>
+      </div>
+
+      <div>
+        <div class="related-card"><div class="related-head">🔗 アサイン履歴 <span class="count">(3)</span></div>
+          <table class="tbl">
+            <tr><td><a data-go="assignment-detail" class="name-link">トパーズ物流 基幹再構築</a></td><td><span class="badge gray">終了</span></td><td class="num">¥1.25M</td></tr>
+            <tr><td>シリウス証券 データ基盤</td><td><span class="badge gray">終了</span></td><td class="num">¥1.20M</td></tr>
+            <tr><td>ネビュラ会計SaaS（提案中）</td><td><span class="badge warn">提案中</span></td><td class="num">¥1.30M</td></tr>
+          </table>
+        </div>
+        <div class="related-card"><div class="related-head">📎 元データ（Asana）</div>
+          <div style="padding:10px 12px;font-size:12px;line-height:1.8;background:#fafaf9">
+            <div style="color:var(--text-mute);margin-bottom:6px">Asanaカード名：</div>
+            <code style="background:#fff;border:1px solid var(--border);padding:3px 6px;border-radius:3px">即日　Java5年　常駐可　シーカーユニット</code>
+            <div style="margin-top:10px;color:var(--text-mute)">カード名に詰め込んでいた情報が、上の項目に分解されています。</div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- ===================== アサイン 一覧 ===================== -->
+  <div class="page" id="assignment-list">
+    <div class="disc">
+      <div class="disc-q">論点：アサイン一覧を「粗利が一目で並ぶ表」にしてよいか（＝原価の可視範囲）</div>
+      <div class="disc-src">要件定義書 §3-2 Assignment__c ／ §4 権限（FLS）</div>
+      <div class="disc-body">
+        Asanaではカード名に <code>MIN80万（70万仕入れ）</code> と書いて粗利を目視計算していました。ここでは請求単価・原価単価・粗利を列にしています。
+        <span class="disc-flag"></span>この画面を営業一般に開放するか、経営・調達限定にするか
+      </div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon assign">🔗</div>
+      <div class="obj-title"><div class="label">アサイン</div><div class="name">稼働中＋提案中 <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      <div class="obj-actions"><button class="btn">エクスポート</button><button class="btn primary" onclick="toast('新規アサイン（モック）')">新規</button></div>
+    </div></div>
+    <div class="filter-bar">
+      <span class="f-chip on">ステータス：稼働中・提案中 ×</span>
+      <span class="f-chip">事業：SES</span>
+      <span class="f-chip">終了 ≦ 30日</span>
+      <span class="f-chip">＋ フィルタを追加</span>
+      <span style="margin-left:auto;color:var(--text-mute);font-size:12px">6 件 ・ 合計粗利 ¥2,180,000/月</span>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>アサイン</th><th>案件</th><th>タレント</th><th class="num">請求単価</th><th class="num">原価単価</th><th class="num">粗利</th><th class="num">粗利率</th><th>期間</th><th>ステータス</th></tr></thead>
+      <tbody>
+        <tr><td><a class="name-link" data-go="assignment-detail">A-2026-0142</a></td><td><a class="name-link" data-go="project-detail">ネビュラ会計SaaS 基盤更改</a></td><td><a class="name-link" data-go="talent-detail">R.I</a></td><td class="num">¥1,300,000</td><td class="num">¥850,000</td><td class="num gp good">¥450,000</td><td class="num gp good">34.6%</td><td>9/1〜3/31</td><td><span class="badge warn">提案中</span></td></tr>
+        <tr><td><a class="name-link" data-go="assignment-detail">A-2026-0138</a></td><td>トパーズ物流 基幹再構築</td><td>K.S</td><td class="num">¥1,180,000</td><td class="num">¥880,000</td><td class="num gp good">¥300,000</td><td class="num gp good">25.4%</td><td>〜9/30</td><td><span class="badge error">終了間近</span></td></tr>
+        <tr><td><a class="name-link" data-go="assignment-detail">A-2026-0131</a></td><td>オリオン銀行 PMO支援</td><td>Y.N</td><td class="num">¥1,450,000</td><td class="num">¥1,050,000</td><td class="num gp good">¥400,000</td><td class="num gp good">27.6%</td><td>8/1〜</td><td><span class="badge info">内定</span></td></tr>
+        <tr><td><a class="name-link" data-go="assignment-detail">A-2026-0127</a></td><td>シリウス証券 データ基盤</td><td>T.W</td><td class="num">¥1,320,000</td><td class="num">¥900,000</td><td class="num gp good">¥420,000</td><td class="num gp good">31.8%</td><td>稼働中</td><td><span class="badge success">稼働中</span></td></tr>
+        <tr><td><a class="name-link" data-go="assignment-detail">A-2026-0119</a></td><td>P's Factory PMO（仮）</td><td>S.O</td><td class="num">¥1,150,000</td><td class="num">¥950,000</td><td class="num gp mid">¥200,000</td><td class="num gp mid">17.4%</td><td>稼働中</td><td><span class="badge success">稼働中</span></td></tr>
+        <tr><td><a class="name-link" data-go="assignment-detail">A-2026-0104</a></td><td>ベガ製造 生産管理刷新</td><td>A.K</td><td class="num">¥1,190,000</td><td class="num">¥780,000</td><td class="num gp good">¥410,000</td><td class="num gp good">34.5%</td><td>稼働中</td><td><span class="badge success">稼働中</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>💡 粗利・粗利率は数式項目。</strong>入力するのは請求単価と原価単価の2つだけで、粗利は自動。案件（主従）にロールアップして経営ダッシュボードへ直結します。</div>
   </div>
 
   <!-- ===================== アサイン 詳細 ===================== -->
@@ -881,6 +1036,44 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
     <div class="callout"><strong>💡 粗利・粗利率は数式で自動。</strong>案件（主従）にロールアップ → 案件単位・全社の月次粗利がダッシュボードに直結。</div>
   </div>
 
+  <!-- ===================== 取引先 一覧 ===================== -->
+  <div class="page" id="account-list">
+    <div class="disc">
+      <div class="disc-q">論点：取引先を「顧客企業／協力会社(BP)」のレコードタイプ2種で分けてよいか</div>
+      <div class="disc-src">要件定義書 §1 M1 ／ §3-2 Account</div>
+      <div class="disc-body">
+        Asanaでは協力会社名がカード名の末尾に書かれているだけ（シーカーユニット／P's Factory／INPA 等）で、BPごとの調達実績が集計できません。
+        <span class="disc-flag"></span>BPの与信・支払サイト・基本契約の有無をどこまで持つか
+      </div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon account">🏢</div>
+      <div class="obj-title"><div class="label">取引先</div><div class="name">すべての取引先 <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      <div class="obj-actions"><button class="btn">インポート</button><button class="btn primary" onclick="toast('新規取引先（モック）')">新規</button></div>
+    </div></div>
+    <div class="filter-bar">
+      <span class="f-chip on">レコードタイプ：すべて ×</span>
+      <span class="f-chip">顧客企業のみ</span>
+      <span class="f-chip">協力会社(BP)のみ</span>
+      <span class="f-chip">＋ フィルタを追加</span>
+      <span style="margin-left:auto;color:var(--text-mute);font-size:12px">8 件</span>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>取引先名</th><th>レコードタイプ</th><th>取引区分</th><th class="num">案件</th><th class="num">稼働中</th><th>支払サイト</th><th>状況</th></tr></thead>
+      <tbody>
+        <tr><td><a class="name-link" data-go="account-detail">株式会社トパーズ物流</a></td><td><span class="badge info">顧客企業</span></td><td>エンド（直請）</td><td class="num">2</td><td class="num">3名</td><td>月末締／翌月末</td><td><span class="badge success">取引中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">株式会社ネビュラソフト</a></td><td><span class="badge info">顧客企業</span></td><td>元請</td><td class="num">1</td><td class="num">0名</td><td>月末締／翌月末</td><td><span class="badge warn">商談中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">オリオン銀行</a></td><td><span class="badge info">顧客企業</span></td><td>エンド（直請）</td><td class="num">1</td><td class="num">1名</td><td>月末締／翌々月10日</td><td><span class="badge success">取引中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">シリウス証券株式会社</a></td><td><span class="badge info">顧客企業</span></td><td>2次請</td><td class="num">1</td><td class="num">1名</td><td>月末締／翌月末</td><td><span class="badge success">取引中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">ペガサスシステムズ株式会社</a></td><td><span class="badge gray">協力会社(BP)</span></td><td>BP（要員供給）</td><td class="num">—</td><td class="num">4名</td><td>月末締／翌月末</td><td><span class="badge success">基本契約済</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">株式会社ドラコIT</a></td><td><span class="badge gray">協力会社(BP)</span></td><td>BP（要員供給）</td><td class="num">—</td><td class="num">3名</td><td>月末締／翌月末</td><td><span class="badge success">基本契約済</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">フェニックス開発株式会社</a></td><td><span class="badge gray">協力会社(BP)</span></td><td>BP（要員供給）</td><td class="num">—</td><td class="num">2名</td><td>月末締／翌月末</td><td><span class="badge success">基本契約済</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">シーカーユニット（仮）</a></td><td><span class="badge gray">協力会社(BP)</span></td><td>BP（個人事業主経由）</td><td class="num">—</td><td class="num">0名</td><td>—</td><td><span class="badge warn">契約前</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>💡 BP（協力会社）も取引先に入れます。</strong>「どのBPから何名調達し、いくら粗利が出ているか」がBP別レポートで自動集計されます（現状Asanaでは追えない情報）。</div>
+  </div>
+
   <!-- ===================== 取引先 詳細 ===================== -->
   <div class="page" id="account-detail">
     <div class="disc">
@@ -888,7 +1081,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
       <div class="disc-src">要件定義書 §3-2 Account ／ §1 M1</div>
       <div class="disc-body">エンド/元請/BPを取引区分で表現。<span class="disc-flag"></span>支払サイト（請求連動）・与信をどこまで持つか</div>
     </div>
-    <div class="crumb"><a data-go="home">取引先</a><span class="sep">›</span>株式会社トパーズ物流</div>
+    <div class="crumb"><a data-go="account-list">取引先</a><span class="sep">›</span>株式会社トパーズ物流</div>
     <div class="obj-header"><div class="row1">
       <div class="obj-icon account">🏢</div>
       <div class="obj-title"><div class="label">取引先（顧客企業）</div><div class="name">株式会社トパーズ物流</div></div>
@@ -913,7 +1106,201 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
     </div>
   </div>
 
-  <!-- ===================== 見積・帳票（APEXボタン + Sander） ===================== -->
+  <!-- ===================== 人情報（取引先責任者）一覧 ===================== -->
+  <div class="page" id="contact-list">
+    <div class="disc">
+      <div class="disc-q">論点：「人情報」＝取引先責任者（顧客担当＋BP担当）の一元管理でよいか</div>
+      <div class="disc-src">要件定義書 §1 M2 ／ 7/17議事「6オブジェクト構成」</div>
+      <div class="disc-body">
+        顧客側の窓口と、BP側の営業窓口を同じオブジェクトで管理します。Asana／メールに散っている「誰に連絡すればよいか」をここに集約。
+        <span class="disc-flag"></span>BP担当者の連絡先はどこまで登録するか（携帯／個人メールの扱い）
+      </div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon contact">👥</div>
+      <div class="obj-title"><div class="label">人情報（取引先責任者）</div><div class="name">すべての担当者 <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      <div class="obj-actions"><button class="btn">インポート</button><button class="btn primary" onclick="toast('新規（モック）')">新規</button></div>
+    </div></div>
+    <div class="filter-bar">
+      <span class="f-chip on">種別：すべて ×</span>
+      <span class="f-chip">顧客担当のみ</span>
+      <span class="f-chip">BP担当のみ</span>
+      <span class="f-chip">＋ フィルタを追加</span>
+      <span style="margin-left:auto;color:var(--text-mute);font-size:12px">6 件</span>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>氏名</th><th>取引先</th><th>種別</th><th>役割</th><th>連絡先</th><th>最終接触</th></tr></thead>
+      <tbody>
+        <tr><td><a class="name-link" data-go="contact-detail">田島 健一</a></td><td><a class="name-link" data-go="account-detail">株式会社トパーズ物流</a></td><td><span class="badge info">顧客担当</span></td><td>情シス部長（決裁）</td><td>t-tajima@example.co.jp</td><td>7/18</td></tr>
+        <tr><td><a class="name-link" data-go="contact-detail">大野 真澄</a></td><td>株式会社トパーズ物流</td><td><span class="badge info">顧客担当</span></td><td>PJリーダー（現場窓口）</td><td>m-ono@example.co.jp</td><td>7/21</td></tr>
+        <tr><td><a class="name-link" data-go="contact-detail">中園 慎也</a></td><td>株式会社ネビュラソフト</td><td><span class="badge info">顧客担当</span></td><td>開発本部 課長</td><td>nakazono@example.co.jp</td><td>7/15</td></tr>
+        <tr><td><a class="name-link" data-go="contact-detail">高瀬 直樹</a></td><td>オリオン銀行</td><td><span class="badge info">顧客担当</span></td><td>システム部 調達担当</td><td>takase@example.co.jp</td><td>7/17</td></tr>
+        <tr><td><a class="name-link" data-go="contact-detail">村瀬 洋子</a></td><td>ペガサスシステムズ株式会社</td><td><span class="badge gray">BP担当</span></td><td>営業（要員提案窓口）</td><td>murase@example.co.jp</td><td>7/22</td></tr>
+        <tr><td><a class="name-link" data-go="contact-detail">石動 亮</a></td><td>株式会社ドラコIT</td><td><span class="badge gray">BP担当</span></td><td>営業部長</td><td>isurugi@example.co.jp</td><td>7/14</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>💡 BP担当者を登録しておくと、</strong>案件発生時に「この条件で出せるBP担当」へ一斉に問い合わせできます（Phase2でメール一括送信も検討可）。</div>
+  </div>
+
+  <!-- ===================== 人情報 詳細 ===================== -->
+  <div class="page" id="contact-detail">
+    <div class="disc">
+      <div class="disc-q">論点：担当者ごとの「やりとり履歴」をSalesforceに残すか</div>
+      <div class="disc-src">要件定義書 §1 M2</div>
+      <div class="disc-body">活動（電話・メール・面談）を記録すると、担当交代時の引き継ぎが効きます。<span class="disc-flag"></span>活動記録は必須運用にするか、任意にするか</div>
+    </div>
+    <div class="crumb"><a data-go="contact-list">人情報</a><span class="sep">›</span>田島 健一</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon contact">👥</div>
+      <div class="obj-title"><div class="label">取引先責任者（顧客担当）</div><div class="name">田島 健一</div></div>
+      <div class="obj-actions"><button class="btn">編集</button><button class="btn primary" onclick="toast('活動を記録（モック）')">活動を記録</button></div>
+    </div></div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">取引先</div><div class="val"><a class="name-link" data-go="account-detail">株式会社トパーズ物流</a></div></div>
+      <div class="item"><div class="lbl">役割</div><div class="val">情シス部長（決裁）</div></div>
+      <div class="item"><div class="lbl">関連案件</div><div class="val">2 件</div></div>
+      <div class="item"><div class="lbl">最終接触</div><div class="val">2026/07/18</div></div>
+    </div>
+    <div class="two-col-3">
+      <div><div class="card"><div class="card-head">📝 詳細</div><div class="card-body"><div class="field-grid">
+        <div class="field"><div class="lbl">部署</div><div class="val">情報システム部</div></div>
+        <div class="field"><div class="lbl">役職</div><div class="val">部長</div></div>
+        <div class="field"><div class="lbl">メール</div><div class="val">t-tajima@example.co.jp</div></div>
+        <div class="field"><div class="lbl">電話</div><div class="val">03-xxxx-xxxx</div></div>
+        <div class="field"><div class="lbl">決裁権限</div><div class="val"><span class="badge success">あり</span></div></div>
+        <div class="field"><div class="lbl">担当営業</div><div class="val">後藤</div></div>
+      </div></div></div></div>
+      <div><div class="related-card"><div class="related-head">📁 関連案件 <span class="count">(2)</span></div>
+        <table class="tbl">
+          <tr><td><a class="name-link" data-go="project-detail">基幹再構築</a></td><td><span class="badge success">参画</span></td></tr>
+          <tr><td>配車アプリ</td><td><span class="badge info">提案中</span></td></tr>
+        </table>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ===================== 見積・請求 一覧（帳票センター） ===================== -->
+  <div class="page" id="doc-list">
+    <div class="disc">
+      <div class="disc-q">論点：帳票は「請求書＝月次一括発行／見積書・注文書＝案件単位で個別発行」でよいか</div>
+      <div class="disc-src">7/17議事 決定事項 ／ 要件定義書 §7</div>
+      <div class="disc-body">
+        7/17に伺った運用をそのまま画面にしました。
+        <span class="disc-flag"></span>Phase1でどこまで作るか（見積書まで／注文書も／請求書一括はPhase2か）
+      </div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon quote">📄</div>
+      <div class="obj-title"><div class="label">見積・請求</div><div class="name">帳票一覧</div></div>
+      <div class="obj-actions">
+        <button class="btn" onclick="goPage('quote')">見積書を作成</button>
+        <button class="btn" onclick="goPage('order')">注文書を作成</button>
+        <button class="btn primary" onclick="goPage('invoice-batch')">月次請求書を一括発行</button>
+      </div>
+    </div></div>
+
+    <div class="doc-nav">
+      <span class="dn on">すべて</span>
+      <span class="dn" onclick="goPage('quote')">見積書（案件単位）</span>
+      <span class="dn" onclick="goPage('order')">注文書（案件単位）</span>
+      <span class="dn" onclick="goPage('invoice-batch')">請求書（月次一括）</span>
+    </div>
+
+    <div class="sander-note">⚙️ いずれも <b>APEXボタン＋Sanderライセンス（月3,000円）</b> で生成する前提です。AppExchangeのカスタムオブジェクト方式はライセンス判定NGのため採用しません。</div>
+
+    <table class="tbl">
+      <thead><tr><th>帳票番号</th><th>種別</th><th>宛先</th><th>案件／対象月</th><th class="num">金額(税込)</th><th>発行日</th><th>状態</th></tr></thead>
+      <tbody>
+        <tr><td><a class="name-link" data-go="quote">Q-2026-0142</a></td><td><span class="badge info">見積書</span></td><td>株式会社ネビュラソフト</td><td>ネビュラ会計SaaS 基盤更改</td><td class="num">¥2,915,000</td><td>2026/07/17</td><td><span class="badge warn">送付済</span></td></tr>
+        <tr><td><a class="name-link" data-go="order">O-2026-0087</a></td><td><span class="badge gray">注文書</span></td><td>ペガサスシステムズ株式会社</td><td>シリウス証券 データ基盤</td><td class="num">¥1,045,000</td><td>2026/07/10</td><td><span class="badge success">締結済</span></td></tr>
+        <tr><td><a class="name-link" data-go="invoice-batch">I-2026-06-001〜012</a></td><td><span class="badge success">請求書</span></td><td>12社（一括）</td><td>2026年6月分</td><td class="num">¥18,942,000</td><td>2026/07/01</td><td><span class="badge success">発行済</span></td></tr>
+        <tr><td><a class="name-link" data-go="invoice-batch">I-2026-05-001〜011</a></td><td><span class="badge success">請求書</span></td><td>11社（一括）</td><td>2026年5月分</td><td class="num">¥17,380,000</td><td>2026/06/01</td><td><span class="badge success">入金済</span></td></tr>
+        <tr><td><a class="name-link" data-go="quote">Q-2026-0138</a></td><td><span class="badge info">見積書</span></td><td>オリオン銀行</td><td>オリオン銀行 PMO支援</td><td class="num">¥1,595,000</td><td>2026/07/08</td><td><span class="badge success">受注</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===================== 月次請求書 一括発行 ===================== -->
+  <div class="page" id="invoice-batch">
+    <div class="disc">
+      <div class="disc-q">論点：月次請求書の一括発行フローはこの手順でよいか（対象月 → 対象確認 → 一括生成）</div>
+      <div class="disc-src">7/17議事「請求書は月次一括発行」／ 要件定義書 §7 A7</div>
+      <div class="disc-body">
+        稼働中アサインから請求額を自動集計し、取引先ごとに1通ずつPDFを生成します。精算幅の超過／控除もここで反映。
+        <span class="disc-flag"></span>勤務表（工数）の取り込み方法＝<b>専用メールアドレスへ送付→自動格納</b>で確定してよいか
+        <span class="disc-flag"></span>これはPhase1に含めるか、Phase2送りか（工数影響大）
+      </div>
+    </div>
+    <div class="crumb"><a data-go="doc-list">見積・請求</a><span class="sep">›</span>月次請求書 一括発行</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon quote">🧾</div>
+      <div class="obj-title"><div class="label">帳票（APEXボタン）</div><div class="name">月次請求書 一括発行</div></div>
+      <div class="obj-actions">
+        <button class="btn">対象月：2026年7月 ▼</button>
+        <button class="btn success" onclick="toast('請求書12件をPDF生成しました（モック）','success')">🧾 一括発行（12件）</button>
+      </div>
+    </div></div>
+
+    <div class="sander-note">⚙️ <b>APEXボタン「月次請求書一括発行」＋Sander</b> で、取引先ごとにPDFを生成→メール送付まで想定。<span style="color:var(--sander)">※Sanderで一括生成・送付が可能かは澤田様・三好様に確認中の項目です</span></div>
+
+    <div class="batch-sum">
+      <div><div class="k">対象月</div><div class="v">2026年7月</div></div>
+      <div><div class="k">対象アサイン</div><div class="v">12 件</div></div>
+      <div><div class="k">請求先</div><div class="v">7 社</div></div>
+      <div><div class="k">請求合計(税込)</div><div class="v">¥19,558,000</div></div>
+      <div><div class="k">粗利合計</div><div class="v gp good">¥6,420,000</div></div>
+      <div style="margin-left:auto"><span class="badge warn">勤務表 未提出 2件</span></div>
+    </div>
+
+    <table class="tbl">
+      <thead><tr class="batch-row"><th><input type="checkbox" checked></th><th>請求先</th><th>アサイン</th><th>タレント</th><th class="num">基本額</th><th class="num">稼働h</th><th class="num">超過/控除</th><th class="num">請求額</th><th>勤務表</th></tr></thead>
+      <tbody>
+        <tr class="batch-row"><td><input type="checkbox" checked></td><td>株式会社トパーズ物流</td><td>A-2026-0138</td><td>K.S</td><td class="num">¥1,180,000</td><td class="num">168</td><td class="num">—</td><td class="num">¥1,180,000</td><td><span class="badge success">受領済</span></td></tr>
+        <tr class="batch-row"><td><input type="checkbox" checked></td><td>株式会社トパーズ物流</td><td>A-2026-0141</td><td>M.T</td><td class="num">¥1,250,000</td><td class="num">184</td><td class="num gp good">+¥32,500</td><td class="num">¥1,282,500</td><td><span class="badge success">受領済</span></td></tr>
+        <tr class="batch-row"><td><input type="checkbox" checked></td><td>シリウス証券株式会社</td><td>A-2026-0127</td><td>T.W</td><td class="num">¥1,320,000</td><td class="num">172</td><td class="num">—</td><td class="num">¥1,320,000</td><td><span class="badge success">受領済</span></td></tr>
+        <tr class="batch-row"><td><input type="checkbox" checked></td><td>オリオン銀行</td><td>A-2026-0131</td><td>Y.N</td><td class="num">¥1,450,000</td><td class="num">136</td><td class="num gp bad">−¥37,140</td><td class="num">¥1,412,860</td><td><span class="badge success">受領済</span></td></tr>
+        <tr class="batch-row"><td><input type="checkbox"></td><td>ベガ製造株式会社</td><td>A-2026-0104</td><td>A.K</td><td class="num">¥1,190,000</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="badge error">未提出</span></td></tr>
+        <tr class="batch-row"><td><input type="checkbox"></td><td>P's Factory（仮）</td><td>A-2026-0119</td><td>S.O</td><td class="num">¥1,150,000</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td><span class="badge error">未提出</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>💡 勤務表が未受領のアサインは自動で除外されます。</strong>専用メールアドレス（例 <code>kinmu@sysnag.co.jp</code>）に送られた勤務表をSalesforceへ自動格納し、稼働hが埋まったものだけを請求対象にする想定です。</div>
+  </div>
+
+  <!-- ===================== 注文書（案件単位） ===================== -->
+  <div class="page" id="order">
+    <div class="disc">
+      <div class="disc-q">論点：注文書はBP（協力会社）向け発注として案件単位で出す認識でよいか</div>
+      <div class="disc-src">7/17議事「見積書・注文書は案件単位で個別発行」</div>
+      <div class="disc-body">アサインの原価単価・期間から自動生成。<span class="disc-flag"></span>注文請書の回収（押印/電子）まで管理するか（Phase2の契約管理候補）</div>
+    </div>
+    <div class="crumb"><a data-go="doc-list">見積・請求</a><span class="sep">›</span>注文書 O-2026-0087</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon order">📑</div>
+      <div class="obj-title"><div class="label">帳票（APEXボタン）</div><div class="name">注文書プレビュー（モック）</div></div>
+      <div class="obj-actions"><button class="btn" onclick="toast('PDFダウンロード（モック）')">PDF</button><button class="btn primary" onclick="toast('注文書をメール送付しました（モック）','success')">メール送付</button></div>
+    </div></div>
+    <div class="pdf-toolbar"><span>◀ ▶ 1 / 1</span><span>注文書_ペガサスシステムズ_20260710.pdf</span><span style="margin-left:auto">100%</span></div>
+    <div class="pdf-page">
+      <div class="pdf-hdr">
+        <div><div class="pdf-title">注 文 書</div><div style="margin-top:16px">ペガサスシステムズ株式会社 御中</div></div>
+        <div style="text-align:right;font-size:12px">注文番号: O-2026-0087<br>発行日: 2026/07/10<br><br><b>株式会社SYSNAG</b><br>東京都千代田区丸の内1-9-2<br>グラントウキョウサウスタワー11階</div>
+      </div>
+      <div>下記の通り発注いたします。</div>
+      <div class="pdf-amount-box">発注金額　¥1,045,000 -（税込）</div>
+      <table class="pdf-tbl">
+        <thead><tr><th>品目</th><th class="num">単価(月)</th><th class="num">人数</th><th class="num">期間</th><th class="num">金額</th></tr></thead>
+        <tbody>
+          <tr><td>技術支援：Java/PHPエンジニア（S.O 氏）</td><td class="num">¥950,000</td><td class="num">1</td><td class="num">1ヶ月</td><td class="num">¥950,000</td></tr>
+          <tr><td colspan="4" class="num">小計</td><td class="num">¥950,000</td></tr>
+          <tr><td colspan="4" class="num">消費税(10%)</td><td class="num">¥95,000</td></tr>
+          <tr><td colspan="4" class="num"><b>合計</b></td><td class="num"><b>¥1,045,000</b></td></tr>
+        </tbody>
+      </table>
+      <div class="pdf-bottom">精算幅: 140〜180h／月　支払条件: 月末締翌月末　作業場所: 顧客先常駐（一部リモート可）<br>備考: 基本契約書に基づく個別契約とする。稼働期間 2026/08/01〜2027/01/31。</div>
+    </div>
+  </div>
+
+  <!-- ===================== 見積書（案件単位） ===================== -->
   <div class="page" id="quote">
     <div class="disc">
       <div class="disc-q">論点：見積・請求の帳票を「APEXボタン＋Sanderライセンス」で出す前提の技術確認</div>
@@ -922,13 +1309,14 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
         案件/アサインから1クリックで見積PDF生成→メール送付を想定。<span class="disc-flag"></span>SanderでPDF生成・送付まで可能か、APEX実装分担（Glue/Sander側）はどうなるか（澤田様・三好様に確認）
       </div>
     </div>
+    <div class="crumb"><a data-go="doc-list">見積・請求</a><span class="sep">›</span>見積書 Q-2026-0142</div>
     <div class="obj-header"><div class="row1">
       <div class="obj-icon quote">📄</div>
-      <div class="obj-title"><div class="label">帳票</div><div class="name">見積書プレビュー（モック）</div></div>
+      <div class="obj-title"><div class="label">帳票（APEXボタン）</div><div class="name">見積書プレビュー（モック）</div></div>
       <div class="obj-actions"><button class="btn" onclick="toast('PDFダウンロード（モック）')">PDF</button><button class="btn primary" onclick="toast('見積書をメール送付しました（モック）','success')">メール送付</button></div>
     </div></div>
 
-    <div class="sander-note">⚙️ この帳票は <b>APEXボタン「見積書作成」＋Sanderライセンス（月3,000円）</b> で生成する前提のモックです。AppExchangeのカスタムオブジェクト方式はライセンス判定NGのため採用しません。<span style="color:var(--sander)">※Phase1は見積書まで／請求書はPhase2想定</span></div>
+    <div class="sander-note">⚙️ この帳票は <b>APEXボタン「見積書作成」＋Sanderライセンス（月3,000円）</b> で生成する前提のモックです。AppExchangeのカスタムオブジェクト方式はライセンス判定NGのため採用しません。<span style="color:var(--sander)">※Phase1は見積書まで／注文書・請求書一括の範囲は本日ご相談</span></div>
 
     <div class="pdf-toolbar"><span>◀ ▶ 1 / 1</span><span>見積書_ネビュラ会計SaaS_20260717.pdf</span><span style="margin-left:auto">100%</span></div>
     <div class="pdf-page">
@@ -1013,6 +1401,106 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
+
+  <!-- ===================== Asana 対比（現行 → Salesforce） ===================== -->
+  <div class="page" id="asana-map">
+    <div class="disc">
+      <div class="disc-q">論点：現行Asanaの情報を、この対応でSalesforceへ移して問題ないか</div>
+      <div class="disc-src">7/21ご提供「asana画面イメージ」／ 要件定義書 §3 データモデル</div>
+      <div class="disc-body">
+        いただいた画面イメージを読み解いて作成しました。<span class="disc-flag"></span>PMO事業案件セクションが0件でしたが、PMO案件は現在どこで管理されていますか
+        <span class="disc-flag"></span>プロパー（自社社員）が1件のみでしたが、自社要員の管理はどちらでしょうか
+      </div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon custom">🔄</div>
+      <div class="obj-title"><div class="label">移行設計</div><div class="name">現行Asana → Salesforce 対応表</div></div>
+      <div class="obj-actions"><button class="btn" onclick="goPage('talent-detail')">👤 タレント項目を見る</button></div>
+    </div></div>
+
+    <div class="ba-grid">
+      <div class="ba-col before">
+        <div class="ba-head">現行：Asana「案件＆要員情報」ボード</div>
+        <div class="ba-body">
+          <div style="font-size:12px;color:var(--text-mute);margin-bottom:8px">セクション（列）：プロパー情報 / 要員情報 / 鶴代(要員) / 要員情報(碇谷) / PMO事業案件 / …</div>
+          <div class="asana-card">
+            ✓ 即日　Java5年　常駐可　シーカーユニット
+            <div class="asana-note">↑ カード名に条件を詰め込み</div>
+          </div>
+          <div class="asana-card">
+            ✓ 薄井さん　PMO　MIN80万（70万仕入れ）　リモート併用　P's Factory
+            <div class="asana-note">↑ 請求単価と原価単価が文字列</div>
+          </div>
+          <div class="asana-card">
+            ✓ 【1/2面談調整中1件】8月開始　AWS上流　120〜130万　DXインキュベーション斎藤
+            <div class="asana-note">↑ 進捗・時期・単価・BP・担当が1行に混在</div>
+          </div>
+          <div style="margin-top:12px;padding:10px;background:#fafaf9;border:1px solid var(--border);border-radius:4px;font-size:12px">
+            <div style="color:var(--text-mute);margin-bottom:6px">タスク詳細（説明欄はすべてフリーテキスト）</div>
+            <div style="line-height:1.9">
+              【名　前】：W.K（28歳）男性<br>
+              【所　属】：1社先個人事業主<br>
+              【最　寄】：京王線・仙川駅<br>
+              【稼働日】：即日〜（常駐可・リモート併用可 週1〜2）<br>
+              【単　価】：60万円（税別）<br>
+              【並　行】：提案1件、面談設定1件<br>
+              【スキル】：言語 / DB・OS / FW・ツール / 経験工程<br>
+              【業　務】：…
+            </div>
+          </div>
+          <div style="margin-top:10px">
+            <div class="pain">❌ カスタムフィールドが0 → <b>絞り込み・並び替え・集計ができない</b></div>
+            <div class="pain">❌ 単価が文字列 → <b>粗利は毎回目視で計算</b></div>
+            <div class="pain">❌ 列が担当者名 → <b>全体を串刺しで見られない</b></div>
+            <div class="pain">❌ 案件と要員が同じボード → <b>マッチングは目視</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ba-col after">
+        <div class="ba-head">Salesforce：6オブジェクトに構造化</div>
+        <div class="ba-body">
+          <table class="tbl map-tbl">
+            <thead><tr><th>Asana</th><th></th><th>Salesforce</th></tr></thead>
+            <tbody>
+              <tr><td>【名前】W.K（28歳）男性</td><td>→</td><td>氏名(イニシャル) / 年齢 / 性別</td></tr>
+              <tr><td>【所属】1社先個人事業主</td><td>→</td><td>所属BP（取引先参照）/ 商流段数</td></tr>
+              <tr><td>【最寄】京王線・仙川駅</td><td>→</td><td>最寄駅 / 通勤可能圏</td></tr>
+              <tr><td>【稼働日】即日〜</td><td>→</td><td>稼働可能時期（日付）</td></tr>
+              <tr><td>常駐可 / リモート週1〜2</td><td>→</td><td>常駐可否 / リモート可否・頻度</td></tr>
+              <tr><td>【単価】60万円</td><td>→</td><td>提示単価（通貨）</td></tr>
+              <tr><td>【並行】提案1件、面談1件</td><td>→</td><td>並行提案数 / 並行面談数 <span class="auto-tag">自動集計</span></td></tr>
+              <tr><td>【スキル】</td><td>→</td><td>言語 / DB・OS / FW・ツール / 経験工程（複数選択×4）</td></tr>
+              <tr><td>【業務】経歴</td><td>→</td><td>業務経歴（ロングテキスト）</td></tr>
+              <tr><td style="color:var(--text-mute)">— カード名 —</td><td></td><td style="color:var(--text-mute)">— 以下は案件／アサインへ —</td></tr>
+              <tr><td>8月開始</td><td>→</td><td>案件.開始予定日</td></tr>
+              <tr><td>AWS上流 / インフラ・PMO・PL</td><td>→</td><td>案件.必要スキル / 役割</td></tr>
+              <tr><td>120〜130万</td><td>→</td><td>案件.単価上限</td></tr>
+              <tr><td>【1/2面談調整中1件】</td><td>→</td><td>案件.ステージ＝面談調整</td></tr>
+              <tr><td>MIN80万（70万仕入れ）</td><td>→</td><td>アサイン.請求単価 / 原価単価<br><b>粗利・粗利率＝数式で自動</b></td></tr>
+              <tr><td>シーカーユニット / P's Factory 等</td><td>→</td><td>取引先（協力会社BP）</td></tr>
+              <tr><td>鶴代 / 碇谷 / 後藤（列名）</td><td>→</td><td>所有者（担当者）項目＋リストビュー</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:10px">
+            <div class="gain">✅ 待機×スキル×単価×稼働時期で<b>絞り込み・並び替え</b>ができる</div>
+            <div class="gain">✅ 粗利・粗利率が<b>自動計算</b>され、案件別・BP別に集計される</div>
+            <div class="gain">✅ 担当者を横断して<b>全社のパイプラインが1画面</b>で見える</div>
+            <div class="gain">✅ 案件⇄人材の<b>マッチング候補がスコア付きで提示</b>される</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:10px">
+      <strong>💡 ご確認をお願いしたい点</strong><br>
+      ① PMO事業案件セクションが0件でした。PMO案件の現行管理場所（別ボード／スプレッドシート／i-SeiQ）<br>
+      ② プロパー情報が1件のみでした。自社社員の管理場所<br>
+      ③ 「INPA 要員情報（スプレッドシート）」「Rezon 要員一覧」等のリンク先スプレッドシート（項目マッピングに使わせてください）<br>
+      ④ Asanaのカード総数（移行対象件数の目安）<br>
+      ⑤ Salesforce稼働後、Asanaは廃止／併用のどちらをお考えか
     </div>
   </div>
 
