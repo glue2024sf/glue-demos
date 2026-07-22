@@ -541,6 +541,24 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   background:var(--error-bg);border-left:3px solid var(--error);
   padding:8px 12px;border-radius:0 4px 4px 0;font-size:12px;margin-bottom:6px;
 }
+
+/* 現行フロー図（iSEC連携） */
+.flow{display:flex;align-items:stretch;gap:4px;flex-wrap:wrap}
+.flow-step{
+  flex:1 1 170px;display:flex;gap:8px;align-items:flex-start;
+  background:#fff;border:1px solid var(--border);border-top:3px solid var(--brand);
+  border-radius:4px;padding:9px 11px;min-width:0;
+}
+.flow-step.iseq{border-top-color:var(--warn);background:var(--warn-bg)}
+.flow-step .fs-n{
+  flex:0 0 20px;height:20px;border-radius:50%;background:var(--brand);color:#fff;
+  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
+}
+.flow-step.iseq .fs-n{background:var(--warn)}
+.flow-step .fs-b{font-size:12px;min-width:0}
+.flow-step .fs-s{font-size:11px;color:var(--text-mute);margin-top:2px}
+.flow-arw{display:flex;align-items:center;color:var(--text-mute);font-size:15px}
+@media(max-width:900px){ .flow-arw{display:none} }
 .gain{
   background:var(--success-bg);border-left:3px solid var(--success);
   padding:8px 12px;border-radius:0 4px 4px 0;font-size:12px;margin-bottom:6px;
@@ -579,6 +597,8 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="tab" data-page="doc-list">📄 見積・請求</div>
   <div class="tab" data-page="dashboard">📊 分析</div>
   <div class="tab" data-page="asana-map">🔄 Asana対比</div>
+  <div class="tab" data-page="isec">🔌 iSEC連携</div>
+  <div class="tab" data-page="issues">📋 論点整理</div>
 </div>
 
 <div class="main">
@@ -601,10 +621,10 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
     </div></div>
 
     <div class="dash-grid">
-      <div class="widget span-3"><div class="w-title">稼働中エンジニア</div><div class="w-big">38<span style="font-size:14px">名</span></div><div class="w-sub up">稼働率 88.4%（自社43名中）</div></div>
-      <div class="widget span-3"><div class="w-title">待機・終了間近</div><div class="w-big" style="color:var(--warn)">5<span style="font-size:14px">名</span></div><div class="w-sub">待機2 / 30日内終了3</div></div>
-      <div class="widget span-3"><div class="w-title">今月 粗利（見込）</div><div class="w-big">¥6.42<span style="font-size:14px">M</span></div><div class="w-sub up">前月比 +4.1%</div></div>
-      <div class="widget span-3"><div class="w-title">パイプライン</div><div class="w-big">¥18.6<span style="font-size:14px">M</span></div><div class="w-sub">提案中12件 / 面談待ち7件</div></div>
+      <div class="widget span-3"><div class="w-title">稼働中エンジニア</div><div class="w-big">87<span style="font-size:14px">名</span></div><div class="w-sub up">稼働率 91.6%（登録95名中）</div></div>
+      <div class="widget span-3"><div class="w-title">待機・終了間近</div><div class="w-big" style="color:var(--warn)">8<span style="font-size:14px">名</span></div><div class="w-sub">待機3 / 30日内終了5</div></div>
+      <div class="widget span-3"><div class="w-title">今月 粗利（見込）</div><div class="w-big">¥21.8<span style="font-size:14px">M</span></div><div class="w-sub up">前月比 +4.1%</div></div>
+      <div class="widget span-3"><div class="w-title">パイプライン</div><div class="w-big">¥18.6<span style="font-size:14px">M</span></div><div class="w-sub">注力5社 ・ 提案中12件 / 面談待ち7件</div></div>
 
       <div class="widget span-8">
         <div class="w-title">⚠ 要対応（終了間近アサイン・停滞案件）</div>
@@ -1352,20 +1372,20 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
       <div class="obj-title"><div class="label">ダッシュボード</div><div class="name">経営：稼働・粗利・パイプライン</div></div>
     </div></div>
     <div class="dash-grid">
-      <div class="widget span-3"><div class="w-title">稼働率</div><div class="w-big">88.4%</div><div class="w-sub up">目標85% 達成</div></div>
-      <div class="widget span-3"><div class="w-title">月次粗利</div><div class="w-big">¥6.42M</div><div class="w-sub up">前月比 +4.1%</div></div>
+      <div class="widget span-3"><div class="w-title">稼働率</div><div class="w-big">91.6%</div><div class="w-sub up">目標85% 達成</div></div>
+      <div class="widget span-3"><div class="w-title">月次粗利</div><div class="w-big">¥21.8M</div><div class="w-sub up">前月比 +4.1%</div></div>
       <div class="widget span-3"><div class="w-title">平均粗利率</div><div class="w-big">31.8%</div><div class="w-sub">目標30%</div></div>
-      <div class="widget span-3"><div class="w-title">待機人材</div><div class="w-big" style="color:var(--warn)">2名</div><div class="w-sub">機会損失 ¥1.7M/月</div></div>
+      <div class="widget span-3"><div class="w-title">待機人材</div><div class="w-big" style="color:var(--warn)">3名</div><div class="w-sub">機会損失 ¥2.6M/月</div></div>
 
       <div class="widget span-8">
         <div class="w-title">月次粗利 推移（百万円）</div>
         <div class="bar-chart-wrap"><div class="bar-chart" style="margin-bottom:22px">
-          <div class="bar" style="height:62%"><span class="v">5.1</span><span class="x">3月</span></div>
-          <div class="bar" style="height:68%"><span class="v">5.5</span><span class="x">4月</span></div>
-          <div class="bar" style="height:64%"><span class="v">5.3</span><span class="x">5月</span></div>
-          <div class="bar" style="height:74%"><span class="v">6.0</span><span class="x">6月</span></div>
-          <div class="bar" style="height:78%"><span class="v">6.2</span><span class="x">7月</span></div>
-          <div class="bar" style="height:82%"><span class="v">6.4</span><span class="x">見込</span></div>
+          <div class="bar" style="height:62%"><span class="v">17.4</span><span class="x">3月</span></div>
+          <div class="bar" style="height:68%"><span class="v">18.8</span><span class="x">4月</span></div>
+          <div class="bar" style="height:64%"><span class="v">18.0</span><span class="x">5月</span></div>
+          <div class="bar" style="height:74%"><span class="v">20.4</span><span class="x">6月</span></div>
+          <div class="bar" style="height:78%"><span class="v">21.1</span><span class="x">7月</span></div>
+          <div class="bar" style="height:82%"><span class="v">21.8</span><span class="x">見込</span></div>
         </div></div>
       </div>
       <div class="widget span-4">
@@ -1373,8 +1393,8 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
         <div class="donut-wrap">
           <div class="donut" style="background:conic-gradient(var(--ses) 0 72%, var(--pmo) 72% 100%)"></div>
           <div class="legend">
-            <div class="lg-item"><span class="lg-dot" style="background:var(--ses)"></span>SES 31名（72%）</div>
-            <div class="lg-item"><span class="lg-dot" style="background:var(--pmo)"></span>PMO 12名（28%）</div>
+            <div class="lg-item"><span class="lg-dot" style="background:var(--ses)"></span>SES 63名（72%）</div>
+            <div class="lg-item"><span class="lg-dot" style="background:var(--pmo)"></span>PMO 24名（28%）</div>
           </div>
         </div>
       </div>
@@ -1395,9 +1415,10 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
         <table class="tbl" style="margin-top:6px">
           <thead><tr><th>協力会社</th><th class="num">稼働</th><th class="num">粗利/月</th></tr></thead>
           <tbody>
-            <tr><td>ペガサスシステムズ</td><td class="num">4名</td><td class="num gp good">¥1.4M</td></tr>
-            <tr><td>ドラコIT</td><td class="num">3名</td><td class="num gp good">¥0.9M</td></tr>
-            <tr><td>フェニックス開発</td><td class="num">2名</td><td class="num gp mid">¥0.5M</td></tr>
+            <tr><td>ペガサスシステムズ</td><td class="num">14名</td><td class="num gp good">¥4.6M</td></tr>
+            <tr><td>ドラコIT</td><td class="num">9名</td><td class="num gp good">¥2.8M</td></tr>
+            <tr><td>フェニックス開発</td><td class="num">6名</td><td class="num gp mid">¥1.5M</td></tr>
+            <tr><td>その他BP 12社</td><td class="num">21名</td><td class="num gp good">¥5.9M</td></tr>
           </tbody>
         </table>
       </div>
@@ -1501,6 +1522,154 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
       ③ 「INPA 要員情報（スプレッドシート）」「Rezon 要員一覧」等のリンク先スプレッドシート（項目マッピングに使わせてください）<br>
       ④ Asanaのカード総数（移行対象件数の目安）<br>
       ⑤ Salesforce稼働後、Asanaは廃止／併用のどちらをお考えか
+    </div>
+  </div>
+
+  <!-- ===================== iSEC 連携のご提案 ===================== -->
+  <div class="page" id="isec">
+    <div class="disc">
+      <div class="disc-q">論点：iSEC（愛生協）との関係を「現行フロー維持＋二重入力の削減」で進めてよいか</div>
+      <div class="disc-src">7/17議事「注力5社のみ案件登録し、契約確定時にiSECにマスター登録する現行フローを維持」／ 要件定義書 §1 Phase2</div>
+      <div class="disc-body">
+        現状は Salesforce（商談〜契約前）と iSEC（契約確定後のマスタ）で入力が分かれます。どこまでを機械的につなぐかで工数が大きく変わります。
+        <span class="disc-flag"></span><b>iSECの画面・項目定義をご提供ください</b>（現時点で未拝見のため、下記は方式の選択肢のみのご提案です）
+      </div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon custom">🔌</div>
+      <div class="obj-title"><div class="label">連携設計（ご提案）</div><div class="name">Salesforce ⇄ iSEC（愛生協）</div></div>
+    </div></div>
+
+    <div class="callout" style="border-left-color:var(--warn);background:var(--warn-bg)">
+      <strong>⚠️ 前提のご確認</strong><br>
+      iSECの画面イメージ・項目定義をまだ拝見できていないため、本ページは<b>「どの方式で行くか」を選んでいただくためのたたき台</b>です。
+      画面に寄せたモックは、スクリーンショットをご提供いただき次第すぐに作成いたします（Asana同様、次回までに反映可能です）。
+    </div>
+
+    <div class="card"><div class="card-head">📌 現行フロー（7/17に伺った内容）</div><div class="card-body">
+      <div class="flow">
+        <div class="flow-step"><div class="fs-n">1</div><div class="fs-b"><b>引合〜提案〜面談</b><div class="fs-s">注力5社のみ／Asana・スプレッドシート</div></div></div>
+        <div class="flow-arw">→</div>
+        <div class="flow-step"><div class="fs-n">2</div><div class="fs-b"><b>契約確定</b><div class="fs-s">条件・単価が確定</div></div></div>
+        <div class="flow-arw">→</div>
+        <div class="flow-step iseq"><div class="fs-n">3</div><div class="fs-b"><b>iSECへマスタ登録</b><div class="fs-s">契約・請求の基盤はiSEC側</div></div></div>
+        <div class="flow-arw">→</div>
+        <div class="flow-step iseq"><div class="fs-n">4</div><div class="fs-b"><b>契約書・請求処理</b><div class="fs-s">iSECで運用</div></div></div>
+      </div>
+      <div class="pain" style="margin-top:10px">❌ 1〜2の情報を、3で<b>もう一度iSECに手入力</b>している（二重入力）</div>
+    </div></div>
+
+    <div class="card"><div class="card-head">🔀 連携方式の選択肢</div><div class="card-body">
+      <table class="tbl">
+        <thead><tr><th style="width:60px">案</th><th>方式</th><th>やること</th><th>メリット</th><th>留意点</th><th style="width:90px">想定工数</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>A</b><br><span class="badge success">推奨</span></td>
+            <td><b>CSV出力連携</b><br>（片方向 SF → iSEC）</td>
+            <td>契約確定した案件・アサインを、<b>iSECの取込フォーマットに合わせたCSVで出力</b>するボタンを用意</td>
+            <td>二重入力がほぼ消える。iSEC側の改修が不要。<b>Phase1に入れられる</b></td>
+            <td>iSECにCSV取込機能があることが前提</td>
+            <td>+1.0人日</td>
+          </tr>
+          <tr>
+            <td><b>B</b></td>
+            <td><b>手入力のまま／転記支援</b></td>
+            <td>iSEC登録に必要な項目だけを1画面にまとめた「iSEC登録用ビュー」を作り、コピペしやすくする</td>
+            <td>最小工数。iSECの仕様に依存しない</td>
+            <td>二重入力は残る（時間は短縮）</td>
+            <td>+0.5人日</td>
+          </tr>
+          <tr>
+            <td><b>C</b></td>
+            <td><b>API連携</b><br>（双方向）</td>
+            <td>iSECのAPIでマスタ登録・ステータス同期を自動化</td>
+            <td>完全自動。ステータスの双方向同期も可能</td>
+            <td><b>iSECにAPIが公開されている場合のみ</b>。設計・テスト工数が大きい</td>
+            <td>Phase2（別途見積）</td>
+          </tr>
+          <tr>
+            <td><b>D</b></td>
+            <td><b>iSEC完全置換</b></td>
+            <td>契約管理・請求処理をSalesforceへ全面移行しiSECを廃止</td>
+            <td>システムが1本化。ランニング削減</td>
+            <td>要件定義v0.1のPhase2範囲。過去帳票の移行は対象外</td>
+            <td>Phase2（別途見積）</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="gain" style="margin-top:10px">✅ <b>ご提案：Phase1はA（CSV出力連携）</b>。iSECを触らずに二重入力だけ潰せて、追加工数も小さく収まります。将来Dに進む場合も、Aで整えた項目がそのまま土台になります。</div>
+    </div></div>
+
+    <div class="card"><div class="card-head">❓ iSECについて教えていただきたいこと</div><div class="card-body">
+      <table class="tbl">
+        <tbody>
+          <tr><td style="width:36px">1</td><td>iSECの<b>画面イメージ</b>（マスタ登録画面・契約画面・請求画面）</td><td><span class="badge warn">未拝受</span></td></tr>
+          <tr><td>2</td><td>iSECに登録している<b>項目の一覧</b>（どの情報を手入力しているか）</td><td><span class="badge warn">未拝受</span></td></tr>
+          <tr><td>3</td><td><b>CSV取込機能の有無</b>と、取込フォーマットの仕様</td><td><span class="badge warn">未確認</span></td></tr>
+          <tr><td>4</td><td><b>API公開の有無</b>（ベンダーへの確認要否）</td><td><span class="badge warn">未確認</span></td></tr>
+          <tr><td>5</td><td>iSECの<b>月額費用</b>（置換した場合のコスト効果の試算に使用）</td><td><span class="badge warn">未確認</span></td></tr>
+          <tr><td>6</td><td>SES事業以外（PMO事業）でもiSECを使っているか</td><td><span class="badge warn">未確認</span></td></tr>
+        </tbody>
+      </table>
+    </div></div>
+  </div>
+
+  <!-- ===================== 論点整理 ===================== -->
+  <div class="page" id="issues">
+    <div class="disc">
+      <div class="disc-q">論点：本日決めたいこと／次回に送ることの仕分け</div>
+      <div class="disc-src">要件定義書v0.1 の⚠印 ／ 7/17議事 ／ 7/21 Asana画面イメージ</div>
+      <div class="disc-body">要件定義fixに向けて残っている判断を1枚に集約しました。<span class="disc-flag"></span>優先度の高いものから本日中に潰させてください</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon report">📋</div>
+      <div class="obj-title"><div class="label">レビュー用</div><div class="name">論点整理（2026-07-23時点）</div></div>
+      <div class="obj-actions"><span class="badge error">要決定 6</span> <span class="badge warn">要情報 5</span> <span class="badge success">決定済 5</span></div>
+    </div></div>
+
+    <div class="card"><div class="card-head">🔴 本日決めたいこと（構築着手の前提になるもの）</div><div class="card-body">
+      <table class="tbl">
+        <thead><tr><th style="width:36px">#</th><th>論点</th><th>選択肢</th><th>Glue推奨</th><th style="width:120px">決まらないと</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><b>Phase1のスコープ確定</b><br>①商談管理コア／②iSEC範囲／③マッチング</td><td>①のみ ／ ①＋②一部 ／ ①＋③</td><td>①をコアに確定。②はCSV連携まで、③は標準機能での候補提示まで</td><td>全体の工数・期日が確定しない</td></tr>
+          <tr><td>2</td><td><b>アサインの関連</b>（案件との紐付け）</td><td>主従関係 ／ 参照関係</td><td><b>主従</b>（案件単位の粗利ロールアップのため）</td><td>オブジェクト作成に着手できない</td></tr>
+          <tr><td>3</td><td><b>スキルの持ち方</b></td><td>複数選択リスト×4 ／ スキルマスタ子オブジェクト</td><td><b>Phase1は複数選択×4</b>（言語/DB・OS/FW・ツール/経験工程）。マスタ化はPhase2</td><td>タレント項目が確定しない</td></tr>
+          <tr><td>4</td><td><b>原価単価・粗利の可視範囲</b></td><td>全員 ／ 経営・調達限定</td><td><b>経営・調達限定</b>（項目レベルセキュリティで制御）</td><td>権限設計に着手できない</td></tr>
+          <tr><td>5</td><td><b>API名の言語</b></td><td>英語（Project__c 等）／ 日本語（案件__c 等）</td><td><b>英語</b>（画面のラベルは日本語なので運用上の影響なし）</td><td>後から変更できない</td></tr>
+          <tr><td>6</td><td><b>帳票のPhase1範囲</b></td><td>見積書のみ ／ ＋注文書 ／ ＋月次請求一括</td><td>見積書・注文書までをPhase1、<b>月次請求一括は勤務表フローとセットでPhase2</b></td><td>工数が読めない</td></tr>
+        </tbody>
+      </table>
+    </div></div>
+
+    <div class="card"><div class="card-head">🟡 情報をいただきたいこと（いただき次第こちらで進めます）</div><div class="card-body">
+      <table class="tbl">
+        <thead><tr><th style="width:36px">#</th><th>依頼事項</th><th>ご担当</th><th>いつまでに</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><b>トライアル環境の登録完了・環境URL</b></td><td>栃原様</td><td><span class="badge error">最優先</span></td><td>これが無いと構築に着手できません</td></tr>
+          <tr><td>2</td><td><b>申込書 署名者の氏名・メール</b>をSalesforceへご連絡</td><td>栃原様</td><td><span class="badge error">最優先</span></td><td>ライセンス発行の起点</td></tr>
+          <tr><td>3</td><td>PMO・SES現行スプレッドシート／<b>iSECの項目定義</b></td><td>貴社キーマン</td><td>今週中</td><td>項目マッピング・移行設計</td></tr>
+          <tr><td>4</td><td>Asana内のリンク先スプレッドシート<br>（INPA 要員情報／Rezon 要員一覧 等）</td><td>後藤様・川端様</td><td>今週中</td><td>移行対象の件数と形式の把握</td></tr>
+          <tr><td>5</td><td><b>勤務表提出用メールアドレス</b>の作成・共有</td><td>貴社</td><td>Phase2着手前</td><td>勤務表の自動格納フロー</td></tr>
+        </tbody>
+      </table>
+    </div></div>
+
+    <div class="card"><div class="card-head">🟢 決定済み（本日は確認のみ）</div><div class="card-body">
+      <table class="tbl">
+        <tbody>
+          <tr><td style="width:36px">1</td><td><b>6オブジェクト構成</b>（取引先・人情報・案件・タレント・アサイン・見積/請求）で進める</td><td><span class="badge success">7/17合意</span></td></tr>
+          <tr><td>2</td><td><b>SES事業は注力5社程度のみ案件登録</b>。詳細なパイプライン管理は行わない</td><td><span class="badge success">7/17合意</span></td></tr>
+          <tr><td>3</td><td><b>請求書＝月次一括発行 ／ 見積書・注文書＝案件単位で個別発行</b></td><td><span class="badge success">7/17合意</span></td></tr>
+          <tr><td>4</td><td>カスタムオブジェクト中心のため<b>ライセンス権限の問題は発生しない</b>（利用は社内約3名＋三浦様側）</td><td><span class="badge success">7/17合意</span></td></tr>
+          <tr><td>5</td><td>帳票は<b>APEXボタン＋Sanderライセンス（月3,000円）</b>。AppExchangeカスタムオブジェクト方式は不採用</td><td><span class="badge success">方針確定</span></td></tr>
+          <tr><td>6</td><td><b>タレント氏名はイニシャル管理</b>（Asanaの現行運用に合わせる）</td><td><span class="badge info">本日ご確認</span></td></tr>
+        </tbody>
+      </table>
+    </div></div>
+
+    <div class="callout">
+      <strong>💡 スケジュールへの影響</strong><br>
+      Step2（初期設定・環境構築）に入るには <b>トライアル環境</b> が必須です。ここが動き出せば、要件定義fix後 1〜2週間で実環境への反映が可能です（7/17にご説明した通り）。
     </div>
   </div>
 
