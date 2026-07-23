@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.3)</title>
+<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.3.1)</title>
 <style>
 /* SHT 活動記録CRM デモ — Salesforce Lightning 風 / 外部依存なし
    （glue hig-japan-sf デモの app.css に準拠）— 2026-07-07 定例FB反映版 */
@@ -400,20 +400,21 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <div class="sub2">カテゴリごとにフォームが切り替わります。7/22FBで<b>件名の候補リスト化・品種→品番・複数取引先</b>を反映。入力を楽にする方向性は<a data-goto="ui3">入力UI 3案</a>で比較できます。</div>
       </div>
     </div>
-    <div class="fb-note">✅ <b>7/22FB反映</b>：件名は候補リストから選択（表記ゆれ防止）／品番は<b>品種→品番</b>の2段選択／取引先は<b>複数紐付け</b>可。入力項目が増えすぎないよう、必須は最小限にしています。</div>
+    <div class="fb-note">✅ <b>7/22–23FB反映</b>：<b>カテゴリは複数選択可</b>（1訪問で複数カテゴリに亘る場合に対応）／件名は候補リストから選択（表記ゆれ防止）／品番は<b>品種→品番</b>の2段選択／取引先は<b>複数紐付け</b>可。入力負荷を抑えるため必須は最小限にしています。</div>
 
     <div class="grid g2">
       <div class="card">
         <div class="hd">活動記録（共通モーダル）<span class="sub" id="form-sub">テンプレート: 営業活動</span></div>
         <div class="bd">
           <div class="field">
-            <label><span class="req">★</span>カテゴリ（テンプレート）</label>
+            <label><span class="req">★</span>カテゴリ <span class="help" style="display:inline">（複数選択可）</span></label>
             <div class="seg" id="tmpl-seg">
               <button data-tmpl="sales" class="on">📈 営業活動</button>
               <button data-tmpl="meeting">👥 社内会議</button>
               <button data-tmpl="claim">⚠️ 品質クレーム</button>
             </div>
-            <p class="help">カテゴリは2階層想定。クレーム等は専用フォームに切替。</p>
+            <p class="help">1回の訪問で複数カテゴリに亘る場合は複数選択。選んだカテゴリの入力欄がまとめて表示されます。</p>
+            <div class="callout" id="multi-note" hidden style="margin-top:6px">🗂️ <b>複数カテゴリの運用おすすめ</b>：1訪問＝1レコードに複数カテゴリをタグ付け。<b>件名は代表を1つ</b>選び、内容欄にカテゴリ別の小見出し（例：【営業】…／【クレーム】…）で記載すると、入力負荷を抑えつつ後から品番・取引先で横断検索できます。細かく分けたい場合はレコード分割も可能です。</div>
           </div>
 
           <div class="field"><label><span class="req">★</span>件名 <span class="help" style="display:inline">（候補リストから選択・表記ゆれ防止）</span></label>
@@ -1163,7 +1164,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     renderBars($('#dash-bars'),(r==='mgr'?dashBars:repBars),true);
   }
 
-  var state={view:'home',user:'kurashima',inboxFilter:'unread',inboxMode:'full',tmpl:'sales',dashRole:'mgr',rec:null};
+  var state={view:'home',user:'kurashima',inboxFilter:'unread',inboxMode:'full',tmpls:['sales'],dashRole:'mgr',rec:null};
   function updateBadges(){
     var n=inbox[state.user].filter(function(i){return !i.read;}).length;
     $('#tab-unread').textContent=n;$('#tab-unread').style.display=n?'grid':'none';
@@ -1192,20 +1193,29 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     renderInbox();renderHomeInbox();updateBadges();
   }
   function toast(msg){var t=$('#toast');$('#toast-msg').textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},2300);}
-  function setTmpl(t){
-    state.tmpl=t;
-    $$('#tmpl-seg button').forEach(function(b){b.classList.toggle('on',b.dataset.tmpl===t);});
-    $$('.tf').forEach(function(f){f.hidden=!f.classList.contains('tf-'+t);});
-    var subs={sales:'営業活動',meeting:'社内会議',claim:'品質クレーム'};
-    $('#form-sub').textContent='テンプレート: '+subs[t];
-    $('#l-date').textContent=t==='meeting'?'開催日':t==='claim'?'発生日':'面談日';
-    $('#l-body').textContent=t==='claim'?'不良内容':t==='meeting'?'議事内容':'活動内容';
-    $('#ta-body').placeholder=t==='claim'?'不良の症状・発生状況・影響範囲を記入':t==='meeting'?'決定事項・宿題を記入':'面談で確認した事項・次アクションを記入';
+  var TSUBS={sales:'営業活動',meeting:'社内会議',claim:'品質クレーム'};
+  function renderTmpls(){
+    var arr=state.tmpls;
+    $$('#tmpl-seg button').forEach(function(b){b.classList.toggle('on',arr.indexOf(b.dataset.tmpl)>=0);});
+    $$('.tf').forEach(function(f){f.hidden=!arr.some(function(t){return f.classList.contains('tf-'+t);});});
+    $('#form-sub').textContent='カテゴリ: '+arr.map(function(t){return TSUBS[t];}).join(' ＋ ');
+    var single=arr.length===1?arr[0]:null;
+    $('#l-date').textContent=single==='meeting'?'開催日':single==='claim'?'発生日':single==='sales'?'面談日':'日付';
+    $('#l-body').textContent=single==='claim'?'不良内容':single==='meeting'?'議事内容':single==='sales'?'活動内容':'活動内容（カテゴリ別に記載）';
+    $('#ta-body').placeholder=arr.length>1?'カテゴリごとに小見出しをつけて記入（例：【営業】…／【クレーム】…）'
+      :(single==='claim'?'不良の症状・発生状況・影響範囲を記入':single==='meeting'?'決定事項・宿題を記入':'面談で確認した事項・次アクションを記入');
+    var mn=$('#multi-note');if(mn)mn.hidden=arr.length<2;
+  }
+  function toggleTmpl(t){
+    var i=state.tmpls.indexOf(t);
+    if(i>=0){if(state.tmpls.length>1)state.tmpls.splice(i,1);}
+    else state.tmpls.push(t);
+    renderTmpls();
   }
 
   $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setView(b.dataset.view);});
   $('#viewer').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setUser(b.dataset.user);});
-  $('#tmpl-seg').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setTmpl(b.dataset.tmpl);});
+  $('#tmpl-seg').addEventListener('click',function(e){var b=e.target.closest('button');if(b)toggleTmpl(b.dataset.tmpl);});
   $('#rec-tabs').addEventListener('click',function(e){var b=e.target.closest('button[data-rtab]');if(b)setRtab(b.dataset.rtab);});
   $('#inbox-filter').addEventListener('click',function(e){var b=e.target.closest('button');if(b){state.inboxFilter=b.dataset.f;$$('#inbox-filter button').forEach(function(x){x.classList.toggle('on',x===b);});renderInbox();}});
   $('#simple-toggle').addEventListener('click',function(e){var b=e.target.closest('button');if(b){state.inboxMode=b.dataset.mode;$$('#simple-toggle button').forEach(function(x){x.classList.toggle('on',x===b);});renderInbox();
@@ -1257,7 +1267,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   renderFeed($('#home-feed'),feed);
   renderFeed($('#dash-unread'),feed.filter(function(f){return f.reads.some(function(r){return !r[2];});}),true);
   renderBars($('#home-bars'),bars);
-  renderHomeInbox();renderInbox();renderDeals();renderClaims();renderCards();renderCal();renderRoute();renderDash();setTmpl('sales');updateBadges();
+  renderHomeInbox();renderInbox();renderDeals();renderClaims();renderCards();renderCal();renderRoute();renderDash();renderTmpls();updateBadges();
 })();
 </script>
 </body>
