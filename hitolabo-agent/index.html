@@ -114,18 +114,41 @@ img{max-width:100%}
 .struct{background:#fbfdff;border:1px dashed #bcd6f0;border-radius:10px;padding:11px 13px;font-family:ui-monospace,monospace;font-size:11px;color:#3a5a78;margin-top:16px;white-space:pre-wrap}
 .struct b{color:#1c61c4}
 
-/* AI職務経歴書 */
-.ai-wrap{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+/* AI履歴書・職務経歴書 */
+.ai-wrap{display:grid;grid-template-columns:1fr 1.15fr;gap:18px;align-items:start}
 .ai-panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
 .ai-panel h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:7px}
 .ai-field{margin-bottom:12px}
 .ai-field label{display:block;font-size:12px;font-weight:800;color:var(--ink-2);margin-bottom:4px}
 .ai-field input,.ai-field textarea,.ai-field select{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:10px;font-size:13px;font-family:inherit}
-.ai-out{background:linear-gradient(180deg,#fffdf8,#fff);border:1.5px solid #ffe2c4}
-.ai-doc{font-size:13px;line-height:1.85;color:var(--ink)}
-.ai-doc .tt{font-weight:800;color:var(--brand-d);margin-top:10px}
+.ai-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ai-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ai-chips .chip{padding:5px 11px;font-size:12px}
+.ai-out{background:linear-gradient(180deg,#fffdf8,#fff);border:1.5px solid #ffe2c4;position:sticky;top:120px}
+.ai-doc{font-size:13px;line-height:1.85;color:var(--ink);min-height:280px}
+.ai-doc .tt{font-weight:800;color:var(--brand-d);margin-top:12px;border-bottom:1px solid var(--line);padding-bottom:3px}
+.ai-doc .tt:first-child{margin-top:0}
 .ai-badge{display:inline-flex;align-items:center;gap:5px;background:#f3eeff;color:#6b46e0;font-weight:800;font-size:11px;padding:4px 10px;border-radius:20px}
 .typing{color:var(--mute)}
+/* 生成物のタブ */
+.ai-tabs{display:flex;gap:4px;background:#f3f6f9;border-radius:10px;padding:3px;margin-bottom:12px}
+.ai-tabs button{flex:1;border:0;background:transparent;font-family:inherit;font-weight:800;font-size:12.5px;color:var(--ink-2);padding:8px 6px;border-radius:8px;cursor:pointer}
+.ai-tabs button.on{background:#fff;color:var(--brand-d);box-shadow:0 1px 4px rgba(20,60,90,.10)}
+.ai-tabs button[disabled]{opacity:.45;cursor:default}
+/* 履歴書テーブル */
+.rirekisho{border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:12.5px}
+.rirekisho .r{display:grid;grid-template-columns:104px 1fr;border-bottom:1px solid var(--line)}
+.rirekisho .r:last-child{border-bottom:0}
+.rirekisho .k{background:#f7fafc;padding:8px 10px;font-weight:800;color:var(--ink-2)}
+.rirekisho .v{padding:8px 10px}
+/* 生成ステップ */
+.ai-steps{list-style:none;margin:0;padding:0;font-size:12.5px;color:var(--mute)}
+.ai-steps li{padding:4px 0;display:flex;align-items:center;gap:8px}
+.ai-steps li.done{color:var(--ok);font-weight:700}
+.ai-steps li.now{color:var(--ink);font-weight:700}
+.ai-actions{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.ai-note{margin-top:12px;font-size:11.5px;color:#8a99ad;background:#fbfdff;border:1px dashed #bcd6f0;border-radius:9px;padding:9px 11px;line-height:1.7}
+.ai-note b{color:#1c61c4}
 
 /* マイページ */
 .mypage{display:grid;grid-template-columns:230px 1fr;gap:20px}
@@ -375,22 +398,75 @@ img{max-width:100%}
     </div>
   </section>
 
-  <!-- ③ AI職務経歴書 -->
+  <!-- ③ AI履歴書・職務経歴書 -->
   <section class="page" id="sp-ai">
     <div class="sec-h"><h2>AI 履歴書・職務経歴書アシスタント</h2><span class="ai-badge">⚡ Powered by Claude</span></div>
+    <p style="color:var(--ink-2);margin:0 0 4px;max-width:760px">会員の方が<b>いつもの応募情報を入力するだけ</b>で、応募先の求人票と突き合わせた<b>履歴書・職務経歴書・志望動機</b>の下書きを自動作成します。求職者は手直しして応募に添付するだけ、貴社には<b>整った書類が最初から届く</b>状態になります。</p>
     <div class="ai-wrap">
       <div class="ai-panel">
         <h3>📝 あなたの情報を入力</h3>
-        <div class="ai-field"><label>保有資格</label><input value="管理栄養士／栄養士"></div>
-        <div class="ai-field"><label>経験（職場・年数）</label><input value="特別養護老人ホーム 4年（献立作成・栄養ケア）"></div>
-        <div class="ai-field"><label>応募先の求人</label><select><option>急性期病院での管理栄養士（みどり総合病院）</option></select></div>
-        <div class="ai-field"><label>アピールしたいこと</label><textarea rows="2">NST活動に関わり、低栄養患者の改善に貢献した経験</textarea></div>
+        <div class="ai-2col">
+          <div class="ai-field"><label>お名前</label><input id="aiName" value="田中 はるか"></div>
+          <div class="ai-field"><label>年齢</label><input id="aiAge" value="32"></div>
+        </div>
+        <div class="ai-field">
+          <label>保有資格（選択できます）</label>
+          <div class="ai-chips" id="aiQual">
+            <span class="chip on" onclick="chipTog(this)">管理栄養士</span>
+            <span class="chip on" onclick="chipTog(this)">栄養士</span>
+            <span class="chip" onclick="chipTog(this)">調理師</span>
+            <span class="chip" onclick="chipTog(this)">食品衛生責任者</span>
+            <span class="chip" onclick="chipTog(this)">普通自動車第一種</span>
+          </div>
+        </div>
+        <div class="ai-2col">
+          <div class="ai-field"><label>直近の職場</label>
+            <select id="aiPlace">
+              <option>特別養護老人ホーム</option><option>急性期病院</option>
+              <option>認可保育園</option><option>社員食堂（給食委託）</option><option>学校給食センター</option>
+            </select>
+          </div>
+          <div class="ai-field"><label>経験年数</label>
+            <select id="aiYears"><option>1年</option><option>2年</option><option selected>4年</option><option>7年</option><option>10年以上</option></select>
+          </div>
+        </div>
+        <div class="ai-field"><label>担当していた業務</label><input id="aiTask" value="献立作成・発注・栄養ケアマネジメント"></div>
+        <div class="ai-field"><label>応募先の求人</label>
+          <select id="aiJob">
+            <option value="0">急性期病院での管理栄養士（みどり総合病院／さいたま市）</option>
+            <option value="1">認可保育園の給食づくり｜栄養士（そらまめ保育園／横浜市）</option>
+            <option value="2">社員食堂の調理師（フードパートナーズ／中央区）</option>
+            <option value="3">特養での献立・栄養ケアマネジメント（やすらぎ介護福祉会／千葉市）</option>
+          </select>
+        </div>
+        <div class="ai-field"><label>アピールしたいこと</label><textarea id="aiPr" rows="2">NST活動に関わり、低栄養患者の改善に貢献した経験</textarea></div>
+        <div class="ai-field"><label>文章のトーン</label>
+          <select id="aiTone"><option value="polite">丁寧・オーソドックス</option><option value="short">簡潔・実務的</option></select>
+        </div>
         <button class="btn lg" style="width:100%;justify-content:center" onclick="genAI()">✨ AIで履歴書・職務経歴書を作成</button>
+        <ul class="ai-steps" id="aiSteps" style="margin-top:12px">
+          <li>① 入力内容を読み取る</li>
+          <li>② 応募先の求人票と突き合わせる</li>
+          <li>③ 履歴書・職務経歴書・志望動機を下書きする</li>
+        </ul>
       </div>
       <div class="ai-panel ai-out">
-        <h3>📄 AIが作成した下書き <span class="ai-badge">編集できます</span></h3>
-        <div class="ai-doc" id="aiDoc">
-          <div class="typing">← 左の情報を入れて「AIで作成」を押すと、ここに志望動機・自己PRの下書きが表示されます。</div>
+        <h3>📄 AIが作成した下書き <span class="ai-badge">そのまま編集できます</span></h3>
+        <div class="ai-tabs" id="aiTabs">
+          <button class="on" disabled onclick="aiTab('rireki',this)">履歴書</button>
+          <button disabled onclick="aiTab('shokumu',this)">職務経歴書</button>
+          <button disabled onclick="aiTab('doki',this)">志望動機・自己PR</button>
+        </div>
+        <div class="ai-doc" id="aiDoc" contenteditable="false">
+          <div class="typing">← 左の情報を入れて「AIで作成」を押すと、ここに履歴書・職務経歴書・志望動機の下書きが表示されます。</div>
+        </div>
+        <div class="ai-actions" id="aiActions" style="display:none">
+          <button class="btn ghost sm" onclick="genAI()">🔄 別の案を作る</button>
+          <button class="btn ghost sm" onclick="toast('下書きをコピーしました（モック）')">📋 コピー</button>
+          <button class="btn accent sm" style="margin-left:auto" onclick="aiAttach()">📨 この内容で応募に添付</button>
+        </div>
+        <div class="ai-note">
+          <b>実装イメージ</b>：会員が入力 → Apexから <b>Claude API</b> へコールアウト（求人票の項目もあわせて送信）→ 生成された下書きを <b>職務経歴書オブジェクト</b>に保存。応募時に自動で添付され、社内Salesforceの求職者レコードから<b>キャリアアドバイザーがそのまま閲覧・編集</b>できます。※本デモの生成部分はダミーです
         </div>
       </div>
     </div>
@@ -656,17 +732,115 @@ function fgo(p,el){
 function favTog(e,el){e.stopPropagation();el.classList.toggle('on');el.textContent=el.classList.contains('on')?'♥':'♡';}
 let _t;
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_t);_t=setTimeout(()=>t.classList.remove('show'),2200);}
+function chipTog(el){el.classList.toggle('on');}
+
+/* 応募先求人のマスタ（実装時はSalesforceの求人レコードから取得） */
+var AI_JOBS=[
+  {sisetsu:'みどり総合病院',keisho:'貴院',area:'さいたま市',shokushu:'管理栄養士',
+   miryoku:'栄養サポートチーム（NST）による多職種連携',gyomu:'入院患者さまの栄養管理・栄養指導'},
+  {sisetsu:'そらまめ保育園',keisho:'貴園',area:'横浜市',shokushu:'栄養士',
+   miryoku:'アレルギー対応と食育に力を入れた給食づくり',gyomu:'園児の給食調理・献立作成・食育活動'},
+  {sisetsu:'フードパートナーズ',keisho:'貴社',area:'中央区',shokushu:'調理師',
+   miryoku:'土日祝休みで腰を据えて働ける環境と、大量調理の技術が磨けること',gyomu:'社員食堂の調理・衛生管理'},
+  {sisetsu:'やすらぎ介護福祉会',keisho:'貴施設',area:'千葉市',shokushu:'管理栄養士',
+   miryoku:'入居者さま一人ひとりに向き合う栄養ケアマネジメント',gyomu:'献立作成・栄養ケアマネジメント・嚥下対応食の設計'}
+];
+var AI_DOC={};
+
+function aiVal(id){return (document.getElementById(id).value||'').trim();}
+function aiQuals(){
+  return Array.from(document.querySelectorAll('#aiQual .chip.on')).map(c=>c.textContent.trim());
+}
+function aiTab(k,el){
+  document.querySelectorAll('#aiTabs button').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('aiDoc').innerHTML=AI_DOC[k]||'';
+}
+function aiAttach(){
+  toast('応募に添付しました。社内Salesforceの求職者レコードにも保存されます（モック）');
+}
+function aiSteps(n){
+  var li=document.querySelectorAll('#aiSteps li');
+  li.forEach((l,i)=>{l.classList.remove('done','now');if(i<n)l.classList.add('done');else if(i===n)l.classList.add('now');});
+}
 function genAI(){
   var out=document.getElementById('aiDoc');
+  var job=AI_JOBS[+aiVal('aiJob')];
+  var name=aiVal('aiName')||'（お名前）', age=aiVal('aiAge')||'—';
+  var quals=aiQuals(), qtxt=quals.length?quals.join('／'):'（未選択）';
+  var place=aiVal('aiPlace'), years=aiVal('aiYears'), task=aiVal('aiTask')||'給食業務全般';
+  var pr=aiVal('aiPr')||'現場で培った経験', tone=aiVal('aiTone');
+  var main=quals[0]||'栄養士';
+  var polite=(tone==='polite');
+
+  document.getElementById('aiActions').style.display='none';
+  document.querySelectorAll('#aiTabs button').forEach(b=>b.disabled=true);
   out.innerHTML='<span class="typing">✨ Claude が下書きを作成中...</span>';
+  aiSteps(0);
+  setTimeout(()=>aiSteps(1),450);
+  setTimeout(()=>aiSteps(2),900);
+
   setTimeout(()=>{
-    out.innerHTML=
-     '<div class="tt">■ 志望動機</div>'+
-     '貴院の「栄養サポートチーム（NST）による多職種連携」に強く魅力を感じ志望いたしました。特別養護老人ホームでの4年間、低栄養状態の入居者さまへの栄養ケアに取り組み、献立改善により食事摂取量を向上させた経験があります。この経験を、急性期医療における栄養管理で活かしたいと考えております。'+
-     '<div class="tt">■ 自己PR</div>'+
-     '管理栄養士として、現場の調理スタッフや看護師と連携しながら、一人ひとりに合わせた栄養ケアを設計することを得意としています。NST活動では、医師・看護師とともに低栄養患者の改善に貢献しました。チームで成果を出す姿勢を、貴院でも発揮いたします。'+
-     '<div style="margin-top:12px;font-size:11.5px;color:#8a99ad">（モック）実際はClaude APIへApexコールアウト → 入力内容から下書き生成。求職者は手直しするだけ。</div>';
-  },1100);
+    /* ① 履歴書 */
+    AI_DOC.rireki=
+      '<div class="tt">■ 履歴書（基本情報）</div>'+
+      '<div class="rirekisho">'+
+        '<div class="r"><div class="k">氏名</div><div class="v">'+name+'</div></div>'+
+        '<div class="r"><div class="k">年齢</div><div class="v">'+age+'歳</div></div>'+
+        '<div class="r"><div class="k">保有資格</div><div class="v">'+qtxt+'</div></div>'+
+        '<div class="r"><div class="k">直近の職場</div><div class="v">'+place+'（'+years+'）</div></div>'+
+        '<div class="r"><div class="k">担当業務</div><div class="v">'+task+'</div></div>'+
+        '<div class="r"><div class="k">応募先</div><div class="v">'+job.sisetsu+'（'+job.area+'）／'+job.shokushu+'</div></div>'+
+      '</div>'+
+      '<div class="tt">■ 職歴（要約）</div>'+
+      place+'にて'+years+'にわたり'+main+'として勤務。'+task+'を担当。'+
+      (quals.length>1?'（'+qtxt+'を保有）':'')+
+      '<div class="tt">■ 本人希望欄</div>'+
+      (polite
+        ? '貴社の規定に従います。'+job.area+'での勤務を希望いたします。'
+        : job.area+'勤務を希望。条件は貴社規定に従います。');
+
+    /* ② 職務経歴書 */
+    AI_DOC.shokumu=
+      '<div class="tt">■ 職務要約</div>'+
+      place+'において'+years+'、'+main+'として'+task+'に従事してまいりました。'+pr+'を強みとしております。'+
+      '<div class="tt">■ 職務内容</div>'+
+      '<ul style="margin:6px 0 0;padding-left:18px">'+
+        '<li>'+task+'</li>'+
+        '<li>食材の発注・在庫管理、原価管理</li>'+
+        '<li>調理スタッフへの指示出し、衛生管理（HACCPに沿った運用）</li>'+
+        '<li>他職種（看護・介護・保育など）との連携、記録・報告</li>'+
+      '</ul>'+
+      '<div class="tt">■ 活かせる経験・スキル</div>'+
+      '<ul style="margin:6px 0 0;padding-left:18px">'+
+        '<li>'+pr+'</li>'+
+        '<li>'+job.gyomu+'に直結する実務経験</li>'+
+        '<li>'+qtxt+'</li>'+
+      '</ul>';
+
+    /* ③ 志望動機・自己PR */
+    AI_DOC.doki=
+      '<div class="tt">■ 志望動機</div>'+
+      (polite
+        ? job.keisho+'の「'+job.miryoku+'」に強く魅力を感じ、志望いたしました。'+place+'での'+years+'、'+task+'に取り組んでまいりました。この経験を'+job.gyomu+'で活かしたいと考えております。'
+        : job.keisho+'の「'+job.miryoku+'」に惹かれ応募しました。'+place+'で'+years+'、'+task+'を担当。'+job.gyomu+'で即戦力として貢献できると考えています。')+
+      '<div class="tt">■ 自己PR</div>'+
+      (polite
+        ? main+'として、現場の調理スタッフや他職種と連携しながら、一人ひとりに合わせた対応を設計することを得意としております。'+pr+'は'+job.keisho+'でも必ず活かせるものと考えております。'
+        : main+'として現場連携を軸に業務を進めてきました。'+pr+'。'+job.keisho+'でも同じ姿勢で成果を出します。')+
+      '<div class="tt">■ 想定される面接での質問（おまけ）</div>'+
+      '<ul style="margin:6px 0 0;padding-left:18px">'+
+        '<li>'+place+'と'+job.sisetsu+'では業務の進め方が異なりますが、どう適応されますか？</li>'+
+        '<li>'+pr+'について、具体的な数値や成果を教えてください。</li>'+
+      '</ul>';
+
+    document.querySelectorAll('#aiTabs button').forEach(b=>{b.disabled=false;b.classList.remove('on');});
+    document.querySelector('#aiTabs button').classList.add('on');
+    out.setAttribute('contenteditable','true');
+    out.innerHTML=AI_DOC.rireki;
+    document.getElementById('aiActions').style.display='flex';
+    aiSteps(3);
+  },1400);
 }
 </script>
 </body>
