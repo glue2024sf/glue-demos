@@ -1134,7 +1134,7 @@ const TABS = [
   {id:'docs',       l:'📄 見積・請求'},
   {id:'dashboard',  l:'📊 分析'},
   {id:'asana',      l:'🔄 Asana対比'},
-  {id:'isec',       l:'🔌 iSEC連携'},
+  {id:'isec',       l:'🧾 帳票の流れ'},
   {id:'issues',     l:'📋 論点整理'}
 ];
 
@@ -1814,7 +1814,7 @@ Pages.dashboard = () => {
 </script>
 <script>
 /* ---------------------------------------------------------------
-   13. 参照用ページ（Asana対比 / iSEC連携 / 論点整理）
+   13. 参照用ページ（Asana対比 / 帳票の流れ / 論点整理）
    --------------------------------------------------------------- */
 Pages.asana = () => `
   <div class="obj-header"><div class="row1">
@@ -1876,39 +1876,75 @@ Pages.asana = () => `
 
 Pages.isec = () => `
   <div class="obj-header"><div class="row1">
-    <div class="obj-icon custom">🔌</div>
-    <div class="obj-title"><div class="label">連携設計（ご提案）</div><div class="name">Salesforce ⇄ iSEC（愛生協）</div></div>
+    <div class="obj-icon quote">🧾</div>
+    <div class="obj-title"><div class="label">帳票</div><div class="name">見積書・注文書・請求書がどうなるか</div></div>
+    <div class="obj-actions"><button class="btn" onclick="Router.go('docs')">帳票一覧を見る</button></div>
   </div></div>
-  <div class="callout" style="border-left-color:var(--warn);background:var(--warn-bg)">
-    <strong>⚠️ 前提のご確認</strong><br>iSECの画面イメージ・項目定義をまだ拝見できていないため、本ページは<b>「どの方式で行くか」を選んでいただくためのたたき台</b>です。画面に寄せたモックは、スクリーンショットをご提供いただき次第すぐに作成いたします。</div>
-  ${card('📌 現行フロー（7/17に伺った内容）',`
-    <div class="flow">
-      <div class="flow-step"><div class="fs-n">1</div><div class="fs-b"><b>引合〜提案〜面談</b><div class="fs-s">注力5社のみ／Asana・スプレッドシート</div></div></div>
-      <div class="flow-arw">→</div>
-      <div class="flow-step"><div class="fs-n">2</div><div class="fs-b"><b>契約確定</b><div class="fs-s">条件・単価が確定</div></div></div>
-      <div class="flow-arw">→</div>
-      <div class="flow-step iseq"><div class="fs-n">3</div><div class="fs-b"><b>iSECへマスタ登録</b><div class="fs-s">契約・請求の基盤はiSEC側</div></div></div>
-      <div class="flow-arw">→</div>
-      <div class="flow-step iseq"><div class="fs-n">4</div><div class="fs-b"><b>契約書・請求処理</b><div class="fs-s">iSECで運用</div></div></div>
-    </div>
-    <div class="pain" style="margin-top:10px">❌ 1〜2の情報を、3で<b>もう一度iSECに手入力</b>している（二重入力）</div>`)}
-  ${card('🔀 連携方式の選択肢',`<table class="tbl">
-    <thead><tr><th style="width:60px">案</th><th>方式</th><th>やること</th><th>メリット</th><th>留意点</th><th style="width:90px">想定工数</th></tr></thead>
+
+  <div class="callout" style="border-left-color:var(--success);background:var(--success-bg)">
+    <strong>結論：iSEC（愛生協）は使わなくなります。</strong>
+    見積書・注文書・請求書は、すべてSalesforceから発行する形に置き換わります。
+  </div>
+
+  ${card('📌 これまで / これから', `<table class="tbl">
+    <thead><tr><th style="width:130px"></th><th>これまで（iSEC）</th><th>これから（Salesforce）</th></tr></thead>
     <tbody>
-      <tr><td><b>A</b><br><span class="badge success">推奨</span></td><td><b>CSV出力連携</b><br>（片方向 SF → iSEC）</td><td>契約確定した案件・アサインを<b>iSECの取込フォーマットに合わせたCSVで出力</b>するボタンを用意</td><td>二重入力がほぼ消える。iSEC側の改修が不要。<b>Phase1に入れられる</b></td><td>iSECにCSV取込機能があることが前提</td><td>+1.0人日</td></tr>
-      <tr><td><b>B</b></td><td><b>手入力のまま／転記支援</b></td><td>iSEC登録に必要な項目だけを1画面にまとめたビューを作りコピペしやすくする</td><td>最小工数。iSECの仕様に依存しない</td><td>二重入力は残る（時間は短縮）</td><td>+0.5人日</td></tr>
-      <tr><td><b>C</b></td><td><b>API連携</b>（双方向）</td><td>iSECのAPIでマスタ登録・ステータス同期を自動化</td><td>完全自動。双方向同期も可能</td><td><b>iSECにAPIが公開されている場合のみ</b></td><td>Phase2</td></tr>
-      <tr><td><b>D</b></td><td><b>iSEC完全置換</b></td><td>契約管理・請求処理をSalesforceへ全面移行しiSECを廃止</td><td>システムが1本化。ランニング削減</td><td>過去帳票の移行は対象外</td><td>Phase2</td></tr>
+      <tr><td><b>見積書</b></td><td>iSECで作成</td><td class="ok">案件からボタン1つで作成</td></tr>
+      <tr><td><b>注文書</b></td><td>iSECで作成</td><td class="ok">アサインからボタン1つで作成</td></tr>
+      <tr><td><b>請求書</b></td><td>iSECで月次作成</td><td class="ok">月次で一括発行</td></tr>
+      <tr><td><b>マスタ登録</b></td><td>契約確定時にiSECへ入力し直し</td><td class="ok">不要（Salesforceに既にある情報を使う）</td></tr>
+      <tr><td><b>単価・粗利</b></td><td>iSEC側で管理</td><td class="ok">アサインで管理し、粗利は自動計算</td></tr>
     </tbody></table>
-    <div class="gain" style="margin-top:10px">✅ <b>ご提案：Phase1はA（CSV出力連携）</b>。iSECを触らずに二重入力だけ潰せて、追加工数も小さく収まります。</div>`)}
-  ${card('❓ iSECについて教えていただきたいこと',`<table class="tbl"><tbody>
-    <tr><td style="width:36px">1</td><td>iSECの<b>画面イメージ</b>（マスタ登録・契約・請求）</td><td><span class="badge warn">未拝受</span></td></tr>
-    <tr><td>2</td><td>iSECに登録している<b>項目の一覧</b></td><td><span class="badge warn">未拝受</span></td></tr>
-    <tr><td>3</td><td><b>CSV取込機能の有無</b>と取込フォーマット</td><td><span class="badge warn">未確認</span></td></tr>
-    <tr><td>4</td><td><b>API公開の有無</b></td><td><span class="badge warn">未確認</span></td></tr>
-    <tr><td>5</td><td>iSECの<b>月額費用</b></td><td><span class="badge warn">未確認</span></td></tr>
-    <tr><td>6</td><td>PMO事業でもiSECを使っているか</td><td><span class="badge warn">未確認</span></td></tr>
-  </tbody></table>`)}`;
+    <div class="gain" style="margin-top:10px">✅ 二重入力がなくなります。Salesforceに入っている案件・アサインの情報から、そのまま帳票が出ます。</div>`)}
+
+  ${card('📄 見積書（案件単位で発行）', `
+    <div class="flow">
+      <div class="flow-step"><div class="fs-n">1</div><div class="fs-b"><b>案件を登録</b><div class="fs-s">顧客・単価上限・人数・期間</div></div></div>
+      <div class="flow-arw">→</div>
+      <div class="flow-step"><div class="fs-n">2</div><div class="fs-b"><b>アサインを作成</b><div class="fs-s">誰をいくらで出すか</div></div></div>
+      <div class="flow-arw">→</div>
+      <div class="flow-step"><div class="fs-n">3</div><div class="fs-b"><b>「見積書を作成」</b><div class="fs-s">案件画面のボタン</div></div></div>
+      <div class="flow-arw">→</div>
+      <div class="flow-step"><div class="fs-n">4</div><div class="fs-b"><b>PDF → メール送付</b><div class="fs-s">送付済ステータスが残る</div></div></div>
+    </div>
+    <div style="font-size:12px;color:var(--text-mute);margin-top:10px">品目・単価・人数・期間はアサインから自動で入ります。手入力は不要です。</div>
+    <div style="margin-top:8px"><button class="btn small primary" onclick="Router.go('projects','PRJ-1')">実際に案件から作ってみる</button></div>`)}
+
+  ${card('📑 注文書（BPへの発注・アサイン単位で発行）', `
+    <div class="flow">
+      <div class="flow-step"><div class="fs-n">1</div><div class="fs-b"><b>BP人材をアサイン</b><div class="fs-s">原価単価を入力</div></div></div>
+      <div class="flow-arw">→</div>
+      <div class="flow-step"><div class="fs-n">2</div><div class="fs-b"><b>「注文書を作成」</b><div class="fs-s">アサイン画面のボタン</div></div></div>
+      <div class="flow-arw">→</div>
+      <div class="flow-step"><div class="fs-n">3</div><div class="fs-b"><b>PDF → BPへ送付</b><div class="fs-s">締結ステータスを管理</div></div></div>
+    </div>
+    <div style="margin-top:8px"><button class="btn small primary" onclick="Router.go('assignments','ASG-9')">実際にアサインから作ってみる</button></div>`)}
+
+  ${card('🧾 請求書（月次で一括発行）', `
+    <div class="flow">
+      <div class="flow-step"><div class="fs-n">1</div><div class="fs-b"><b>稼働中アサイン</b><div class="fs-s">請求額のもとになる</div></div></div>
+      <div class="flow-arw">→</div>
+      <div class="flow-step"><div class="fs-n">2</div><div class="fs-b"><b>勤務表を受領</b><div class="fs-s">専用アドレス宛→自動格納</div></div></div>
+      <div class="flow-arw">→</div>
+      <div class="flow-step"><div class="fs-n">3</div><div class="fs-b"><b>「一括発行」</b><div class="fs-s">対象月を選んで1クリック</div></div></div>
+      <div class="flow-arw">→</div>
+      <div class="flow-step"><div class="fs-n">4</div><div class="fs-b"><b>取引先ごとにPDF</b><div class="fs-s">まとめてメール送付</div></div></div>
+    </div>
+    <div style="font-size:12px;color:var(--text-mute);margin-top:10px">
+      精算幅（例140〜180h）の<b>超過・控除も自動計算</b>されます。勤務表が未受領のアサインは自動で対象外になります。
+    </div>
+    <div style="margin-top:8px"><button class="btn small primary" onclick="Router.go('batch')">実際に一括発行を見てみる</button></div>`)}
+
+  ${card('❓ 確認させてください', `<table class="tbl"><tbody>
+    <tr><td style="width:36px">1</td><td>iSECで出していた<b>見積書・注文書・請求書の様式（現物）</b>をいただけますでしょうか。同じレイアウトに寄せて作成します</td><td><span class="badge warn">未拝受</span></td></tr>
+    <tr><td>2</td><td>iSECを<b>いつ止めるか</b>。並行稼働の期間は必要でしょうか</td><td><span class="badge warn">未確認</span></td></tr>
+    <tr><td>3</td><td>iSECに入っている<b>過去の帳票・契約データ</b>の扱い（移行するか、iSEC側で参照のみ残すか）</td><td><span class="badge warn">未確認</span></td></tr>
+    <tr><td>4</td><td>請求書の<b>締め日・送付先</b>（取引先ごとに異なるか）</td><td><span class="badge warn">未確認</span></td></tr>
+    <tr><td>5</td><td>PMO事業でもiSECを使っているか</td><td><span class="badge warn">未確認</span></td></tr>
+  </tbody></table>`)}
+
+  <div class="callout"><strong>💡 帳票はAPEXボタン＋Sanderライセンス（月3,000円）で生成します。</strong>
+  Phase1でどこまで作るか（見積書まで／注文書も／月次請求一括も）は本日ご相談させてください。</div>`;
 
 Pages.issues = () => `
   <div class="obj-header"><div class="row1">
@@ -1918,7 +1954,7 @@ Pages.issues = () => `
   </div></div>
   ${card('🔴 本日決めたいこと（構築着手の前提になるもの）',`<table class="tbl">
     <thead><tr><th style="width:36px">#</th><th>論点</th><th>選択肢</th><th>Glue推奨</th><th style="width:120px">決まらないと</th></tr></thead><tbody>
-    <tr><td>1</td><td><b>Phase1のスコープ確定</b></td><td>①のみ / ①＋②一部 / ①＋③</td><td>①をコアに確定。②はCSV連携まで、③は候補提示まで</td><td>工数・期日が確定しない</td></tr>
+    <tr><td>1</td><td><b>Phase1のスコープ確定</b></td><td>①のみ / ①＋②一部 / ①＋③</td><td>①をコアに確定。②は<b>帳票（見積・注文）まで</b>、③は候補提示まで</td><td>工数・期日が確定しない</td></tr>
     <tr><td>2</td><td><b>アサインの関連</b></td><td>主従 / 参照</td><td><b>主従</b>（案件単位の粗利ロールアップ）</td><td>オブジェクト作成に着手できない</td></tr>
     <tr><td>3</td><td><b>スキルの持ち方</b></td><td>複数選択×4 / スキルマスタ子obj</td><td><b>Phase1は複数選択×4</b></td><td>タレント項目が確定しない</td></tr>
     <tr><td>4</td><td><b>原価単価・粗利の可視範囲</b></td><td>全員 / 経営・調達限定</td><td><b>経営・調達限定</b>（FLSで制御）</td><td>権限設計に着手できない</td></tr>
@@ -1929,7 +1965,7 @@ Pages.issues = () => `
     <thead><tr><th style="width:36px">#</th><th>依頼事項</th><th>ご担当</th><th>いつまでに</th><th>用途</th></tr></thead><tbody>
     <tr><td>1</td><td><b>トライアル環境の登録完了・環境URL</b></td><td>栃原様</td><td><span class="badge error">最優先</span></td><td>構築着手の起点</td></tr>
     <tr><td>2</td><td><b>申込書 署名者の氏名・メール</b></td><td>栃原様</td><td><span class="badge error">最優先</span></td><td>ライセンス発行の起点</td></tr>
-    <tr><td>3</td><td>現行スプレッドシート／<b>iSECの項目定義</b></td><td>貴社キーマン</td><td>今週中</td><td>項目マッピング</td></tr>
+    <tr><td>3</td><td>現行スプレッドシート／<b>iSECの帳票様式（見積・注文・請求）</b></td><td>貴社キーマン</td><td>今週中</td><td>項目マッピング</td></tr>
     <tr><td>4</td><td>Asana内リンク先スプレッドシート</td><td>後藤様・川端様</td><td>今週中</td><td>移行件数・形式の把握</td></tr>
     <tr><td>5</td><td><b>勤務表提出用メールアドレス</b></td><td>貴社</td><td>Phase2着手前</td><td>勤務表の自動格納</td></tr>
   </tbody></table>`)}
