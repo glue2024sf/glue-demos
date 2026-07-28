@@ -663,7 +663,7 @@ const Toast = {
 const STAGES = ['引合','提案中','面談調整','面談済','内定','参画(受注)','終了','失注'];
 const STAGE_OPEN = ['引合','提案中','面談調整','面談済','内定'];
 const ASSIGN_STATUS = ['提案中','面談待ち','面談済','内定','稼働中','終了'];
-const TALENT_STATUS = ['待機','稼働中','参画予定','稼働終了'];
+const TALENT_STATUS = ['待機','稼働中','参画予定','稼働終了','退職']; // 退職・非稼働はマッチング対象から除外（2026-07-23決定）
 const SKILL_LANG  = ['Java','Python','JavaScript','TypeScript','PHP','C#','C++','Go','Ruby','PL/SQL','HTML/CSS','COBOL'];
 const SKILL_DB    = ['Oracle','PostgreSQL','MySQL','SQL Server','MongoDB','Linux','Windows','AIX'];
 const SKILL_FW    = ['Spring Framework','Struts','React','Vue','Django','Laravel','.NET','Git','SVN','Docker','Terraform','AWS','Azure'];
@@ -931,7 +931,7 @@ const Calc = {
     const waiting = talents.filter(t=>t.status==='待機');
     const gross = active.reduce((s,a)=>s+Calc.gross(a),0);
     const bill  = active.reduce((s,a)=>s+(Number(a.billRate)||0),0);
-    const endingSoon = active.filter(a=>a.endDate && daysBetween(today(), a.endDate) <= 45 && daysBetween(today(), a.endDate) >= 0);
+    const endingSoon = active.filter(a=>a.endDate && daysBetween(today(), a.endDate) <= 60 && daysBetween(today(), a.endDate) >= 0); // 2ヶ月前アラート（2026-07-23決定、旧30日）
     const pipeline = Store.all('projects').filter(p=>STAGE_OPEN.includes(p.stage))
                       .reduce((s,p)=>s+(Number(p.rateMax)||0)*(Number(p.headcount)||0),0);
     return {
@@ -1268,7 +1268,7 @@ Pages.home = () => {
   </div></div>
   <div class="dash-grid">
     <div class="widget span-3"><div class="w-title">稼働中エンジニア</div><div class="w-big">${k.activeCount}<span style="font-size:14px">名</span></div><div class="w-sub up">稼働率 ${pct(k.rate)}（登録${k.talentCount}名中）</div></div>
-    <div class="widget span-3"><div class="w-title">待機・終了間近</div><div class="w-big" style="color:var(--warn)">${k.waitingCount + k.endingSoon}<span style="font-size:14px">名</span></div><div class="w-sub">待機${k.waitingCount} / 45日内終了${k.endingSoon}</div></div>
+    <div class="widget span-3"><div class="w-title">待機・終了間近</div><div class="w-big" style="color:var(--warn)">${k.waitingCount + k.endingSoon}<span style="font-size:14px">名</span></div><div class="w-sub">待機${k.waitingCount} / 2ヶ月内終了${k.endingSoon}</div></div>
     <div class="widget span-3"><div class="w-title">今月 粗利（稼働中合計）</div><div class="w-big">${yenM(k.gross)}</div><div class="w-sub up">粗利率 ${pct(k.grossRate)}</div></div>
     <div class="widget span-3"><div class="w-title">パイプライン</div><div class="w-big">${yenM(k.pipeline)}</div><div class="w-sub">オープン案件 ${Store.all('projects').filter(p=>STAGE_OPEN.includes(p.stage)).length}件</div></div>
 
@@ -1542,7 +1542,7 @@ Pages.match = () => {
   if(!MatchState.projectId || !Store.get('projects',MatchState.projectId)) MatchState.projectId = (projects[0]||{}).id;
   const p = Store.get('projects', MatchState.projectId);
   if(!p) return `<div class="empty"><span class="ic">🎯</span>オープン中の案件がありません<br><button class="btn" style="margin-top:10px" onclick="Form.open('projects')">案件を登録する</button></div>`;
-  const cands = Store.all('talents').map(t=>({t, s:score(p,t)})).sort((a,b)=>b.s.total-a.s.total).slice(0,10);
+  const cands = Store.all('talents').filter(t=>t.status!=='退職').map(t=>({t, s:score(p,t)})).sort((a,b)=>b.s.total-a.s.total).slice(0,10);
   return `
   <div class="obj-header"><div class="row1">
     <div class="obj-icon custom">🎯</div>
@@ -2219,7 +2219,7 @@ const Behaviors = {
     const k = Calc.kpi();
     Modal.open(`<div class="modal-head">🔔 通知<span class="x" onclick="Modal.close()">×</span></div>
       <div class="modal-body"><table class="tbl"><tbody>
-        <tr><td><span class="badge warn">終了間近</span></td><td>45日以内に終了するアサインが ${k.endingSoon} 件あります</td></tr>
+        <tr><td><span class="badge warn">終了間近</span></td><td>2ヶ月以内に終了するアサインが ${k.endingSoon} 件あります</td></tr>
         <tr><td><span class="badge info">待機</span></td><td>待機中のタレントが ${k.waitingCount} 名います（機会損失 ${yenM(k.lossPerMonth)}/月）</td></tr>
         <tr><td><span class="badge gray">デモ</span></td><td>これらはデータから自動生成された通知です</td></tr>
       </tbody></table></div>
