@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.5)</title>
+<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.6)</title>
 <style>
 /* SHT 活動記録CRM デモ — Salesforce Lightning 風 / 外部依存なし
    （glue hig-japan-sf デモの app.css に準拠）— 2026-07-07 定例FB反映版 */
@@ -402,6 +402,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     </div>
     <div class="fb-note">✅ <b>7/23FB反映（v0.4）</b>：<b>件名を複数選択可</b>（1訪問で複数の用件）＋<b>件名候補はカテゴリ連動</b>で出し分け。カテゴリは1つに整理（2階層想定）。品番は<b>品種→品番</b>の2段選択／取引先は<b>複数紐付け</b>可。</div>
     <div class="fb-note">✅ <b>7/28FB反映（v0.5）</b>：活動記録の横断検索を<b>品番×取引先</b>だけでなく<b>カテゴリ（品種→品番の第2階層）</b>や<b>件名</b>でも検索できるように拡張しました（右側「活動記録の横断検索」カードの切替タブでご確認いただけます）。</div>
+    <div class="fb-note">✅ <b>7/27–28FB反映（v0.6）</b>：①「関連する引合」で<b>新規引合をこの画面で作成→紐付け</b>（別画面移動なし）②既存引合を選ぶと<b>現在フェーズを自動表示</b>（毎回選択不要）③レコード側で<b>入力完了の取消（本人のみ＋回覧済みへ通知）</b>と<b>引合紐付けの後追い変更</b>（プレ検討→正式引合化で遡り紐付け）に対応。</div>
 
     <div class="grid g2">
       <div class="card">
@@ -442,7 +443,20 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
               <select id="part-sel"></select>
               <p class="help">品種→品番の階層。品番＋取引先で活動履歴・クレームを横断検索できます</p>
             </div>
-            <div class="field"><label>関連する引合</label><select><option>CN-320 新型コネクタ 年間契約</option><option>（なし）</option></select></div>
+            <div class="field"><label>関連する引合</label>
+              <select id="deal-sel">
+                <option value="d1">CN-320 新型コネクタ 年間契約</option>
+                <option value="d2">端子ユニット 追加発注</option>
+                <option value="none">（なし・プレ検討）</option>
+                <option value="new">＋ 新規引合をこの画面で作成…</option>
+              </select>
+              <div class="help" id="deal-phase-wrap" style="margin-top:4px">現在のフェーズ: <b>見積提示</b> <span class="pill gray" style="padding:1px 6px">自動表示</span>（次回以降も現フェーズが自動表示・必要時のみ変更）</div>
+              <div id="deal-new" hidden style="margin-top:8px;border:1px solid var(--line-d);border-radius:6px;padding:10px;background:#fafcff">
+                <div class="row2"><div class="field" style="margin:0"><label>新規引合名</label><input placeholder="例: CN-410 試作 引合"></div><div class="field" style="margin:0"><label>初期フェーズ</label><select><option>引合受付</option><option>ニーズ確認</option></select></div></div>
+                <button class="btn primary sm" type="button" id="deal-create" style="margin-top:8px">この画面で引合を作成して紐付け</button>
+                <p class="help">別画面に移動せず、活動記録の入力中に新規引合を作成→そのまま紐付けできます（7/27 FB）</p>
+              </div>
+            </div>
           </div>
 
           <div class="row2 tf tf-sales">
@@ -674,6 +688,13 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       <span class="msg" id="confirm-msg">この記録はまだ確認されていません。内容を読んでから確認してください。</span>
       <button class="btn confirm lg" id="btn-confirm">✓ 確認する</button>
     </div>
+
+    <div class="card" id="rec-lock" style="margin-bottom:14px"><div class="bd" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <span class="pill gray">🔒 入力完了（上書きロック）</span>
+      <button class="btn sm" type="button" id="rec-uncomplete">入力完了を取消して修正（入力者本人のみ）</button>
+      <button class="btn sm" type="button" id="rec-linkdeal">引合を紐付け（完了後も変更可）</button>
+      <span class="help" style="flex-basis:100%">🔧 7/28 FB：①入力完了の取消は<b>入力者本人のみ</b>可。取消時は<b>回覧済みの方へ通知</b>されます ②<b>引合紐付け</b>など指定項目は入力完了後も変更可（プレ検討→正式引合化後に<b>遡って紐付け</b>）</span>
+    </div></div>
 
     <div class="rec-cols">
       <div>
@@ -1254,6 +1275,28 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   $('#bell').addEventListener('click',function(){setView('inbox');});
   $('#submit-activity').addEventListener('click',function(){toast('確認送信しました — 配信先の未読一覧に追加されます');});
   $('#card-scan').addEventListener('click',function(){toast('名刺を撮影 → OCRで取引先責任者に登録（8月頭に先行提供）');});
+  // 関連引合：新規インライン作成＋フェーズ自動表示（7/27FB #3・#4）
+  var DEALPHASE={d1:'見積提示',d2:'ニーズ確認'};
+  if($('#deal-sel')){
+    $('#deal-sel').addEventListener('change',function(){
+      var v=this.value,pw=$('#deal-phase-wrap');
+      $('#deal-new').hidden=(v!=='new');
+      if(v==='d1'||v==='d2'){pw.style.display='';pw.innerHTML='現在のフェーズ: <b>'+DEALPHASE[v]+'</b> <span class="pill gray" style="padding:1px 6px">自動表示</span>（次回以降も自動表示・必要時のみ変更）';}
+      else if(v==='none'){pw.style.display='';pw.innerHTML='プレ検討（引合番号 未採番）— 正式引合化後に<b>遡って紐付け可能</b>です';}
+      else{pw.style.display='none';}
+    });
+    $('#deal-create').addEventListener('click',function(){
+      var sel=$('#deal-sel'),o=document.createElement('option');o.value='dn';o.textContent='（新規）CN-410 試作 引合';
+      sel.insertBefore(o,sel.firstChild);sel.value='dn';$('#deal-new').hidden=true;
+      var pw=$('#deal-phase-wrap');pw.style.display='';pw.innerHTML='現在のフェーズ: <b>引合受付</b> <span class="pill gray" style="padding:1px 6px">新規・自動設定</span>';
+      toast('この画面で新規引合を作成し、活動記録に紐付けました（別画面への移動なし）');
+    });
+  }
+  // レコード：入力完了の取消＋既読通知／引合紐付けの後変更（7/28FB #6・#7）
+  if($('#rec-uncomplete')){
+    $('#rec-uncomplete').addEventListener('click',function(){toast('入力完了を取消しました（入力者本人）— 回覧済みの方へ「取消」を通知しました');});
+    $('#rec-linkdeal').addEventListener('click',function(){toast('正式引合に遡って紐付けました（入力完了は維持・引合紐付け項目のみ変更）');});
+  }
   // 活動記録の横断検索：品番×取引先／カテゴリ（第2階層）／件名 のいずれでも検索可（7/28FB）
   var XS_HELP={part:'品番と取引先の組み合わせで、活動記録・クレームを横断検索します。',cat:'品種（大カテゴリ）→品番（第2階層）で絞り込み、活動記録・クレームを横断検索します。',subj:'分類（カテゴリ）と件名で、活動記録・クレームを横断検索します。'};
   function renderXCat2(){var c=$('#x-cat1');var p=$('#x-cat2');if(!c||!p)return;p.innerHTML=(PARTS[c.value]||[]).map(function(x){return '<option>'+x+'</option>';}).join('');}
