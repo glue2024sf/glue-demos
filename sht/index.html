@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.4)</title>
+<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.5)</title>
 <style>
 /* SHT 活動記録CRM デモ — Salesforce Lightning 風 / 外部依存なし
    （glue hig-japan-sf デモの app.css に準拠）— 2026-07-07 定例FB反映版 */
@@ -401,6 +401,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       </div>
     </div>
     <div class="fb-note">✅ <b>7/23FB反映（v0.4）</b>：<b>件名を複数選択可</b>（1訪問で複数の用件）＋<b>件名候補はカテゴリ連動</b>で出し分け。カテゴリは1つに整理（2階層想定）。品番は<b>品種→品番</b>の2段選択／取引先は<b>複数紐付け</b>可。</div>
+    <div class="fb-note">✅ <b>7/28FB反映（v0.5）</b>：活動記録の横断検索を<b>品番×取引先</b>だけでなく<b>カテゴリ（品種→品番の第2階層）</b>や<b>件名</b>でも検索できるように拡張しました（右側「活動記録の横断検索」カードの切替タブでご確認いただけます）。</div>
 
     <div class="grid g2">
       <div class="card">
@@ -483,13 +484,28 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       </div>
 
       <div class="card" style="align-self:start">
-        <div class="hd">品番×取引先 横断検索<span class="sub">FB反映</span></div>
+        <div class="hd">活動記録の横断検索<span class="sub">7/28 FB反映</span>
+          <div class="seg" id="xs-seg" style="margin-left:auto">
+            <button data-xm="part" class="on">品番×取引先</button>
+            <button data-xm="cat">カテゴリ</button>
+            <button data-xm="subj">件名</button>
+          </div>
+        </div>
         <div class="bd">
-          <div class="row2" style="margin-bottom:10px">
+          <div class="row2 xs-mode" id="xs-part" style="margin-bottom:10px">
             <div class="field" style="margin:0"><label>品番</label><select id="x-part"><option>CN-320</option><option>CN-220</option><option>ACC-12</option></select></div>
             <div class="field" style="margin:0"><label>取引先</label><select id="x-acct"><option>すべて</option><option>東海電子工業</option><option>関西精密コネクタ</option></select></div>
           </div>
-          <button class="btn primary sm" id="x-search" style="width:100%;justify-content:center">この品番の履歴を検索</button>
+          <div class="row2 xs-mode" id="xs-cat" style="margin-bottom:10px;display:none">
+            <div class="field" style="margin:0"><label>品種（大カテゴリ）</label><select id="x-cat1"><option>コネクタ</option><option>端子</option><option>治具・付属</option></select></div>
+            <div class="field" style="margin:0"><label>品番（第2階層）</label><select id="x-cat2"></select></div>
+          </div>
+          <div class="row2 xs-mode" id="xs-subj" style="margin-bottom:10px;display:none">
+            <div class="field" style="margin:0"><label>分類</label><select id="x-subjcat"><option value="sales">営業活動</option><option value="meeting">社内会議</option><option value="claim">品質クレーム</option></select></div>
+            <div class="field" style="margin:0"><label>件名</label><select id="x-subj"></select></div>
+          </div>
+          <div class="help" id="xs-help" style="margin-bottom:8px">品番と取引先の組み合わせで、活動記録・クレームを横断検索します。</div>
+          <button class="btn primary sm" id="x-search" style="width:100%;justify-content:center">この条件で履歴を検索</button>
           <div id="x-result" style="margin-top:12px"></div>
         </div>
       </div>
@@ -1238,14 +1254,42 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   $('#bell').addEventListener('click',function(){setView('inbox');});
   $('#submit-activity').addEventListener('click',function(){toast('確認送信しました — 配信先の未読一覧に追加されます');});
   $('#card-scan').addEventListener('click',function(){toast('名刺を撮影 → OCRで取引先責任者に登録（8月頭に先行提供）');});
+  // 活動記録の横断検索：品番×取引先／カテゴリ（第2階層）／件名 のいずれでも検索可（7/28FB）
+  var XS_HELP={part:'品番と取引先の組み合わせで、活動記録・クレームを横断検索します。',cat:'品種（大カテゴリ）→品番（第2階層）で絞り込み、活動記録・クレームを横断検索します。',subj:'分類（カテゴリ）と件名で、活動記録・クレームを横断検索します。'};
+  function renderXCat2(){var c=$('#x-cat1');var p=$('#x-cat2');if(!c||!p)return;p.innerHTML=(PARTS[c.value]||[]).map(function(x){return '<option>'+x+'</option>';}).join('');}
+  function renderXSubj(){var c=$('#x-subjcat');var s=$('#x-subj');if(!c||!s)return;s.innerHTML=(SUBJECTS[c.value]||[]).map(function(x){return '<option>'+x+'</option>';}).join('');}
+  if($('#xs-seg')){
+    $('#xs-seg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+      $$('#xs-seg button').forEach(function(x){x.classList.toggle('on',x===b);});
+      $$('.xs-mode').forEach(function(el){el.style.display=(el.id==='xs-'+b.dataset.xm)?'':'none';});
+      $('#xs-help').textContent=XS_HELP[b.dataset.xm];
+      state.xsMode=b.dataset.xm;
+      if(b.dataset.xm==='cat')renderXCat2();
+      if(b.dataset.xm==='subj')renderXSubj();
+    });
+    $('#x-cat1').addEventListener('change',renderXCat2);
+    $('#x-subjcat').addEventListener('change',renderXSubj);
+  }
   $('#x-search').addEventListener('click',function(){
-    var p=$('#x-part').value,a=$('#x-acct').value;
-    $('#x-result').innerHTML='<div class="callout" style="margin-bottom:8px">品番 <b>'+p+'</b>'+(a==='すべて'?'':' × '+a)+' の履歴</div>'+
+    var mode=state.xsMode||'part',keyLabel,toastMsg;
+    if(mode==='cat'){
+      keyLabel='カテゴリ <b>'+$('#x-cat1').value+' ／ '+$('#x-cat2').value+'</b>';
+      toastMsg='カテゴリ（第2階層）で活動記録・クレームを横断検索';
+    }else if(mode==='subj'){
+      var subjOpt=$('#x-subj');
+      keyLabel='件名 <b>'+(subjOpt&&subjOpt.value?subjOpt.value:'')+'</b>（'+TSUBS[$('#x-subjcat').value]+'）';
+      toastMsg='件名で活動記録・クレームを横断検索';
+    }else{
+      var p=$('#x-part').value,a=$('#x-acct').value;
+      keyLabel='品番 <b>'+p+'</b>'+(a==='すべて'?'':' × '+a);
+      toastMsg='品番×取引先で活動記録・クレームを横断検索';
+    }
+    $('#x-result').innerHTML='<div class="callout" style="margin-bottom:8px">'+keyLabel+' の履歴</div>'+
       '<table class="tbl"><thead><tr><th>日付</th><th>種別</th><th>件名</th></tr></thead><tbody>'+
       '<tr><td>7/17</td><td><span class="cat sales">営業</span></td><td>東海電子工業 訪問 — 内示見込み</td></tr>'+
       '<tr><td>7/15</td><td><span class="cat claim">クレーム</span></td><td>寸法 公差外れ（L2312）</td></tr>'+
       '<tr><td>7/1</td><td><span class="cat sales">営業</span></td><td>技術仕様の詰め</td></tr></tbody></table>';
-    toast('品番×取引先で活動記録・クレームを横断検索');
+    toast(toastMsg);
   });
   $('#dash-role').addEventListener('click',function(e){var b=e.target.closest('button');if(b){state.dashRole=b.dataset.role;$$('#dash-role button').forEach(function(x){x.classList.toggle('on',x===b);});renderDash();}});
   // 品種→品番の階層絞り込み（7/22FB）
