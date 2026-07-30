@@ -348,13 +348,73 @@ img{max-width:100%}
 .emp-band.direct{background:var(--brand-50);color:var(--brand-d)}
 .emp-band.itaku{background:#fff1e6;color:#c4600a}
 
+/* 静的ページ（読み物） */
+.doc{max-width:840px;margin:0 auto}
+.doc h1{font-size:26px;margin:0 0 6px}
+.doc .lead{color:var(--ink-2);margin:0 0 20px;font-size:14px}
+.doc h2{font-size:17px;border-left:4px solid var(--brand);padding-left:10px;margin:26px 0 8px}
+.doc p,.doc li{color:var(--ink-2);font-size:13.5px;line-height:1.95}
+.doc table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.doc th,.doc td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+.doc th{background:#f7fafc;width:180px;font-weight:800;color:var(--ink-2)}
+/* フォーム（ログイン・会員登録・プロフィール） */
+.form-card{max-width:440px;margin:10px auto;background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 30px}
+.form-card.wide{max-width:620px}
+.form-card h1{font-size:22px;margin:0 0 4px;text-align:center}
+.form-card .sub{text-align:center;color:var(--mute);font-size:12.5px;margin-bottom:20px}
+.form-row{margin-bottom:14px}
+.form-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row label{display:block;font-size:12px;font-weight:800;color:var(--ink-2);margin-bottom:5px}
+.form-row input,.form-row select,.form-row textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;font-size:13.5px;font-family:inherit}
+.form-note{text-align:center;font-size:12px;color:var(--mute);margin-top:14px}
+.form-note a{color:var(--brand-d);font-weight:700;cursor:pointer}
+/* サイトマップ（全ページハブ） */
+.sitemap-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.sitemap-cols h4{font-size:13px;margin:0 0 8px;color:var(--brand-d);border-bottom:1px solid var(--brand-50);padding-bottom:5px}
+.sitemap-cols a{display:block;font-size:12.5px;color:var(--ink-2);padding:5px 0;cursor:pointer;border-bottom:1px dashed #eef2f6}
+.sitemap-cols a:hover{color:var(--brand-d)}
+.sitemap-cols a .u{display:block;font-family:ui-monospace,monospace;font-size:10px;color:var(--mute)}
+/* こだわり条件クラウド */
+.tagcloud{display:flex;flex-wrap:wrap;gap:9px}
+.tagcloud a{background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:8px 15px;font-size:13px;font-weight:700;color:var(--ink-2);cursor:pointer}
+.tagcloud a:hover{border-color:var(--brand);color:var(--brand-d);background:var(--brand-50)}
+.tagcloud a b{color:var(--brand-d)}
+/* CA紹介 */
+.adv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.adv-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px}
+.adv-card .av{width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,var(--brand),#54d39a);color:#fff;font-size:32px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.adv-card .nm{font-weight:800;font-size:15px;text-align:center}
+.adv-card .ro{font-size:12px;color:var(--brand-d);font-weight:700;margin:2px 0 10px;text-align:center}
+.adv-card p{font-size:12.5px;color:var(--ink-2);line-height:1.8;margin:0}
+/* 応募フォームのステップ */
+.steps-bar{display:flex;gap:8px;margin:0 0 20px}
+.steps-bar .st{flex:1;text-align:center;font-size:12px;font-weight:800;color:var(--mute);padding:9px;background:#f3f6f9;border-radius:9px}
+.steps-bar .st.on{background:var(--brand);color:#fff}
+/* コラム記事 */
+.article{max-width:760px;margin:0 auto}
+.article .hd{height:190px;border-radius:14px;background:linear-gradient(120deg,#eafaf2,#e7f6ff);display:flex;align-items:center;justify-content:center;font-size:60px;margin-bottom:18px}
+.article h1{font-size:25px;margin:0 0 8px;line-height:1.4}
+.article .meta{font-size:12px;color:var(--mute);margin-bottom:20px;display:flex;gap:10px}
+.article h2{font-size:18px;margin:26px 0 8px}
+.article p,.article li{color:var(--ink-2);font-size:14px;line-height:1.95}
+.article .toc{background:#f7fafc;border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:18px 0}
+.article .toc b{font-size:13px}
+.article .toc a{display:block;color:var(--brand-d);font-size:13px;padding:3px 0;cursor:pointer}
+/* フッター（リンク集） */
+.footcols{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;max-width:1080px;margin:0 auto;padding:0 20px 24px;text-align:left;border-bottom:1px solid #24344a}
+.footcols h4{font-size:12px;color:#cfe3d8;margin:0 0 10px;font-weight:800}
+.footcols a{display:block;color:#8fa1b6;font-size:12px;padding:4px 0;cursor:pointer}
+.footcols a:hover{color:#fff}
+.site-foot .bar{padding-top:18px}
+
 @media(max-width:880px){
   .searchbox{grid-template-columns:1fr 1fr}
   .job-grid,.ai-wrap,.detail-top,.mypage,.sf-cols{grid-template-columns:1fr}
   .hl-grid,.sf-hl,.kpis{grid-template-columns:repeat(2,1fr)}
   .cat-grid,.area-grid,.facil-grid,.col-grid,.stat-strip{grid-template-columns:repeat(2,1fr)}
-  .list-layout,.fac-hero{grid-template-columns:1fr}
+  .list-layout,.fac-hero,.form-2{grid-template-columns:1fr}
   .cta-band{flex-direction:column;text-align:center}
+  .sitemap-cols,.adv-grid,.footcols{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -883,7 +943,493 @@ img{max-width:100%}
     </div>
   </section>
 
-  <footer class="site-foot">© おしごとらぼ（デモ）／ Salesforce Experience Cloud 上に構築 — 全データはダミーです</footer>
+  <!-- ⑧ エリアから探す（都道府県一覧） -->
+  <section class="page" id="sp-areatop">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><span>エリアから探す</span></div>
+    <div class="list-head"><h1>エリアから探す</h1><span class="ct">全国 4,120件</span></div>
+    <div class="area-note" style="margin:0 0 18px">URL例：<b>/area/</b> → <b>/{職種}/area/{都道府県}/{市区町村}/</b></div>
+    <div class="blk">
+      <div class="blk-h"><span class="en">Kanto</span><h2>関東</h2></div>
+      <div class="area-grid">
+        <div class="area-card" onclick="sgo('area')"><span class="rg">東京都</span><span class="rc">842件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">神奈川県</span><span class="rc">531件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">埼玉県</span><span class="rc">388件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">千葉県</span><span class="rc">342件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">茨城県</span><span class="rc">96件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">栃木県</span><span class="rc">71件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">群馬県</span><span class="rc">68件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">山梨県</span><span class="rc">24件</span></div>
+      </div>
+    </div>
+    <div class="blk">
+      <div class="blk-h"><span class="en">Kansai / Tokai</span><h2>関西・東海</h2></div>
+      <div class="area-grid">
+        <div class="area-card" onclick="sgo('area')"><span class="rg">大阪府</span><span class="rc">476件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">兵庫県</span><span class="rc">215件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">京都府</span><span class="rc">138件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">愛知県</span><span class="rc">298件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">静岡県</span><span class="rc">112件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">三重県</span><span class="rc">54件</span></div>
+      </div>
+    </div>
+    <div class="blk">
+      <div class="blk-h"><span class="en">Other</span><h2>その他の地方</h2></div>
+      <div class="area-grid">
+        <div class="area-card" onclick="sgo('area')"><span class="rg">北海道</span><span class="rc">143件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">宮城県</span><span class="rc">67件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">広島県</span><span class="rc">89件</span></div>
+        <div class="area-card" onclick="sgo('area')"><span class="rg">福岡県</span><span class="rc">253件</span></div>
+      </div>
+      <div class="area-note">※ 求人が0件のエリアは自動的に非表示になります</div>
+    </div>
+  </section>
+
+  <!-- ⑨ 施設形態から探す -->
+  <section class="page" id="sp-shokushu">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><span>施設形態から探す</span></div>
+    <div class="list-head"><h1>施設形態から探す</h1></div>
+    <div class="area-note" style="margin:0 0 18px">URL例：<b>/{職種}/shisetsu/{施設種別}/</b></div>
+    <div class="facil-grid">
+      <div class="facil-card" onclick="sgo('search')"><div class="ic">🏥</div><div><div class="nm">病院・クリニック</div><div class="ct">1,180件｜急性期・療養・回復期</div></div></div>
+      <div class="facil-card" onclick="sgo('search')"><div class="ic">🧸</div><div><div class="nm">保育園・こども園</div><div class="ct">760件｜認可・認証・企業主導型</div></div></div>
+      <div class="facil-card" onclick="sgo('search')"><div class="ic">🏡</div><div><div class="nm">高齢者施設</div><div class="ct">1,020件｜特養・老健・有料</div></div></div>
+      <div class="facil-card" onclick="sgo('search')"><div class="ic">🍱</div><div><div class="nm">社員食堂</div><div class="ct">430件｜企業内・オフィス</div></div></div>
+      <div class="facil-card" onclick="sgo('search')"><div class="ic">🏫</div><div><div class="nm">学校給食</div><div class="ct">290件｜給食センター・自校式</div></div></div>
+      <div class="facil-card" onclick="sgo('search')"><div class="ic">🍳</div><div><div class="nm">給食委託会社</div><div class="ct">440件｜受託運営</div></div></div>
+    </div>
+    <div class="blk">
+      <div class="blk-h"><span class="en">Pickup</span><h2>病院・クリニックの新着</h2><span class="more" onclick="sgo('search')">すべて見る ›</span></div>
+      <div class="job-grid">
+        <div class="job-card" onclick="sgo('detail')">
+          <span class="fav" onclick="favTog(event,this)">♡</span>
+          <div class="tagrow"><span class="tag new">NEW</span><span class="tag g">管理栄養士</span></div>
+          <h3>急性期病院での管理栄養士（栄養管理・献立作成）</h3>
+          <div class="co">🏥 みどり総合病院（さいたま市）</div>
+          <div class="job-meta"><span>月給 <b>26〜32万円</b></span><span>📍 埼玉県さいたま市</span></div>
+        </div>
+        <div class="job-card" onclick="sgo('detail')">
+          <span class="fav" onclick="favTog(event,this)">♡</span>
+          <div class="tagrow"><span class="tag g">栄養士</span><span class="tag b">日勤のみ</span></div>
+          <h3>療養型病院の栄養士｜献立・食数管理</h3>
+          <div class="co">🏥 なごみ会病院（横浜市）</div>
+          <div class="job-meta"><span>月給 <b>23〜27万円</b></span><span>📍 神奈川県横浜市</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑩ こだわり条件から探す -->
+  <section class="page" id="sp-tag">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><span>こだわり条件から探す</span></div>
+    <div class="list-head"><h1>こだわり条件から探す</h1></div>
+    <div class="area-note" style="margin:0 0 18px">URL例：<b>/{職種}/tag/{条件}/</b></div>
+    <div class="blk">
+      <div class="blk-h"><span class="en">Work style</span><h2>働き方</h2></div>
+      <div class="tagcloud">
+        <a onclick="sgo('search')">日勤のみ <b>1,240</b></a><a onclick="sgo('search')">土日休み <b>980</b></a>
+        <a onclick="sgo('search')">残業ほぼなし <b>760</b></a><a onclick="sgo('search')">夜勤なし <b>1,100</b></a>
+        <a onclick="sgo('search')">年間休日120日以上 <b>640</b></a><a onclick="sgo('search')">週休3日応相談 <b>120</b></a>
+      </div>
+    </div>
+    <div class="blk">
+      <div class="blk-h"><span class="en">Condition</span><h2>応募条件・待遇</h2></div>
+      <div class="tagcloud">
+        <a onclick="sgo('search')">未経験OK <b>870</b></a><a onclick="sgo('search')">ブランクOK <b>530</b></a>
+        <a onclick="sgo('search')">賞与あり <b>1,560</b></a><a onclick="sgo('search')">車通勤可 <b>1,320</b></a>
+        <a onclick="sgo('search')">駅近5分以内 <b>410</b></a><a onclick="sgo('search')">住宅手当あり <b>290</b></a>
+        <a onclick="sgo('search')">正社員 <b>2,100</b></a><a onclick="sgo('search')">パート・アルバイト <b>980</b></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑪ コラム一覧 -->
+  <section class="page" id="sp-columns">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><span>コラム</span></div>
+    <div class="hero" style="padding:28px 30px">
+      <span class="em">📚</span>
+      <h1>なるほど！<span class="hl">おしごとらぼ</span></h1>
+      <p>給食・栄養業界で働く方へ。給与相場、転職ノウハウ、資格・キャリアの情報をお届けします。</p>
+    </div>
+    <div class="chips">
+      <span class="chip on">すべて</span><span class="chip">給与・待遇</span><span class="chip">転職ノウハウ</span>
+      <span class="chip">資格・スキル</span><span class="chip">職場を知る</span><span class="chip">インタビュー</span>
+    </div>
+    <div class="area-note" style="margin:6px 0 16px">URL例：<b>/columns/</b> → <b>/columns/{記事名}/</b>（SEO/LLMO記事 全20本の格納先）</div>
+    <div class="col-grid">
+      <div class="col-card" onclick="sgo('article')"><div class="thumb">📝</div><div class="body"><span class="cat">給与・待遇</span><h3>管理栄養士の給与相場は？関東エリアの最新事情</h3></div></div>
+      <div class="col-card" onclick="sgo('article')"><div class="thumb">🍀</div><div class="body"><span class="cat">転職ノウハウ</span><h3>未経験から給食業界へ。栄養士の転職ステップ</h3></div></div>
+      <div class="col-card" onclick="sgo('article')"><div class="thumb">🏥</div><div class="body"><span class="cat">職場を知る</span><h3>病院・保育園・社員食堂、働き方の違いを比較</h3></div></div>
+      <div class="col-card" onclick="sgo('article')"><div class="thumb">📋</div><div class="body"><span class="cat">資格・スキル</span><h3>管理栄養士国家試験の勉強法と合格スケジュール</h3></div></div>
+      <div class="col-card" onclick="sgo('article')"><div class="thumb">💬</div><div class="body"><span class="cat">インタビュー</span><h3>委託給食から直雇用へ。転職した先輩の体験談</h3></div></div>
+      <div class="col-card" onclick="sgo('article')"><div class="thumb">🕑</div><div class="body"><span class="cat">転職ノウハウ</span><h3>退職の伝え方・引き継ぎのマナー完全ガイド</h3></div></div>
+    </div>
+  </section>
+
+  <!-- ⑫ コラム記事 -->
+  <section class="page" id="sp-article">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><a onclick="sgo('columns')">コラム</a><span>›</span><span>管理栄養士の給与相場</span></div>
+    <div class="article">
+      <div class="hd">📝</div>
+      <span class="col-card"><span class="cat" style="display:inline-block;background:var(--brand-50);color:var(--brand-d);font-size:10.5px;font-weight:800;border-radius:5px;padding:2px 8px">給与・待遇</span></span>
+      <h1>管理栄養士の給与相場は？関東エリアの最新事情</h1>
+      <div class="meta"><span>📅 2026-07-20</span><span>⏱ 約5分で読めます</span><span>✍ おしごとらぼ編集部</span></div>
+      <div class="toc">
+        <b>目次</b>
+        <a>1. 管理栄養士の平均給与</a>
+        <a>2. 施設形態による違い（病院・高齢者施設・保育園）</a>
+        <a>3. 給与を上げるためのキャリアの考え方</a>
+      </div>
+      <h2>1. 管理栄養士の平均給与</h2>
+      <p>関東エリアの管理栄養士の給与相場は、正社員で月給24〜32万円程度が中心です。経験年数や保有資格、勤務先の施設形態によって幅があります。おしごとらぼに掲載中の求人でも、この水準の募集が多くを占めています。</p>
+      <h2>2. 施設形態による違い</h2>
+      <p>病院は栄養指導やNST活動など専門性が高く、給与も比較的高めの傾向があります。高齢者施設は求人数が多く、未経験・ブランクからの復帰もしやすい環境です。保育園は年間休日が多く、土日休みを重視する方に人気です。</p>
+      <h2>3. 給与を上げるためのキャリアの考え方</h2>
+      <p>委託給食から施設の直雇用への転職、管理職・栄養ケアマネジメントへのステップアップなどが、給与アップにつながりやすい選択肢です。ご自身の希望条件を整理して、キャリアアドバイザーにご相談ください。</p>
+      <div class="ai-note" style="margin-top:20px"><b>この記事の作り方（Phase1スコープ）</b>：記事のたたきはGlueが作成し、御社の業界ナレッジを加筆いただく分担です。CMS（Salesforce）で管理し、構造化データとサイトマップを自動生成します。※本文はデモ用のダミーです</div>
+      <div style="margin-top:20px"><button class="btn ghost" onclick="sgo('columns')">‹ コラム一覧へ戻る</button></div>
+    </div>
+  </section>
+
+  <!-- ⑬ キャリアアドバイザー紹介 -->
+  <section class="page" id="sp-advisors">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><span>キャリアアドバイザー紹介</span></div>
+    <div class="hero" style="padding:28px 30px">
+      <span class="em">🤝</span>
+      <h1>あなたの転職を支える<span class="hl">キャリアアドバイザー</span></h1>
+      <p>給食・栄養業界に精通した専任アドバイザーが、求人紹介から面接対策まで無料でサポートします。</p>
+    </div>
+    <div class="adv-grid" style="margin-top:22px">
+      <div class="adv-card"><div class="av">👩</div><div class="nm">佐藤 みなみ</div><div class="ro">管理栄養士 専任</div><p>病院・高齢者施設の求人を中心に担当。栄養士から管理栄養士へのキャリアアップ相談が得意です。</p></div>
+      <div class="adv-card"><div class="av">👨</div><div class="nm">鈴木 大輔</div><div class="ro">調理師・委託給食 専任</div><p>委託給食会社の求人に精通。未経験・異業種からの転職サポート実績が豊富です。</p></div>
+      <div class="adv-card"><div class="av">👩</div><div class="nm">高橋 あゆみ</div><div class="ro">保育・こども園 専任</div><p>保育園・こども園の給食求人を担当。土日休み・ワークライフバランス重視の方に。</p></div>
+    </div>
+    <div class="cta-band" style="margin-top:28px">
+      <span class="em">💬</span>
+      <div class="tx"><h2>まずは気軽にご相談ください</h2><p>会員登録（無料）いただくと、あなたに合った求人をアドバイザーがご提案します。</p></div>
+      <button class="btn lg" onclick="sgo('register')">無料で相談する</button>
+    </div>
+  </section>
+
+  <!-- ⑭ 企業様向けご案内 -->
+  <section class="page" id="sp-employers">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><span>企業様向けご案内</span></div>
+    <div class="hero" style="padding:28px 30px">
+      <span class="em">🏢</span>
+      <h1><span class="hl">採用担当者様</span>へ｜求人掲載・人材紹介のご案内</h1>
+      <p>栄養士・調理師に特化した専門媒体で、貴施設にマッチする人材をご紹介します。</p>
+    </div>
+    <div class="stat-strip" style="margin-top:18px">
+      <div class="s"><div class="n">特化型</div><div class="l">給食・栄養に専門特化</div></div>
+      <div class="s"><div class="n">成功報酬</div><div class="l">採用が決まってからの費用</div></div>
+      <div class="s"><div class="n">CA伴走</div><div class="l">専任担当が採用を支援</div></div>
+    </div>
+    <div class="blk">
+      <div class="blk-h"><span class="en">Contact</span><h2>掲載・人材紹介のお問い合わせ</h2></div>
+      <div class="form-card wide" style="margin:0">
+        <div class="form-2">
+          <div class="form-row"><label>会社名・施設名</label><input value=""></div>
+          <div class="form-row"><label>ご担当者名</label><input value=""></div>
+        </div>
+        <div class="form-2">
+          <div class="form-row"><label>メールアドレス</label><input value=""></div>
+          <div class="form-row"><label>電話番号</label><input value=""></div>
+        </div>
+        <div class="form-row"><label>募集職種</label><select><option>管理栄養士</option><option>栄養士</option><option>調理師</option><option>調理員</option><option>複数職種</option></select></div>
+        <div class="form-row"><label>ご相談内容</label><textarea rows="3"></textarea></div>
+        <button class="btn lg" style="width:100%;justify-content:center" onclick="toast('（モック）送信 ＝ Web-to-Case でケース作成')">送信する</button>
+        <div class="form-note">送信内容はSalesforceの<b>ケース（Web-to-Case）</b>として登録されます</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑮ お問い合わせ -->
+  <section class="page" id="sp-contact">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><span>お問い合わせ</span></div>
+    <div class="form-card wide">
+      <h1>お問い合わせ</h1>
+      <div class="sub">求職者様・企業様共通のお問い合わせ窓口です</div>
+      <div class="form-row"><label>お問い合わせ種別</label><select><option>求人について（求職者）</option><option>会員登録・ログインについて</option><option>求人掲載・人材紹介について（企業）</option><option>その他</option></select></div>
+      <div class="form-2">
+        <div class="form-row"><label>お名前</label><input></div>
+        <div class="form-row"><label>メールアドレス</label><input></div>
+      </div>
+      <div class="form-row"><label>お問い合わせ内容</label><textarea rows="4"></textarea></div>
+      <button class="btn lg" style="width:100%;justify-content:center" onclick="toast('（モック）送信 ＝ Web-to-Case')">送信する</button>
+      <div class="form-note">通常2営業日以内にご返信します</div>
+    </div>
+  </section>
+
+  <!-- ⑯ 運営会社 -->
+  <section class="page" id="sp-company">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><span>運営会社</span></div>
+    <div class="doc">
+      <h1>運営会社</h1>
+      <p class="lead">「おしごとらぼ」は、ヒトラボエージェント株式会社が運営する栄養士・調理師専門の求人サイトです。（※本デモの会社情報はダミーです）</p>
+      <table>
+        <tr><th>会社名</th><td>ヒトラボエージェント株式会社</td></tr>
+        <tr><th>所在地</th><td>大阪府〇〇市〇〇 1-2-3 ／ 東京オフィス：東京都〇〇区〇〇</td></tr>
+        <tr><th>事業内容</th><td>栄養士・調理師の人材紹介、求人サイト「おしごとらぼ」の運営</td></tr>
+        <tr><th>有料職業紹介事業許可番号</th><td>13-ユ-XXXXXX</td></tr>
+        <tr><th>プライバシーマーク</th><td>取得（デモ表記）</td></tr>
+      </table>
+      <h2>私たちの想い</h2>
+      <p>給食・栄養の現場で働く方が、自分らしく長く働ける職場に出会えるように。求職者様と施設様の双方に寄り添った人材紹介を行っています。</p>
+    </div>
+  </section>
+
+  <!-- ⑰ 利用規約 -->
+  <section class="page" id="sp-terms">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><span>利用規約</span></div>
+    <div class="doc">
+      <h1>利用規約</h1>
+      <p class="lead">この利用規約は、おしごとらぼ（以下「本サービス」）の利用条件を定めるものです。（※デモ用のサンプル文です）</p>
+      <h2>第1条（適用）</h2>
+      <p>本規約は、本サービスの利用に関わる一切の関係に適用されるものとします。</p>
+      <h2>第2条（会員登録）</h2>
+      <p>本サービスの一部機能（応募・お気に入り・マイページ等）のご利用には、会員登録が必要です。登録情報は正確にご入力ください。</p>
+      <h2>第3条（禁止事項）</h2>
+      <p>虚偽の情報の登録、他者へのなりすまし、本サービスの運営を妨げる行為を禁止します。</p>
+      <h2>第4条（免責事項）</h2>
+      <p>本サービスに掲載される求人情報の内容について、当社は完全性・正確性を保証するものではありません。</p>
+    </div>
+  </section>
+
+  <!-- ⑱ プライバシーポリシー -->
+  <section class="page" id="sp-privacy">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><span>プライバシーポリシー</span></div>
+    <div class="doc">
+      <h1>プライバシーポリシー</h1>
+      <p class="lead">おしごとらぼは、求職者様の個人情報を適切に取り扱います。（※デモ用のサンプル文です）</p>
+      <h2>取得する情報</h2>
+      <p>会員登録時のお名前・連絡先・希望条件、サイトの閲覧・応募履歴などを取得します。</p>
+      <h2>利用目的</h2>
+      <p>求人のご紹介、キャリアアドバイザーによるサポート、サービス改善のために利用します。</p>
+      <h2>第三者提供</h2>
+      <p>ご応募いただいた求人の採用選考に必要な範囲で、応募先施設・委託先企業へ情報を提供する場合があります。</p>
+      <h2>お問い合わせ</h2>
+      <p>個人情報の開示・訂正・削除のご請求は、お問い合わせ窓口までご連絡ください。</p>
+    </div>
+  </section>
+
+  <!-- ⑲ ログイン -->
+  <section class="page" id="sp-login">
+    <div class="form-card">
+      <h1>ログイン</h1>
+      <div class="sub">会員の方はこちらからログインしてください</div>
+      <div class="form-row"><label>メールアドレス</label><input value="tanaka.haruka@example.com"></div>
+      <div class="form-row"><label>パスワード</label><input type="password" value="········"></div>
+      <button class="btn lg" style="width:100%;justify-content:center" onclick="sgo('mypage')">ログイン</button>
+      <div class="form-note"><a onclick="toast('（モック）パスワード再設定メール送信')">パスワードをお忘れの方</a></div>
+      <div class="form-note">アカウントをお持ちでない方は <a onclick="sgo('register')">会員登録（無料）</a></div>
+    </div>
+  </section>
+
+  <!-- ⑳ 会員登録 -->
+  <section class="page" id="sp-register">
+    <div class="form-card wide">
+      <h1>会員登録（無料）</h1>
+      <div class="sub">ご希望条件を登録すると、ぴったりの求人をご提案します</div>
+      <div class="form-2">
+        <div class="form-row"><label>お名前</label><input></div>
+        <div class="form-row"><label>メールアドレス</label><input></div>
+      </div>
+      <div class="form-2">
+        <div class="form-row"><label>パスワード</label><input type="password"></div>
+        <div class="form-row"><label>電話番号</label><input></div>
+      </div>
+      <div class="form-2">
+        <div class="form-row"><label>希望職種</label><select><option>管理栄養士</option><option>栄養士</option><option>調理師</option><option>調理員</option></select></div>
+        <div class="form-row"><label>希望エリア</label><select><option>東京都</option><option>神奈川県</option><option>埼玉県</option><option>千葉県</option><option>大阪府</option></select></div>
+      </div>
+      <div class="form-row"><label>転職活動の状況</label><select><option>すぐにでも転職したい</option><option>3ヶ月以内に転職したい</option><option>良い求人があれば</option><option>情報収集中</option></select></div>
+      <button class="btn lg" style="width:100%;justify-content:center" onclick="sgo('mypage')">この内容で登録する</button>
+      <div class="form-note">登録情報はSalesforceの<b>取引先責任者（求職者）</b>として作成されます。歯抜けのないデータベースになります</div>
+    </div>
+  </section>
+
+  <!-- ㉑ 応募状況（会員） -->
+  <section class="page" id="sp-applications">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><a onclick="sgo('mypage')">マイページ</a><span>›</span><span>応募状況</span></div>
+    <div class="list-head"><h1>応募状況</h1><span class="ct">2件</span></div>
+    <div class="panel" style="margin-top:14px">
+      <div class="hist-row"><span class="when">6/26 応募</span><div><div class="t">急性期病院での管理栄養士</div><div class="co">みどり総合病院（さいたま市）</div></div><span class="st"><span class="b blue">書類選考中</span></span></div>
+      <div class="hist-row"><span class="when">6/18 応募</span><div><div class="t">委託給食の管理栄養士</div><div class="co">ヘルシーミール（大宮）</div></div><span class="st"><span class="b g">面接調整中</span></span></div>
+    </div>
+    <div class="ai-note">応募情報はSalesforceの<b>応募（カスタムオブジェクト）</b>。担当キャリアアドバイザーに通知され、直営／委託の別も判別されます</div>
+  </section>
+
+  <!-- ㉒ お気に入り（会員） -->
+  <section class="page" id="sp-favorites">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><a onclick="sgo('mypage')">マイページ</a><span>›</span><span>お気に入り</span></div>
+    <div class="list-head"><h1>お気に入り</h1><span class="ct">3件</span></div>
+    <div class="job-grid" style="margin-top:14px">
+      <div class="job-card" onclick="sgo('detail')">
+        <span class="fav on" onclick="favTog(event,this)">♥</span>
+        <div class="tagrow"><span class="tag g">調理師</span><span class="tag b">土日祝休み</span></div>
+        <h3>社員食堂の調理師｜土日祝休み・残業ほぼなし</h3>
+        <div class="co">🍱 フードパートナーズ（中央区）</div>
+        <div class="job-meta"><span>月給 <b>25〜30万円</b></span><span>📍 東京都中央区</span></div>
+      </div>
+      <div class="job-card" onclick="sgo('detail')">
+        <span class="fav on" onclick="favTog(event,this)">♥</span>
+        <div class="tagrow"><span class="tag g">管理栄養士</span><span class="tag o">ブランクOK</span></div>
+        <h3>特養での献立・栄養ケアマネジメント（管理栄養士）</h3>
+        <div class="co">🏡 やすらぎ介護福祉会（千葉市）</div>
+        <div class="job-meta"><span>月給 <b>24〜29万円</b></span><span>📍 千葉県千葉市</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ㉓ 閲覧履歴（会員） -->
+  <section class="page" id="sp-history">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><a onclick="sgo('mypage')">マイページ</a><span>›</span><span>閲覧履歴</span></div>
+    <div class="list-head"><h1>閲覧履歴</h1><span class="ct">直近30日</span></div>
+    <div class="panel" style="margin-top:14px">
+      <div class="hist-row"><span class="when">本日 11:40</span><div><div class="t">急性期病院での管理栄養士</div><div class="co">みどり総合病院（さいたま市）</div></div><span class="st"><span class="b o">3回見た</span></span></div>
+      <div class="hist-row"><span class="when">本日 11:32</span><div><div class="t">特養での献立・栄養ケアマネジメント</div><div class="co">やすらぎ介護福祉会（千葉市）</div></div><span class="st"><span class="b gray">1回</span></span></div>
+      <div class="hist-row"><span class="when">6/24</span><div><div class="t">社員食堂の調理師</div><div class="co">フードパートナーズ（中央区）</div></div><span class="st"><span class="b g">♥ 保存済</span></span></div>
+      <div class="hist-row"><span class="when">6/20</span><div><div class="t">認可保育園の給食づくり</div><div class="co">そらまめ保育園（横浜市）</div></div><span class="st"><span class="b gray">1回</span></span></div>
+    </div>
+    <div class="ai-note">閲覧・ログイン状況は社内Salesforceで可視化され、掘り起こしリストやレコメンドに活用されます</div>
+  </section>
+
+  <!-- ㉔ プロフィール設定（会員） -->
+  <section class="page" id="sp-profile">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><a onclick="sgo('mypage')">マイページ</a><span>›</span><span>プロフィール設定</span></div>
+    <div class="form-card wide">
+      <h1>プロフィール設定</h1>
+      <div class="sub">希望条件を更新すると、レコメンドの精度が上がります</div>
+      <div class="form-2">
+        <div class="form-row"><label>お名前</label><input value="田中 はるか"></div>
+        <div class="form-row"><label>電話番号</label><input value="090-XXXX-XXXX"></div>
+      </div>
+      <div class="form-2">
+        <div class="form-row"><label>保有資格</label><input value="管理栄養士／栄養士"></div>
+        <div class="form-row"><label>経験年数</label><select><option>4年</option><option>1年</option><option>7年</option><option>10年以上</option></select></div>
+      </div>
+      <div class="form-2">
+        <div class="form-row"><label>希望職種</label><select><option>管理栄養士</option><option>栄養士</option></select></div>
+        <div class="form-row"><label>希望エリア</label><select><option>埼玉県</option><option>東京都</option></select></div>
+      </div>
+      <div class="form-row"><label>希望条件</label><input value="日勤のみ／賞与あり／車通勤可"></div>
+      <button class="btn lg" style="width:100%;justify-content:center" onclick="toast('プロフィールを更新しました（モック）')">更新する</button>
+    </div>
+  </section>
+
+  <!-- ㉕ 応募フォーム -->
+  <section class="page" id="sp-apply">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><a onclick="sgo('detail')">求人詳細</a><span>›</span><span>応募</span></div>
+    <div class="form-card wide">
+      <h1>この求人に応募する</h1>
+      <div class="sub">急性期病院での管理栄養士（みどり総合病院／さいたま市）</div>
+      <div class="steps-bar">
+        <div class="st on">1. 内容確認</div><div class="st">2. 書類</div><div class="st">3. 完了</div>
+      </div>
+      <div class="form-2">
+        <div class="form-row"><label>お名前</label><input value="田中 はるか"></div>
+        <div class="form-row"><label>連絡先電話番号</label><input value="090-XXXX-XXXX"></div>
+      </div>
+      <div class="form-row"><label>志望動機（任意）</label><textarea rows="3">NST活動に関わった経験を活かしたく応募します。</textarea></div>
+      <div class="form-row"><label>応募書類</label>
+        <div style="border:1.5px dashed var(--brand);border-radius:10px;padding:14px;background:var(--brand-50);font-size:13px;color:var(--brand-d);font-weight:700">✨ AIアシスタントで作成した履歴書・職務経歴書が添付されています <span style="font-weight:400;color:var(--ink-2)">（<a style="color:var(--brand-d);cursor:pointer" onclick="sgo('ai')">編集する</a>）</span></div>
+      </div>
+      <button class="btn lg" style="width:100%;justify-content:center" onclick="toast('（モック）応募 ＝ 応募__c を画面フローで作成・貴社へ通知')">応募を確定する</button>
+      <div class="form-note">応募すると、ヒトラボエージェント様（貴社）へ通知が届きます</div>
+    </div>
+  </section>
+
+  <!-- ㉖ サイトマップ（全ページハブ） -->
+  <section class="page" id="sp-sitemap">
+    <div class="crumbs"><a onclick="sgo('top')">トップ</a><span>›</span><span>サイトマップ</span></div>
+    <div class="list-head"><h1>サイトマップ</h1><span class="ct">全ページ一覧（デモ）</span></div>
+    <div class="area-note" style="margin:0 0 18px">統合版サイトマップ（トップ → 職種トップ → エリア検索）の全ページです。各項目からデモの画面をご確認いただけます。</div>
+    <div class="sitemap-cols">
+      <div>
+        <h4>探す（公開）</h4>
+        <a onclick="sgo('top')">総合トップ<span class="u">/</span></a>
+        <a onclick="sgo('shoku')">職種トップ<span class="u">/{職種}/</span></a>
+        <a onclick="sgo('areatop')">エリアから探す<span class="u">/area/</span></a>
+        <a onclick="sgo('area')">エリア別一覧（市区町村）<span class="u">/{職種}/area/{都道府県}/{市区町村}/</span></a>
+        <a onclick="sgo('shokushu')">施設形態から探す<span class="u">/{職種}/shisetsu/{施設種別}/</span></a>
+        <a onclick="sgo('tag')">こだわり条件から探す<span class="u">/{職種}/tag/{条件}/</span></a>
+        <a onclick="sgo('search')">求人検索結果<span class="u">/{職種}/jobs/</span></a>
+        <a onclick="sgo('detail')">求人詳細<span class="u">/{職種}/jobs/{求人ID}/</span></a>
+        <a onclick="sgo('facility')">施設ページ<span class="u">/facilities/{施設ID}/</span></a>
+      </div>
+      <div>
+        <h4>コンテンツ・その他</h4>
+        <a onclick="sgo('columns')">コラム一覧<span class="u">/columns/</span></a>
+        <a onclick="sgo('article')">コラム記事<span class="u">/columns/{記事名}/</span></a>
+        <a onclick="sgo('advisors')">キャリアアドバイザー紹介<span class="u">/advisors/</span></a>
+        <a onclick="sgo('employers')">企業様向けご案内<span class="u">/for-employers/</span></a>
+        <a onclick="sgo('contact')">お問い合わせ<span class="u">/contact/</span></a>
+        <a onclick="sgo('company')">運営会社<span class="u">/company/</span></a>
+        <a onclick="sgo('terms')">利用規約<span class="u">/terms/</span></a>
+        <a onclick="sgo('privacy')">プライバシーポリシー<span class="u">/privacy/</span></a>
+      </div>
+      <div>
+        <h4>会員（ログイン）</h4>
+        <a onclick="sgo('register')">会員登録<span class="u">/register/</span></a>
+        <a onclick="sgo('login')">ログイン<span class="u">/login/</span></a>
+        <a onclick="sgo('mypage')">マイページ<span class="u">/mypage/</span></a>
+        <a onclick="sgo('applications')">応募状況<span class="u">/mypage/applications/</span></a>
+        <a onclick="sgo('favorites')">お気に入り<span class="u">/mypage/favorites/</span></a>
+        <a onclick="sgo('history')">閲覧履歴<span class="u">/mypage/history/</span></a>
+        <a onclick="sgo('profile')">プロフィール設定<span class="u">/mypage/profile/</span></a>
+        <a onclick="sgo('apply')">応募フォーム<span class="u">/{職種}/jobs/{求人ID}/apply/</span></a>
+      </div>
+      <div>
+        <h4>AI・注目</h4>
+        <a onclick="sgo('ai')">AI履歴書・職務経歴書<span class="u">/mypage/resume/</span></a>
+        <h4 style="margin-top:16px">社内（Salesforce）</h4>
+        <a onclick="setMode('sf')">求職者・掘り起こし・求人・集客・ダッシュボード<span class="u">Salesforce内・サイト非公開</span></a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-foot">
+    <div class="footcols">
+      <div>
+        <h4>職種から探す</h4>
+        <a onclick="sgo('shoku')">管理栄養士の求人</a>
+        <a onclick="sgo('shoku')">栄養士の求人</a>
+        <a onclick="sgo('shoku')">調理師の求人</a>
+        <a onclick="sgo('shoku')">調理員の求人</a>
+      </div>
+      <div>
+        <h4>探す</h4>
+        <a onclick="sgo('areatop')">エリアから探す</a>
+        <a onclick="sgo('shokushu')">施設形態から探す</a>
+        <a onclick="sgo('tag')">こだわり条件から探す</a>
+        <a onclick="sgo('search')">求人検索</a>
+      </div>
+      <div>
+        <h4>サービス</h4>
+        <a onclick="sgo('ai')">AI履歴書・職務経歴書</a>
+        <a onclick="sgo('advisors')">キャリアアドバイザー紹介</a>
+        <a onclick="sgo('columns')">コラム</a>
+        <a onclick="sgo('employers')">企業様向けご案内</a>
+      </div>
+      <div>
+        <h4>会員・その他</h4>
+        <a onclick="sgo('register')">会員登録</a>
+        <a onclick="sgo('login')">ログイン</a>
+        <a onclick="sgo('mypage')">マイページ</a>
+        <a onclick="sgo('company')">運営会社</a>
+        <a onclick="sgo('contact')">お問い合わせ</a>
+        <a onclick="sgo('sitemap')">サイトマップ</a>
+      </div>
+    </div>
+    <div class="footcols" style="border-bottom:0;padding-bottom:8px">
+      <div style="grid-column:1/-1;display:flex;gap:16px;flex-wrap:wrap">
+        <a onclick="sgo('terms')">利用規約</a>
+        <a onclick="sgo('privacy')">プライバシーポリシー</a>
+        <a onclick="sgo('company')">運営会社</a>
+        <span style="color:#66788d;font-size:11px">有料職業紹介事業許可番号 13-ユ-XXXXXX</span>
+      </div>
+    </div>
+    <div class="bar">© おしごとらぼ（デモ）／ Salesforce Experience Cloud 上に構築 — 全データはダミーです</div>
+  </footer>
 </div>
 
 <!-- =========================================================
