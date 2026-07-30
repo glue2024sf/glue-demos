@@ -748,11 +748,11 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
     <table class="tbl">
       <thead><tr><th>関与先</th><th>コード</th><th>法人/個人</th><th>決算月</th><th>会計ソフト</th><th>担当</th><th class="num">月額</th><th>関与状況</th></tr></thead>
       <tbody>
-        <tr><td><a class="name-link" data-go="account-detail">さくら製作所</a></td><td>A-10428</td><td>法人</td><td>3月</td><td>TKC</td><td>田中</td><td class="num">¥50,000</td><td><span class="badge success">関与中</span></td></tr>
-        <tr><td><a class="name-link" data-go="account-detail">みどり建設</a></td><td>A-10233</td><td>法人</td><td>9月</td><td>TKC</td><td>佐藤</td><td class="num">¥45,000</td><td><span class="badge success">関与中</span></td></tr>
-        <tr><td><a class="name-link" data-go="account-detail">あおぞら食品</a></td><td>A-10871</td><td>法人</td><td>12月</td><td>弥生</td><td>鈴木</td><td class="num">¥40,000</td><td><span class="badge success">関与中</span></td></tr>
-        <tr><td><a class="name-link" data-go="account-detail">ひまわり物流</a></td><td>A-10905</td><td>法人</td><td>6月</td><td>TKC</td><td>田中</td><td class="num">¥50,000</td><td><span class="badge success">関与中</span></td></tr>
-        <tr><td><a class="name-link" data-go="account-detail">こもれび歯科</a></td><td>A-11002</td><td>個人</td><td>12月</td><td>弥生</td><td>田中</td><td class="num">¥30,000</td><td><span class="badge warn">新規</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">さくら製作所</a></td><td>A-10428</td><td>法人</td><td>3月</td><td>TKC</td><td>担当A</td><td class="num">¥50,000</td><td><span class="badge success">関与中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">みどり建設</a></td><td>A-10233</td><td>法人</td><td>9月</td><td>TKC</td><td>担当B</td><td class="num">¥45,000</td><td><span class="badge success">関与中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">あおぞら食品</a></td><td>A-10871</td><td>法人</td><td>12月</td><td>弥生</td><td>担当C</td><td class="num">¥40,000</td><td><span class="badge success">関与中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">ひまわり物流</a></td><td>A-10905</td><td>法人</td><td>6月</td><td>TKC</td><td>担当A</td><td class="num">¥50,000</td><td><span class="badge success">関与中</span></td></tr>
+        <tr><td><a class="name-link" data-go="account-detail">こもれび歯科</a></td><td>A-11002</td><td>個人</td><td>12月</td><td>弥生</td><td>担当A</td><td class="num">¥30,000</td><td><span class="badge warn">新規</span></td></tr>
       </tbody>
     </table>
   </div>
@@ -780,7 +780,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
       <div class="item"><div class="lbl">決算月</div><div class="val">3月</div></div>
       <div class="item"><div class="lbl">会計ソフト</div><div class="val">TKC</div></div>
       <div class="item"><div class="lbl">顧問料（月額）</div><div class="val">¥50,000</div></div>
-      <div class="item"><div class="lbl">担当</div><div class="val">田中</div></div>
+      <div class="item"><div class="lbl">担当</div><div class="val">担当A</div></div>
     </div>
     <div class="two-col-3">
       <div>
@@ -789,8 +789,8 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
           <div class="card-body"><table class="tbl">
             <thead><tr><th>プロジェクト</th><th>進捗</th><th>担当</th><th class="num">次回予定</th></tr></thead>
             <tbody>
-              <tr><td><a class="name-link" data-go="kaikei-detail">2026年6月 月次会計</a></td><td><span class="badge warn">提出</span></td><td>田中</td><td class="num">7/20</td></tr>
-              <tr><td><a class="name-link" data-go="kessan-detail">2026年3月期 決算</a></td><td><span class="badge info">申告書チェック</span></td><td>佐藤</td><td class="num">7/28</td></tr>
+              <tr><td><a class="name-link" data-go="kaikei-detail">2026年6月 月次会計</a></td><td><span class="badge warn">提出</span></td><td>担当A</td><td class="num">7/20</td></tr>
+              <tr><td><a class="name-link" data-go="kessan-detail">2026年3月期 決算</a></td><td><span class="badge info">申告書チェック</span></td><td>担当B</td><td class="num">7/28</td></tr>
             </tbody>
           </table></div>
         </div>
@@ -844,7 +844,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
         <div class="form-row"><label>法人/個人<span class="req">*</span></label><select><option>法人</option><option>個人</option></select></div>
         <div class="form-row"><label>決算月<span class="req">*</span></label><select><option>3月</option><option>9月</option><option>12月</option></select></div>
         <div class="form-row"><label>会計ソフト</label><select><option>TKC</option><option>弥生</option><option>freee</option></select></div>
-        <div class="form-row"><label>業務担当<span class="req">*</span></label><select><option>田中</option><option>佐藤</option><option>鈴木</option></select></div>
+        <div class="form-row"><label>業務担当<span class="req">*</span></label><select><option>担当A</option><option>担当B</option><option>担当C</option></select></div>
         <div class="form-row"><label>顧問料（月額）</label><input placeholder="¥50,000"></div>
         <div class="form-row full"><label>事業内容</label><textarea rows="2"></textarea></div>
       </div>
@@ -935,22 +935,22 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
     </div>
     <div class="kanban">
       <div class="kb-col"><h4>① 案内 <span class="c">7</span></h4>
-        <div class="kb-card" data-go="kaikei-detail">あおぞら食品<div class="who">鈴木 ・ <span class="due">期限 7/20</span></div></div>
-        <div class="kb-card" data-go="kaikei-detail">こもれび歯科<div class="who">田中 ・ 期限 7/24</div></div>
+        <div class="kb-card" data-go="kaikei-detail">あおぞら食品<div class="who">担当C ・ <span class="due">期限 7/20</span></div></div>
+        <div class="kb-card" data-go="kaikei-detail">こもれび歯科<div class="who">担当A ・ 期限 7/24</div></div>
       </div>
       <div class="kb-col"><h4>② 電子化 <span class="c">12</span></h4>
-        <div class="kb-card over" data-go="kaikei-detail">みどり建設<div class="who">佐藤 ・ <span class="due">期限 7/16 超過</span></div></div>
-        <div class="kb-card" data-go="kaikei-detail">かえで運輸<div class="who">鈴木 ・ 期限 7/21</div></div>
+        <div class="kb-card over" data-go="kaikei-detail">みどり建設<div class="who">担当B ・ <span class="due">期限 7/16 超過</span></div></div>
+        <div class="kb-card" data-go="kaikei-detail">かえで運輸<div class="who">担当C ・ 期限 7/21</div></div>
       </div>
       <div class="kb-col"><h4>③ 提出 <span class="c">9</span></h4>
-        <div class="kb-card over" data-go="kaikei-detail">さくら製作所<div class="who">田中 ・ <span class="due">期限 7/15 超過</span></div></div>
-        <div class="kb-card" data-go="kaikei-detail">はまなす商店<div class="who">佐藤 ・ 期限 7/23</div></div>
+        <div class="kb-card over" data-go="kaikei-detail">さくら製作所<div class="who">担当A ・ <span class="due">期限 7/15 超過</span></div></div>
+        <div class="kb-card" data-go="kaikei-detail">はまなす商店<div class="who">担当B ・ 期限 7/23</div></div>
       </div>
       <div class="kb-col"><h4>④ PDF化 <span class="c">6</span></h4>
-        <div class="kb-card" data-go="kaikei-detail">ひまわり物流<div class="who">田中 ・ 期限 7/22</div></div>
+        <div class="kb-card" data-go="kaikei-detail">ひまわり物流<div class="who">担当A ・ 期限 7/22</div></div>
       </div>
       <div class="kb-col"><h4>⑤ 納品 <span class="c">14</span></h4>
-        <div class="kb-card" data-go="kaikei-detail">つばき化成<div class="who">鈴木 ・ 完了 7/12</div></div>
+        <div class="kb-card" data-go="kaikei-detail">つばき化成<div class="who">担当C ・ 完了 7/12</div></div>
       </div>
     </div>
   </div>
@@ -976,10 +976,10 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
     <table class="tbl">
       <thead><tr><th>関与先</th><th>業務月</th><th>進捗</th><th>担当</th><th class="num">期限</th><th class="num">請求額</th></tr></thead>
       <tbody>
-        <tr><td><a class="name-link" data-go="kaikei-detail">さくら製作所</a></td><td>2026/06</td><td><span class="badge warn">提出</span></td><td>田中</td><td class="num" style="color:var(--error)">7/15</td><td class="num">¥55,000</td></tr>
-        <tr><td><a class="name-link" data-go="kaikei-detail">みどり建設</a></td><td>2026/06</td><td><span class="badge info">電子化</span></td><td>佐藤</td><td class="num">7/16</td><td class="num">¥45,000</td></tr>
-        <tr><td><a class="name-link" data-go="kaikei-detail">あおぞら食品</a></td><td>2026/06</td><td><span class="badge gray">案内</span></td><td>鈴木</td><td class="num">7/20</td><td class="num">¥40,000</td></tr>
-        <tr><td><a class="name-link" data-go="kaikei-detail">つばき化成</a></td><td>2026/06</td><td><span class="badge success">納品済</span></td><td>鈴木</td><td class="num">7/12</td><td class="num">¥48,000</td></tr>
+        <tr><td><a class="name-link" data-go="kaikei-detail">さくら製作所</a></td><td>2026/06</td><td><span class="badge warn">提出</span></td><td>担当A</td><td class="num" style="color:var(--error)">7/15</td><td class="num">¥55,000</td></tr>
+        <tr><td><a class="name-link" data-go="kaikei-detail">みどり建設</a></td><td>2026/06</td><td><span class="badge info">電子化</span></td><td>担当B</td><td class="num">7/16</td><td class="num">¥45,000</td></tr>
+        <tr><td><a class="name-link" data-go="kaikei-detail">あおぞら食品</a></td><td>2026/06</td><td><span class="badge gray">案内</span></td><td>担当C</td><td class="num">7/20</td><td class="num">¥40,000</td></tr>
+        <tr><td><a class="name-link" data-go="kaikei-detail">つばき化成</a></td><td>2026/06</td><td><span class="badge success">納品済</span></td><td>担当C</td><td class="num">7/12</td><td class="num">¥48,000</td></tr>
       </tbody>
     </table>
   </div>
@@ -1007,7 +1007,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
     </div>
     <div class="highlights">
       <div class="item"><div class="lbl">業務種別</div><div class="val">月次会計</div></div>
-      <div class="item"><div class="lbl">業務担当</div><div class="val">田中</div></div>
+      <div class="item"><div class="lbl">業務担当</div><div class="val">担当A</div></div>
       <div class="item"><div class="lbl">期限</div><div class="val" style="color:var(--error)">7/15（超過）</div></div>
       <div class="item"><div class="lbl">会計ソフト</div><div class="val">TKC</div></div>
       <div class="item"><div class="lbl">請求月</div><div class="val">2026/07</div></div>
@@ -1029,8 +1029,8 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
       <div>
         <div class="related-card"><div class="related-head">🕘 作業履歴 <span class="count">(自動記録)</span></div>
           <div class="timeline">
-            <div class="tl-item"><div class="tl-icon task">T</div><div class="tl-body"><div class="tl-meta">7/14 田中</div><div class="tl-title">進捗：電子化 → 提出</div><div class="tl-desc">電子送信日をセット</div></div></div>
-            <div class="tl-item"><div class="tl-icon task">T</div><div class="tl-body"><div class="tl-meta">7/12 田中</div><div class="tl-title">会計チェック完了</div></div></div>
+            <div class="tl-item"><div class="tl-icon task">T</div><div class="tl-body"><div class="tl-meta">7/14 担当A</div><div class="tl-title">進捗：電子化 → 提出</div><div class="tl-desc">電子送信日をセット</div></div></div>
+            <div class="tl-item"><div class="tl-icon task">T</div><div class="tl-body"><div class="tl-meta">7/12 担当A</div><div class="tl-title">会計チェック完了</div></div></div>
           </div>
         </div>
         <div class="related-card"><div class="related-head">💴 請求（この業務から自動連携）</div>
@@ -1054,7 +1054,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
         <div class="form-row"><label>関与先<span class="req">*</span></label><input value="さくら製作所"></div>
         <div class="form-row"><label>業務月<span class="req">*</span></label><input value="2026/07" placeholder="YYYY/MM"></div>
         <div class="form-row"><label>業務種別<span class="req">*</span></label><select><option>月次会計</option><option>決算業務</option><option>年末調整</option><option>確定申告</option><option>償却資産税</option></select></div>
-        <div class="form-row"><label>業務担当<span class="req">*</span></label><select><option>田中</option><option>佐藤</option><option>鈴木</option></select></div>
+        <div class="form-row"><label>業務担当<span class="req">*</span></label><select><option>担当A</option><option>担当B</option><option>担当C</option></select></div>
         <div class="form-row"><label>期限</label><input placeholder="2026/08/15"></div>
         <div class="form-row"><label>会計ソフト</label><input value="TKC"></div>
       </div>
@@ -1118,9 +1118,9 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
     <table class="tbl">
       <thead><tr><th>関与先</th><th>決算期</th><th>決算フロー</th><th>担当</th><th class="num">決算料</th><th class="num">納品予定</th></tr></thead>
       <tbody>
-        <tr><td><a class="name-link" data-go="kessan-detail">さくら製作所</a></td><td>2026年3月期</td><td><span class="badge info">申告書チェック</span></td><td>佐藤</td><td class="num">¥180,000</td><td class="num">7/28</td></tr>
-        <tr><td><a class="name-link" data-go="kessan-detail">みどり建設</a></td><td>2025年9月期</td><td><span class="badge warn">決算報告</span></td><td>佐藤</td><td class="num">¥200,000</td><td class="num">7/25</td></tr>
-        <tr><td><a class="name-link" data-go="kessan-detail">かえで運輸</a></td><td>2026年4月期</td><td><span class="badge gray">事前検討</span></td><td>鈴木</td><td class="num">¥160,000</td><td class="num">7/31</td></tr>
+        <tr><td><a class="name-link" data-go="kessan-detail">さくら製作所</a></td><td>2026年3月期</td><td><span class="badge info">申告書チェック</span></td><td>担当B</td><td class="num">¥180,000</td><td class="num">7/28</td></tr>
+        <tr><td><a class="name-link" data-go="kessan-detail">みどり建設</a></td><td>2025年9月期</td><td><span class="badge warn">決算報告</span></td><td>担当B</td><td class="num">¥200,000</td><td class="num">7/25</td></tr>
+        <tr><td><a class="name-link" data-go="kessan-detail">かえで運輸</a></td><td>2026年4月期</td><td><span class="badge gray">事前検討</span></td><td>担当C</td><td class="num">¥160,000</td><td class="num">7/31</td></tr>
       </tbody>
     </table>
   </div>
@@ -1158,7 +1158,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
           <div class="field-grid">
             <div class="field"><div class="lbl">決算予測/事前検討日</div><div class="val">2026/06/20</div></div>
             <div class="field"><div class="lbl">決算報告日</div><div class="val">2026/07/03</div></div>
-            <div class="field"><div class="lbl">申告書チェック作成者</div><div class="val">佐藤</div></div>
+            <div class="field"><div class="lbl">申告書チェック作成者</div><div class="val">担当B</div></div>
             <div class="field"><div class="lbl">書面添付</div><div class="val">有</div></div>
             <div class="field full"><div class="lbl">申告内容メモ</div><div class="val">繰越欠損金あり。所得拡大税制の適用を確認済。</div></div>
           </div>
