@@ -424,8 +424,6 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   .widget.span-6,.widget.span-8,.widget.span-12{grid-column:span 4}
   .gh-search{display:none}
 }
-</style>
-<style>
 /* === 案件固有スタイル === */
 .obj-icon.kaikei{background:#3ba755}
 .obj-icon.kessan{background:#1b7f4b}
@@ -499,6 +497,26 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
 .oshirase-sched{font-size:12px;line-height:1.75;background:#fafaf9;border:1px solid var(--border-light);border-radius:6px;padding:10px 14px}
 .oshirase-sched .mon{font-weight:700;color:#1b7f4b;margin:8px 0 2px;display:block}
 .oshirase-sched .rule{color:#706e6b}
+
+/* === ホーム：「私の」／「全体」サブタブ（2026-07-22 FB反映） === */
+.subtabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin:0 0 10px}
+.subtab{padding:8px 18px;font-size:13px;font-weight:700;color:var(--text-mute);cursor:pointer;
+        border:1px solid transparent;border-bottom:none;border-radius:6px 6px 0 0;position:relative;top:1px}
+.subtab:hover{color:var(--text-2);background:#fafaf9}
+.subtab.active{color:var(--brand);background:#fff;border-color:var(--border);border-bottom:1px solid #fff}
+.subpane{display:none}
+.subpane.active{display:block}
+/* 「自分のみ」バッジ */
+.mine-badge{display:inline-block;background:#eef4ff;color:#1b5fbf;border:1px solid #c9dcf7;
+            border-radius:4px;font-size:10px;font-weight:700;padding:0 5px;margin-left:5px;vertical-align:2px}
+/* タブ全体に効く注記（KPIタイルを狭くしないため、バッジではなく1行で示す） */
+.pane-note{font-size:12px;color:var(--text-mute);margin:0 0 8px;padding-left:2px}
+.pane-note b{color:#1b5fbf}
+/* KPI 6枚並び用。demo-base.css の Responsive は max-width:1000px で 4カラム化し
+   span-3/4→span2・span-6/8/12→span4 に再マップするが span-2 は対象外。
+   4カラム時の span-2 は半幅になるため追加指定は不要（＝ここで再定義しない）。 */
+.widget.span-2{grid-column:span 2}
+.w-big.sm{font-size:22px}
 </style>
 </head>
 <body>
@@ -529,88 +547,187 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <!-- =================== HOME =================== -->
   <div class="page active" id="home">
     <div class="disc">
-      <div class="disc-q">論点：ホームは現行org（本番環境）のホーム構成を踏襲してよいか</div>
-      <div class="disc-src">出典: 現行org ホームページ（FlexiPage：MISSION／活動方針・お知らせ・カウントダウン・ダッシュボード）</div>
-      <div class="disc-body">現在お使いのホーム（MISSION／活動方針バナー・お知らせ・締切カウントダウン）を新orgでもそのまま再現する想定。<span class="disc-flag"></span>お知らせは手入力運用か、レポート/リストへのリンク集約か（現行はリンク集約）。<span class="disc-flag"></span>公開デモのため氏名・実レポートURLは伏せ・モック化しています。</div>
+      <div class="disc-q">論点：ホームを「私の」／「全体」の2タブに分け、この振り分けで合っているか</div>
+      <div class="disc-src">2026-07-30 変更依頼①（タブ切替・自分のアタックリスト・現行ダッシュボード）／2026-07-22 Chatwork 手書きフィードバック／現行org ホームページ FlexiPage</div>
+      <div class="disc-body">ご依頼の3点を反映しました。①自分／全体のタブ切替　②「私の」に<b>自分のアタックリスト</b>を追加　③「全体」に<b>現行ホームのダッシュボード</b>を追加。<span class="disc-flag"></span><b>「期限超過」を赤入れどおり「月次で2ヶ月以上動いていないもの」に変更しました。一方「滞留」は3日以上のままです。両方を別指標として並べた状態（全体タブ：滞留6件／期限超過4件）にしてありますが、「超過」という語が『期限日を過ぎた』の意味とも取れて紛らわしいため、①2指標を維持するか②どちらかに統一するか、③名称を変える（例：期限超過→長期停滞）かを決めたい。</b><span class="disc-flag"></span>アタックリストの列（ステータス・次回アクション・次回予定・想定報酬・最終接触）とステータス値（交渉中／契約合意）はこれで足りるか。現行の管理方法（Excel等）に合わせて調整します。<span class="disc-flag"></span>アタックリストは商談オブジェクトで持つか、関与先（見込客）のステータスで持つかを決めたい。<span class="disc-flag"></span>「現行ホームのダッシュボード」は担当者別の進捗状況として仮置きしています。実際に載っているグラフ・指標をご共有いただければそのまま再現します。<span class="disc-flag"></span>「マスゼミ レポート」は「全体」タブのウィジェットとして配置しました。ナビゲーションのタブとして独立させる想定でしたら差し替えます。<span class="disc-flag"></span>お知らせは手入力運用か、レポート/リストへのリンク集約か（現行はリンク集約）。<span class="disc-flag"></span>公開デモのため氏名・実レポートURLは伏せ・モック化しています。</div>
     </div>
 
-    <!-- MISSION / 活動方針（現行orgホーム踏襲） -->
-    <div class="mission">
-      <div class="mlabel">【MISSION】<span class="en">- Our Mission -</span></div>
-      <div class="mmain">すべてのお客様を豊かにする</div>
-      <div class="msub">　全員が力を合わせて会社の未来を創り、社員の“豊かな心と暮らし”を実現する</div>
-      <div class="mlabel" style="margin-top:8px">【活動方針】<span class="en">- Our Principles -</span></div>
-      <div class="principles">
-        <span class="pr">CHALLENGE ｜ チャレンジする</span>
-        <span class="pr">GROWTH ｜ 着実に組織を成長させる</span>
-        <span class="pr">AESTHETICS ｜ 美意識を高める</span>
-        <span class="pr">BREAKTHROUGH ｜ コンフォートゾーンから抜け出す</span>
-      </div>
+    <!-- ホーム サブタブ（2026-07-22 FB：「ホームに 私の と 全体 の2タブ」） -->
+    <div class="subtabs">
+      <div class="subtab active" data-subtab="home-mine">👤 私の</div>
+      <div class="subtab" data-subtab="home-all">🏢 全体</div>
     </div>
 
-    <div class="obj-header"><div class="row1">
-      <div class="obj-icon home">🏠</div>
-      <div class="obj-title"><div class="label">ホーム</div><div class="name">おはようございます — 2026年7月17日（金）</div></div>
-      <div class="obj-actions"><span class="countdown">⏳ 7月決算 電子化・提出まで <span class="big">本日！</span></span></div>
-    </div></div>
+    <!-- ============ 「私の」タブ ============ -->
+    <div class="subpane active" id="home-mine">
 
-    <div class="dash-grid">
-      <!-- KPI（業務進捗の見える化） -->
-      <div class="widget span-3"><div class="w-title">今月 納品待ち</div><div class="w-big">18</div><div class="w-sub">件 / 月次会計</div></div>
-      <div class="widget span-3"><div class="w-title">期限超過</div><div class="w-big" style="color:var(--error)">4</div><div class="w-sub down">要即対応</div></div>
-      <div class="widget span-3"><div class="w-title">今月 請求予定</div><div class="w-big">¥2.86M</div><div class="w-sub up">前月比 +6%</div></div>
-      <div class="widget span-3"><div class="w-title">案内前（未着手）</div><div class="w-big">7</div><div class="w-sub">件</div></div>
-
-      <div class="widget span-8">
-        <div class="w-title">🔥 滞留している会計業務（進捗が3日以上動いていない）</div>
-        <table class="tbl" style="margin-top:6px">
-          <thead><tr><th>関与先</th><th>業務種別</th><th>進捗</th><th>担当</th><th class="num">期限</th></tr></thead>
-          <tbody>
-            <tr><td><a class="name-link" data-go="kaikei-detail">さくら製作所</a></td><td>月次会計</td><td><span class="badge warn">提出</span></td><td>担当A</td><td class="num" style="color:var(--error)">7/15 超過</td></tr>
-            <tr><td><a class="name-link" data-go="kessan-detail">みどり建設</a></td><td>決算業務</td><td><span class="badge info">電子化</span></td><td>担当B</td><td class="num" style="color:var(--error)">7/16 超過</td></tr>
-            <tr><td><a class="name-link" data-go="kaikei-detail">あおぞら食品</a></td><td>月次会計</td><td><span class="badge gray">案内</span></td><td>担当C</td><td class="num">7/20</td></tr>
-            <tr><td><a class="name-link" data-go="kaikei-detail">ひまわり物流</a></td><td>年末調整</td><td><span class="badge info">PDF化</span></td><td>担当A</td><td class="num">7/22</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="widget span-4">
-        <div class="w-title">進捗パイプライン（今月・件数）</div>
-        <table class="tbl" style="margin-top:6px"><tbody>
-          <tr><td>① 案内</td><td class="num">7</td></tr>
-          <tr><td>② 電子化</td><td class="num">12</td></tr>
-          <tr><td>③ 提出</td><td class="num">9</td></tr>
-          <tr><td>④ PDF化</td><td class="num">6</td></tr>
-          <tr><td>⑤ 納品</td><td class="num">14</td></tr>
-        </tbody></table>
-        <div class="w-sub" style="margin-top:6px">案内→電子化→提出→PDF化→納品</div>
-      </div>
-
-      <!-- お知らせ（月次スケジュール）＝現行ホーム踏襲。下部に配置 -->
-      <div class="widget span-8">
-        <div class="w-title">📢 お知らせ</div>
-        <div class="oshirase-sched">
-          <span class="rule">決算・予定納税・届出書 PDF納品　┗ 翌月3営業日以内に納品</span>
-          <span class="mon">【7月】</span>
-          4(土)　中間大会<br>
-          📢 マスゼミ　開催日：7/10・7/17・7/24（担当持ち回り）／文言締め 7/6(火)<br>
-          📊 7/3 算定基礎・労働保険 年度更新／7/8 納特<br>
-          📊 決算　14(火) 会計チェック／23(木) 申告チェック／28(火) 電子化・提出期限<br>
-          📝 NSS　24(金) 自振表入力期限／27(月) NSS入力（ワーカー）／28(火) 確認・追加／29(水) 締切<br>
-          😊 マスマスSmile　10月頃発行予定・年始発行に向け準備中
-          <span class="mon">【8月】</span>
-          12〜14　お盆休み
+      <!-- MISSION / 活動方針（現行orgホーム踏襲）→ FB: 個 -->
+      <div class="mission">
+        <div class="mlabel">【MISSION】<span class="en">- Our Mission -</span></div>
+        <div class="mmain">すべてのお客様を豊かにする</div>
+        <div class="msub">　全員が力を合わせて会社の未来を創り、社員の“豊かな心と暮らし”を実現する</div>
+        <div class="mlabel" style="margin-top:8px">【活動方針】<span class="en">- Our Principles -</span></div>
+        <div class="principles">
+          <span class="pr">CHALLENGE ｜ チャレンジする</span>
+          <span class="pr">GROWTH ｜ 着実に組織を成長させる</span>
+          <span class="pr">AESTHETICS ｜ 美意識を高める</span>
+          <span class="pr">BREAKTHROUGH ｜ コンフォートゾーンから抜け出す</span>
         </div>
       </div>
-      <!-- お知らせ（クイックリンク）＝現行ホーム踏襲。実URLはモック化。下部に配置 -->
-      <div class="widget span-4">
-        <div class="w-title">🔗 お知らせ（クイックリンク）</div>
-        <div style="margin-top:4px">
-          <div class="ol-row"><b>週MTG</b><a onclick="toast('2026年_アジェンダ（モック）')">アジェンダ</a><a onclick="toast('決算月早見表（モック）')">決算月早見表</a><a onclick="toast('マスゼミ2026（モック）')">マスゼミ2026</a></div>
-          <div class="ol-row"><b>決算業務 提出</b><a data-go="kessan-list">今月</a><a data-go="kessan-list">来月</a><a onclick="toast('有利判定（モック）')">有利判定</a></div>
-          <div class="ol-row"><b>予定納税 提出</b><a data-go="kessan-list">今月</a><a data-go="kessan-list">来月</a></div>
-          <div class="ol-row"><b>納品確認</b><a data-go="kessan-list">届出書_未納品</a><a data-go="kessan-list">予定納税_未納品</a></div>
-          <div class="ol-row"><b>営業活動</b><a data-go="account-list">ダッシュボード</a><a data-go="account-list">アタックリスト</a></div>
-          <div class="ol-row"><b>CS向上ノート</b><a data-go="csnote-detail">未共有</a></div>
+
+      <div class="obj-header"><div class="row1">
+        <div class="obj-icon home">🏠</div>
+        <div class="obj-title"><div class="label">ホーム</div><div class="name">おはようございます 担当A さん — 2026年7月17日（金）</div></div>
+        <div class="obj-actions"><span class="countdown">⏳ 7月決算 電子化・提出まで <span class="big">本日！</span></span></div>
+      </div></div>
+
+      <div class="pane-note">👤 このタブの数値は<b>すべて自分の担当分のみ</b>（事務所全体は「全体」タブ）</div>
+
+      <div class="dash-grid">
+        <!-- 業務KPI（FB：すべて「自分のもの」に絞る） -->
+        <div class="widget span-2"><div class="w-title">今月 納品待ち</div><div class="w-big">6</div><div class="w-sub">件 / 月次会計</div></div>
+        <div class="widget span-2"><div class="w-title">期限超過</div><div class="w-big" style="color:var(--error)">2</div><div class="w-sub down">月次・2ヶ月以上停滞</div></div>
+        <div class="widget span-2"><div class="w-title">今月 請求予定</div><div class="w-big sm">¥0.94M</div><div class="w-sub up">前月比 +4%</div></div>
+        <div class="widget span-2"><div class="w-title">案内前（未着手）</div><div class="w-big">3</div><div class="w-sub">件</div></div>
+        <!-- 営業活動KPI（FB追記：「＋個 交渉中＆契約合意」） -->
+        <div class="widget span-2"><div class="w-title">交渉中</div><div class="w-big">5</div><div class="w-sub">件 / 商談</div></div>
+        <div class="widget span-2"><div class="w-title">契約合意</div><div class="w-big" style="color:var(--success)">3</div><div class="w-sub up">今月</div></div>
+
+        <!-- 自分のToDo（KPI「期限超過=2」の内訳がドリルダウンで一致するように作成） -->
+        <div class="widget span-8">
+          <div class="w-title">📋 自分の会計業務（期限超過・停滞中）<span class="mine-badge">自分のみ</span></div>
+          <table class="tbl" style="margin-top:6px">
+            <thead><tr><th>関与先</th><th>業務種別</th><th>進捗</th><th class="num">最終更新</th><th class="num">停滞</th><th class="num">期限</th></tr></thead>
+            <tbody>
+              <tr><td><a class="name-link" data-go="kaikei-detail">さくら製作所</a></td><td>月次会計</td><td><span class="badge warn">提出</span></td><td class="num">5/12</td><td class="num" style="color:var(--error)">66日</td><td class="num" style="color:var(--error)">7/15</td></tr>
+              <tr><td><a class="name-link" data-go="kaikei-detail">こはる商店</a></td><td>月次会計</td><td><span class="badge gray">案内</span></td><td class="num">5/16</td><td class="num" style="color:var(--error)">62日</td><td class="num" style="color:var(--error)">6/30</td></tr>
+              <tr><td><a class="name-link" data-go="kaikei-detail">ひまわり物流</a></td><td>年末調整</td><td><span class="badge info">PDF化</span></td><td class="num">7/16</td><td class="num">1日</td><td class="num">7/22</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- お知らせ（クイックリンク）＝現行ホーム踏襲。実URLはモック化 -->
+        <div class="widget span-4">
+          <div class="w-title">🔗 お知らせ（クイックリンク）</div>
+          <div style="margin-top:4px">
+            <div class="ol-row"><b>週MTG</b><a onclick="toast('2026年_アジェンダ（モック）')">アジェンダ</a><a onclick="toast('決算月早見表（モック）')">決算月早見表</a><a onclick="toast('マスゼミ2026（モック）')">マスゼミ2026</a></div>
+            <div class="ol-row"><b>決算業務 提出</b><a data-go="kessan-list">今月</a><a data-go="kessan-list">来月</a><a onclick="toast('有利判定（モック）')">有利判定</a></div>
+            <div class="ol-row"><b>予定納税 提出</b><a data-go="kessan-list">今月</a><a data-go="kessan-list">来月</a></div>
+            <div class="ol-row"><b>納品確認</b><a data-go="kessan-list">届出書_未納品</a><a data-go="kessan-list">予定納税_未納品</a></div>
+            <div class="ol-row"><b>営業活動</b><a data-go="account-list">ダッシュボード</a><a data-go="account-list">アタックリスト</a></div>
+            <div class="ol-row"><b>CS向上ノート</b><a data-go="csnote-detail">未共有</a></div>
+          </div>
+        </div>
+
+        <!-- 自分のアタックリスト（2026-07-30 変更依頼①：「個：自分の業務⇒追加で自分のアタックリストを表示したい」）
+             手書きの「交渉中＆契約合意」はこの一覧のステータスを指すと判明したため、
+             上のKPIタイル（交渉中5／契約合意3）と件数が一致するように作成 -->
+        <div class="widget span-12">
+          <div class="w-title">🎯 自分のアタックリスト<span class="mine-badge">自分のみ</span></div>
+          <table class="tbl" style="margin-top:6px">
+            <thead><tr><th>見込先</th><th>ステータス</th><th>次回アクション</th><th class="num">次回予定</th><th class="num">想定報酬(月額)</th><th class="num">最終接触</th></tr></thead>
+            <tbody>
+              <tr><td><a class="name-link" data-go="account-detail">北山フーズ</a></td><td><span class="badge success">契約合意</span></td><td>契約書送付・関与先登録</td><td class="num">7/18</td><td class="num">¥45,000</td><td class="num">7/16</td></tr>
+              <tr><td><a class="name-link" data-go="account-detail">若葉テック</a></td><td><span class="badge success">契約合意</span></td><td>初回訪問日の調整</td><td class="num">7/22</td><td class="num">¥30,000</td><td class="num">7/15</td></tr>
+              <tr><td><a class="name-link" data-go="account-detail">大河内工務店</a></td><td><span class="badge success">契約合意</span></td><td>報酬内訳の最終確認</td><td class="num">7/23</td><td class="num">¥52,000</td><td class="num">7/14</td></tr>
+              <tr><td><a class="name-link" data-go="account-detail">三日月デンタル</a></td><td><span class="badge warn">交渉中</span></td><td>見積提示（記帳代行込み）</td><td class="num">7/21</td><td class="num">¥38,000</td><td class="num">7/10</td></tr>
+              <tr><td><a class="name-link" data-go="account-detail">青山リース</a></td><td><span class="badge warn">交渉中</span></td><td>他事務所との比較検討中・再訪</td><td class="num">7/24</td><td class="num">¥60,000</td><td class="num">7/8</td></tr>
+              <tr><td><a class="name-link" data-go="account-detail">東雲メディカル</a></td><td><span class="badge warn">交渉中</span></td><td>決算期ヒアリング</td><td class="num">7/25</td><td class="num">¥42,000</td><td class="num">7/3</td></tr>
+            </tbody>
+          </table>
+          <div class="w-sub" style="margin-top:6px">交渉中 5件・契約合意 3件（計8件）のうち<b>次回予定が近い6件</b>を表示。上のKPIタイルと件数が一致します。</div>
+        </div>
+
+        <!-- お知らせ（月次スケジュール）＝現行ホーム踏襲 -->
+        <div class="widget span-12">
+          <div class="w-title">📢 お知らせ</div>
+          <div class="oshirase-sched">
+            <span class="rule">決算・予定納税・届出書 PDF納品　┗ 翌月3営業日以内に納品</span>
+            <span class="mon">【7月】</span>
+            4(土)　中間大会<br>
+            📢 マスゼミ　開催日：7/10・7/17・7/24（担当持ち回り）／文言締め 7/6(火)<br>
+            📊 7/3 算定基礎・労働保険 年度更新／7/8 納特<br>
+            📊 決算　14(火) 会計チェック／23(木) 申告チェック／28(火) 電子化・提出期限<br>
+            📝 NSS　24(金) 自振表入力期限／27(月) NSS入力（ワーカー）／28(火) 確認・追加／29(水) 締切<br>
+            😊 マスマスSmile　10月頃発行予定・年始発行に向け準備中
+            <span class="mon">【8月】</span>
+            12〜14　お盆休み
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 「全体」タブ ============ -->
+    <div class="subpane" id="home-all">
+
+      <div class="obj-header"><div class="row1">
+        <div class="obj-icon home">🏢</div>
+        <div class="obj-title"><div class="label">ホーム / 全体</div><div class="name">事務所全体の進捗 — 2026年7月17日（金）</div></div>
+      </div></div>
+
+      <div class="dash-grid">
+        <!-- 全体KPI（事務所合計） -->
+        <div class="widget span-3"><div class="w-title">今月 納品待ち</div><div class="w-big">18</div><div class="w-sub">件 / 月次会計</div></div>
+        <div class="widget span-3"><div class="w-title">期限超過</div><div class="w-big" style="color:var(--error)">4</div><div class="w-sub down">月次・2ヶ月以上停滞</div></div>
+        <div class="widget span-3"><div class="w-title">今月 請求予定</div><div class="w-big">¥2.86M</div><div class="w-sub up">前月比 +6%</div></div>
+        <div class="widget span-3"><div class="w-title">案内前（未着手）</div><div class="w-big">7</div><div class="w-sub">件</div></div>
+
+        <!-- FB：業（全体）へ。★「滞留(3日)」と「期限超過(2ヶ月)」は別指標であることが伝わるよう
+             停滞日数を列で明示し、件数もあえて一致させていない（論点：定義を統一するか） -->
+        <div class="widget span-8">
+          <div class="w-title">🔥 滞留している会計業務（進捗が3日以上動いていない）— 全6件</div>
+          <table class="tbl" style="margin-top:6px">
+            <thead><tr><th>関与先</th><th>業務種別</th><th>進捗</th><th>担当</th><th class="num">停滞</th><th class="num">期限</th></tr></thead>
+            <tbody>
+              <tr><td><a class="name-link" data-go="kaikei-detail">さくら製作所</a></td><td>月次会計</td><td><span class="badge warn">提出</span></td><td>担当A</td><td class="num" style="color:var(--error)">66日</td><td class="num" style="color:var(--error)">7/15</td></tr>
+              <tr><td><a class="name-link" data-go="kaikei-detail">こはる商店</a></td><td>月次会計</td><td><span class="badge gray">案内</span></td><td>担当A</td><td class="num" style="color:var(--error)">62日</td><td class="num" style="color:var(--error)">6/30</td></tr>
+              <tr><td><a class="name-link" data-go="kessan-detail">みどり建設</a></td><td>決算業務</td><td><span class="badge info">電子化</span></td><td>担当B</td><td class="num" style="color:var(--error)">71日</td><td class="num" style="color:var(--error)">7/16</td></tr>
+              <tr><td><a class="name-link" data-go="kaikei-detail">あおぞら食品</a></td><td>月次会計</td><td><span class="badge gray">案内</span></td><td>担当C</td><td class="num" style="color:var(--error)">64日</td><td class="num">7/20</td></tr>
+              <tr><td><a class="name-link" data-go="kaikei-detail">ふじの工業</a></td><td>月次会計</td><td><span class="badge info">電子化</span></td><td>担当B</td><td class="num">12日</td><td class="num">7/25</td></tr>
+              <tr><td><a class="name-link" data-go="kaikei-detail">みなと商事</a></td><td>月次会計</td><td><span class="badge warn">提出</span></td><td>担当C</td><td class="num">5日</td><td class="num">7/28</td></tr>
+            </tbody>
+          </table>
+          <div class="w-sub" style="margin-top:6px">※ このうち<b>停滞60日超＝4件</b>が上のKPI「期限超過（2ヶ月以上停滞）」と一致します。<b>滞留（3日以上）6件 と 期限超過 4件 は別の指標です。</b></div>
+        </div>
+        <!-- FB：業（全体）へ -->
+        <div class="widget span-4">
+          <div class="w-title">進捗パイプライン（今月・件数）</div>
+          <table class="tbl" style="margin-top:6px"><tbody>
+            <tr><td>① 案内</td><td class="num">7</td></tr>
+            <tr><td>② 電子化</td><td class="num">12</td></tr>
+            <tr><td>③ 提出</td><td class="num">9</td></tr>
+            <tr><td>④ PDF化</td><td class="num">6</td></tr>
+            <tr><td>⑤ 納品</td><td class="num">14</td></tr>
+          </tbody></table>
+          <div class="w-sub" style="margin-top:6px">案内→電子化→提出→PDF化→納品</div>
+        </div>
+
+        <!-- FB追記：「＋業 今のホームのダッシュボード」＝現行orgホーム掲載のダッシュボードを全体タブへ -->
+        <div class="widget span-8">
+          <div class="w-title">📊 現行ホームのダッシュボード（担当者別 進捗状況）</div>
+          <table class="tbl" style="margin-top:6px">
+            <thead><tr><th>担当</th><th class="num">担当関与先</th><th class="num">今月 納品待ち</th><th class="num">期限超過</th><th class="num">今月 納品済</th></tr></thead>
+            <tbody>
+              <tr><td>担当A</td><td class="num">28</td><td class="num">6</td><td class="num" style="color:var(--error)">2</td><td class="num">9</td></tr>
+              <tr><td>担当B</td><td class="num">24</td><td class="num">5</td><td class="num" style="color:var(--error)">1</td><td class="num">11</td></tr>
+              <tr><td>担当C</td><td class="num">31</td><td class="num">4</td><td class="num" style="color:var(--error)">1</td><td class="num">8</td></tr>
+              <tr><td>担当D</td><td class="num">19</td><td class="num">3</td><td class="num">0</td><td class="num">7</td></tr>
+            </tbody>
+          </table>
+          <div class="w-sub" style="margin-top:6px">※現行ホーム掲載のダッシュボードを移植する想定。掲載したい指標が他にあればご指示ください。</div>
+        </div>
+
+        <!-- FB追記：「マスゼミ レポート」（配置先は要確認） -->
+        <div class="widget span-4">
+          <div class="w-title">📢 マスゼミ レポート</div>
+          <table class="tbl" style="margin-top:6px">
+            <thead><tr><th>開催日</th><th>担当</th><th>文言締め</th></tr></thead>
+            <tbody>
+              <tr><td>7/10（木）</td><td>担当B</td><td><span class="badge success">提出済</span></td></tr>
+              <tr><td>7/17（金）</td><td>担当A</td><td><span class="badge warn">本日締め</span></td></tr>
+              <tr><td>7/24（金）</td><td>担当C</td><td><span class="badge gray">未</span></td></tr>
+            </tbody>
+          </table>
+          <div class="w-sub" style="margin-top:6px">※現行orgの マスゼミ オブジェクトから集計する想定。</div>
         </div>
       </div>
     </div>
@@ -620,7 +737,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="account-list">
     <div class="disc">
       <div class="disc-q">論点：一覧の列とフィルタ（関与状況・決算月・担当）はこれで足りるか</div>
-      <div class="disc-src">出典: 現行 Account は約180項目・リストビュー多数</div>
+      <div class="disc-src">現行 Account は約180項目・リストビュー多数</div>
       <div class="disc-body">関与先を「担当・決算月・関与状況」で絞れる想定。<span class="disc-flag"></span>営業（アタック状況）と顧問先を同じ一覧で見るか、分けるか。</div>
     </div>
     <div class="obj-header"><div class="row1">
@@ -644,7 +761,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="account-detail">
     <div class="disc">
       <div class="disc-q">論点：関与先を開いて「パッと見たい情報」はこの並びで合っているか</div>
-      <div class="disc-src">出典: 2026-06-08 往訪MTG議事録「関連情報の優先順位整理・不要情報のタブ退避」「進行中PJTを上位」「各項目に最終更新日」</div>
+      <div class="disc-src">2026-06-08 往訪MTG議事録「関連情報の優先順位整理・不要情報のタブ退避」「進行中PJTを上位」「各項目に最終更新日」</div>
       <div class="disc-body">進行中プロジェクトを最上部・鮮度（最終更新日）を各値に添える案。約180項目は下部/タブへ退避。<span class="disc-flag"></span>ハイライトに出す項目／タブへ退避する項目の線引きを確認したい。</div>
     </div>
     <div class="crumb"><a data-go="account-list">関与先</a><span class="sep">›</span>さくら製作所</div>
@@ -716,7 +833,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="account-new">
     <div class="disc">
       <div class="disc-q">論点：新規関与先の登録は「最小必須項目」だけで起票できるか</div>
-      <div class="disc-src">出典: 2026-07-03 KO資料「極力楽に入れたい・みんなが入れやすくしたい」</div>
+      <div class="disc-src">2026-07-03 KO資料「極力楽に入れたい・みんなが入れやすくしたい」</div>
       <div class="disc-body">登録時は必須6項目のみ、残りは関与開始後に埋める運用。<span class="disc-flag"></span>登録に最低限必要な項目はこれで足りるか。</div>
     </div>
     <div class="crumb"><a data-go="account-list">関与先</a><span class="sep">›</span>新規</div>
@@ -742,7 +859,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="project-detail">
     <div class="disc">
       <div class="disc-q">論点：報酬マスタ（顧問料・記帳代行・決算料…）を年度別プロジェクトで持つ、で良いか</div>
-      <div class="disc-src">出典: Project__c（関与先ごとの契約/報酬マスタ）／ 決算時の報酬改定を次年度Projectに反映</div>
+      <div class="disc-src">Project__c（関与先ごとの契約/報酬マスタ）／ 決算時の報酬改定を次年度Projectに反映</div>
       <div class="disc-body">年度ごとに報酬を版管理し、請求はここを単価の正とする想定。<span class="disc-flag"></span>報酬改定時に旧年度を残して新年度を作る運用で問題ないか。</div>
     </div>
     <div class="crumb"><a data-go="account-detail">さくら製作所</a><span class="sep">›</span>2026年度 契約・報酬</div>
@@ -775,7 +892,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="csnote-detail">
     <div class="disc">
       <div class="disc-q">論点：顧客ごとの「学びとNext Action」を蓄積し、全体共有する、で良いか</div>
-      <div class="disc-src">出典: CSNote__c（事実の経緯・学びとNext Action・自己評価・全体共有日）</div>
+      <div class="disc-src">CSNote__c（事実の経緯・学びとNext Action・自己評価・全体共有日）</div>
       <div class="disc-body">対応の振り返りを関与先に紐付けて蓄積、全体共有日で朝MTGに載せる想定。<span class="disc-flag"></span>分類カテゴリの選択肢は現行のままで良いか。</div>
     </div>
     <div class="crumb"><a data-go="account-detail">さくら製作所</a><span class="sep">›</span>CSノート</div>
@@ -802,8 +919,8 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="kaikei-board">
     <div class="disc">
       <div class="disc-q">論点：巨大な一覧を「進捗パイプラインのボード」に置き換える、で伝わるか</div>
-      <div class="disc-src">出典: 2026-07-03 KO資料「項目が多すぎて使いづらい・検索性が悪い」／現行 kaikeigyoumu__c は約200項目</div>
-      <div class="disc-body">進捗（案内→電子化→提出→PDF化→納品）でカラム分け、カードは関与先・期限・担当だけ。<span class="disc-flag"></span>ドラッグで進める運用にするか。</div>
+      <div class="disc-src">2026-07-03 KO資料「項目が多すぎて使いづらい・検索性が悪い」／現行 kaikeigyoumu__c は約200項目</div>
+      <div class="disc-body">進捗（案内→電子化→提出→PDF化→納品）でカラム分け、カードは関与先・期限・担当だけ。<span class="disc-flag"></span>ドラッグで進める運用にするか。<span class="disc-flag"></span><b>【2026-07-30 ご依頼】「中のリストや矢羽根は編集の必要あり（検討中）」— 御社にてご検討中。現行の矢羽根ステージ（案内→電子化→提出→PDF化→納品）とリストの列を、どう変えたいかご指示いただき次第このモックに反映します。この論点は本日の合意対象から外し、次回持ち越しとします。</b></div>
     </div>
     <div class="obj-header"><div class="row1">
       <div class="obj-icon kaikei">🧾</div>
@@ -842,7 +959,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="kaikei-list">
     <div class="disc">
       <div class="disc-q">論点：一覧派の担当者向けに、列を絞ったリストビューも用意する、で良いか</div>
-      <div class="disc-src">出典: 現行 kaikeigyoumu__c のリストビュー20種以上（属人化）</div>
+      <div class="disc-src">現行 kaikeigyoumu__c のリストビュー20種以上（属人化）</div>
       <div class="disc-body">ボードと同じデータを表でも。列は「関与先・業務月・進捗・担当・期限・請求額」に固定。<span class="disc-flag"></span>属人リストビューを整理・統合してよいか。</div>
     </div>
     <div class="obj-header"><div class="row1">
@@ -871,7 +988,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="kaikei-detail">
     <div class="disc">
       <div class="disc-q">論点：200項目を「今のステージで必要な項目だけ」に絞る、で回るか</div>
-      <div class="disc-src">出典: 現行 kaikeigyoumu__c 全項目レイアウト vs. 2026-07-03 KO資料「極力楽に入れたい」</div>
+      <div class="disc-src">現行 kaikeigyoumu__c 全項目レイアウト vs. 2026-07-03 KO資料「極力楽に入れたい」</div>
       <div class="disc-body">上部は共通要点、中央は現ステージ＝提出で触る項目だけ、残り約180項目は折りたたみ。<span class="disc-flag"></span>各ステージの“見せる項目セット”をこちらで定義してよいか（業務種別ごとに棚卸し）。</div>
     </div>
     <div class="crumb"><a data-go="kaikei-board">月次会計</a><span class="sep">›</span>さくら製作所 2026年6月</div>
@@ -927,7 +1044,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="kaikei-new">
     <div class="disc">
       <div class="disc-q">論点：新規起票は「関与先・業務月・種別・担当」の4項目で足りるか（残りは進捗で追加）</div>
-      <div class="disc-src">出典: 2026-07-03 KO資料「入れないと進まないようにしたい／極力楽に」</div>
+      <div class="disc-src">2026-07-03 KO資料「入れないと進まないようにしたい／極力楽に」</div>
       <div class="disc-body">起票時は最小、以降はステージが進むごとに必要項目が現れる想定。<span class="disc-flag"></span>毎月分の自動起票（次月分を納品時に生成）と手動起票の切り分け。</div>
     </div>
     <div class="crumb"><a data-go="kaikei-board">月次会計</a><span class="sep">›</span>新規</div>
@@ -952,7 +1069,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="kaikei-flow">
     <div class="disc">
       <div class="disc-q">論点：納品完了→翌月分の自動起票／期限アラートを自動化する、で良いか</div>
-      <div class="disc-src">出典: 2026-06-08 往訪MTG議事録「月次会計業務の成果物格納と業務完了の仕組み化（当月完了→次月分が起票）」</div>
+      <div class="disc-src">2026-06-08 往訪MTG議事録「月次会計業務の成果物格納と業務完了の仕組み化（当月完了→次月分が起票）」</div>
       <div class="disc-body">当月を「納品」にすると翌月分レコードが自動生成、期限3日前に担当へ通知する想定。<span class="disc-flag"></span>自動起票のタイミング（納品時／月初）と通知先（担当のみ／管理者含む）。</div>
     </div>
     <div class="obj-header"><div class="row1"><div class="obj-icon kaikei">⚙</div><div class="obj-title"><div class="label">自動化フロー</div><div class="name">月次会計：納品→翌月起票 ＆ 期限アラート</div></div></div></div>
@@ -984,8 +1101,8 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="kessan-list">
     <div class="disc">
       <div class="disc-q">論点：決算は「決算月別」に束ねて進捗管理する、で良いか</div>
-      <div class="disc-src">出典: kaikeigyoumu__c RecordType=決算業務 / 決算業務 picklist（2025年X月提出）</div>
-      <div class="disc-body">提出月ごとに決算案件をまとめ、月末の山を可視化する想定。<span class="disc-flag"></span>決算は月次と同じオブジェクトのRecordType運用で良いか、分離するか。</div>
+      <div class="disc-src">kaikeigyoumu__c RecordType=決算業務 / 決算業務 picklist（2025年X月提出）</div>
+      <div class="disc-body">提出月ごとに決算案件をまとめ、月末の山を可視化する想定。<span class="disc-flag"></span>決算は月次と同じオブジェクトのRecordType運用で良いか、分離するか。<span class="disc-flag"></span><b>【2026-07-30 ご依頼】「同じくリストや矢羽根は編集の必要あり（検討中）」— 御社にてご検討中。現行の矢羽根ステージとリストの列をどう変えたいかご指示いただき次第反映します。この論点は本日の合意対象から外し、次回持ち越しとします。</b></div>
     </div>
     <div class="obj-header"><div class="row1">
       <div class="obj-icon kessan">📗</div>
@@ -1012,7 +1129,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="kessan-detail">
     <div class="disc">
       <div class="disc-q">論点：決算業務の最終ステップに「来年度の報酬変更 有無」を組み込む、で良いか</div>
-      <div class="disc-src">出典: 2026-06-08 往訪MTG議事録「決算業務の最終ステップに来年度の報酬変更有無を確認する画面・ボタンを設置」</div>
+      <div class="disc-src">2026-06-08 往訪MTG議事録「決算業務の最終ステップに来年度の報酬変更有無を確認する画面・ボタンを設置」</div>
       <div class="disc-body">決算報告→申告書チェック→納品の後に「報酬改定の要否」を確認するアクションを設置。<span class="disc-flag"></span>報酬変更“有”のとき、次年度Projectへ自動反映まで自動化してよいか。</div>
     </div>
     <div class="crumb"><a data-go="kessan-list">決算業務</a><span class="sep">›</span>さくら製作所 2026年3月期</div>
@@ -1062,7 +1179,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="kessan-report">
     <div class="disc">
       <div class="disc-q">論点：決算書・申告書の納品物をSalesforce内でプレビュー/PDF化する、で良いか</div>
-      <div class="disc-src">出典: 2026-07-03 KO資料「成果物を格納・確認すると次工程に自然につながる」</div>
+      <div class="disc-src">2026-07-03 KO資料「成果物を格納・確認すると次工程に自然につながる」</div>
       <div class="disc-body">帳票はSF内でプレビュー→PDF化→納品まで一気通貫の想定。<span class="disc-flag"></span>帳票はSF標準（帳票機能）で作るか、既存TKC出力を格納する運用か。</div>
     </div>
     <div class="crumb"><a data-go="kessan-detail">2026年3月期 決算</a><span class="sep">›</span>決算書プレビュー</div>
@@ -1096,7 +1213,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="kessan-flow">
     <div class="disc">
       <div class="disc-q">論点：決算納品→報酬改定確認→次年度Project反映を自動で流す、で良いか</div>
-      <div class="disc-src">出典: 2026-06-08 往訪MTG議事録「受注後の業務連鎖フロー設計」「報酬変更有無→添付・新規起票まで自動化」</div>
+      <div class="disc-src">2026-06-08 往訪MTG議事録「受注後の業務連鎖フロー設計」「報酬変更有無→添付・新規起票まで自動化」</div>
       <div class="disc-body">納品後に報酬改定確認を必須通過、有なら次年度Projectを新単価で自動生成。<span class="disc-flag"></span>改定“無”でも次年度Projectを据え置き複製するか。</div>
     </div>
     <div class="obj-header"><div class="row1"><div class="obj-icon kessan">⚙</div><div class="obj-title"><div class="label">自動化フロー</div><div class="name">決算：納品→報酬改定→次年度反映</div></div></div></div>
@@ -1124,7 +1241,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="seikyu-list">
     <div class="disc">
       <div class="disc-q">論点：請求は会計業務から自動集計し、この一覧で発行管理する、で良いか</div>
-      <div class="disc-src">出典: kaikeigyoumu__c の請求項目（請求金額合計・請求書発行日・請求方法 NSS/請求書・追加請求人数）</div>
+      <div class="disc-src">kaikeigyoumu__c の請求項目（請求金額合計・請求書発行日・請求方法 NSS/請求書・追加請求人数）</div>
       <div class="disc-body">月次・決算・年調の報酬を関与先×請求月で束ね、発行状況を管理する想定。<span class="disc-flag"></span>請求方法（NSS/請求書）で導線を分けるか、帳票はSF内で完結させるか。</div>
     </div>
     <div class="obj-header"><div class="row1">
@@ -1154,7 +1271,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="seikyu-detail">
     <div class="disc">
       <div class="disc-q">論点：請求は「関与先×請求月」で1レコード、内訳は会計業務からロールアップ、で良いか</div>
-      <div class="disc-src">出典: kaikeigyoumu__c（請求金額合計/追加請求人数/請求方法）＋ Project__c（単価マスタ）</div>
+      <div class="disc-src">kaikeigyoumu__c（請求金額合計/追加請求人数/請求方法）＋ Project__c（単価マスタ）</div>
       <div class="disc-body">複数業務（月次＋決算＋年調）の報酬を1請求に集約、追加請求人数も加味。<span class="disc-flag"></span>年調の人数×単価などの変動費の扱い。</div>
     </div>
     <div class="crumb"><a data-go="seikyu-list">請求</a><span class="sep">›</span>みどり建設 2026年7月</div>
@@ -1185,7 +1302,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <div class="page" id="seikyu-invoice">
     <div class="disc">
       <div class="disc-q">論点：請求書のレイアウト・インボイス番号記載はこれで要件を満たすか</div>
-      <div class="disc-src">出典: Account（適格請求書発行事業者登録番号 InvoiceNumber）／ 請求方法 NSS・請求書</div>
+      <div class="disc-src">Account（適格請求書発行事業者登録番号 InvoiceNumber）／ 請求方法 NSS・請求書</div>
       <div class="disc-body">適格請求書（インボイス）要件を満たすレイアウトの想定。<span class="disc-flag"></span>NSS（口座振替）分は請求書を出さない運用か、控えとして出すか。</div>
     </div>
     <div class="crumb"><a data-go="seikyu-detail">みどり建設 2026年7月</a><span class="sep">›</span>請求書プレビュー</div>
@@ -1216,9 +1333,9 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
   <!-- =================== 請求 自動化フロー =================== -->
   <div class="page" id="seikyu-flow">
     <div class="disc">
-      <div class="disc-q">論点：会計業務の納品→請求自動集計→発行（NSS/請求書で分岐）を自動化する、で良いか</div>
-      <div class="disc-src">出典: 2026-07-03 KO資料「Salesforceを正として運用」／ 請求方法 NSS・請求書の分岐</div>
-      <div class="disc-body">業務納品時に請求へ金額連携、請求月末に方法別で発行を分岐。<span class="disc-flag"></span>NSS口座振替データの連携先（外部システム）との接続要否。</div>
+      <div class="disc-q">論点：請求の自動化はこの2本立て（A:納品→集計→発行／B:金額未入力の督促）で良いか</div>
+      <div class="disc-src">2026-07-30 変更依頼②「月次以外の会計業務が作成されたら請求書の内訳が金額空欄で作成／請求月20日に空欄をピックアップ／メールで自動送信（決算業務も同様）」／2026-07-03 KO資料「Salesforceを正として運用」</div>
+      <div class="disc-body">ご依頼のフロー（下記<b>フローB</b>）を追加しました。月次以外の会計業務・決算業務の作成時に<b>金額空欄の請求内訳</b>を先に作り、請求月20日時点で空欄のものを担当へメール通知する想定です。<span class="disc-flag"></span><b>「月次以外」の対象業務種別を確定したい</b>（決算・年調・償却資産・記帳代行・スポット相談… どこまでか）。<span class="disc-flag"></span><b>メールの宛先は担当者本人のみか、上長・管理者にもCCするか。件名・本文の文面もご指定ください。</b><span class="disc-flag"></span>20日が土日祝の場合は前営業日／翌営業日のどちらに寄せるか。<span class="disc-flag"></span>金額が空欄のまま請求月末を迎えた場合、発行を止める（エラー扱い）か、空欄のまま進めるか。<span class="disc-flag"></span>NSS口座振替データの連携先（外部システム）との接続要否。<span class="disc-flag"></span>本フローは Flow 実装（Glue基準で<b>L3:重要</b>）です。進捗ステージ・対象業務種別が固まってから着手しないと作り直しになるため、着手時期をご相談したい。</div>
     </div>
     <div class="obj-header"><div class="row1"><div class="obj-icon seikyu">⚙</div><div class="obj-title"><div class="label">自動化フロー</div><div class="name">請求：業務納品→集計→発行</div></div></div></div>
     <div class="subnav">
@@ -1227,6 +1344,7 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
       <button class="btn small" onclick="goPage('seikyu-invoice')">📄 請求書プレビュー</button>
       <button class="btn small on">⚙ 自動化フロー</button>
     </div>
+    <div class="sec-title">フローA：納品 → 請求集計 → 発行</div>
     <div class="flow">
       <div class="flow-node trigger"><div class="ic">▶</div><div class="tx"><b>トリガー：会計業務が「納品」になった</b></div></div>
       <div class="flow-arrow"></div>
@@ -1240,6 +1358,23 @@ body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid v
       <div class="flow-node action"><div class="ic">🏦</div><div class="tx"><b>「NSS」→ 口座振替データを出力</b></div></div>
       <div class="flow-arrow"></div>
       <div class="flow-node end"><div class="ic">✓</div><div class="tx"><b>発行済にステータス更新</b></div></div>
+    </div>
+
+    <!-- 2026-07-30 変更依頼②：月次以外の会計業務／決算業務 → 金額空欄の内訳を先に作成 → 20日に督促メール -->
+    <div class="sec-title" style="margin-top:22px">フローB：金額未入力の請求内訳を検知して督促（2026-07-30 ご依頼分）</div>
+    <div class="flow">
+      <div class="flow-node trigger"><div class="ic">▶</div><div class="tx"><b>トリガー：「月次以外」の会計業務／決算業務が作成された</b><small>対象の業務種別は要確定（決算・年調・償却資産・スポット…）</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node action"><div class="ic">📝</div><div class="tx"><b>請求の内訳明細を「金額空欄」で自動作成</b><small>関与先×請求月の請求にひもづけ。金額は担当が後から入力</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node wait"><div class="ic">📅</div><div class="tx"><b>請求月の20日まで待機</b><small>20日が土日祝の場合の扱いは要確定</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-branch">判定：内訳金額が空欄のまま？</div>
+      <div class="flow-node action"><div class="ic">🔍</div><div class="tx"><b>空欄の内訳をピックアップ（担当者ごとに集約）</b></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node action"><div class="ic">✉️</div><div class="tx"><b>担当者へ督促メールを自動送信</b><small>宛先（本人のみ／上長CC）・件名・本文は要確定</small></div></div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node end"><div class="ic">✓</div><div class="tx"><b>金額入力後はフローAの発行処理へ合流</b></div></div>
     </div>
   </div>
 
@@ -1332,6 +1467,20 @@ window.addEventListener('DOMContentLoaded', ()=>{
   if(location.hash === '#review') document.body.classList.add('disc-on');
   const btn = document.getElementById('discToggle');
   if(btn) btn.textContent = document.body.classList.contains('disc-on') ? '💡 論点を隠す' : '💡 論点を表示';
+});
+</script>
+<script>
+/* ホーム サブタブ切替（「私の」／「全体」）— 案件固有なので index.html 側に置く */
+document.querySelectorAll('.subtab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    const target = t.getAttribute('data-subtab');
+    const group  = t.closest('.subtabs');
+    group.querySelectorAll('.subtab').forEach(x=>x.classList.toggle('active', x===t));
+    // 同じ page 内の subpane のみ切替
+    t.closest('.page').querySelectorAll('.subpane').forEach(p=>{
+      p.classList.toggle('active', p.id===target);
+    });
+  });
 });
 </script>
 </body>
