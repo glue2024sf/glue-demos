@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.8)</title>
+<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.10)</title>
 <style>
 /* SHT 活動記録CRM デモ — Salesforce Lightning 風 / 外部依存なし
    （glue hig-japan-sf デモの app.css に準拠）— 2026-07-07 定例FB反映版 */
@@ -404,6 +404,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <div class="sub2">カテゴリごとにフォームが切り替わります。7/22FBで<b>件名の候補リスト化・品種→品番・複数取引先</b>を反映。入力を楽にする方向性は<a data-goto="ui3">入力UI 3案</a>で比較できます。</div>
       </div>
     </div>
+    <div class="fb-note">✅ <b>8/4 反映（v0.9）</b>：品番の入力方法を<b>取引先＞品種＞品番</b>の3階層選択に変更しました。取引先を追加すると（複数紐付け時は最初の1社を基準に）、その取引先が取り扱う品種・品番だけが選択肢に絞り込まれます。品種・品番のマスタデータは取引先ごとに保持する構成です（名刺管理と同様、マスタとして登録済みの情報を活動記録側から参照する形）。</div>
     <div class="fb-note">✅ <b>7/31 反映（v0.8）</b>：<b>引合番号・クレーム番号を自動採番</b>するようにしました。「関連する引合」「関連するクレーム」で<b>新規作成</b>を選ぶと、既存番号と重複しない番号がその場で発行されます（紙での手管理からの脱却）。</div>
     <div class="fb-note">✅ <b>7/30 要件反映（v0.7）</b>：活動記録のカテゴリを<b>メイン5分類→サブカテゴリ→件名</b>の階層に（Excel設計案準拠）／<b>必須未入力は確認送信不可</b>／横断検索に<b>本文キーワード</b>を追加。</div>
     <div class="fb-note">✅ <b>7/23FB反映（v0.4）</b>：<b>件名を複数選択可</b>（1訪問で複数の用件）＋<b>件名候補はカテゴリ連動</b>で出し分け。カテゴリは1つに整理（2階層想定）。品番は<b>品種→品番</b>の2段選択／取引先は<b>複数紐付け</b>可。</div>
@@ -430,24 +431,24 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
             <p class="help">カテゴリを選ぶと、そのカテゴリ用の件名候補が表示されます。1回の訪問で複数の用件があった場合は、件名を複数選択できます（表記ゆれ防止）。</p>
           </div>
 
-          <div class="field"><label><span class="req">★</span>取引先 <span class="help" style="display:inline">（複数紐付け可）</span></label>
+          <div class="field"><label><span class="req">★</span>取引先 <span class="help" style="display:inline">（複数紐付け可・最初の1社が品番の絞り込み基準）</span></label>
             <div id="acct-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
             <select id="acct-add"><option value="">＋ 取引先を追加…</option><option>東海電子工業</option><option>ネクスティエレクトロニクス（商社）</option><option>関西精密コネクタ</option><option>日本マイクロデバイス</option><option>北陸プレシジョン</option></select>
             <p class="help" id="parent-help">商社経由の場合は親会社も自動で紐付きます</p>
           </div>
 
           <div class="row2">
-            <div class="field tf tf-sales tf-claim"><label>品種（大カテゴリ）</label>
-              <select id="cat-sel"><option>コネクタ</option><option>端子</option><option>治具・付属</option></select>
+            <div class="field tf tf-sales tf-claim"><label>品種（取引先で絞り込み）</label>
+              <select id="cat-sel"></select>
             </div>
             <div class="field"><label><span class="req">★</span><span id="l-date">面談日</span></label><input type="date" value="2026-07-22"></div>
           </div>
 
-          <!-- 品番（品種で絞り込み）-->
+          <!-- 品番（取引先＞品種で絞り込み）-->
           <div class="row2 tf tf-sales tf-claim">
-            <div class="field"><label>品番（品種で絞り込み）</label>
+            <div class="field"><label>品番（取引先＞品種で絞り込み）</label>
               <select id="part-sel"></select>
-              <p class="help">品種→品番の階層。品番＋取引先で活動履歴・クレームを横断検索できます</p>
+              <p class="help">取引先→品種→品番の階層。品番＋取引先で活動履歴・クレームを横断検索できます</p>
             </div>
             <div class="field"><label>関連する引合</label>
               <select id="deal-sel">
@@ -781,10 +782,11 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       </div>
       <div class="acts"><button class="btn primary" data-goto="activity">活動を記録</button></div>
     </div>
+    <div class="fb-note">✅ <b>8/4 反映（v0.10）</b>：引合レコード自体の項目として<b>品種・発生日・完了日</b>を追加しました（従来は活動記録側にのみ入力）。一覧・詳細の両方で確認できます。</div>
     <div class="fb-note">✅ <b>7/31 反映（v0.8）</b>：<b>引合番号を自動採番</b>（既存フォーマット踏襲・重複防止の連番）。活動記録フォームから新規引合を作成すると、その場で番号が発行されます。</div>
     <div class="lv-toolbar"><span class="count">4 件</span><span class="spring"></span><span class="pill gray">最終接触からの経過で信号機を自動判定</span></div>
     <div class="tbl-wrap">
-      <table class="lvt"><thead><tr><th class="chk">状態</th><th>引合番号</th><th>引合名</th><th>取引先</th><th>品番</th><th>フェーズ</th><th class="num">見込金額</th><th>最終接触</th><th>担当</th></tr></thead>
+      <table class="lvt"><thead><tr><th class="chk">状態</th><th>引合番号</th><th>引合名</th><th>取引先</th><th>品番</th><th>品種</th><th>フェーズ</th><th class="num">見込金額</th><th>発生日</th><th>完了日</th><th>最終接触</th><th>担当</th></tr></thead>
         <tbody id="deals-body"></tbody>
       </table>
     </div>
@@ -806,10 +808,13 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <div class="rf"><span class="l">引合番号</span><span class="v"><span class="code">INQ-2605-011</span> <span class="pill gray" style="padding:1px 6px">自動採番</span></span></div>
         <div class="rf"><span class="l">取引先</span><span class="v"><a data-goto="accounts">東海電子工業</a></span></div>
         <div class="rf"><span class="l">商社経由</span><span class="v">ネクスティエレクトロニクス</span></div>
+        <div class="rf"><span class="l">品種</span><span class="v">コネクタ</span></div>
         <div class="rf"><span class="l">品番</span><span class="v"><span class="code">CN-320</span></span></div>
         <div class="rf"><span class="l">状態</span><span class="v"><span class="signal g"><i class="g"></i><i class="a"></i><i class="r"></i></span> 順調</span></div>
         <div class="rf"><span class="l">見込金額</span><span class="v">¥ 8,400,000</span></div>
         <div class="rf"><span class="l">確度</span><span class="v">60%</span></div>
+        <div class="rf"><span class="l">発生日</span><span class="v">2026-05-12</span></div>
+        <div class="rf"><span class="l">完了日</span><span class="v">—（未完了）</span></div>
         <div class="rf"><span class="l">所有者</span><span class="v">田中（営業部）</span></div>
       </div>
     </div>
@@ -833,11 +838,14 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
             <div class="fitem2"><div class="l"><span class="req">*</span>引合名</div><div class="v">CN-320 新型コネクタ 年間契約 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>取引先</div><div class="v">東海電子工業 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">商社（販売経路）</div><div class="v">ネクスティエレクトロニクス <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">品種</div><div class="v">コネクタ <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>製品品番</div><div class="v">CN-320 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>フェーズ</div><div class="v">見積提示 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>見込金額</div><div class="v">¥ 8,400,000 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">確度（フェーズ連動）</div><div class="v">60% <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">数量（年間）</div><div class="v">120,000 個 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">発生日</div><div class="v">2026-05-12 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">完了日</div><div class="v">—（受注 or 失注確定時に入力）<span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">ネクストアクション</div><div class="v">7/22 見積提示・技術折衝 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">失注理由</div><div class="v">—（失注時に必須）<span class="pencil">✎</span></div></div>
           </div>
@@ -878,6 +886,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       </div>
       <div class="acts"><button class="btn primary" data-goto="activity">クレームを記録</button></div>
     </div>
+    <div class="fb-note">✅ <b>8/4 反映（v0.10）</b>：クレームレコード自体の項目として<b>品種・発生日・完了日</b>を追加しました（従来は活動記録側にのみ入力）。クローズ済みのクレームは完了日が表示されます。</div>
     <div class="fb-note">✅ <b>7/31 反映（v0.8）</b>：<b>クレーム番号を自動採番</b>。活動記録フォームの「関連するクレーム」から新規作成すると、その場で番号が発行されます。</div>
     <div class="fb-note">✅ <b>7/7FB反映</b>：①引合と同様の<b>フェーズ管理</b>を適用 ②<b>製品品番</b>欄を追加し品番×取引先で横断検索 ③1レコード追記更新／都度新規レコード紐づけの両方式に対応</div>
 
@@ -892,7 +901,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
 
     <div class="lv-toolbar"><span class="count">3 件</span><span class="spring"></span><input class="s" placeholder="品番で絞り込み..."></div>
     <div class="tbl-wrap">
-      <table class="lvt"><thead><tr><th class="chk">重大度</th><th>クレーム番号</th><th>件名</th><th>取引先</th><th>品番 / ロット</th><th>フェーズ</th><th>報告者</th><th>回覧</th></tr></thead>
+      <table class="lvt"><thead><tr><th class="chk">重大度</th><th>クレーム番号</th><th>件名</th><th>取引先</th><th>品番 / ロット</th><th>品種</th><th>フェーズ</th><th>発生日</th><th>完了日</th><th>報告者</th><th>回覧</th></tr></thead>
         <tbody id="claims-body"></tbody>
       </table>
     </div>
@@ -1071,18 +1080,20 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   var dashBars=[{l:'東海電子工業',v:100,n:'18件'},{l:'関西精密コネクタ',v:74,n:'13件'},{l:'ネクスティ（商社）',v:61,n:'11件'},{l:'日本マイクロデバイス',v:52,n:'9件'},{l:'北陸プレシジョン',v:40,n:'7件'}];
   var repBars=[{l:'東海電子工業',v:100,n:'12件'},{l:'関西精密コネクタ',v:58,n:'7件'},{l:'北陸プレシジョン',v:25,n:'3件'}];
 
+  // 品番→品種の対応（活動記録フォームのPART_MASTERと同じ分類。8/4FBで引合・クレームのレコード自体にも品種・発生日・完了日を追加）
+  var PART_CAT={'CN-320':'コネクタ','CN-320H':'コネクタ','CN-110':'コネクタ','CN-220':'端子','TM-08':'端子','ACC-12':'治具・付属','ACC-30':'治具・付属'};
   var deals=[
-    {no:'INQ-2605-011',sig:'g',name:'CN-320 新型コネクタ 年間契約',acct:'東海電子工業',part:'CN-320',phase:'見積提示',amt:'¥ 8,400,000',last:'3日前',who:'田中',key:'tanaka'},
-    {no:'INQ-2606-019',sig:'a',name:'端子ユニット 追加発注',acct:'関西精密コネクタ',part:'CN-220',phase:'ニーズ確認',amt:'¥ 2,100,000',last:'19日前',who:'鈴木',key:'suzuki'},
-    {no:'INQ-2606-023',sig:'r',name:'試作品 評価案件',acct:'北陸プレシジョン',part:'ACC-12',phase:'提案',amt:'¥ 5,600,000',last:'34日前',who:'田中',key:'tanaka'},
-    {no:'INQ-2607-025',sig:'g',name:'定期リピート（月次）',acct:'日本マイクロデバイス',part:'CN-220',phase:'受注',amt:'¥ 1,300,000',last:'昨日',who:'鈴木',key:'suzuki'}
+    {no:'INQ-2605-011',sig:'g',name:'CN-320 新型コネクタ 年間契約',acct:'東海電子工業',part:'CN-320',phase:'見積提示',amt:'¥ 8,400,000',occ:'2026-05-12',done:'',last:'3日前',who:'田中',key:'tanaka'},
+    {no:'INQ-2606-019',sig:'a',name:'端子ユニット 追加発注',acct:'関西精密コネクタ',part:'CN-220',phase:'ニーズ確認',amt:'¥ 2,100,000',occ:'2026-06-03',done:'',last:'19日前',who:'鈴木',key:'suzuki'},
+    {no:'INQ-2606-023',sig:'r',name:'試作品 評価案件',acct:'北陸プレシジョン',part:'ACC-12',phase:'提案',amt:'¥ 5,600,000',occ:'2026-06-20',done:'',last:'34日前',who:'田中',key:'tanaka'},
+    {no:'INQ-2607-025',sig:'g',name:'定期リピート（月次）',acct:'日本マイクロデバイス',part:'CN-220',phase:'受注',amt:'¥ 1,300,000',occ:'2026-07-02',done:'2026-07-30',last:'昨日',who:'鈴木',key:'suzuki'}
   ];
   var claims=[
-    {id:'c1',no:'CLM-2607-006',sev:'amber',sevL:'中',ttl:'端子めっき剥離（外観不良）',acct:'関西精密コネクタ',part:'CN-220',lot:'L2405',ph:'原因調査',phc:'amber',who:'佐藤',key:'sato',reads:[['吉','yoshida',0],['木','kida',1]]},
-    {id:'c2',no:'CLM-2603-002',sev:'red',sevL:'重大',ttl:'コネクタ寸法 公差外れ',acct:'東海電子工業',part:'CN-320',lot:'L2312',ph:'恒久対策',phc:'red',who:'佐藤',key:'sato',reads:[['吉','yoshida',1],['田','tanaka',1]]},
-    {id:'c3',no:'CLM-2606-005',sev:'gray',sevL:'軽微',ttl:'梱包ラベル 誤記',acct:'日本マイクロデバイス',part:'ACC-12',lot:'L2404',ph:'クローズ',phc:'green',who:'木田',key:'kida',reads:[['佐','sato',1]]}
+    {id:'c1',no:'CLM-2607-006',sev:'amber',sevL:'中',ttl:'端子めっき剥離（外観不良）',acct:'関西精密コネクタ',part:'CN-220',lot:'L2405',ph:'原因調査',phc:'amber',occ:'2026-07-15',done:'',who:'佐藤',key:'sato',reads:[['吉','yoshida',0],['木','kida',1]]},
+    {id:'c2',no:'CLM-2603-002',sev:'red',sevL:'重大',ttl:'コネクタ寸法 公差外れ',acct:'東海電子工業',part:'CN-320',lot:'L2312',ph:'恒久対策',phc:'red',occ:'2026-03-08',done:'',who:'佐藤',key:'sato',reads:[['吉','yoshida',1],['田','tanaka',1]]},
+    {id:'c3',no:'CLM-2606-005',sev:'gray',sevL:'軽微',ttl:'梱包ラベル 誤記',acct:'日本マイクロデバイス',part:'ACC-12',lot:'L2404',ph:'クローズ',phc:'green',occ:'2026-06-11',done:'2026-06-18',who:'木田',key:'kida',reads:[['佐','sato',1]]}
   ];
-  // 引合番号・クレーム番号の自動採番（既存フォーマット踏襲: 3桁年月-カテゴリ-連番／7/31反映）
+  // 引合番号・クレーム番号の自動採番（既存フォーマット踏襲: カテゴリ-年月(YYMM)-連番3桁／7/31反映）
   var DEMO_YM='2607';
   var seq={INQ:25,CLM:6};
   function pad3(n){return ('000'+n).slice(-3);}
@@ -1184,8 +1195,10 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       var sig='<span class="signal '+d.sig+'"><i class="g"></i><i class="a"></i><i class="r"></i></span>';
       return '<tr class="clickable" data-goto="deal-detail"><td>'+sig+'</td><td><span class="code">'+d.no+'</span></td><td class="lk">'+d.name+'</td><td class="muted">'+d.acct+'</td>'+
         '<td><span class="code">'+d.part+'</span></td>'+
+        '<td class="muted">'+(PART_CAT[d.part]||'—')+'</td>'+
         '<td><span class="pill '+(d.phase==='受注'?'green':d.phase==='提案'?'red':'blue')+'"><span class="d"></span>'+d.phase+'</span></td>'+
-        '<td class="num" style="font-weight:700">'+d.amt+'</td><td class="muted">'+d.last+'</td>'+
+        '<td class="num" style="font-weight:700">'+d.amt+'</td>'+
+        '<td class="muted">'+d.occ+'</td><td class="muted">'+(d.done||'—')+'</td><td class="muted">'+d.last+'</td>'+
         '<td><span class="u">'+ava(d.who,d.key)+'<span class="nm">'+d.who+'</span></span></td></tr>';
     }).join('');
   }
@@ -1194,7 +1207,9 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       return '<tr><td><span class="pill '+(c.sev==='red'?'red':c.sev==='amber'?'amber':'gray')+'">'+c.sevL+'</span></td>'+
         '<td><span class="code">'+c.no+'</span></td>'+
         '<td class="lk">'+c.ttl+'</td><td class="muted">'+c.acct+'</td><td><span class="code">'+c.part+'</span> / '+c.lot+'</td>'+
+        '<td class="muted">'+(PART_CAT[c.part]||'—')+'</td>'+
         '<td><span class="pill '+c.phc+'"><span class="d"></span>'+c.ph+'</span></td>'+
+        '<td class="muted">'+c.occ+'</td><td class="muted">'+(c.done||'—')+'</td>'+
         '<td><span class="u">'+ava(c.who,c.key)+'<span class="nm">'+c.who+'</span></span></td>'+
         '<td>'+renderReaders(c.reads,true)+'</td></tr>';
     }).join('');
@@ -1439,14 +1454,39 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     toast(toastMsg);
   });
   $('#dash-role').addEventListener('click',function(e){var b=e.target.closest('button');if(b){state.dashRole=b.dataset.role;$$('#dash-role button').forEach(function(x){x.classList.toggle('on',x===b);});renderDash();}});
-  // 品種→品番の階層絞り込み（7/22FB）
-  var PARTS={'コネクタ':['CN-320 ／ 基板対基板コネクタ 0.4mm','CN-320H ／ ハイト違い派生品','CN-110 ／ 電源コネクタ'],'端子':['CN-220 ／ 端子ユニット','TM-08 ／ 圧着端子'],'治具・付属':['ACC-12 ／ 実装治具','ACC-30 ／ 検査治具']};
-  function renderParts(){var c=$('#cat-sel');var p=$('#part-sel');if(!c||!p)return;p.innerHTML=(PARTS[c.value]||[]).map(function(x){return '<option>'+x+'</option>';}).join('');}
-  if($('#cat-sel')){$('#cat-sel').addEventListener('change',renderParts);renderParts();}
-  // 複数取引先チップ（7/22FB）
+  // 取引先→品種→品番の階層絞り込み（7/22FBの品種→品番から、8/4FBで取引先起点の3階層に変更）
+  var PART_MASTER={
+    '東海電子工業':{'コネクタ':['CN-320 ／ 基板対基板コネクタ 0.4mm','CN-320H ／ ハイト違い派生品'],'端子':['TM-08 ／ 圧着端子']},
+    'ネクスティエレクトロニクス（商社）':{'端子':['CN-220 ／ 端子ユニット']},
+    '関西精密コネクタ':{'端子':['CN-220 ／ 端子ユニット'],'治具・付属':['ACC-30 ／ 検査治具']},
+    '日本マイクロデバイス':{'コネクタ':['CN-110 ／ 電源コネクタ'],'端子':['CN-220 ／ 端子ユニット'],'治具・付属':['ACC-12 ／ 実装治具']},
+    '北陸プレシジョン':{'治具・付属':['ACC-12 ／ 実装治具']}
+  };
+  // 横断検索（取引先を跨いで検索する）用に、全取引先の 品種→品番 をマージした平坦マスタ
+  var PARTS=(function(){var m={};Object.keys(PART_MASTER).forEach(function(a){
+    Object.keys(PART_MASTER[a]).forEach(function(c){m[c]=m[c]||[];
+      PART_MASTER[a][c].forEach(function(p){if(m[c].indexOf(p)<0)m[c].push(p);});});});return m;})();
+  function primaryAcct(){return accts[0]||'';}
+  function renderCats(){
+    var c=$('#cat-sel');if(!c)return;
+    var a=primaryAcct();var cats=a?Object.keys(PART_MASTER[a]||{}):[];
+    c.disabled=!a;
+    c.innerHTML=a?(cats.length?cats.map(function(x){return '<option>'+x+'</option>';}).join(''):'<option value="">この取引先の品種マスタが未登録です</option>'):'<option value="">先に取引先を選択してください</option>';
+    renderParts();
+  }
+  function renderParts(){
+    var c=$('#cat-sel');var p=$('#part-sel');if(!c||!p)return;
+    var a=primaryAcct();var list=(a&&PART_MASTER[a]&&PART_MASTER[a][c.value])||[];
+    p.disabled=!a||!c.value;
+    p.innerHTML=list.length?list.map(function(x){return '<option>'+x+'</option>';}).join(''):'<option value="">'+(a?'品番なし':'先に取引先を選択してください')+'</option>';
+  }
+  if($('#cat-sel')){$('#cat-sel').addEventListener('change',renderParts);}
+  // 複数取引先チップ（7/22FB）／最初に追加した取引先を品番カスケードの基準にする（8/4FB）
   var accts=['東海電子工業'];
   function renderAcctChips(){var el=$('#acct-chips');if(!el)return;
-    el.innerHTML=accts.map(function(a){return '<span class="pill blue" style="gap:6px">'+a+(a.indexOf('ネクスティ')>=0?' <span class="pill gray" style="padding:1px 6px">親: アイシン</span>':'')+' <a data-rm="'+a+'" style="cursor:pointer;font-weight:800">×</a></span>';}).join('')||'<span class="help">取引先を追加してください</span>';}
+    el.innerHTML=accts.map(function(a,i){return '<span class="pill blue" style="gap:6px">'+a+(i===0?' <span class="pill green" style="padding:1px 6px">品番の基準</span>':'')+(a.indexOf('ネクスティ')>=0?' <span class="pill gray" style="padding:1px 6px">親: アイシン</span>':'')+' <a data-rm="'+a+'" style="cursor:pointer;font-weight:800">×</a></span>';}).join('')||'<span class="help">取引先を追加してください</span>';
+    renderCats();
+  }
   if($('#acct-add')){
     $('#acct-add').addEventListener('change',function(){var v=this.value;if(v&&accts.indexOf(v)<0){accts.push(v);renderAcctChips();}this.value='';});
     $('#acct-chips').addEventListener('click',function(e){var r=e.target.closest('[data-rm]');if(r){accts=accts.filter(function(a){return a!==r.dataset.rm;});renderAcctChips();}});
