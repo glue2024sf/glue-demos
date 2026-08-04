@@ -1093,7 +1093,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     {id:'c2',no:'CLM-2603-002',sev:'red',sevL:'重大',ttl:'コネクタ寸法 公差外れ',acct:'東海電子工業',part:'CN-320',lot:'L2312',ph:'恒久対策',phc:'red',occ:'2026-03-08',done:'',who:'佐藤',key:'sato',reads:[['吉','yoshida',1],['田','tanaka',1]]},
     {id:'c3',no:'CLM-2606-005',sev:'gray',sevL:'軽微',ttl:'梱包ラベル 誤記',acct:'日本マイクロデバイス',part:'ACC-12',lot:'L2404',ph:'クローズ',phc:'green',occ:'2026-06-11',done:'2026-06-18',who:'木田',key:'kida',reads:[['佐','sato',1]]}
   ];
-  // 引合番号・クレーム番号の自動採番（既存フォーマット踏襲: 3桁年月-カテゴリ-連番／7/31反映）
+  // 引合番号・クレーム番号の自動採番（既存フォーマット踏襲: カテゴリ-年月(YYMM)-連番3桁／7/31反映）
   var DEMO_YM='2607';
   var seq={INQ:25,CLM:6};
   function pad3(n){return ('000'+n).slice(-3);}
@@ -1459,9 +1459,13 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     '東海電子工業':{'コネクタ':['CN-320 ／ 基板対基板コネクタ 0.4mm','CN-320H ／ ハイト違い派生品'],'端子':['TM-08 ／ 圧着端子']},
     'ネクスティエレクトロニクス（商社）':{'端子':['CN-220 ／ 端子ユニット']},
     '関西精密コネクタ':{'端子':['CN-220 ／ 端子ユニット'],'治具・付属':['ACC-30 ／ 検査治具']},
-    '日本マイクロデバイス':{'コネクタ':['CN-110 ／ 電源コネクタ'],'端子':['CN-220 ／ 端子ユニット']},
+    '日本マイクロデバイス':{'コネクタ':['CN-110 ／ 電源コネクタ'],'端子':['CN-220 ／ 端子ユニット'],'治具・付属':['ACC-12 ／ 実装治具']},
     '北陸プレシジョン':{'治具・付属':['ACC-12 ／ 実装治具']}
   };
+  // 横断検索（取引先を跨いで検索する）用に、全取引先の 品種→品番 をマージした平坦マスタ
+  var PARTS=(function(){var m={};Object.keys(PART_MASTER).forEach(function(a){
+    Object.keys(PART_MASTER[a]).forEach(function(c){m[c]=m[c]||[];
+      PART_MASTER[a][c].forEach(function(p){if(m[c].indexOf(p)<0)m[c].push(p);});});});return m;})();
   function primaryAcct(){return accts[0]||'';}
   function renderCats(){
     var c=$('#cat-sel');if(!c)return;
