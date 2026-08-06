@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>スマテク様｜オンボーディング進捗管理 リストビュー デモ</title>
+<style>
+  :root {
+    color-scheme: light;
+    --brand: #0176D3;
+    --brand-dark: #014486;
+    --brand-soft: #EEF4FF;
+    --page: #F3F3F3;
+    --surface: #FFFFFF;
+    --row-hover: #F3F3F3;
+    --head-bg: #FAFAFA;
+    --border: #E5E5E5;
+    --border-strong: #C9C9C9;
+    --ink: #181818;
+    --ink-2: #444444;
+    --ink-3: #747474;
+    --ok-bg: #CDEFC4;   --ok-ink: #2E644A;
+    --warn-bg: #FEF1E1; --warn-ink: #8C4B02;
+    --err-bg: #FEDED8;  --err-ink: #8C1D14;
+    --neutral-bg: #ECEBEA; --neutral-ink: #444444;
+    /* 工程の進み具合 */
+    --done-fill: #E8F5E2;      --done-fill-hover: #DEF0D6;  --done-edge: #6BAE55;
+    --now-fill:  #FDF0DC;      --now-fill-hover:  #FAE7CB;  --now-edge:  #E0961F;
+    --sf: "Salesforce Sans", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic", "Noto Sans JP", "Meiryo", Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--page); color: var(--ink); font-family: var(--sf);
+    font-size: 13px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; }
+  .app { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* ============ page header ============ */
+  .ph { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px 8px; box-shadow: 0 2px 2px rgba(0,0,0,.05); }
+  .ph-top { display: flex; align-items: flex-start; gap: 12px; }
+  .ph-icon { width: 32px; height: 32px; border-radius: 6px; flex: none; background: #7F8DE1; display: grid; place-items: center; margin-top: 2px; }
+  .ph-icon svg { width: 19px; height: 19px; fill: #fff; }
+  .ph-mid { min-width: 0; flex: 1; }
+  .ph-obj { font-size: 12px; color: var(--ink-2); display: block; }
+  .ph-nameline { display: flex; align-items: center; gap: 4px; }
+  .ph-name { font-size: 20px; font-weight: 700; margin: 0; }
+  .iconbtn { background: none; border: 1px solid transparent; border-radius: 4px; width: 26px; height: 26px; display: grid; place-items: center; cursor: pointer; color: var(--ink-2); padding: 0; }
+  .iconbtn:hover { background: var(--brand-soft); color: var(--brand); }
+  .iconbtn:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .iconbtn svg { width: 14px; height: 14px; fill: currentColor; }
+  .iconbtn.pinned { color: var(--brand); }
+  .ph-actions { display: flex; gap: 4px; align-items: flex-start; flex: none; }
+  .btn { font-size: 13px; padding: 5px 14px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border-strong); background: var(--surface); color: var(--brand); white-space: nowrap; }
+  .btn:hover { background: var(--brand-soft); }
+  .btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .btn.primary:hover { background: var(--brand-dark); }
+  .ph-meta { font-size: 12px; color: var(--ink-3); margin-top: 10px; }
+
+  .lv-wrap { position: relative; }
+  .lv-menu { position: absolute; top: 100%; left: 0; margin-top: 4px; z-index: 40; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.16); min-width: 290px; padding: 4px 0; display: none; }
+  .lv-menu[data-open="true"] { display: block; }
+  .lv-menu .mh { font-size: 11px; font-weight: 700; color: var(--ink-3); letter-spacing: .04em; padding: 6px 12px 4px; }
+  .lv-item { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: none; border: 0; cursor: pointer; padding: 7px 12px; font-size: 13px; color: var(--ink); }
+  .lv-item:hover { background: var(--row-hover); }
+  .lv-item:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+  .lv-item .chk { width: 14px; flex: none; color: var(--brand); }
+  .lv-item .cnt { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .lv-item[aria-selected="true"] { font-weight: 700; }
+  .lv-sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+  /* ============ toolbar ============ */
+  .tb { background: var(--surface); border: 1px solid var(--border); border-bottom: 0; border-radius: 4px 4px 0 0; padding: 8px 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .search { position: relative; flex: 1; min-width: 200px; max-width: 340px; }
+  .search svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; fill: var(--ink-3); }
+  .search input { width: 100%; font-family: inherit; font-size: 13px; color: var(--ink); padding: 6px 10px 6px 28px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface); }
+  .search input::placeholder { color: var(--ink-3); }
+  .search input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); }
+  .tb-spacer { flex: 1; }
+  .tb-icons { display: flex; gap: 2px; align-items: center; }
+  .tb-div { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+  /* ============ table ============ */
+  .listwrap { background: var(--surface); border: 1px solid var(--border); border-radius: 0 0 4px 4px; box-shadow: 0 2px 2px rgba(0,0,0,.05); overflow: hidden; }
+  .scroller { overflow-x: auto; }
+  table { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; }
+  th, td { text-align: left; white-space: nowrap; padding: 7px 10px; font-size: 13px; }
+  thead th { background: var(--head-bg); border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 400; color: var(--ink-2); user-select: none; }
+  thead th.sortable { cursor: pointer; }
+  thead th.sortable:hover { background: #F0F0F0; }
+  thead th .arrow { color: var(--ink-3); font-size: 10px; margin-left: 3px; opacity: 0; }
+  thead th[aria-sort="ascending"] .arrow, thead th[aria-sort="descending"] .arrow { opacity: 1; color: var(--ink-2); }
+  thead th.phase { color: var(--ink-3); }
+  tbody td { border-bottom: 1px solid var(--border); color: var(--ink); }
+  tbody tr:hover td { background: var(--row-hover); }
+  tbody tr.hidden { display: none; }
+
+  /* --- 工程の進み具合（帯） --- */
+  tbody td.st-done { background: var(--done-fill); }
+  tbody tr:hover td.st-done { background: var(--done-fill-hover); }
+  tbody td.st-now { background: var(--now-fill); box-shadow: inset 0 -2px 0 var(--now-edge); }
+  tbody tr:hover td.st-now { background: var(--now-fill-hover); }
+  tbody td.st-done .dt { color: #245C1C; }
+  tbody td.st-now .dt, tbody td.st-now .await { color: var(--warn-ink); }
+  .await { font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+  .await::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--now-edge); flex: none; }
+
+  .col-chk { width: 34px; }
+  .col-num { width: 42px; color: var(--ink-3); font-family: var(--mono); font-size: 12px; }
+  th.col-chk, th.col-num { color: var(--ink-3); }
+  input[type=checkbox] { accent-color: var(--brand); width: 14px; height: 14px; cursor: pointer; margin: 0; }
+
+  .stick { position: sticky; z-index: 2; background: var(--surface); }
+  thead .stick { background: var(--head-bg); z-index: 3; }
+  tbody tr:hover .stick { background: var(--row-hover); }
+  .s0 { left: 0; }
+  .s1 { left: 34px; }
+  .s2 { left: 76px; min-width: 200px; box-shadow: 3px 0 6px -5px rgba(0,0,0,.35); }
+
+  a.rec { color: var(--brand); text-decoration: none; }
+  a.rec:hover { text-decoration: underline; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; line-height: 1.45; white-space: nowrap; background: var(--neutral-bg); color: var(--neutral-ink); }
+  .b-ok { background: var(--ok-bg); color: var(--ok-ink); }
+  .b-warn { background: var(--warn-bg); color: var(--warn-ink); }
+  .b-err { background: var(--err-bg); color: var(--err-ink); }
+
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  .num.hot { color: var(--err-ink); font-weight: 700; }
+  .num.mid { color: var(--warn-ink); font-weight: 700; }
+  .dt { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  .dt .el { color: var(--ink-3); font-size: 11px; margin-left: 5px; }
+  td.st-done .dt .el { color: #4A7A3E; }
+  td.st-now .dt .el { color: var(--warn-ink); font-weight: 700; }
+  .none { color: var(--ink-3); }
+  .dash { color: #C9C9C9; }
+
+  .rowmenu { width: 34px; text-align: center; }
+  .rowmenu button { background: none; border: 0; cursor: pointer; color: var(--ink-2); font-size: 12px; padding: 2px 5px; border-radius: 3px; }
+  .rowmenu button:hover { background: var(--brand-soft); color: var(--brand); }
+
+  .empty-state { padding: 40px 16px; text-align: center; color: var(--ink-3); font-size: 13px; display: none; }
+  .empty-state[data-show="true"] { display: block; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 10px 12px; border-top: 1px solid var(--border); font-size: 12px; color: var(--ink-3); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 22px; height: 12px; border-radius: 2px; display: inline-block; border: 1px solid rgba(0,0,0,.06); }
+
+  .footnote { font-size: 12px; color: var(--ink-3); padding: 0 4px; display: flex; flex-direction: column; gap: 4px; }
+  .footnote b { color: var(--ink-2); }
+  .mockflag { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 3px; background: var(--warn-bg); color: var(--warn-ink); font-size: 11px; font-weight: 700; vertical-align: 3px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="ph">
+    <div class="ph-top">
+      <div class="ph-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4.4-8 4.6-8-4.6V6.6l8 4.6 8-4.6z"/></svg>
+      </div>
+      <div class="ph-mid">
+        <span class="ph-obj">オンボーディング</span>
+        <div class="ph-nameline">
+          <h1 class="ph-name" id="lvName">要催促のオンボーディング</h1>
+          <div class="lv-wrap">
+            <button class="iconbtn" id="lvToggle" aria-haspopup="true" aria-expanded="false" title="リストビューを選択">
+              <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+            </button>
+            <div class="lv-menu" id="lvMenu" role="listbox" aria-label="リストビュー">
+              <div class="mh">リストビュー</div>
+              <button class="lv-item" role="option" data-view="urgent" aria-selected="true"><span class="chk">✓</span>要催促のオンボーディング<span class="cnt" data-count="urgent"></span></button>
+              <button class="lv-item" role="option" data-view="submit" aria-selected="false"><span class="chk"></span>提出待ち<span class="cnt" data-count="submit"></span></button>
+              <button class="lv-item" role="option" data-view="mail" aria-selected="false"><span class="chk"></span>郵便受取待ち<span class="cnt" data-count="mail"></span></button>
+              <button class="lv-item" role="option" data-view="long" aria-selected="false"><span class="chk"></span>14日以上の滞留<span class="cnt" data-count="long"></span></button>
+              <div class="lv-sep"></div>
+              <button class="lv-item" role="option" data-view="mine" aria-selected="false"><span class="chk"></span>自分が営業２のオンボーディング<span class="cnt" data-count="mine"></span></button>
+              <button class="lv-item" role="option" data-view="done" aria-selected="false"><span class="chk"></span>取引許可 完了<span class="cnt" data-count="done"></span></button>
+              <button class="lv-item" role="option" data-view="all" aria-selected="false"><span class="chk"></span>すべてのオンボーディング<span class="cnt" data-count="all"></span></button>
+            </div>
+          </div>
+          <button class="iconbtn pinned" title="このリストを固定表示（ピン留め済み）">
+            <svg viewBox="0 0 24 24"><path d="M16 9V4h1a1 1 0 0 0 0-2H7a1 1 0 0 0 0 2h1v5c0 1.7-1.3 3-3 3v2h5.9v6l1 1 1-1v-6H19v-2c-1.7 0-3-1.3-3-3z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="ph-actions">
+        <button class="btn" type="button">インポート</button>
+        <button class="btn primary" type="button">新規</button>
+      </div>
+    </div>
+    <p class="ph-meta" id="phMeta">6 件 • 滞留日数で並び替え • 絞り込み条件: 要催促 • 数秒前に更新</p>
+  </div>
+
+  <div class="tb">
+    <div class="search">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg>
+      <input type="search" id="q" placeholder="この一覧を検索..." aria-label="この一覧を検索">
+    </div>
+    <div class="tb-spacer"></div>
+    <div class="tb-icons">
+      <button class="iconbtn" title="表示設定"><svg viewBox="0 0 24 24"><path d="M3 5h18v2H3zm0 6h18v2H3zm0 6h18v2H3z"/></svg></button>
+      <button class="iconbtn" title="更新"><svg viewBox="0 0 24 24"><path d="M17.6 6.4A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.8-4.2L13 11h7V4z"/></svg></button>
+      <button class="iconbtn" title="インライン編集"><svg viewBox="0 0 24 24"><path d="M3 17.2V21h3.8L17.8 10l-3.8-3.8zM20.7 7.1a1 1 0 0 0 0-1.4l-2.4-2.4a1 1 0 0 0-1.4 0l-1.8 1.8L18.9 9z"/></svg></button>
+      <div class="tb-div"></div>
+      <button class="iconbtn" title="絞り込み"><svg viewBox="0 0 24 24"><path d="M10 18h4v-2h-4zM3 6v2h18V6zm3 7h12v-2H6z"/></svg></button>
+      <button class="iconbtn" title="設定"><svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.9 4a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L16 3H8l-.4 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L8 21h8l.4-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c0-.4.1-.8.1-1.2z"/></svg></button>
+    </div>
+  </div>
+
+  <div class="listwrap">
+    <div class="scroller">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th class="col-chk stick s0" scope="col"><input type="checkbox" id="chkAll" aria-label="すべて選択"></th>
+            <th class="col-num stick s1" scope="col">#</th>
+            <th class="stick s2 sortable" scope="col" data-sort="name" aria-sort="none">企業名<span class="arrow">▲</span></th>
+            <th scope="col">営業２</th>
+            <th class="sortable" scope="col" data-sort="days" aria-sort="descending">滞留日数<span class="arrow">▼</span></th>
+            <th scope="col">滞留点</th>
+            <th scope="col">待ち先</th>
+            <th scope="col">必要なアクション</th>
+            <th class="phase" scope="col">アカウント発行日</th>
+            <th class="phase" scope="col">初回ログイン日</th>
+            <th class="phase" scope="col">審査情報 直近提出日</th>
+            <th class="phase" scope="col">審査情報 直近差戻日</th>
+            <th class="phase" scope="col">審査結果</th>
+            <th class="phase" scope="col">審査完了日</th>
+            <th class="phase" scope="col">郵便発送日</th>
+            <th class="phase" scope="col">本社郵便受取日</th>
+            <th class="phase" scope="col">担当者郵便開封日</th>
+            <th class="phase" scope="col">取引許可</th>
+            <th class="phase" scope="col">取引許可通知日</th>
+            <th class="rowmenu" scope="col"></th>
+          </tr>
+        </thead>
+        <tbody id="tb">
+
+          <tr data-days="28" data-name="アオイ商事" data-rep="山田" data-tags="urgent submit long all">
+            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
+            <td class="col-num stick s1">1</td>
+            <td class="stick s2"><a class="rec" href="#">株式会社アオイ商事</a></td>
+            <td>山田</td>
+            <td><span class="num hot">28</span></td>
+            <td>初回ログイン後</td>
+            <td>提出待ち</td>
+            <td><span class="badge b-err">提出催促</span></td>
+            <td class="st-done"><span class="dt">2026-06-25<span class="el">42日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-09<span class="el">28日</span></span></td>
+            <td class="st-now"><span class="await">提出待ち 28日</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="badge">未審査</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
+          </tr>
+
+          <tr data-days="17" data-name="北陸ストア" data-rep="鈴木" data-tags="urgent submit long all">
+            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
+            <td class="col-num stick s1">2</td>
+            <td class="stick s2"><a class="rec" href="#">北陸ストア株式会社</a></td>
+            <td>鈴木</td>
+            <td><span class="num hot">17</span></td>
+            <td>審査情報 差戻後</td>
+            <td>提出待ち</td>
+            <td><span class="badge b-err">提出催促</span></td>
+            <td class="st-done"><span class="dt">2026-07-16<span class="el">21日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-17<span class="el">20日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-19<span class="el">18日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-20<span class="el">17日</span></span></td>
+            <td class="st-now"><span class="await">再提出待ち 17日</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
+          </tr>
+
+          <tr data-days="10" data-name="みなとリテール" data-rep="山田" data-tags="urgent submit all">
+            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
+            <td class="col-num stick s1">3</td>
+            <td class="stick s2"><a class="rec" href="#">株式会社みなとリテール</a></td>
+            <td>山田</td>
+            <td><span class="num mid">10</span></td>
+            <td>審査情報 差戻後</td>
+            <td>提出待ち</td>
+            <td><span class="badge b-err">提出催促</span></td>
+            <td class="st-done"><span class="dt">2026-07-16<span class="el">21日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-17<span class="el">20日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-25<span class="el">12日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
+            <td class="st-now"><span class="await">再提出待ち 10日</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
+          </tr>
+
+          <tr data-days="5" data-name="さくら物産" data-rep="佐藤" data-tags="urgent mail all">
+            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
+            <td class="col-num stick s1">4</td>
+            <td class="stick s2"><a class="rec" href="#">株式会社さくら物産</a></td>
+            <td>佐藤</td>
+            <td><span class="num mid">5</span></td>
+            <td>郵便発送後</td>
+            <td>本社受取待ち</td>
+            <td><span class="badge b-warn">郵便受取催促</span></td>
+            <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-30<span class="el">7日</span></span></td>
+            <td class="st-done"><span class="badge b-ok">審査OK</span></td>
+            <td class="st-done"><span class="dt">2026-07-31<span class="el">6日</span></span></td>
+            <td class="st-done"><span class="dt">2026-08-01<span class="el">5日</span></span></td>
+            <td class="st-now"><span class="await">本社受取待ち 5日</span></td>
+            <td class="st-done"><span class="dt">2026-08-04<span class="el">2日</span></span></td>
+            <td><span class="badge">未許可</span></td>
+            <td><span class="dash">—</span></td>
+            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
+          </tr>
+
+          <tr data-days="4" data-name="東西百貨店" data-rep="高橋" data-tags="urgent mail all">
+            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
+            <td class="col-num stick s1">5</td>
+            <td class="stick s2"><a class="rec" href="#">東西百貨店株式会社</a></td>
+            <td>高橋</td>
+            <td><span class="num mid">4</span></td>
+            <td>郵便発送後</td>
+            <td>本社・担当者とも受取待ち</td>
+            <td><span class="badge b-warn">郵便受取催促</span></td>
+            <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-30<span class="el">7日</span></span></td>
+            <td class="st-done"><span class="badge b-ok">審査OK</span></td>
+            <td class="st-done"><span class="dt">2026-07-31<span class="el">6日</span></span></td>
+            <td class="st-done"><span class="dt">2026-08-02<span class="el">4日</span></span></td>
+            <td class="st-now"><span class="await">本社受取待ち 4日</span></td>
+            <td class="st-now"><span class="await">開封待ち</span></td>
+            <td><span class="badge">未許可</span></td>
+            <td><span class="dash">—</span></td>
+            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
+          </tr>
+
+          <tr data-days="3" data-name="カメリア" data-rep="山田" data-tags="urgent mail all">
+            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
+            <td class="col-num stick s1">6</td>
+            <td class="stick s2"><a class="rec" href="#">株式会社カメリア</a></td>
+            <td>山田</td>
+            <td><span class="num mid">3</span></td>
+            <td>郵便発送後</td>
+            <td>担当者受取待ち</td>
+            <td><span class="badge b-warn">郵便受取催促</span></td>
+            <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-30<span class="el">7日</span></span></td>
+            <td class="st-done"><span class="badge b-ok">審査OK</span></td>
+            <td class="st-done"><span class="dt">2026-07-31<span class="el">6日</span></span></td>
+            <td class="st-done"><span class="dt">2026-08-03<span class="el">3日</span></span></td>
+            <td class="st-done"><span class="dt">2026-08-04<span class="el">2日</span></span></td>
+            <td class="st-now"><span class="await">開封待ち 3日</span></td>
+            <td><span class="badge">未許可</span></td>
+            <td><span class="dash">—</span></td>
+            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
+          </tr>
+
+          <tr data-days="0" data-name="ふじや" data-rep="山田" data-tags="all">
+            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
+            <td class="col-num stick s1">7</td>
+            <td class="stick s2"><a class="rec" href="#">株式会社ふじや</a></td>
+            <td>山田</td>
+            <td><span class="none">—</span></td>
+            <td><span class="none">—</span></td>
+            <td><span class="none">—</span></td>
+            <td><span class="none">—</span></td>
+            <td class="st-done"><span class="dt">2026-07-16<span class="el">21日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-17<span class="el">20日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-25<span class="el">12日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-20<span class="el">17日</span></span></td>
+            <td class="st-now"><span class="badge b-warn">審査中</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
+          </tr>
+
+          <tr data-days="0" data-name="中央トレーディング" data-rep="鈴木" data-tags="all">
+            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
+            <td class="col-num stick s1">8</td>
+            <td class="stick s2"><a class="rec" href="#">中央トレーディング株式会社</a></td>
+            <td>鈴木</td>
+            <td><span class="none">—</span></td>
+            <td><span class="none">—</span></td>
+            <td><span class="none">—</span></td>
+            <td><span class="none">—</span></td>
+            <td class="st-done"><span class="dt">2026-07-31<span class="el">6日</span></span></td>
+            <td class="st-done"><span class="dt">2026-08-01<span class="el">5日</span></span></td>
+            <td class="st-done"><span class="dt">2026-08-02<span class="el">4日</span></span></td>
+            <td><span class="dash">—</span></td>
+            <td class="st-now"><span class="await">審査待ち 4日</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td><span class="dash">—</span></td>
+            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
+          </tr>
+
+          <tr data-days="0" data-name="リバーサイド" data-rep="佐藤" data-tags="done all">
+            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
+            <td class="col-num stick s1">9</td>
+            <td class="stick s2"><a class="rec" href="#">株式会社リバーサイド</a></td>
+            <td>佐藤</td>
+            <td><span class="none">—</span></td>
+            <td><span class="none">—</span></td>
+            <td><span class="none">—</span></td>
+            <td><span class="none">—</span></td>
+            <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
+            <td class="st-done"><span class="dt">2026-07-30<span class="el">7日</span></span></td>
+            <td class="st-done"><span class="badge b-ok">審査OK</span></td>
+            <td class="st-done"><span class="dt">2026-07-31<span class="el">6日</span></span></td>
+            <td class="st-done"><span class="dt">2026-08-02<span class="el">4日</span></span></td>
+            <td class="st-done"><span class="dt">2026-08-04<span class="el">2日</span></span></td>
+            <td class="st-done"><span class="dt">2026-08-05<span class="el">1日</span></span></td>
+            <td class="st-done"><span class="badge b-ok">許可</span></td>
+            <td class="st-done"><span class="dt">2026-08-06<span class="el">0日</span></span></td>
+            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+    <p class="empty-state" id="emptyState">条件に一致するレコードはありません。</p>
+    <div class="legend">
+      <span><i style="background:var(--done-fill)"></i>完了した工程（日付が入っている）</span>
+      <span><i style="background:var(--now-fill);box-shadow:inset 0 -2px 0 var(--now-edge)"></i>いま待っている工程</span>
+      <span><i style="background:#fff"></i>まだ着手していない工程</span>
+      <span>日付の右の数字は本日（2026-08-06）からの経過日数</span>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <p style="margin:0"><b>デザイン確認用モックです<span class="mockflag">企業名・担当者名・日付はすべて架空です</span></b></p>
+    <p style="margin:0">リストビューの切り替え（企業名の右の ▾）、この一覧を検索、列見出しでの並び替えが実際に動きます。</p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var VIEWS = {
+    urgent: { label: "要催促のオンボーディング", filter: "要催促" },
+    submit: { label: "提出待ち",               filter: "提出待ち" },
+    mail:   { label: "郵便受取待ち",           filter: "郵便受取待ち" },
+    long:   { label: "14日以上の滞留",         filter: "滞留14日以上" },
+    mine:   { label: "自分が営業２のオンボーディング", filter: "営業２ = 山田" },
+    done:   { label: "取引許可 完了",          filter: "取引許可 = 許可" },
+    all:    { label: "すべてのオンボーディング", filter: "すべて" }
+  };
+  var ME = "山田";
+  var current = "urgent";
+  var sortKey = "days", sortDir = -1;
+
+  var tb = document.getElementById("tb");
+  var rows = Array.prototype.slice.call(tb.querySelectorAll("tr"));
+  var q = document.getElementById("q");
+  var meta = document.getElementById("phMeta");
+  var lvName = document.getElementById("lvName");
+  var menu = document.getElementById("lvMenu");
+  var toggle = document.getElementById("lvToggle");
+  var emptyState = document.getElementById("emptyState");
+  var chkAll = document.getElementById("chkAll");
+
+  function inView(row, view) {
+    if (view === "mine") return row.dataset.rep === ME;
+    return (" " + row.dataset.tags + " ").indexOf(" " + view + " ") > -1;
+  }
+
+  function counts() {
+    Object.keys(VIEWS).forEach(function (v) {
+      var n = rows.filter(function (r) { return inView(r, v); }).length;
+      var el = menu.querySelector('[data-count="' + v + '"]');
+      if (el) el.textContent = n;
+    });
+  }
+
+  function apply() {
+    var term = q.value.trim().toLowerCase();
+    var shown = 0;
+    rows.forEach(function (r) {
+      var ok = inView(r, current);
+      if (ok && term) ok = r.textContent.toLowerCase().indexOf(term) > -1;
+      r.classList.toggle("hidden", !ok);
+      if (ok) shown++;
+    });
+    var sortLabel = sortKey === "days" ? "滞留日数" : "企業名";
+    meta.textContent = shown + " 件 • " + sortLabel + "で並び替え • 絞り込み条件: "
+      + VIEWS[current].filter + (term ? " ／ 検索「" + q.value.trim() + "」" : "") + " • 数秒前に更新";
+    emptyState.setAttribute("data-show", shown === 0 ? "true" : "false");
+    renumber();
+  }
+
+  function renumber() {
+    var i = 0;
+    rows.forEach(function (r) {
+      if (r.classList.contains("hidden")) return;
+      i++;
+      r.querySelector(".col-num").textContent = i;
+    });
+  }
+
+  function sortRows() {
+    var sorted = rows.slice().sort(function (a, b) {
+      if (sortKey === "days") {
+        var d = (+a.dataset.days) - (+b.dataset.days);
+        if (d !== 0) return d * sortDir;
+        return a.dataset.name.localeCompare(b.dataset.name, "ja");
+      }
+      return a.dataset.name.localeCompare(b.dataset.name, "ja") * sortDir;
+    });
+    sorted.forEach(function (r) { tb.appendChild(r); });
+  }
+
+  document.querySelectorAll("th.sortable").forEach(function (th) {
+    th.addEventListener("click", function () {
+      var key = th.dataset.sort;
+      if (sortKey === key) { sortDir = -sortDir; }
+      else { sortKey = key; sortDir = key === "days" ? -1 : 1; }
+      document.querySelectorAll("th.sortable").forEach(function (o) { o.setAttribute("aria-sort", "none"); });
+      th.setAttribute("aria-sort", sortDir === 1 ? "ascending" : "descending");
+      th.querySelector(".arrow").textContent = sortDir === 1 ? "▲" : "▼";
+      sortRows(); apply();
+    });
+  });
+
+  function openMenu(open) {
+    menu.setAttribute("data-open", open ? "true" : "false");
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  toggle.addEventListener("click", function (e) { e.stopPropagation(); openMenu(menu.getAttribute("data-open") !== "true"); });
+  document.addEventListener("click", function () { openMenu(false); });
+  menu.addEventListener("click", function (e) { e.stopPropagation(); });
+
+  menu.querySelectorAll(".lv-item").forEach(function (item) {
+    item.addEventListener("click", function () {
+      current = item.dataset.view;
+      menu.querySelectorAll(".lv-item").forEach(function (o) {
+        var on = o === item;
+        o.setAttribute("aria-selected", on ? "true" : "false");
+        o.querySelector(".chk").textContent = on ? "✓" : "";
+      });
+      lvName.textContent = VIEWS[current].label;
+      openMenu(false);
+      apply();
+    });
+  });
+
+  q.addEventListener("input", apply);
+
+  chkAll.addEventListener("change", function () {
+    rows.forEach(function (r) {
+      if (r.classList.contains("hidden")) return;
+      var c = r.querySelector('input[type=checkbox]');
+      if (c) c.checked = chkAll.checked;
+    });
+  });
+
+  counts(); sortRows(); apply();
+})();
+</script>
+</body>
+</html>
