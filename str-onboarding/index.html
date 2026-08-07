@@ -153,6 +153,23 @@
   .footnote { font-size: 12px; color: var(--ink-3); padding: 0 4px; display: flex; flex-direction: column; gap: 4px; }
   .footnote b { color: var(--ink-2); }
   .mockflag { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 3px; background: var(--warn-bg); color: var(--warn-ink); font-size: 11px; font-weight: 700; vertical-align: 3px; }
+
+  /* --- ToDo（オペレータ記入欄）--- */
+  .todocell { max-width: 300px; }
+  .todotext {
+    display: block; max-width: 300px; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; border-bottom: 1px dashed var(--border-strong); padding-bottom: 1px;
+  }
+  .todocell:hover .todotext { border-bottom-color: var(--brand); cursor: text; }
+  .todoempty { color: var(--ink-3); font-style: normal; border-bottom: 1px dashed var(--border-strong); }
+  .due { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+  /* 期日超過：企業名・ToDo内容・ToDo期日を警告色に */
+  tr.overdue .stick.s2 a.rec,
+  tr.overdue .todotext,
+  tr.overdue .due { color: var(--err-ink); font-weight: 700; }
+  tr.overdue .due::before { content: "⚠ "; }
+  .overdays { font-size: 11px; color: var(--err-ink); margin-left: 4px; font-weight: 700; }
+  .contact { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -178,6 +195,7 @@
               <button class="lv-item" role="option" data-view="submit" aria-selected="false"><span class="chk"></span>提出待ち<span class="cnt" data-count="submit"></span></button>
               <button class="lv-item" role="option" data-view="mail" aria-selected="false"><span class="chk"></span>郵便受取待ち<span class="cnt" data-count="mail"></span></button>
               <button class="lv-item" role="option" data-view="long" aria-selected="false"><span class="chk"></span>14日以上の滞留<span class="cnt" data-count="long"></span></button>
+              <button class="lv-item" role="option" data-view="overdue" aria-selected="false"><span class="chk"></span>ToDo期日超過<span class="cnt" data-count="overdue"></span></button>
               <div class="lv-sep"></div>
               <button class="lv-item" role="option" data-view="mine" aria-selected="false"><span class="chk"></span>自分が営業２のオンボーディング<span class="cnt" data-count="mine"></span></button>
               <button class="lv-item" role="option" data-view="done" aria-selected="false"><span class="chk"></span>取引許可 完了<span class="cnt" data-count="done"></span></button>
@@ -226,6 +244,8 @@
             <th scope="col">滞留点</th>
             <th scope="col">待ち先</th>
             <th scope="col">必要なアクション</th>
+            <th scope="col">ToDo内容（オペレータ記入）</th>
+            <th class="sortable" scope="col" data-sort="due" aria-sort="none">ToDo期日<span class="arrow">▲</span></th>
             <th class="phase" scope="col">アカウント発行日</th>
             <th class="phase" scope="col">初回ログイン日</th>
             <th class="phase" scope="col">審査情報 直近提出日</th>
@@ -239,12 +259,14 @@
             <th class="phase" scope="col">担当者郵便開封日</th>
             <th class="phase" scope="col">取引許可</th>
             <th class="phase" scope="col">取引許可通知日</th>
+            <th scope="col">電話番号</th>
+            <th scope="col">メールアドレス</th>
             <th class="rowmenu" scope="col"></th>
           </tr>
         </thead>
         <tbody id="tb">
 
-          <tr data-days="28" data-name="アオイ商事" data-rep="山田" data-tags="urgent submit long all">
+          <tr data-days="28" class="overdue" data-name="アオイ商事" data-due="2026-08-05" data-rep="山田" data-tags="overdue urgent submit long all">
             <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
             <td class="col-num stick s1">1</td>
             <td class="stick s2"><a class="rec" href="#">株式会社アオイ商事</a></td>
@@ -253,6 +275,8 @@
             <td>初回ログイン後</td>
             <td>提出待ち</td>
             <td><span class="badge b-err">提出催促</span></td>
+            <td class="todocell"><span class="todotext" title="審査情報の提出方法を再度ご説明。必要書類のリストを再送する">審査情報の提出方法を再度ご説明。必要書類のリストを再送する</span></td>
+            <td><span class="due">2026-08-05</span><span class="overdays">1日超過</span></td>
             <td class="st-done"><span class="dt">2026-06-25<span class="el">42日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-09<span class="el">28日</span></span></td>
             <td class="st-now"><span class="await">提出待ち 28日</span></td>
@@ -266,10 +290,12 @@
             <td><span class="dash">—</span></td>
             <td><span class="dash">—</span></td>
             <td><span class="dash">—</span></td>
+            <td><span class="contact">03-5738-7628</span></td>
+            <td><span class="contact">aoi-shoji@example.co.jp</span></td>
             <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
           </tr>
 
-          <tr data-days="17" data-name="北陸ストア" data-rep="鈴木" data-tags="urgent submit long all">
+          <tr data-days="17" data-name="北陸ストア" data-due="2026-08-08" data-rep="鈴木" data-tags="urgent submit long all">
             <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
             <td class="col-num stick s1">2</td>
             <td class="stick s2"><a class="rec" href="#">北陸ストア株式会社</a></td>
@@ -278,6 +304,8 @@
             <td>審査情報 差戻後</td>
             <td>提出待ち</td>
             <td><span class="badge b-err">提出催促</span></td>
+            <td class="todocell"><span class="todotext" title="差戻理由（登記事項の相違）を説明し、再提出を依頼">差戻理由（登記事項の相違）を説明し、再提出を依頼</span></td>
+            <td><span class="due">2026-08-08</span></td>
             <td class="st-done"><span class="dt">2026-07-16<span class="el">21日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-17<span class="el">20日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-19<span class="el">18日</span></span></td>
@@ -291,10 +319,12 @@
             <td><span class="dash">—</span></td>
             <td><span class="dash">—</span></td>
             <td><span class="dash">—</span></td>
+            <td><span class="contact">076-233-1100</span></td>
+            <td><span class="contact">hokuriku-store@example.co.jp</span></td>
             <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
           </tr>
 
-          <tr data-days="10" data-name="みなとリテール" data-rep="山田" data-tags="urgent submit all">
+          <tr data-days="10" class="overdue" data-name="みなとリテール" data-due="2026-08-04" data-rep="山田" data-tags="overdue urgent submit all">
             <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
             <td class="col-num stick s1">3</td>
             <td class="stick s2"><a class="rec" href="#">株式会社みなとリテール</a></td>
@@ -303,6 +333,8 @@
             <td>審査情報 差戻後</td>
             <td>提出待ち</td>
             <td><span class="badge b-err">提出催促</span></td>
+            <td class="todocell"><span class="todotext" title="登記簿の不備箇所を先方総務とすり合わせ">登記簿の不備箇所を先方総務とすり合わせ</span></td>
+            <td><span class="due">2026-08-04</span><span class="overdays">2日超過</span></td>
             <td class="st-done"><span class="dt">2026-07-16<span class="el">21日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-17<span class="el">20日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-25<span class="el">12日</span></span></td>
@@ -316,10 +348,12 @@
             <td><span class="dash">—</span></td>
             <td><span class="dash">—</span></td>
             <td><span class="dash">—</span></td>
+            <td><span class="contact">03-3477-5111</span></td>
+            <td><span class="contact">minato-retail@example.co.jp</span></td>
             <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
           </tr>
 
-          <tr data-days="5" data-name="さくら物産" data-rep="佐藤" data-tags="urgent mail all">
+          <tr data-days="5" data-name="さくら物産" data-due="2026-08-06" data-rep="佐藤" data-tags="urgent mail all">
             <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
             <td class="col-num stick s1">4</td>
             <td class="stick s2"><a class="rec" href="#">株式会社さくら物産</a></td>
@@ -328,6 +362,8 @@
             <td>郵便発送後</td>
             <td>本社受取待ち</td>
             <td><span class="badge b-warn">郵便受取催促</span></td>
+            <td class="todocell"><span class="todotext" title="本社総務部へ郵便の所在を確認いただく">本社総務部へ郵便の所在を確認いただく</span></td>
+            <td><span class="due">2026-08-06</span></td>
             <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
@@ -341,10 +377,12 @@
             <td class="st-done"><span class="dt">2026-08-04<span class="el">2日</span></span></td>
             <td><span class="badge b-err">謝絶</span></td>
             <td><span class="dash">—</span></td>
+            <td><span class="contact">06-6271-1000</span></td>
+            <td><span class="contact">sakura-bussan@example.co.jp</span></td>
             <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
           </tr>
 
-          <tr data-days="4" data-name="東西百貨店" data-rep="高橋" data-tags="urgent mail all">
+          <tr data-days="4" class="overdue" data-name="東西百貨店" data-due="2026-08-03" data-rep="高橋" data-tags="overdue urgent mail all">
             <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
             <td class="col-num stick s1">5</td>
             <td class="stick s2"><a class="rec" href="#">東西百貨店株式会社</a></td>
@@ -353,6 +391,8 @@
             <td>郵便発送後</td>
             <td>本社・担当者とも受取待ち</td>
             <td><span class="badge b-warn">郵便受取催促</span></td>
+            <td class="todocell"><span class="todotext" title="郵便の受領状況を本社・店舗の双方に確認">郵便の受領状況を本社・店舗の双方に確認</span></td>
+            <td><span class="due">2026-08-03</span><span class="overdays">3日超過</span></td>
             <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
@@ -366,10 +406,12 @@
             <td class="st-now"><span class="await">開封待ち</span></td>
             <td><span class="badge">未許可</span></td>
             <td><span class="dash">—</span></td>
+            <td><span class="contact">03-3273-1111</span></td>
+            <td><span class="contact">tozai-dept@example.co.jp</span></td>
             <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
           </tr>
 
-          <tr data-days="3" data-name="カメリア" data-rep="山田" data-tags="urgent mail all">
+          <tr data-days="3" data-name="カメリア" data-due="2026-08-08" data-rep="山田" data-tags="urgent mail all">
             <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
             <td class="col-num stick s1">6</td>
             <td class="stick s2"><a class="rec" href="#">株式会社カメリア</a></td>
@@ -378,6 +420,8 @@
             <td>郵便発送後</td>
             <td>担当者受取待ち</td>
             <td><span class="badge b-warn">郵便受取催促</span></td>
+            <td class="todocell"><span class="todotext" title="取引担当者へ開封と署名を依頼">取引担当者へ開封と署名を依頼</span></td>
+            <td><span class="due">2026-08-08</span></td>
             <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
@@ -391,10 +435,12 @@
             <td class="st-now"><span class="await">開封待ち 3日</span></td>
             <td><span class="badge">未許可</span></td>
             <td><span class="dash">—</span></td>
+            <td><span class="contact">052-242-0088</span></td>
+            <td><span class="contact">camellia@example.co.jp</span></td>
             <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
           </tr>
 
-          <tr data-days="0" data-name="ふじや" data-rep="山田" data-tags="all">
+          <tr data-days="0" data-name="ふじや" data-due="9999-12-31" data-rep="山田" data-tags="all">
             <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
             <td class="col-num stick s1">7</td>
             <td class="stick s2"><a class="rec" href="#">株式会社ふじや</a></td>
@@ -403,6 +449,8 @@
             <td><span class="none">—</span></td>
             <td><span class="none">—</span></td>
             <td><span class="none">—</span></td>
+            <td class="todocell"><span class="todoempty">クリックして入力</span></td>
+            <td><span class="dash">—</span></td>
             <td class="st-done"><span class="dt">2026-07-16<span class="el">21日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-17<span class="el">20日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-25<span class="el">12日</span></span></td>
@@ -416,10 +464,12 @@
             <td><span class="dash">—</span></td>
             <td><span class="dash">—</span></td>
             <td><span class="dash">—</span></td>
+            <td><span class="contact">0246-22-8000</span></td>
+            <td><span class="contact">fujiya@example.co.jp</span></td>
             <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
           </tr>
 
-          <tr data-days="0" data-name="中央トレーディング" data-rep="鈴木" data-tags="all">
+          <tr data-days="0" data-name="中央トレーディング" data-due="9999-12-31" data-rep="鈴木" data-tags="all">
             <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
             <td class="col-num stick s1">8</td>
             <td class="stick s2"><a class="rec" href="#">中央トレーディング株式会社</a></td>
@@ -428,6 +478,8 @@
             <td><span class="none">—</span></td>
             <td><span class="none">—</span></td>
             <td><span class="none">—</span></td>
+            <td class="todocell"><span class="todoempty">クリックして入力</span></td>
+            <td><span class="dash">—</span></td>
             <td class="st-done"><span class="dt">2026-07-31<span class="el">6日</span></span></td>
             <td class="st-done"><span class="dt">2026-08-01<span class="el">5日</span></span></td>
             <td class="st-done"><span class="dt">2026-08-02<span class="el">4日</span></span></td>
@@ -441,10 +493,12 @@
             <td><span class="dash">—</span></td>
             <td><span class="dash">—</span></td>
             <td><span class="dash">—</span></td>
+            <td><span class="contact">03-3668-0321</span></td>
+            <td><span class="contact">chuo-trading@example.co.jp</span></td>
             <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
           </tr>
 
-          <tr data-days="0" data-name="リバーサイド" data-rep="佐藤" data-tags="done all">
+          <tr data-days="0" data-name="リバーサイド" data-due="9999-12-31" data-rep="佐藤" data-tags="done all">
             <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
             <td class="col-num stick s1">9</td>
             <td class="stick s2"><a class="rec" href="#">株式会社リバーサイド</a></td>
@@ -453,6 +507,8 @@
             <td><span class="none">—</span></td>
             <td><span class="none">—</span></td>
             <td><span class="none">—</span></td>
+            <td class="todocell"><span class="todoempty">クリックして入力</span></td>
+            <td><span class="dash">—</span></td>
             <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
             <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
@@ -466,6 +522,8 @@
             <td class="st-done"><span class="dt">2026-08-05<span class="el">1日</span></span></td>
             <td class="st-done"><span class="badge b-ok">許可</span></td>
             <td class="st-done"><span class="dt">2026-08-06<span class="el">0日</span></span></td>
+            <td><span class="contact">03-3477-1010</span></td>
+            <td><span class="contact">riverside@example.co.jp</span></td>
             <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
           </tr>
 
@@ -478,13 +536,14 @@
       <span><i style="background:var(--done-fill)"></i>完了した工程（日付が入っている）</span>
       <span><i style="background:var(--now-fill);box-shadow:inset 0 -2px 0 var(--now-edge)"></i>いま待っている工程</span>
       <span><i style="background:#fff"></i>まだ着手していない工程</span>
+      <span style="color:var(--err-ink);font-weight:700">⚠ ToDo期日を過ぎた行は企業名・ToDo内容・期日を警告色で表示</span>
       <span>日付の右の数字は本日（2026-08-06）からの経過日数</span>
     </div>
   </div>
 
   <div class="footnote">
     <p style="margin:0"><b>デザイン確認用モックです<span class="mockflag">企業名・担当者名・日付はすべて架空です</span></b></p>
-    <p style="margin:0">リストビューの切り替え（企業名の右の ▾）、この一覧を検索、列見出しでの並び替えが実際に動きます。</p>
+    <p style="margin:0">リストビューの切り替え（企業名の右の ▾）、この一覧を検索、列見出しでの並び替えが実際に動きます。ToDo内容・ToDo期日はオペレータの方が直接入力する欄です。電話番号・メールアドレスは列設定で非表示にできます。</p>
   </div>
 
 </div>
@@ -496,6 +555,7 @@
     submit: { label: "提出待ち",               filter: "提出待ち" },
     mail:   { label: "郵便受取待ち",           filter: "郵便受取待ち" },
     long:   { label: "14日以上の滞留",         filter: "滞留14日以上" },
+    overdue:{ label: "ToDo期日超過",           filter: "ToDo期日 < 本日" },
     mine:   { label: "自分が営業２のオンボーディング", filter: "営業２ = 山田" },
     done:   { label: "取引許可 完了",          filter: "取引許可 = 許可" },
     all:    { label: "すべてのオンボーディング", filter: "すべて" }
@@ -536,7 +596,7 @@
       r.classList.toggle("hidden", !ok);
       if (ok) shown++;
     });
-    var sortLabel = sortKey === "days" ? "滞留日数" : "企業名";
+    var sortLabel = sortKey === "days" ? "滞留日数" : (sortKey === "due" ? "ToDo期日" : "企業名");
     meta.textContent = shown + " 件 • " + sortLabel + "で並び替え • 絞り込み条件: "
       + VIEWS[current].filter + (term ? " ／ 検索「" + q.value.trim() + "」" : "") + " • 数秒前に更新";
     emptyState.setAttribute("data-show", shown === 0 ? "true" : "false");
@@ -557,6 +617,11 @@
       if (sortKey === "days") {
         var d = (+a.dataset.days) - (+b.dataset.days);
         if (d !== 0) return d * sortDir;
+        return a.dataset.name.localeCompare(b.dataset.name, "ja");
+      }
+      if (sortKey === "due") {
+        var e = a.dataset.due.localeCompare(b.dataset.due);
+        if (e !== 0) return e * sortDir;
         return a.dataset.name.localeCompare(b.dataset.name, "ja");
       }
       return a.dataset.name.localeCompare(b.dataset.name, "ja") * sortDir;
