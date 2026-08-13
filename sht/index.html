@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.11)</title>
+<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.12)</title>
 <style>
 /* SHT 活動記録CRM デモ — Salesforce Lightning 風 / 外部依存なし
    （glue hig-japan-sf デモの app.css に準拠）— 2026-07-07 定例FB反映版 */
@@ -163,6 +163,14 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
 .path .st.cur{background:var(--blue-d);color:#fff}
 .path.claim .st.done{background:#b5535f;color:#fff}
 .path.claim .st.cur{background:#8c2b39;color:#fff}
+/* フェーズ内手続きチェックリスト（8/10受領資料 v0.12） */
+.cklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.ckgrp{border:1px solid var(--line-d);border-radius:7px;padding:9px 11px;background:#fbfcfe}
+.ckgrp.cur{border-color:var(--blue);background:#f3f8ff;box-shadow:0 0 0 1px var(--blue) inset}
+.ckhd{display:flex;align-items:center;gap:7px;margin-bottom:7px;padding-bottom:6px;border-bottom:1px solid var(--line);font-size:12.5px}
+.ckrow{display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-size:12px;cursor:pointer;line-height:1.45}
+.ckrow input{margin-top:2px;flex:none;cursor:pointer}
+.ckrow:hover{color:var(--blue-d)}
 
 /* object icons */
 .obj-icon{width:32px;height:32px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex:0 0 auto}
@@ -331,10 +339,11 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   <button data-view="ui3">入力UI 3案 <span class="new">NEW</span></button>
   <button data-view="inbox">回覧トレイ <span class="tb" id="tab-unread">4</span></button>
   <button data-view="calendar">カレンダー</button>
-  <button data-view="deals">引合（商談）</button>
+  <button data-view="deals">引合</button>
   <button data-view="claims">品質クレーム</button>
   <button data-view="accounts">取引先 <span class="new">NEW</span></button>
-  <button data-view="cards">名刺取込 <span class="new">NEW</span></button>
+  <button data-view="cards">名刺取込</button>
+  <button data-view="master">マスタ <span class="new">NEW</span></button>
   <button data-view="dash">ダッシュボード</button>
 </nav>
 
@@ -347,14 +356,31 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       <div>
         <div class="eyebrow">ホーム</div>
         <h1>活動記録 — 入力から上長回覧・可視化まで</h1>
-        <div class="sub2">7/22定例のフィードバックを反映（v0.3）。次回 7/30（木）13:00 で「入力UI 3案」の方向性を選定します。</div>
+        <div class="sub2">8/10にいただいたご要望（活動記録入力関連）を全面反映しました（v0.12）。次回 8/18（火）10:00 の定例でご確認をお願いいたします。</div>
       </div>
-      <div class="actions"><button class="btn primary" data-goto="ui3">入力UI 3案を見る</button></div>
+      <div class="actions"><button class="btn primary" data-goto="activity">反映内容を見る</button></div>
     </div>
 
+    <div class="fb-note" style="border-left-width:4px"><b>✅ 8/10 いただいたご要望を全面反映しました（v0.12）</b>
+      <table class="tbl" style="margin-top:8px">
+        <thead><tr><th style="width:190px">いただいた内容</th><th>デモへの反映</th><th style="width:110px">確認場所</th></tr></thead>
+        <tbody>
+          <tr><td><b>カテゴリー／件名／フォームの見直し</b></td><td>カテゴリー<b>5種</b>・サブカテゴリー<b>5種</b>・件名<b>62種</b>を一覧どおり登録し、<b>form①〜⑤</b>で入力フォームが切り替わるようにしました</td><td><a data-goto="activity">活動記録</a></td></tr>
+          <tr><td><b>引合フェーズの再整理</b></td><td><b>大フェーズ7個＋フェーズ内手続き21個</b>の2段構造に。21個は1つも削らずに束ねています。<b>チェックは外せます</b>（数コマ戻すケースに対応）</td><td><a data-goto="deal-detail">引合の詳細</a></td></tr>
+          <tr><td><b>品質クレームのフェーズ</b></td><td><b>大フェーズ4個＋フェーズ内手続き14個</b>の2段構造に</td><td><a data-goto="claims">品質クレーム</a></td></tr>
+          <tr><td><b>件名（詳細）の手入力</b></td><td>件名（会議名）のプルダウンとは別に、自由入力欄を追加しました</td><td><a data-goto="activity">活動記録</a></td></tr>
+          <tr><td><b>活動種別</b></td><td>訪問／来社／メール（受）（発）／Ｗｅｂ／電話（受）（発）の<b>7種</b>を追加</td><td><a data-goto="activity">活動記録</a></td></tr>
+          <tr><td><b>先方・当方（参加者）</b></td><td>相手先ごとの担当者一覧・社員一覧から<b>複数選択</b>できるようにしました</td><td><a data-goto="activity">活動記録</a></td></tr>
+          <tr><td><b>会議名ごとの参加者プリセット</b></td><td>「できれば理想」とのご要望を実装。会議名を選ぶと<b>参加者が自動セット</b>されます</td><td><a data-goto="activity">活動記録</a></td></tr>
+          <tr><td><b>品種・材料カテゴリー</b></td><td>品種を<b>実データ10種</b>、材料カテゴリーを<b>実データ7種</b>に差し替えました</td><td><a data-goto="master">マスタ</a></td></tr>
+          <tr><td><b>ご質問：取引先／サプライヤー／その他活動先は別DBか</b></td><td>Glueの考えを回答としてまとめました</td><td><a data-goto="master">マスタ</a></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:8px">📌 <b>ご確認いただきたい点が3つあります</b>：①8/6の定例では「カテゴリーは引き合い・クレーム・その他の2〜3個」というお話でしたが、8/10の資料は<b>5カテゴリー</b>でしたので<b>資料のほうを採用</b>しています ②件名は<b>複数選択</b>のままでよろしいでしょうか ③<b>品番マスタが受領できておりません</b>（資料には「送付済み」とご記載がありました）</div>
+    </div>
     <div class="fb-note">✅ <b>7/31 反映（v0.8）</b>：活動記録フィードに<b>📌固定表示</b>ボタンを追加。確認済みの記録でも、押しておけば一覧の先頭に固定表示され続けます（各記録の右下の📌ボタンで切替）。</div>
     <div class="fb-note">✅ <b>7/22定例FB 反映（v0.3）</b>：①<b>入力UI 3案</b>で入力負荷を軽減（別タブ） ②活動記録の<b>件名を候補リスト化</b>し表記ゆれ防止 ③<b>品種→品番</b>の階層構造 ④<b>複数取引先</b>への紐付け ⑤取引先選択で当該会社・品番の活動履歴を絞り込み ⑥<b>承認フロー</b>（入口でテンプレ分け、細部の閲覧・変更は承認）</div>
-    <div class="demo-note">⚠️ レビュー用デモです。取引先名・担当者名・数値・品番はすべてダミー。スクショや手書きメモでのFBをSlackにお送りください。</div>
+    <div class="demo-note">⚠️ レビュー用デモです。<b>本デモは一般公開されているため、会社名・お名前はすべてダミーに置き換えています</b>（協力会社4社は「協力会社Ａ〜Ｄ」と表記）。<b>品種10種・材料カテゴリー7種・件名62種・フェーズは、いただいた資料のまま</b>反映しています。スクショや手書きメモでのFBをSlackにお送りください。</div>
 
     <div class="grid g4" style="margin-bottom:16px">
       <div class="kpi"><div class="label">今週の活動記録</div><div class="val tnum">38<small> 件</small></div><div class="delta up">▲ 前週比 +12%</div></div>
@@ -385,11 +411,11 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
 
     <div class="section-title">オブジェクト（フェーズ1）</div>
     <div class="grid g6">
-      <a class="kpi" data-goto="deals" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-opp lg">💼</span><div><div class="val" style="font-size:15px">引合（商談）</div><div class="label">標準で開始</div></div></a>
-      <a class="kpi" data-goto="activity" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-act lg">📋</span><div><div class="val" style="font-size:15px">活動記録</div><div class="label">テンプレ3種</div></div></a>
-      <a class="kpi" data-goto="claims" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-claim lg">⚠️</span><div><div class="val" style="font-size:15px">品質クレーム</div><div class="label">フェーズ管理</div></div></a>
+      <a class="kpi" data-goto="deals" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-opp lg">💼</span><div><div class="val" style="font-size:15px">引合</div><div class="label">大7＋手続き21</div></div></a>
+      <a class="kpi" data-goto="activity" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-act lg">📋</span><div><div class="val" style="font-size:15px">活動記録</div><div class="label">フォーム5種</div></div></a>
+      <a class="kpi" data-goto="claims" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-claim lg">⚠️</span><div><div class="val" style="font-size:15px">品質クレーム</div><div class="label">大4＋手続き14</div></div></a>
       <a class="kpi" data-goto="accounts" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-acct lg">🏢</span><div><div class="val" style="font-size:15px">取引先</div><div class="label">親会社/商社</div></div></a>
-      <a class="kpi" data-goto="cards" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-card lg">📇</span><div><div class="val" style="font-size:15px">名刺取込</div><div class="label">8月頭 先行提供</div></div></a>
+      <a class="kpi" data-goto="master" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-acct lg">🗃️</span><div><div class="val" style="font-size:15px">マスタ</div><div class="label">必要なDB一覧</div></div></a>
       <a class="kpi" data-goto="dash" style="display:flex;align-items:center;gap:11px"><span class="obj-icon o-dash lg">📊</span><div><div class="val" style="font-size:15px">ダッシュボード</div><div class="label">役割別に切替</div></div></a>
     </div>
   </section>
@@ -401,9 +427,13 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       <div>
         <div class="eyebrow">活動 ・ 記録</div>
         <h1>活動を記録</h1>
-        <div class="sub2">カテゴリごとにフォームが切り替わります。7/22FBで<b>件名の候補リスト化・品種→品番・複数取引先</b>を反映。入力を楽にする方向性は<a data-goto="ui3">入力UI 3案</a>で比較できます。</div>
+        <div class="sub2">8/10受領資料のとおり、<b>カテゴリー5種ごとに入力フォーム（form①〜⑤）が切り替わります</b>。カテゴリーを切り替えて、それぞれの入力項目をご確認ください。</div>
       </div>
     </div>
+    <div class="fb-note" style="border-left-width:4px">✅ <b>8/10 反映（v0.12）</b>：いただいた対応表のとおり、<b>カテゴリー5種 ／ サブカテゴリー5種 ／ 件名62種 ／ 入力フォーム5種（form①〜⑤）</b>を登録しました。<b>カテゴリーを切り替えると入力フォームが丸ごと変わります</b>ので、5種類それぞれをご確認ください。<br>
+      ・<b>対顧客活動</b>（form①・件名19）／<b>対サプライヤー活動</b>（form②・件名4）／<b>その他社外活動</b>（form③・件名2）はサブカテゴリー無し<br>
+      ・<b>社内会議</b>（form④・サブ3／件名30）／<b>その他情報</b>（form⑤・サブ2／件名7）はサブカテゴリーあり<br>
+      新規項目として <b>件名（詳細）の手入力</b>・<b>活動種別7種</b>・<b>先方／当方の複数選択</b>・<b>会議名ごとの参加者プリセット</b> を追加しています。必須項目（★）もフォームごとに出し分けています。</div>
     <div class="fb-note">✅ <b>8/4 反映（v0.11）</b>：活動記録の横断検索に<b>複数条件（AND/OR）</b>タブを追加しました。<b>メインカテゴリー／サブカテゴリー／件名／取引先／品種／品番／ステータス</b>の各キーを<b>一度の検索で同時に指定</b>でき、条件どうしを<b>AND / OR</b>で組み合わせられます。連続する OR は1つのまとまりとして扱うため、いただいた例（取引先：A社 and 品種：X or Y）はそのまま <span class="code">1 AND (2 OR 3)</span> として表現されます。</div>
     <div class="fb-note">✅ <b>8/4 反映（v0.9）</b>：品番の入力方法を<b>取引先＞品種＞品番</b>の3階層選択に変更しました。取引先を追加すると（複数紐付け時は最初の1社を基準に）、その取引先が取り扱う品種・品番だけが選択肢に絞り込まれます。品種・品番のマスタデータは取引先ごとに保持する構成です（名刺管理と同様、マスタとして登録済みの情報を活動記録側から参照する形）。</div>
     <div class="fb-note">✅ <b>7/31 反映（v0.8）</b>：<b>引合番号・クレーム番号を自動採番</b>するようにしました。「関連する引合」「関連するクレーム」で<b>新規作成</b>を選ぶと、既存番号と重複しない番号がその場で発行されます（紙での手管理からの脱却）。</div>
@@ -414,92 +444,117 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
 
     <div class="grid g2">
       <div class="card">
-        <div class="hd">活動記録（共通モーダル）<span class="sub" id="form-sub">テンプレート: 営業活動</span></div>
+        <div class="hd">活動記録<span class="sub" id="form-sub">form①：対顧客活動</span></div>
         <div class="bd">
           <div class="row2">
-            <div class="field"><label><span class="req">★</span>メインカテゴリ</label>
+            <div class="field"><label><span class="req">★</span>カテゴリー</label>
               <select id="maincat"></select>
             </div>
-            <div class="field"><label><span class="req">★</span>サブカテゴリ</label>
+            <div class="field" id="subcat-wrap"><label>サブカテゴリー</label>
               <select id="subcat"></select>
             </div>
           </div>
-          <p class="help" style="margin-top:-4px">7/30合意：フォームは<b>メインカテゴリごとに類型化</b>、サブ・件名の違いは項目の属性で吸収。<span style="color:var(--red);font-weight:700">★＝必須</span>（未入力だと確認送信できません）。</p>
+          <p class="help" style="margin-top:-4px">8/10受領資料に準拠：カテゴリー<b>5種</b>ごとに入力フォームが切り替わります（form①〜⑤）。<b>社外系3カテゴリーはサブカテゴリー無し</b>、社内系2カテゴリーのみサブがあります。<span style="color:var(--red);font-weight:700">★＝必須</span>（未入力だと確認送信できません）。</p>
 
-          <div class="field"><label><span class="req">★</span>件名 <span class="help" style="display:inline">（複数選択可・候補はサブカテゴリ連動）</span></label>
+          <div class="field"><label><span class="req">★</span>件名（会議名） <span class="help" style="display:inline">（複数選択可・候補はカテゴリー連動）</span></label>
             <div id="subj-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
             <select id="subj-add"></select>
-            <p class="help">カテゴリを選ぶと、そのカテゴリ用の件名候補が表示されます。1回の訪問で複数の用件があった場合は、件名を複数選択できます（表記ゆれ防止）。</p>
+            <p class="help">カテゴリー（サブがある場合はサブ）を選ぶと、そのカテゴリー用の件名候補が表示されます。<b>全62件名</b>を8/10受領資料どおり登録済みです。</p>
           </div>
 
-          <div class="field"><label><span class="req">★</span>取引先 <span class="help" style="display:inline">（複数紐付け可・最初の1社が品番の絞り込み基準）</span></label>
+          <div class="field"><label>件名（詳細） <span class="pill green" style="padding:1px 6px">8/10 NEW</span></label>
+            <input id="subj-detail" placeholder="例: 次期モデル向け カレントトランスの単価見直し（手入力）">
+            <p class="help">件名（会議名）のプルダウンでは表しきれない具体の内容を自由入力する欄です（8/10受領資料で新規に定義）。</p>
+          </div>
+
+          <!-- 相手先：カテゴリーにより 取引先／サプライヤー／活動先 が切り替わる -->
+          <div class="field tf tf-f1 tf-f4 tf-f5"><label><span class="req" id="acct-req">★</span>取引先 <span class="help" style="display:inline">（複数紐付け可・最初の1社が品番の絞り込み基準）</span></label>
             <div id="acct-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
             <select id="acct-add"><option value="">＋ 取引先を追加…</option><option>東海電子工業</option><option>ネクスティエレクトロニクス（商社）</option><option>関西精密コネクタ</option><option>日本マイクロデバイス</option><option>北陸プレシジョン</option></select>
             <p class="help" id="parent-help">商社経由の場合は親会社も自動で紐付きます</p>
           </div>
-
-          <div class="row2">
-            <div class="field tf tf-sales tf-claim"><label>品種（取引先で絞り込み）</label>
-              <select id="cat-sel"></select>
-            </div>
-            <div class="field"><label><span class="req">★</span><span id="l-date">面談日</span></label><input type="date" value="2026-07-22"></div>
+          <div class="field tf tf-f2 tf-f4 tf-f5"><label><span class="req">★</span>サプライヤー</label>
+            <select id="supp-sel"></select>
+            <p class="help">受領「サプライヤーリスト」は<b>仕入先66社 × メーカー72社</b>の2階層構造でした。デモは社名をダミーにして構造のみ再現しています。</p>
+          </div>
+          <div class="field tf tf-f3"><label><span class="req">★</span>活動先</label>
+            <select id="other-sel"><option>◯◯大学 工学部</option><option>△△工業会</option><option>□□産業技術センター</option><option>展示会事務局</option></select>
+          </div>
+          <div class="field tf tf-f4 tf-f5"><label>その他活動先</label>
+            <select id="other-sel2"><option value="">（なし）</option><option>◯◯大学 工学部</option><option>△△工業会</option><option>□□産業技術センター</option></select>
           </div>
 
-          <!-- 品番（取引先＞品種で絞り込み）-->
-          <div class="row2 tf tf-sales tf-claim">
-            <div class="field"><label>品番（取引先＞品種で絞り込み）</label>
-              <select id="part-sel"></select>
-              <p class="help">取引先→品種→品番の階層。品番＋取引先で活動履歴・クレームを横断検索できます</p>
+          <div class="row2">
+            <div class="field"><label><span class="req">★</span><span id="l-date">活動日</span></label><input type="date" value="2026-08-18"></div>
+            <div class="field tf tf-f1 tf-f2 tf-f3"><label><span class="req">★</span>活動種別 <span class="pill green" style="padding:1px 6px">8/10 NEW</span></label>
+              <select id="acttype"></select>
             </div>
-            <div class="field"><label>関連する引合</label>
+          </div>
+
+          <!-- 先方（社外の相手）：form①②③のみ -->
+          <div class="field tf tf-f1 tf-f2 tf-f3"><label><span class="req">★</span>先方 <span class="help" style="display:inline">（相手先ごとの担当者一覧から複数選択）</span></label>
+            <div id="side-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+            <select id="side-add"></select>
+            <p class="help">選択した取引先／サプライヤーに紐づく<b>外部名簿</b>から候補を出し分けます（8/10「必要なデータベース」記載の外部名簿）。</p>
+          </div>
+
+          <!-- 当方／参加者：全フォーム共通 -->
+          <div class="field"><label><span class="req">★</span><span id="l-people">当方</span> <span class="help" style="display:inline">（社員一覧から複数選択）</span></label>
+            <div id="ppl-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+            <select id="ppl-add"></select>
+            <p class="help" id="ppl-help">社員名簿（ＳＨＴ／ＳＨＴプロダクツ／協力会社）から選択します。氏名のみ表示し、部署・役職は裏側で保持する構成です。</p>
+          </div>
+
+          <div class="row2 tf tf-f1 tf-f4 tf-f5">
+            <div class="field"><label>対象品種（取引先で絞り込み）</label>
+              <select id="cat-sel"></select>
+            </div>
+            <div class="field"><label>対象品番（取引先＞品種で絞り込み）</label>
+              <select id="part-sel"></select>
+              <p class="help">取引先→品種→品番の階層。品種は<b>8/10受領の実データ10種</b>に差し替え済みです</p>
+            </div>
+          </div>
+          <div class="field tf tf-f2 tf-f4 tf-f5"><label>対象材料カテゴリー</label>
+            <select id="mat-sel"></select>
+            <p class="help">受領「サプライヤーリスト」の<b>材料カテゴリー7種</b>（実データ）</p>
+          </div>
+          <div class="field tf tf-f3"><label>対象分野</label>
+            <select><option>要素技術</option><option>工法開発</option><option>材料評価</option><option>その他</option></select>
+          </div>
+
+          <div class="row2 tf tf-f1 tf-f2 tf-f4 tf-f5">
+            <div class="field"><label>対象引合</label>
               <select id="deal-sel">
-                <option value="d1">CN-320 新型コネクタ 年間契約</option>
-                <option value="d2">端子ユニット 追加発注</option>
+                <option value="d1">CT-320 カレントトランス 年間契約</option>
+                <option value="d2">カットコア 追加発注</option>
                 <option value="none">（なし・プレ検討）</option>
                 <option value="new">＋ 新規引合をこの画面で作成…</option>
               </select>
-              <div class="help" id="deal-phase-wrap" style="margin-top:4px">現在のフェーズ: <b>見積提示</b> <span class="pill gray" style="padding:1px 6px">自動表示</span>（次回以降も現フェーズが自動表示・必要時のみ変更）</div>
+              <div class="help" id="deal-phase-wrap" style="margin-top:4px">現在のフェーズ: <b>仕様詳細決定</b> <span class="pill gray" style="padding:1px 6px">自動表示</span>（次回以降も現フェーズが自動表示・必要時のみ変更）</div>
               <div id="deal-new" hidden style="margin-top:8px;border:1px solid var(--line-d);border-radius:6px;padding:10px;background:#fafcff">
-                <div class="row2"><div class="field" style="margin:0"><label>新規引合名</label><input placeholder="例: CN-410 試作 引合"></div><div class="field" style="margin:0"><label>初期フェーズ</label><select><option>引合受付</option><option>ニーズ確認</option></select></div></div>
+                <div class="row2"><div class="field" style="margin:0"><label>新規引合名</label><input placeholder="例: CT-410 試作 引合"></div><div class="field" style="margin:0"><label>初期フェーズ</label><select><option>引合入手</option><option>引合検討</option></select></div></div>
                 <button class="btn primary sm" type="button" id="deal-create" style="margin-top:8px">この画面で引合を作成して紐付け</button>
                 <p class="help">別画面に移動せず、活動記録の入力中に新規引合を作成→そのまま紐付けできます（7/27 FB）</p>
               </div>
             </div>
           </div>
 
-          <div class="row2 tf tf-sales">
-            <div class="field"><label>面談種別</label><select><option>訪問</option><option>Web商談</option><option>電話</option><option>展示会</option></select></div>
-            <div class="field"><label>面談相手</label><input placeholder="購買部 山田様（キーマン）"></div>
-          </div>
-          <div class="row2 tf tf-meeting" hidden>
-            <div class="field"><label>会議区分</label><select><option>役員会</option><option>経営会議</option><option>部門会議</option></select></div>
-            <div class="field"><label>出席者</label><input placeholder="社長・吉田専務・各部長"></div>
-          </div>
-          <div class="row2 tf tf-claim" hidden>
-            <div class="field"><label>ロット番号</label><input placeholder="L2406"></div>
-            <div class="field"><label>重大度</label><select><option>軽微</option><option>中</option><option>重大（出荷停止）</option></select></div>
-          </div>
-          <div class="field tf tf-claim" hidden><label>記録方式</label>
-            <div class="seg"><button class="on" type="button">1レコードに追記更新</button><button type="button">都度 新規レコードを紐づけ</button></div>
-            <p class="help">7/7FB: 発生からクローズまで継続記録するため、両方式に対応</p>
-          </div>
-          <div class="field tf tf-claim" hidden><label>関連するクレーム</label>
+          <div class="field tf tf-f1 tf-f2 tf-f4 tf-f5"><label>対象クレーム</label>
             <select id="claim-sel">
               <option value="c1">端子めっき剥離（関西精密コネクタ / L2405）</option>
-              <option value="c2">コネクタ寸法 公差外れ（東海電子工業 / L2312）</option>
+              <option value="c2">寸法 公差外れ（東海電子工業 / L2312）</option>
               <option value="none">（なし・新規クレームとして起票）</option>
               <option value="new">＋ 新規クレームをこの画面で作成…</option>
             </select>
-            <div class="help" id="claim-no-wrap" style="margin-top:4px">クレーム番号: <b>QCI-2607-02</b> <span class="pill gray" style="padding:1px 6px">自動表示</span> ／ フェーズ: <b>原因調査</b></div>
+            <div class="help" id="claim-no-wrap" style="margin-top:4px">クレーム番号: <b>QCI-2607-02</b> <span class="pill gray" style="padding:1px 6px">自動表示</span> ／ フェーズ: <b>クレーム詳細調査</b></div>
             <div id="claim-new" hidden style="margin-top:8px;border:1px solid var(--line-d);border-radius:6px;padding:10px;background:#fafcff">
-              <div class="row2"><div class="field" style="margin:0"><label>クレーム件名</label><input placeholder="例: 樹脂部 変色不良"></div><div class="field" style="margin:0"><label>重大度</label><select><option>軽微</option><option>中</option><option>重大（出荷停止）</option></select></div></div>
+              <div class="row2"><div class="field" style="margin:0"><label>クレーム件名</label><input placeholder="例: 樹脂部 変色不良"></div><div class="field" style="margin:0"><label>区分</label><select><option>クレーム</option><option>解析依頼</option></select></div></div>
               <button class="btn primary sm" type="button" id="claim-create" style="margin-top:8px">この画面でクレームを作成して紐付け</button>
-              <p class="help">引合と同様、別画面に移動せず新規クレームを作成→そのまま紐付け＋クレーム番号を自動採番します（7/31反映）</p>
+              <p class="help">別画面に移動せず新規クレームを作成→そのまま紐付け＋クレーム番号を自動採番します。<b>区分（クレーム／解析依頼）</b>は8/10受領のフェーズ表に受付・クローズの2入口／2出口があることを踏まえた<b>Glueからのご提案</b>です。</p>
             </div>
           </div>
 
-          <div class="field"><label><span class="req">★</span><span id="l-body">活動内容</span></label><textarea id="ta-body" placeholder="面談で確認した事項・次アクションを記入"></textarea></div>
-          <div class="field tf tf-claim" hidden><label>是正処置</label><textarea placeholder="一次対応・恒久対策・水平展開"></textarea></div>
+          <div class="field"><label><span class="req">★</span><span id="l-body">活動内容</span></label><textarea id="ta-body" placeholder="活動で確認した事項・次アクションを記入"></textarea></div>
 
           <div class="field"><label>添付ファイル / リンク</label>
             <div class="dropzone">📎 ファイルをドロップ、または <span style="color:var(--blue);font-weight:700">リンクを貼付</span></div>
@@ -538,16 +593,16 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
             </div>
           </div>
           <div class="row2 xs-mode" id="xs-part" style="margin-bottom:10px;display:none">
-            <div class="field" style="margin:0"><label>品番</label><select id="x-part"><option>CN-320</option><option>CN-220</option><option>ACC-12</option></select></div>
+            <div class="field" style="margin:0"><label>品番</label><select id="x-part"><option>CT-320</option><option>SC-210</option><option>TR-140</option></select></div>
             <div class="field" style="margin:0"><label>取引先</label><select id="x-acct"><option>すべて</option><option>東海電子工業</option><option>関西精密コネクタ</option></select></div>
           </div>
           <div class="row2 xs-mode" id="xs-cat" style="margin-bottom:10px;display:none">
-            <div class="field" style="margin:0"><label>品種（大カテゴリ）</label><select id="x-cat1"><option>コネクタ</option><option>端子</option><option>治具・付属</option></select></div>
+            <div class="field" style="margin:0"><label>品種（実データ10種）</label><select id="x-cat1"></select></div>
             <div class="field" style="margin:0"><label>品番（第2階層）</label><select id="x-cat2"></select></div>
           </div>
           <div class="row2 xs-mode" id="xs-subj" style="margin-bottom:10px;display:none">
-            <div class="field" style="margin:0"><label>分類</label><select id="x-subjcat"><option value="sales">営業活動</option><option value="meeting">社内会議</option><option value="claim">品質クレーム</option></select></div>
-            <div class="field" style="margin:0"><label>件名</label><select id="x-subj"></select></div>
+            <div class="field" style="margin:0"><label>カテゴリー／サブカテゴリー</label><select id="x-subjcat"></select></div>
+            <div class="field" style="margin:0"><label>件名（全62種）</label><select id="x-subj"></select></div>
           </div>
           <div class="row2 xs-mode" id="xs-text" style="margin-bottom:10px;display:none">
             <div class="field" style="margin:0"><label>本文キーワード</label><input id="x-text" placeholder="例: 断線不良"></div>
@@ -643,7 +698,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
                 <div class="fitem2"><div class="l">取引先</div><div class="v">東海電子工業 <span class="pill green">自動</span></div></div>
                 <div class="fitem2"><div class="l">日時</div><div class="v">7/24 14:00 <span class="pill green">自動</span></div></div>
                 <div class="fitem2"><div class="l">件名</div><div class="v">訪問 <span class="pill green">自動</span></div></div>
-                <div class="fitem2"><div class="l">品番</div><div class="v">CN-320 <span class="pill green">前回踏襲</span></div></div>
+                <div class="fitem2"><div class="l">品番</div><div class="v">CT-320 <span class="pill green">前回踏襲</span></div></div>
               </div>
               <div class="field" style="margin-top:10px"><label>内容（ここだけ入力）</label><textarea style="width:100%;border:1px solid var(--line-d);border-radius:5px;padding:8px 10px" placeholder="面談で確認した事項・次アクション"></textarea></div>
             </div>
@@ -746,8 +801,8 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <div class="related act-panel">
           <div class="rl-hd"><span class="obj-icon o-act">📋</span> 同じ品番の履歴<span class="sp"></span></div>
           <div class="tl">
-            <div class="item"><span class="dot"></span><div class="when">7/1 ・ Web商談 ・ 田中</div><div class="body">技術仕様の詰め（CN-320）</div></div>
-            <div class="item"><span class="dot"></span><div class="when">6/24 ・ 訪問 ・ 田中</div><div class="body">初回引合ヒアリング（CN-320）</div></div>
+            <div class="item"><span class="dot"></span><div class="when">7/1 ・ Web商談 ・ 田中</div><div class="body">技術仕様の詰め（CT-320）</div></div>
+            <div class="item"><span class="dot"></span><div class="when">6/24 ・ 訪問 ・ 田中</div><div class="body">初回引合ヒアリング（CT-320）</div></div>
           </div>
         </div>
       </div>
@@ -785,9 +840,9 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     <div class="lv-head">
       <span class="obj-icon o-opp lg">💼</span>
       <div class="meta">
-        <div class="kicker">引合（商談）・ 進捗管理</div>
+        <div class="kicker">引合 ・ 進捗管理</div>
         <div class="lv-title">進行中の引合</div>
-        <div class="sub">引合＝標準「商談」で開始する想定。信号機（緑:順調 / 黄:停滞 / 赤:要対応）で可視化。</div>
+        <div class="sub">大フェーズ7個＋フェーズ内手続き21個の2段構造（8/10受領資料）。信号機（緑:順調 / 黄:停滞 / 赤:要対応）で可視化。</div>
       </div>
       <div class="acts"><button class="btn primary" data-goto="activity">活動を記録</button></div>
     </div>
@@ -809,8 +864,8 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       <div class="rec-top">
         <span class="obj-icon o-opp lg">💼</span>
         <div class="meta">
-          <div class="crumb"><a data-goto="deals">引合（商談）</a> › レコード</div>
-          <h1>CN-320 新型コネクタ 年間契約</h1>
+          <div class="crumb"><a data-goto="deals">引合</a> › レコード</div>
+          <h1>CT-320 カレントトランス 年間契約</h1>
         </div>
         <div class="acts"><button class="btn" data-goto="activity">活動を記録</button><button class="btn">見積</button><button class="btn primary">編集</button></div>
       </div>
@@ -818,21 +873,26 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <div class="rf"><span class="l">引合番号</span><span class="v"><span class="code">INQ-2605-011</span> <span class="pill gray" style="padding:1px 6px">自動採番</span></span></div>
         <div class="rf"><span class="l">取引先</span><span class="v"><a data-goto="accounts">東海電子工業</a></span></div>
         <div class="rf"><span class="l">商社経由</span><span class="v">ネクスティエレクトロニクス</span></div>
-        <div class="rf"><span class="l">品種</span><span class="v">コネクタ</span></div>
-        <div class="rf"><span class="l">品番</span><span class="v"><span class="code">CN-320</span></span></div>
+        <div class="rf"><span class="l">品種</span><span class="v">カレントトランス</span></div>
+        <div class="rf"><span class="l">品番</span><span class="v"><span class="code">CT-320</span></span></div>
         <div class="rf"><span class="l">状態</span><span class="v"><span class="signal g"><i class="g"></i><i class="a"></i><i class="r"></i></span> 順調</span></div>
         <div class="rf"><span class="l">見込金額</span><span class="v">¥ 8,400,000</span></div>
-        <div class="rf"><span class="l">確度</span><span class="v">60%</span></div>
+        <div class="rf"><span class="l">確度</span><span class="v">75%</span></div>
         <div class="rf"><span class="l">発生日</span><span class="v">2026-05-12</span></div>
         <div class="rf"><span class="l">完了日</span><span class="v">—（未完了）</span></div>
         <div class="rf"><span class="l">所有者</span><span class="v">田中（営業部）</span></div>
       </div>
     </div>
+    <div class="fb-note">✅ <b>8/10 反映（v0.12）</b>：いただいたフェーズ表のとおり、引合を<b>大フェーズ7個 ＋ フェーズ内手続き21個</b>の2段構造にしました。上段のパスが大フェーズ、下段のチェックリストが各フェーズ内の手続きです。<b>チェックは外せます</b>ので、トラブルで数コマ戻るケースにも対応できます。製品により<b>手続きのスキップ</b>も可能です。</div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <div class="path" style="flex:1">
-        <div class="st done">引合受付</div><div class="st done">ニーズ確認</div><div class="st cur">見積提示</div><div class="st">交渉</div><div class="st">受注</div><div class="st">量産フォロー</div>
+      <div class="path" style="flex:1" id="inq-path"></div>
+      <button class="btn primary">✓ フェーズ完了</button>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="hd">フェーズ内手続き（チェックリスト）<span class="sub">大フェーズ 7 ／ 手続き 21 — 現在: <b id="inq-cur">—</b></span></div>
+      <div class="bd"><div class="cklist" id="inq-check"></div>
+        <p class="help" style="margin-top:10px">💡 8/6定例のご議論を踏まえた実装です。21個をすべてフェーズにすると入力負荷と可視化が悪化するため、<b>レポート・ファネル・確度は大フェーズ側</b>で管理し、細かい手続きはチェックリストで持ちます。現行の21手続きは<b>1つも削らずに</b>7つの大フェーズへ束ねています。</p>
       </div>
-      <button class="btn primary">✓ ステージ完了</button>
     </div>
     <div class="rec-tabs" id="rec-tabs">
       <button data-rtab="detail" class="on">詳細</button>
@@ -845,14 +905,14 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
           <h3><span class="caret">▾</span> 引合 情報</h3>
           <div class="fgrid">
             <div class="fitem2"><div class="l">引合番号</div><div class="v">INQ-2605-011 <span class="pill gray" style="padding:1px 6px;font-weight:600">自動採番</span></div></div>
-            <div class="fitem2"><div class="l"><span class="req">*</span>引合名</div><div class="v">CN-320 新型コネクタ 年間契約 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l"><span class="req">*</span>引合名</div><div class="v">CT-320 カレントトランス 年間契約 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>取引先</div><div class="v">東海電子工業 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">商社（販売経路）</div><div class="v">ネクスティエレクトロニクス <span class="pencil">✎</span></div></div>
-            <div class="fitem2"><div class="l">品種</div><div class="v">コネクタ <span class="pencil">✎</span></div></div>
-            <div class="fitem2"><div class="l"><span class="req">*</span>製品品番</div><div class="v">CN-320 <span class="pencil">✎</span></div></div>
-            <div class="fitem2"><div class="l"><span class="req">*</span>フェーズ</div><div class="v">見積提示 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">品種</div><div class="v">カレントトランス <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l"><span class="req">*</span>製品品番</div><div class="v">CT-320 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l"><span class="req">*</span>フェーズ（大分類）</div><div class="v">仕様詳細決定 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>見込金額</div><div class="v">¥ 8,400,000 <span class="pencil">✎</span></div></div>
-            <div class="fitem2"><div class="l">確度（フェーズ連動）</div><div class="v">60% <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">確度（大フェーズ連動）</div><div class="v">75% <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">数量（年間）</div><div class="v">120,000 個 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">発生日</div><div class="v">2026-05-12 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">完了日</div><div class="v">—（受注 or 失注確定時に入力）<span class="pencil">✎</span></div></div>
@@ -865,9 +925,9 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
           <div class="tbl-wrap"><table class="lvt" style="border:0;border-radius:0">
             <thead><tr><th>品番</th><th>品名</th><th class="num">単価</th><th class="num">年間数量</th><th class="num">年間金額</th></tr></thead>
             <tbody>
-              <tr><td><span class="code">CN-320</span></td><td>基板対基板コネクタ 0.4mm</td><td class="num">¥58</td><td class="num">96,000</td><td class="num">¥5.6M</td></tr>
-              <tr><td><span class="code">CN-320H</span></td><td>ハイト違い派生品</td><td class="num">¥64</td><td class="num">18,000</td><td class="num">¥1.2M</td></tr>
-              <tr><td><span class="code">ACC-12</span></td><td>実装治具・付属</td><td class="num">¥320</td><td class="num">5,000</td><td class="num">¥1.6M</td></tr>
+              <tr><td><span class="code">CT-320</span></td><td>貫通型カレントトランス</td><td class="num">¥58</td><td class="num">96,000</td><td class="num">¥5.6M</td></tr>
+              <tr><td><span class="code">CT-320H</span></td><td>高精度品</td><td class="num">¥64</td><td class="num">18,000</td><td class="num">¥1.2M</td></tr>
+              <tr><td><span class="code">CH-208</span></td><td>コモンモードチョーク</td><td class="num">¥320</td><td class="num">5,000</td><td class="num">¥1.6M</td></tr>
             </tbody>
           </table></div>
         </div>
@@ -892,7 +952,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       <div class="meta">
         <div class="kicker">品質クレーム ・ 是正管理</div>
         <div class="lv-title">オープンなクレーム</div>
-        <div class="sub">発生からクローズまで継続記録。引合と同様のフェーズ管理を適用します。</div>
+        <div class="sub">大フェーズ4個＋フェーズ内手続き14個の2段構造（8/10受領資料）。発生からクローズまで継続記録します。</div>
       </div>
       <div class="acts"><button class="btn primary" data-goto="activity">クレームを記録</button></div>
     </div>
@@ -901,12 +961,13 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     <div class="fb-note">✅ <b>7/31 反映（v0.8）</b>：<b>クレーム番号を自動採番</b>。活動記録フォームの「関連するクレーム」から新規作成すると、その場で番号が発行されます。</div>
     <div class="fb-note">✅ <b>7/7FB反映</b>：①引合と同様の<b>フェーズ管理</b>を適用 ②<b>製品品番</b>欄を追加し品番×取引先で横断検索 ③1レコード追記更新／都度新規レコード紐づけの両方式に対応</div>
 
+    <div class="fb-note">✅ <b>8/10 反映（v0.12）</b>：いただいたフェーズ表のとおり、品質クレームを<b>大フェーズ4個 ＋ フェーズ内手続き14個</b>の2段構造にしました。引合と同じくチェックの取り消しが可能です。<br>💡 <b>Glueからのご提案</b>：「受付」に<b>解析依頼受付／クレーム受付</b>の2入口、「クローズ」に<b>クローズ（クレーム）／クローズ（解析依頼）</b>の2出口があるため、<b>区分（クレーム／解析依頼）</b>という項目を設けて出し分ける構成をご提案します。顧客報告の要否が変わるはずのため、レポートも分離できます。</div>
+
     <div class="card" style="margin-bottom:14px">
-      <div class="hd">端子めっき剥離（関西精密コネクタ / L2405）— フェーズ</div>
+      <div class="hd">端子めっき剥離（関西精密コネクタ / L2405）— フェーズ<span class="sub">大フェーズ 4 ／ 手続き 14 — 現在: <b id="clm-cur">—</b></span></div>
       <div class="bd">
-        <div class="path claim">
-          <div class="st done">発生受付</div><div class="st done">一次対応</div><div class="st cur">原因調査</div><div class="st">恒久対策</div><div class="st">水平展開</div><div class="st">クローズ</div>
-        </div>
+        <div class="path claim" id="clm-path" style="margin-bottom:14px"></div>
+        <div class="cklist" id="clm-check"></div>
       </div>
     </div>
 
@@ -1003,6 +1064,95 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   </section>
 
   <!-- ==================== DASHBOARD ==================== -->
+  <!-- ==================== MASTER ==================== -->
+  <section class="view" id="v-master">
+    <div class="page-head">
+      <div class="icon" style="background:#4b6ea9">🗃️</div>
+      <div>
+        <div class="eyebrow">マスタ ・ 必要なデータベース</div>
+        <h1>マスタの構成</h1>
+        <div class="sub2">8/10にご共有いただいた「必要なデータベース」シートに沿って、各マスタの構成と整備状況を整理しました。</div>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-bottom:16px;flex-direction:column">
+      <div><b>❓ いただいたご質問</b>：「取引先、サプライヤー、その他活動先は別々のカテゴリーのデータベースになるのか？」</div>
+      <div style="margin-top:8px"><b>▶ Glueからの回答：標準の「取引先」1つのオブジェクトに、<u>レコードタイプ</u>で区分を持たせる構成をおすすめします。</b></div>
+      <div style="margin-top:8px">
+        <table class="tbl">
+          <thead><tr><th style="width:130px">理由</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td><b>標準機能をそのまま使える</b></td><td>名刺取込・担当者（取引先責任者）・活動履歴・重複チェックは、いずれも「取引先」に紐づく標準機能です。別々のオブジェクトにすると同じ仕組みを3つ作ることになり、構築費・保守費が増えます</td></tr>
+            <tr><td><b>兼務に対応できる</b></td><td>1社が「取引先」であり同時に「サプライヤー」でもあるケースを、区分の併用で表現できます</td></tr>
+            <tr><td><b>見え方は別々のまま</b></td><td>入力フォームでは、カテゴリーに応じて該当区分の候補<b>だけ</b>を表示します。タブ・一覧も区分ごとに分けられるため、<b>使う側からは「別々のデータベース」に見えます</b></td></tr>
+          </tbody>
+        </table>
+        <p class="help" style="margin-top:8px">💡 実際の動きは「活動記録」タブでご確認ください。カテゴリーを <b>対顧客活動 → 対サプライヤー活動 → その他社外活動</b> と切り替えると、相手先の選択肢が入れ替わります。</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="hd">必要なデータベース<span class="sub">8/10受領資料の記載どおり</span></div>
+      <div class="tbl-wrap"><table class="lvt">
+        <thead><tr><th>データベース</th><th>区分</th><th>保持する情報</th><th>取得方法</th><th>状況</th></tr></thead>
+        <tbody id="master-db"></tbody>
+      </table></div>
+    </div>
+
+    <div class="grid g2" style="margin-bottom:16px">
+      <div class="card">
+        <div class="hd">品種<span class="sub">実データ10種を反映済み</span></div>
+        <div class="bd"><div id="master-prodtype" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          <p class="help" style="margin-top:10px">✅ デモのダミー品種（コネクタ／端子／カットコア）を<b>実際の品種10種</b>に差し替えました。品番は取引先ごとのダミーです。<b>品番マスタは「送付済み」とご記載いただいていますが、こちらで受領を確認できておりません。</b>お手数ですが再送いただけますでしょうか。</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="hd">材料カテゴリー<span class="sub">実データ7種を反映済み</span></div>
+        <div class="bd"><div id="master-matcat" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          <p class="help" style="margin-top:10px">「対サプライヤー活動」の入力フォームで、対象材料カテゴリーとして選択できます。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <div class="hd">社員名簿<span class="sub">受領データ 計76名</span></div>
+        <div class="bd">
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>区分</th><th class="num">人数</th><th>いただいた列</th></tr></thead>
+            <tbody>
+              <tr><td>ＳＨＴ</td><td class="num">45</td><td>所属／部署（役職が同じ列に混在）／氏名／カナ</td></tr>
+              <tr><td>ＳＨＴプロダクツ</td><td class="num">9</td><td>所属／役職／氏名／カナ</td></tr>
+              <tr><td>協力会社（5社）</td><td class="num">22</td><td>所属／役職／氏名（<b>カナ列なし</b>）</td></tr>
+            </tbody>
+          </table></div>
+          <div class="callout" style="margin-top:10px;flex-direction:column">
+            <b>ご確認させてください（2点）</b>
+            <div style="margin-top:6px">① 資料では全区分「部署＞役職＞氏名」ですが、8/10のSlackでは「ＳＨＴとプロダクツは<b>氏名だけでよい</b>」とのお話でした。<br>
+            <b>▶ ご提案：情報は全員分もっておき、画面には氏名だけを出す</b>——という形にすれば、両方を満たせます。参加者を選ぶ画面では氏名のみ、必要なときだけ所属・役職を開く運用です。<br><br>
+            ② シートによって列の並びが異なり、ＳＨＴシートは部署と役職が同じ列に入っています。データ投入前に整えさせていただく必要があります。</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="hd">サプライヤー<span class="sub">受領データ 明細110行</span></div>
+        <div class="bd">
+          <div class="grid g3" style="margin-bottom:10px">
+            <div class="kpi"><div class="label">仕入先</div><div class="val tnum">66<small> 社</small></div></div>
+            <div class="kpi"><div class="label">メーカー</div><div class="val tnum">72<small> 社</small></div></div>
+            <div class="kpi"><div class="label">材料カテゴリー</div><div class="val tnum">7<small> 種</small></div></div>
+          </div>
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>仕入先</th><th>メーカー</th><th>材料カテゴリー</th></tr></thead>
+            <tbody id="master-supp"></tbody>
+          </table></div>
+          <p class="help" style="margin-top:10px">⚠️ <b>社名はダミーです</b>（本デモは一般公開されているため）。構造だけ再現しています。<br>
+          いただいたリストは<b>仕入先とメーカーの2階層</b>で、1つの仕入先が複数の材料カテゴリー・複数メーカーにまたがっていました（例：ある仕入先が7行）。つまり材料カテゴリーは仕入先そのものではなく<b>「仕入先×メーカー」の組み合わせ</b>に付く情報と理解しています。この理解で相違ないでしょうか。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="view" id="v-dash">
     <div class="page-head">
       <div class="icon" style="background:var(--blue)">📊</div>
@@ -1045,10 +1195,13 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
   var COLORS={kurashima:'#2f8f8f',yoshida:'#a86403',kida:'#2e844a',tomiyama:'#b0559a',tanaka:'#2f8f8f',sato:'#ba0517',suzuki:'#5867e8'};
   function ava(nm,key){return '<span class="ava" style="background:'+(COLORS[key]||'#667')+'">'+nm.charAt(0)+'</span>';}
-  function catLabel(c){return c==='sales'?'営業活動':c==='meeting'?'社内会議':'品質クレーム';}
+  // v0.12: 横断検索の種別は8/10受領のカテゴリー5種（f1〜f5）。フィード/回覧トレイは従来キーのまま
+  var CATLBL={f1:'対顧客活動',f2:'対サプライヤー活動',f3:'その他社外活動',f4:'社内会議',f5:'その他情報'};
+  function catLabel(c){return CATLBL[c]||(c==='sales'?'対顧客活動':c==='meeting'?'社内会議':'品質クレーム');}
+  function catCls(c){return (c==='f4'||c==='f5'||c==='meeting')?'meeting':(c==='f2'||c==='f3')?'claim':'sales';}
 
   var feed=[
-    {id:1,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — 新型コネクタ CN-320 引合',body:'購買・技術の合同レビュー。年間12万個の内示見込み。次回7/22に見積提示。',t:'32分前',attach:'議事メモ.pdf',reads:[['木','kida',1],['吉','yoshida',0]]},
+    {id:1,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — カレントトランス CT-320 引合',body:'購買・技術の合同レビュー。年間12万個の内示見込み。次回7/22に見積提示。',t:'32分前',attach:'議事メモ.pdf',reads:[['木','kida',1],['吉','yoshida',0]]},
     {id:2,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密コネクタ 品質クレーム — 端子めっき剥離',body:'ロットL2405で剥離3件。一次対応済、原因調査中。重大度:中。',t:'1時間前',attach:'不良写真.zip',reads:[['吉','yoshida',0],['木','kida',1]]},
     {id:3,who:'吉田',key:'yoshida',cat:'meeting',ttl:'7月 経営会議 議事録',body:'上期実績と下期方針。SFA導入の進捗を共有。※閲覧は役員限定。',t:'3時間前',attach:'経営会議_07.pdf',reads:[['田','tanaka',1]]},
     {id:4,who:'鈴木',key:'suzuki',cat:'sales',ttl:'日本マイクロデバイス Web商談 — 既存品リピート',body:'月次発注の継続確認。特段の課題なし。',t:'昨日',attach:null,reads:[['田','tanaka',1],['吉','yoshida',1]]}
@@ -1056,32 +1209,32 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
 
   var inbox={
     kurashima:[
-      {id:1,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（L2405）',acct:'関西精密コネクタ',part:'CN-220',read:false,others:[['吉','yoshida',0]],
-       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','CN-220 / L2405'],['重大度','中'],['フェーズ','原因調査'],['報告者','佐藤（品質保証部）'],['発生日','2026-07-15']],
+      {id:1,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（L2405）',acct:'関西精密コネクタ',part:'SC-210',read:false,others:[['吉','yoshida',0]],
+       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','SC-210 / L2405'],['重大度','中'],['フェーズ','原因調査'],['報告者','佐藤（品質保証部）'],['発生日','2026-07-15']],
        body:'<h4>不良内容</h4>ロット L2405 の端子めっきに剥離を3件確認。外観検査で発見、client先での実装工程には未流出。<h4>一次対応</h4>該当ロットを全数隔離。代替ロット L2407 を7/16に出荷済み。<h4>原因調査（進行中）</h4>めっき槽の温度管理記録を確認中。7/20までに一次報告予定。<h4>次アクション</h4>恒久対策案を7/22の定例で共有。'},
-      {id:2,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CN-320 引合（年間12万個の内示）',acct:'東海電子工業',part:'CN-320',read:false,others:[['木','kida',1]],
-       fields:[['取引先','東海電子工業'],['品番','CN-320'],['面談種別','訪問'],['面談相手','購買部 山田様（キーマン）'],['関連引合','CN-320 新型コネクタ 年間契約'],['面談日','2026-07-17']],
-       body:'<h4>活動内容</h4>購買・技術の合同レビューを実施。年間12万個の内示見込みを口頭で確認。<h4>先方コメント</h4>「競合A社と比較検討中だが、実装治具込みの提案は評価できる」<h4>次アクション</h4>7/22に見積提示・技術折衝。ハイト違い派生品（CN-320H）も併せて提案。'},
-      {id:3,who:'鈴木',key:'suzuki',cat:'sales',ttl:'北陸プレシジョン 見積フォロー — 34日間 接触なし',acct:'北陸プレシジョン',part:'ACC-12',read:false,others:[['木','kida',1]],
-       fields:[['取引先','北陸プレシジョン'],['品番','ACC-12'],['面談種別','電話'],['状態','要対応（赤）'],['面談日','2026-07-16']],
+      {id:2,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CT-320 引合（年間12万個の内示）',acct:'東海電子工業',part:'CT-320',read:false,others:[['木','kida',1]],
+       fields:[['取引先','東海電子工業'],['品番','CT-320'],['面談種別','訪問'],['面談相手','購買部 山田様（キーマン）'],['関連引合','CT-320 カレントトランス 年間契約'],['面談日','2026-07-17']],
+       body:'<h4>活動内容</h4>購買・技術の合同レビューを実施。年間12万個の内示見込みを口頭で確認。<h4>先方コメント</h4>「競合A社と比較検討中だが、取付治具込みの提案は評価できる」<h4>次アクション</h4>7/22に見積提示・技術折衝。ハイト違い派生品（CT-320H）も併せて提案。'},
+      {id:3,who:'鈴木',key:'suzuki',cat:'sales',ttl:'北陸プレシジョン 見積フォロー — 34日間 接触なし',acct:'北陸プレシジョン',part:'TR-140',read:false,others:[['木','kida',1]],
+       fields:[['取引先','北陸プレシジョン'],['品番','TR-140'],['面談種別','電話'],['状態','要対応（赤）'],['面談日','2026-07-16']],
        body:'<h4>活動内容</h4>試作品評価の状況を電話で確認。先方の担当者が異動しており、後任へ引き継ぎ中とのこと。<h4>リスク</h4>34日間接触が空いていた。信号機=赤。<h4>次アクション</h4>後任の方への挨拶訪問を7月中に設定する。'},
       {id:4,who:'木田',key:'kida',cat:'meeting',ttl:'営業部 週次ミーティング 議事録（7/15）',acct:'（社内）',part:'—',read:false,others:[['田','tanaka',1],['鈴','suzuki',0]],
        fields:[['会議区分','部門会議'],['出席者','木田・田中・鈴木・佐藤'],['開催日','2026-07-15']],
-       body:'<h4>議題</h4>①各案件の進捗共有 ②CN-320の見積方針 ③クレーム対応状況<h4>決定事項</h4>CN-320は実装治具込みのセット提案で進める。値引きは5%を上限とし、超える場合は専務決裁。<h4>宿題</h4>田中: 7/22までに見積書作成 / 佐藤: めっき剥離の原因一次報告'},
-      {id:5,who:'鈴木',key:'suzuki',cat:'sales',ttl:'日本マイクロデバイス リピート受注',acct:'日本マイクロデバイス',part:'CN-220',read:true,others:[['吉','yoshida',1]],
-       fields:[['取引先','日本マイクロデバイス'],['品番','CN-220'],['面談種別','Web商談']],
+       body:'<h4>議題</h4>①各案件の進捗共有 ②CT-320の見積方針 ③クレーム対応状況<h4>決定事項</h4>CT-320は取付治具込みのセット提案で進める。値引きは5%を上限とし、超える場合は専務決裁。<h4>宿題</h4>田中: 7/22までに見積書作成 / 佐藤: めっき剥離の原因一次報告'},
+      {id:5,who:'鈴木',key:'suzuki',cat:'sales',ttl:'日本マイクロデバイス リピート受注',acct:'日本マイクロデバイス',part:'SC-210',read:true,others:[['吉','yoshida',1]],
+       fields:[['取引先','日本マイクロデバイス'],['品番','SC-210'],['面談種別','Web商談']],
        body:'<h4>活動内容</h4>月次発注の継続確認。特段の課題なし。'}
     ],
     yoshida:[
-      {id:11,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CN-320 引合（年間12万個の内示）',acct:'東海電子工業',part:'CN-320',read:false,others:[['木','kida',1]],
-       fields:[['取引先','東海電子工業'],['品番','CN-320'],['見込金額','¥8,400,000'],['面談相手','購買部 山田様（キーマン）'],['面談日','2026-07-17']],
+      {id:11,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CT-320 引合（年間12万個の内示）',acct:'東海電子工業',part:'CT-320',read:false,others:[['木','kida',1]],
+       fields:[['取引先','東海電子工業'],['品番','CT-320'],['見込金額','¥8,400,000'],['面談相手','購買部 山田様（キーマン）'],['面談日','2026-07-17']],
        body:'<h4>活動内容</h4>購買・技術の合同レビュー。年間12万個の内示見込み。<h4>次アクション</h4>7/22に見積提示。値引きは5%上限、超過時は専務決裁が必要です。'},
-      {id:12,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（重大度:中）',acct:'関西精密コネクタ',part:'CN-220',read:false,others:[['田','tanaka',0]],
-       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','CN-220 / L2405'],['重大度','中'],['フェーズ','原因調査']],
+      {id:12,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（重大度:中）',acct:'関西精密コネクタ',part:'SC-210',read:false,others:[['田','tanaka',0]],
+       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','SC-210 / L2405'],['重大度','中'],['フェーズ','原因調査']],
        body:'<h4>不良内容</h4>端子めっき剥離3件。未流出。<h4>一次対応</h4>全数隔離・代替ロット出荷済み。<h4>次アクション</h4>7/20までに原因一次報告。'},
-      {id:13,who:'木田',key:'kida',cat:'sales',ttl:'大口案件 稟議前 状況共有（CN-320 / 840万円）',acct:'東海電子工業',part:'CN-320',read:false,others:[['田','tanaka',1]],
+      {id:13,who:'木田',key:'kida',cat:'sales',ttl:'大口案件 稟議前 状況共有（CT-320 / 840万円）',acct:'東海電子工業',part:'CT-320',read:false,others:[['田','tanaka',1]],
        fields:[['取引先','東海電子工業'],['見込金額','¥8,400,000'],['稟議','値引5%超の可能性あり']],
-       body:'<h4>共有事項</h4>CN-320案件、競合A社の価格攻勢により5%を超える値引き要請が入る可能性があります。<h4>ご確認</h4>専務決裁の要否について事前にご相談させてください。'},
+       body:'<h4>共有事項</h4>CT-320案件、競合A社の価格攻勢により5%を超える値引き要請が入る可能性があります。<h4>ご確認</h4>専務決裁の要否について事前にご相談させてください。'},
       {id:14,who:'佐藤',key:'sato',cat:'claim',ttl:'月次 品質サマリ（重大クレーム 0件）',acct:'（全社）',part:'—',read:true,others:[['田','tanaka',1]],
        fields:[['対象','全社'],['重大クレーム','0件']],body:'<h4>サマリ</h4>今月の重大クレームは0件。軽微2件はいずれも是正完了。'}
     ]
@@ -1092,17 +1245,20 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   var repBars=[{l:'東海電子工業',v:100,n:'12件'},{l:'関西精密コネクタ',v:58,n:'7件'},{l:'北陸プレシジョン',v:25,n:'3件'}];
 
   // 品番→品種の対応（活動記録フォームのPART_MASTERと同じ分類。8/4FBで引合・クレームのレコード自体にも品種・発生日・完了日を追加）
-  var PART_CAT={'CN-320':'コネクタ','CN-320H':'コネクタ','CN-110':'コネクタ','CN-220':'端子','TM-08':'端子','ACC-12':'治具・付属','ACC-30':'治具・付属'};
+  // v0.12: 品種を8/10受領資料の実データ10種へ差し替え（品番・取引先名はダミー）
+  var PART_CAT={'CT-320':'カレントトランス','CT-320H':'カレントトランス','CH-208':'チョークコイル（自動巻き）','CH-071':'チョークコイル（手巻き）','SC-210':'センサーコア','MC-118':'モールドコア','UC-030':'単コア','RA-410':'リアクトル','TR-140':'トランス','CC-050':'カットコア'};
+  // フェーズは8/10受領のフェーズ表（引合＝大フェーズ7個）に差し替え
   var deals=[
-    {no:'INQ-2605-011',sig:'g',name:'CN-320 新型コネクタ 年間契約',acct:'東海電子工業',part:'CN-320',phase:'見積提示',amt:'¥ 8,400,000',occ:'2026-05-12',done:'',last:'3日前',who:'田中',key:'tanaka'},
-    {no:'INQ-2606-019',sig:'a',name:'端子ユニット 追加発注',acct:'関西精密コネクタ',part:'CN-220',phase:'ニーズ確認',amt:'¥ 2,100,000',occ:'2026-06-03',done:'',last:'19日前',who:'鈴木',key:'suzuki'},
-    {no:'INQ-2606-023',sig:'r',name:'試作品 評価案件',acct:'北陸プレシジョン',part:'ACC-12',phase:'提案',amt:'¥ 5,600,000',occ:'2026-06-20',done:'',last:'34日前',who:'田中',key:'tanaka'},
-    {no:'INQ-2607-025',sig:'g',name:'定期リピート（月次）',acct:'日本マイクロデバイス',part:'CN-220',phase:'受注',amt:'¥ 1,300,000',occ:'2026-07-02',done:'2026-07-30',last:'昨日',who:'鈴木',key:'suzuki'}
+    {no:'INQ-2605-011',sig:'g',name:'CT-320 カレントトランス 年間契約',acct:'東海電子工業',part:'CT-320',phase:'仕様詳細決定',amt:'¥ 8,400,000',occ:'2026-05-12',done:'',last:'3日前',who:'田中',key:'tanaka'},
+    {no:'INQ-2606-019',sig:'a',name:'カットコア 追加発注',acct:'関西精密コネクタ',part:'CC-050',phase:'引合検討',amt:'¥ 2,100,000',occ:'2026-06-03',done:'',last:'19日前',who:'鈴木',key:'suzuki'},
+    {no:'INQ-2606-023',sig:'r',name:'手巻きチョーク 試作評価',acct:'北陸プレシジョン',part:'CH-071',phase:'対顧客交渉',amt:'¥ 5,600,000',occ:'2026-06-20',done:'',last:'34日前',who:'田中',key:'tanaka'},
+    {no:'INQ-2607-025',sig:'g',name:'絶縁トランス 定期リピート（月次）',acct:'日本マイクロデバイス',part:'TR-140',phase:'量産準備',amt:'¥ 1,300,000',occ:'2026-07-02',done:'2026-07-30',last:'昨日',who:'鈴木',key:'suzuki'}
   ];
+  // クレームは大フェーズ4個
   var claims=[
-    {id:'c1',no:'QCI-2607-02',sev:'amber',sevL:'中',ttl:'端子めっき剥離（外観不良）',acct:'関西精密コネクタ',part:'CN-220',lot:'L2405',ph:'原因調査',phc:'amber',occ:'2026-07-15',done:'',who:'佐藤',key:'sato',reads:[['吉','yoshida',0],['木','kida',1]]},
-    {id:'c2',no:'QCI-2604-03',sev:'red',sevL:'重大',ttl:'コネクタ寸法 公差外れ',acct:'東海電子工業',part:'CN-320',lot:'L2312',ph:'恒久対策',phc:'red',occ:'2026-04-20',done:'',who:'佐藤',key:'sato',reads:[['吉','yoshida',1],['田','tanaka',1]]},
-    {id:'c3',no:'QCI-2606-01',sev:'gray',sevL:'軽微',ttl:'梱包ラベル 誤記',acct:'日本マイクロデバイス',part:'ACC-12',lot:'L2404',ph:'クローズ',phc:'green',occ:'2026-06-11',done:'2026-06-18',who:'木田',key:'kida',reads:[['佐','sato',1]]}
+    {id:'c1',no:'QCI-2607-02',sev:'amber',sevL:'中',ttl:'端子めっき剥離（外観不良）',acct:'関西精密コネクタ',part:'SC-210',lot:'L2405',ph:'クレーム詳細調査',phc:'amber',occ:'2026-07-15',done:'',who:'佐藤',key:'sato',reads:[['吉','yoshida',0],['木','kida',1]]},
+    {id:'c2',no:'QCI-2604-03',sev:'red',sevL:'重大',ttl:'コア寸法 公差外れ',acct:'東海電子工業',part:'CT-320',lot:'L2312',ph:'対顧客回答検討',phc:'red',occ:'2026-04-20',done:'',who:'佐藤',key:'sato',reads:[['吉','yoshida',1],['田','tanaka',1]]},
+    {id:'c3',no:'QCI-2606-01',sev:'gray',sevL:'軽微',ttl:'梱包ラベル 誤記',acct:'日本マイクロデバイス',part:'TR-140',lot:'L2404',ph:'クローズ',phc:'green',occ:'2026-06-11',done:'2026-06-18',who:'木田',key:'kida',reads:[['佐','sato',1]]}
   ];
   // 採番（8/4に先方からご提供いただいた実ルールを反映）
   //  クレーム: QCI-<年度+月>-<受付順2桁>  例 QCI-2604-01（QCI=固定／2604=年度+月／-01=クレーム受付順）
@@ -1284,7 +1440,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     renderBars($('#dash-bars'),(r==='mgr'?dashBars:repBars),true);
   }
 
-  var state={view:'home',user:'kurashima',inboxFilter:'unread',inboxMode:'full',maincat:'対顧客活動',subcat:'営業活動',dashRole:'mgr',rec:null,pinned:[]};
+  var state={view:'home',user:'kurashima',inboxFilter:'unread',inboxMode:'full',maincat:'対顧客活動',subcat:'',dashRole:'mgr',rec:null,pinned:[]};
   function updateBadges(){
     var n=inbox[state.user].filter(function(i){return !i.read;}).length;
     $('#tab-unread').textContent=n;$('#tab-unread').style.display=n?'grid':'none';
@@ -1313,53 +1469,77 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     renderInbox();renderHomeInbox();updateBadges();
   }
   function toast(msg){var t=$('#toast');$('#toast-msg').textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show');},2300);}
-  var TSUBS={sales:'営業活動',meeting:'社内会議',claim:'品質クレーム'};
-  // 件名候補はカテゴリ連動（7/23FB）
-  var SUBJECTS={
-    sales:['定期訪問','新規開拓','見積提示','価格交渉','技術折衝','サンプル評価フォロー','受注後フォロー'],
-    meeting:['役員会 議事','経営会議 議事','部門会議','案件レビュー'],
-    claim:['クレーム受付','一次対応','原因調査','是正報告','水平展開']
+  var TSUBS={f1:'対顧客活動',f2:'対サプライヤー活動',f3:'その他社外活動',f4:'社内会議',f5:'その他情報'};
+
+  // ══════════════════════════════════════════════════════════════
+  // 8/10 受領「活動記録入力関連.xlsx」準拠（v0.12）
+  //   カテゴリー 5 ／ サブカテゴリー 5 ／ 件名 62 ／ 入力フォーム 5種
+  //   ※ 社外系3カテゴリーはサブカテゴリー無し。社内系2カテゴリーのみサブあり
+  //   ※ 協力会社名（4社）は公開デモのため「協力会社Ａ〜Ｄ」に伏せています
+  // ══════════════════════════════════════════════════════════════
+  var CATS={
+    '対顧客活動':[],
+    '対サプライヤー活動':[],
+    'その他社外活動':[],
+    '社内会議':['定例会議','個別事案対応','その他打合せ'],
+    'その他情報':['生産拠点対応','その他']
   };
+  var FORMOF={'対顧客活動':'f1','対サプライヤー活動':'f2','その他社外活動':'f3','社内会議':'f4','その他情報':'f5'};
+  var FORMNO={f1:'form①',f2:'form②',f3:'form③',f4:'form④',f5:'form⑤'};
+  var CATSUBJ={
+    '対顧客活動':['新規活動（引合前）','所要情報','売価改定','クレーム・解析依頼対応','開発情報','引合案件（一般）','引合案件（価格情報）','引合案件（数量情報）','引合案件（顧客スケジュール）','引合案件（信頼性データ）','引合案件（環境データ）','引合案件（仕様決定）','引合案件（サンプルデータ）','引合案件（要求特性）','引合案件（他社情報）','引合案件（特許情報）','ＶＡ提案','４Ｍ変更','その他'],
+    '対サプライヤー活動':['価格改定','数量情報','材料不良','その他'],
+    'その他社外活動':['開発関連','その他'],
+    '定例会議':['月曜連絡会','役員連絡会','経営会議','新製品会議','ＳＰＩ会議','品質会議','部内ＭＴＧ（営業）','部内ＭＴＧ（開発営業）','部内ＭＴＧ（品質保証）','部内ＭＴＧ（生産管理）','部内ＭＴＧ（要素技術）','部内ＭＴＧ（トランス）','部内ＭＴＧ（経営企画）','部内ＭＴＧ（総務）','その他'],
+    '個別事案対応':['引合案件検討','クレーム・解析依頼対応','材料不良対応','取引先対応方針検討','引合前検討','生産・出荷調整（協力会社Ａ）','生産・出荷調整（プロダクツ）','工程改善（協力会社Ａ）','工程改善（プロダクツ）','設備関連（協力会社Ａ）','設備関連（プロダクツ）','工法開発','その他'],
+    'その他打合せ':['開発関連','その他'],
+    '生産拠点対応':['協力会社Ａ','兵庫工場','三重工場','協力会社Ｂ','協力会社Ｃ','協力会社Ｄ'],
+    'その他':['その他']
+  };
+  // 件名候補のキー：サブカテゴリーがあればサブ、無ければカテゴリー自身
+  function subjKey(){ return state.subcat||state.maincat; }
+  function formOf(m){ return FORMOF[m]||'f1'; }
+
+  // 活動種別 7種（8/10受領資料）
+  var ACTTYPES=['訪問','来社','メール（受）','メール（発）','Ｗｅｂ','電話（受）','電話（発）'];
+  // 材料カテゴリー 7種（サプライヤーリスト.xlsx より・実データ）
+  var MATCATS=['コア材','成形品','銅線','絶縁テープ','副資材','梱包材','絶縁チューブ、端子、プレスなど'];
+  // 会議名ごとのデフォルト参加者プリセット（8/10「できれば理想」とのご要望）
+  var MEET_PRESET={
+    '月曜連絡会':['青木 誠（営業）','石川 里奈（営業）','遠藤 健一（技術）','片山 悟（生産管理）'],
+    '役員連絡会':['木村 隆（取締役）','小林 直人（経営企画）'],
+    '経営会議':['木村 隆（取締役）','小林 直人（経営企画）','大西 由紀（品質保証）'],
+    '品質会議':['大西 由紀（品質保証）','遠藤 健一（技術）','高原 由美（品質管理 課長）'],
+    '部内ＭＴＧ（営業）':['青木 誠（営業）','石川 里奈（営業）','上田 拓也（開発営業）']
+  };
+
   var subjSel=[];
   function renderSubjAdd(){
-    var opts=CATSUBJ[state.subcat]||[];
-    $('#subj-add').innerHTML='<option value="">＋ 件名を追加（'+(state.subcat||'')+'）…</option>'+
+    var opts=CATSUBJ[subjKey()]||[];
+    $('#subj-add').innerHTML='<option value="">＋ 件名を追加（'+subjKey()+'／'+opts.length+'種）…</option>'+
       opts.filter(function(s){return subjSel.indexOf(s)<0;}).map(function(s){return '<option>'+s+'</option>';}).join('');
   }
   function renderSubjChips(){
     $('#subj-chips').innerHTML=subjSel.map(function(s){return '<span class="pill blue" style="gap:6px">'+s+' <a data-rms="'+s+'" style="cursor:pointer;font-weight:800">×</a></span>';}).join('')||'<span class="help">件名を選択してください（複数可）</span>';
   }
-  // メインカテゴリ→サブカテゴリ→件名（Excel設計案・7/30合意）
-  var CATS={
-    '社内会議':['定例会議','個別案件・取引先対応','その他（会議）'],
-    '対顧客活動':['営業活動','取引条件交渉','情報収集','クレーム対応','表敬（その他）'],
-    '調達関連':['取引条件交渉','情報収集'],
-    '生産関連':['材料不良','その他'],
-    'その他情報共有':['その他']
-  };
-  var CATSUBJ={
-    '定例会議':['月曜連絡会','役員連絡会','経営会議','新製品会議','品質会議','部内MTG（営業）','部内MTG（開発営業）','部内MTG（品質保証）','その他'],
-    '個別案件・取引先対応':['引合案件検討','クレーム対応','材料不良対応','取引先対応検討','引合プレ検討','その他'],
-    'その他（会議）':['営業関連','開発営業関連','品質保証関連','生産管理関連','要素技術関連','経営関連','その他'],
-    '営業活動':['新規活動','引合案件','その他'],
-    '取引条件交渉':['売価改定（値上）','売価改定（値下）','VA提案','4M変更','生産終了','その他'],
-    '情報収集':['所要情報','開発情報','数量情報','その他'],
-    'クレーム対応':['クレーム発生','クレーム対応中','クロージング','その他'],
-    '表敬（その他）':['人事異動','その他'],
-    '材料不良':['材料不良発生','材料不良対応','その他'],
-    'その他':['その他']
-  };
-  function kindFor(m,s){ if(s==='クレーム対応'||m==='生産関連') return 'claim'; if(m==='社内会議') return 'meeting'; if(m==='その他情報共有') return 'other'; return 'sales'; }
   function renderMaincat(){ $('#maincat').innerHTML=Object.keys(CATS).map(function(c){return '<option'+(c===state.maincat?' selected':'')+'>'+c+'</option>';}).join(''); }
-  function renderSubcat(){ var subs=CATS[state.maincat]||[]; state.subcat=subs[0]; $('#subcat').innerHTML=subs.map(function(s){return '<option>'+s+'</option>';}).join(''); }
+  function renderSubcat(){
+    var subs=CATS[state.maincat]||[]; var sel=$('#subcat');
+    if(!subs.length){ state.subcat=''; sel.innerHTML='<option value="">（無し）</option>'; sel.disabled=true; }
+    else { state.subcat=subs[0]; sel.disabled=false; sel.innerHTML=subs.map(function(s){return '<option>'+s+'</option>';}).join(''); }
+  }
   function applyCat(){
-    var k=kindFor(state.maincat,state.subcat);
-    $$('.tf').forEach(function(f){f.hidden=!f.classList.contains('tf-'+k);});
-    $('#form-sub').textContent='カテゴリ: '+state.maincat+' ＞ '+state.subcat;
-    $('#l-date').textContent=(state.maincat==='社内会議')?'開催日':(k==='claim')?'発生日':'活動日';
-    $('#l-body').textContent=(k==='claim')?'不良内容':(state.maincat==='社内会議')?'議事内容':'活動内容';
-    $('#ta-body').placeholder=(k==='claim')?'不良の症状・発生状況・影響範囲を記入':(state.maincat==='社内会議')?'決定事項・宿題を記入':'面談で確認した事項・次アクションを記入';
+    var f=formOf(state.maincat);
+    $$('.tf').forEach(function(el){el.hidden=!el.classList.contains('tf-'+f);});
+    var meeting=(f==='f4'||f==='f5');
+    $('#form-sub').textContent=FORMNO[f]+'：'+state.maincat+(state.subcat?' ＞ '+state.subcat:'（サブカテゴリー無し）');
+    $('#l-date').textContent=meeting?'開催日':'活動日';
+    $('#l-body').textContent=meeting?'会議内容':'活動内容';
+    $('#ta-body').placeholder=meeting?'決定事項・宿題を記入':'活動で確認した事項・次アクションを記入';
+    $('#l-people').textContent=meeting?'参加者':'当方';
+    $('#subcat-wrap').style.opacity=CATS[state.maincat].length?'1':'.55';
     subjSel=[];renderSubjChips();renderSubjAdd();
+    renderPeople();renderSideChips();
   }
 
   $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button');if(b)setView(b.dataset.view);});
@@ -1369,7 +1549,10 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     $('#subcat').addEventListener('change',function(){state.subcat=this.value;applyCat();});
   }
   if($('#subj-add')){
-    $('#subj-add').addEventListener('change',function(){var v=this.value;if(v&&subjSel.indexOf(v)<0){subjSel.push(v);renderSubjChips();renderSubjAdd();}this.value='';});
+    $('#subj-add').addEventListener('change',function(){var v=this.value;
+      if(v&&subjSel.indexOf(v)<0){subjSel.push(v);renderSubjChips();renderSubjAdd();
+        if(applyMeetPreset(v))toast('会議名「'+v+'」のデフォルト参加者を自動セットしました（8/10ご要望）');}
+      this.value='';});
     $('#subj-chips').addEventListener('click',function(e){var r=e.target.closest('[data-rms]');if(r){subjSel=subjSel.filter(function(s){return s!==r.dataset.rms;});renderSubjChips();renderSubjAdd();}});
   }
   $('#rec-tabs').addEventListener('click',function(e){var b=e.target.closest('button[data-rtab]');if(b)setRtab(b.dataset.rtab);});
@@ -1386,16 +1569,97 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     var p=e.target.closest('[data-pin]');if(p){togglePin(parseInt(p.dataset.pin,10));}
   });
   $('#bell').addEventListener('click',function(){setView('inbox');});
+  // 必須チェックは 8/10受領資料の (※) 定義に準拠（フォームごとに必須項目が異なる）
   $('#submit-activity').addEventListener('click',function(){
-    var miss=[];
-    if(!subjSel.length)miss.push('件名');
-    if(!accts.length)miss.push('取引先');
-    if(miss.length){toast('⚠ 必須が未入力です（'+miss.join('・')+'）— 入力完了できません');}
-    else{toast('確認送信しました — 配信先の未読一覧に追加されます');}
+    var f=formOf(state.maincat),meeting=(f==='f4'||f==='f5'),miss=[];
+    if(!subjSel.length)miss.push('件名（会議名）');
+    if(f==='f1'&&!accts.length)miss.push('取引先');
+    if(f==='f2'&&!$('#supp-sel').value)miss.push('サプライヤー');
+    if(f==='f3'&&!$('#other-sel').value)miss.push('活動先');
+    if(!meeting&&!sideSel.length)miss.push('先方');
+    if(!pplSel.length)miss.push(meeting?'参加者':'当方');
+    if(!$('#ta-body').value.trim())miss.push(meeting?'会議内容':'活動内容');
+    if(miss.length){toast('⚠ 必須が未入力です（'+miss.join('・')+'）— '+FORMNO[f]+'の必須項目です');}
+    else{toast(FORMNO[f]+'で確認送信しました — 配信先の未読一覧に追加されます');}
   });
   $('#card-scan').addEventListener('click',function(){toast('名刺を撮影 → OCRで取引先責任者に登録（8月頭に先行提供）');});
+  // ══════════════════════════════════════════════════════════════
+  // フェーズ体系（8/10受領「活動記録入力関連.xlsx」シート「フェーズ（引合・品質クレーム）」）
+  //   引合    : 大フェーズ 7 × フェーズ内手続き 21
+  //   クレーム : 大フェーズ 4 × フェーズ内手続き 14
+  //   8/6定例の合意どおり「大フェーズ＋チェックリスト」の2段構造で実装。
+  //   ・大フェーズ間は原則後戻りしない位置で区切り
+  //   ・フェーズ内手続きはチェックの取り消しが可能（トラブル時に数コマ戻せる）
+  //   ・製品により手続きをスキップ可能
+  // ══════════════════════════════════════════════════════════════
+  var INQ_PHASES=[
+    {p:'引合入手',    items:['引合審議前検討']},
+    {p:'引合検討',    items:['引合審議作成','新製品企画会議（ＤＰ）','原価試算','工作会議','ＤＲ０']},
+    {p:'対顧客交渉',  items:['初回サンプル納入','ＤＲ１']},
+    {p:'受注決定',    items:['ＤＲ２']},
+    {p:'仕様詳細決定',items:['設備・金型手配','ＡＱ０','材料手配','納入仕様書提出','納入仕様書回収']},
+    {p:'量産準備',    items:['量産試作（設備認定）','工程認定','ＡＱ１','量産引継','ＡＱ２']},
+    {p:'結果',        items:['初品出荷（完了）','失注']}
+  ];
+  var CLM_PHASES=[
+    {p:'受付',            items:['解析依頼受付','クレーム受付']},
+    {p:'クレーム詳細調査',items:['社内（製造現場含む）展開','現物入手','現物解析（多発性有無の検証の為の検品）','発生・流出原因特定']},
+    {p:'対顧客回答検討',  items:['再発防止策検討','客先報告書作成','報告書内容検討','再発防止策徹底','客先報告書提出','対策前品の処置（検品等）']},
+    {p:'クローズ',        items:['クローズ（クレーム）','クローズ（解析依頼）']}
+  ];
+  function phaseNames(def){return def.map(function(x){return x.p;});}
+  function itemCount(def){return def.reduce(function(n,x){return n+x.items.length;},0);}
+  // チェック状態（デモ：引合は「仕様詳細決定」の途中まで、クレームは「詳細調査」の途中まで進行）
+  var chk={inq:{'引合審議前検討':1,'引合審議作成':1,'新製品企画会議（ＤＰ）':1,'原価試算':1,'工作会議':1,'ＤＲ０':1,'初回サンプル納入':1,'ＤＲ１':1,'ＤＲ２':1,'設備・金型手配':1,'ＡＱ０':1,'材料手配':0,'納入仕様書提出':0},
+             clm:{'クレーム受付':1,'社内（製造現場含む）展開':1,'現物入手':1,'現物解析（多発性有無の検証の為の検品）':0}};
+  // 現在の大フェーズ＝「チェックが1つでも付いている最も先のフェーズ」。
+  // そのフェーズが全て完了していれば次へ進む。
+  // ※ 手続きのスキップ（製品により通らない工程）や、受付の2入口（解析依頼／クレーム）のように
+  //    片方しか通らないケースでも、進捗が止まって見えないようにするための判定。
+  function curPhase(def,map){
+    var last=0;
+    for(var i=0;i<def.length;i++){ if(def[i].items.some(function(it){return map[it];})) last=i; }
+    if(def[last].items.every(function(it){return map[it];}) && last<def.length-1) last++;
+    return last;
+  }
+  function renderPath(el,def,map){
+    if(!el)return; var ci=curPhase(def,map);
+    el.innerHTML=def.map(function(x,i){
+      var done=x.items.every(function(it){return map[it];});
+      var n=x.items.filter(function(it){return map[it];}).length;
+      return '<div class="st '+(done?'done':(i===ci?'cur':''))+'" title="'+x.items.join(' / ')+'">'+x.p+' <span style="opacity:.7;font-size:10px">'+n+'/'+x.items.length+'</span></div>';
+    }).join('');
+  }
+  function renderChecklist(el,def,map,key){
+    if(!el)return; var ci=curPhase(def,map);
+    el.innerHTML=def.map(function(x,i){
+      var done=x.items.every(function(it){return map[it];});
+      return '<div class="ckgrp'+(i===ci?' cur':'')+'">'+
+        '<div class="ckhd"><span class="pill '+(done?'green':(i===ci?'blue':'gray'))+'">'+(i+1)+'</span><b>'+x.p+'</b>'+
+          '<span class="help" style="margin-left:auto">'+x.items.filter(function(it){return map[it];}).length+' / '+x.items.length+' 完了</span></div>'+
+        x.items.map(function(it){
+          return '<label class="ckrow"><input type="checkbox" data-ck="'+key+'" value="'+it+'"'+(map[it]?' checked':'')+'><span>'+it+'</span></label>';
+        }).join('')+'</div>';
+    }).join('');
+  }
+  function refreshPhases(){
+    renderPath($('#inq-path'),INQ_PHASES,chk.inq);
+    renderChecklist($('#inq-check'),INQ_PHASES,chk.inq,'inq');
+    renderPath($('#clm-path'),CLM_PHASES,chk.clm);
+    renderChecklist($('#clm-check'),CLM_PHASES,chk.clm,'clm');
+    var ip=INQ_PHASES[curPhase(INQ_PHASES,chk.inq)].p, cp=CLM_PHASES[curPhase(CLM_PHASES,chk.clm)].p;
+    if($('#inq-cur'))$('#inq-cur').textContent=ip;
+    if($('#clm-cur'))$('#clm-cur').textContent=cp;
+  }
+  document.addEventListener('change',function(e){
+    var c=e.target.closest('[data-ck]');if(!c)return;
+    var key=c.dataset.ck; chk[key][c.value]=c.checked?1:0;
+    refreshPhases();
+    toast(c.checked?('「'+c.value+'」を完了にしました'):('「'+c.value+'」のチェックを外しました（トラブル時に戻せます）'));
+  });
+
   // 関連引合：新規インライン作成＋フェーズ自動表示（7/27FB #3・#4）
-  var DEALPHASE={d1:'見積提示',d2:'ニーズ確認'};
+  var DEALPHASE={d1:'仕様詳細決定',d2:'引合検討'};
   if($('#deal-sel')){
     $('#deal-sel').addEventListener('change',function(){
       var v=this.value,pw=$('#deal-phase-wrap');
@@ -1405,9 +1669,9 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       else{pw.style.display='none';}
     });
     $('#deal-create').addEventListener('click',function(){
-      var sel=$('#deal-sel'),no=nextNo('INQ'),o=document.createElement('option');o.value='dn';o.textContent='（新規）'+no+' CN-410 試作 引合';
+      var sel=$('#deal-sel'),no=nextNo('INQ'),o=document.createElement('option');o.value='dn';o.textContent='（新規）'+no+' CT-410 試作 引合';
       sel.insertBefore(o,sel.firstChild);sel.value='dn';$('#deal-new').hidden=true;
-      var pw=$('#deal-phase-wrap');pw.style.display='';pw.innerHTML='現在のフェーズ: <b>引合受付</b> <span class="pill gray" style="padding:1px 6px">新規・自動設定</span> ／ 引合番号: <b>'+no+'</b> <span class="pill gray" style="padding:1px 6px">自動採番</span>';
+      var pw=$('#deal-phase-wrap');pw.style.display='';pw.innerHTML='現在のフェーズ: <b>引合入手</b> <span class="pill gray" style="padding:1px 6px">新規・自動設定</span> ／ 引合番号: <b>'+no+'</b> <span class="pill gray" style="padding:1px 6px">自動採番</span>';
       toast('この画面で新規引合を作成し、引合番号 '+no+' を自動採番して紐付けました（別画面への移動なし）');
     });
   }
@@ -1435,29 +1699,40 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   }
   // 活動記録の横断検索：品番×取引先／カテゴリ（第2階層）／件名 のいずれでも検索可（7/28FB）
   var XS_HELP={multi:'検索キーを複数組み合わせ、AND / OR を指定して活動記録・クレームを絞り込みます。連続する OR は1つのまとまりとして扱います（例：1 AND (2 OR 3)）。',part:'品番と取引先の組み合わせで、活動記録・クレームを横断検索します。',cat:'品種（大カテゴリ）→品番（第2階層）で絞り込み、活動記録・クレームを横断検索します。',subj:'分類（カテゴリ）と件名で、活動記録・クレームを横断検索します。',text:'活動記録の本文（内容）に含まれるキーワードで全文検索します（例：本文に「断線不良」を含む記録を抽出・7/30FB）。'};
-  function renderXCat2(){var c=$('#x-cat1');var p=$('#x-cat2');if(!c||!p)return;p.innerHTML=(PARTS[c.value]||[]).map(function(x){return '<option>'+x+'</option>';}).join('');}
-  function renderXSubj(){var c=$('#x-subjcat');var s=$('#x-subj');if(!c||!s)return;s.innerHTML=(SUBJECTS[c.value]||[]).map(function(x){return '<option>'+x+'</option>';}).join('');}
+  function renderXCat2(){var c=$('#x-cat1');var p=$('#x-cat2');if(!c||!p)return;
+    if(!c.options.length)c.innerHTML=Object.keys(PARTS).map(function(x){return '<option>'+x+'</option>';}).join('');
+    p.innerHTML=(PARTS[c.value]||[]).map(function(x){return '<option>'+x+'</option>';}).join('')||'<option value="">（品番なし）</option>';}
+  // 件名検索：8/10受領の カテゴリー／サブカテゴリー → 件名（全62種）で絞り込む
+  function renderXSubj(){var c=$('#x-subjcat');var s=$('#x-subj');if(!c||!s)return;
+    if(!c.options.length)c.innerHTML=Object.keys(CATSUBJ).map(function(k){return '<option>'+k+'（'+CATSUBJ[k].length+'）</option>';}).join('');
+    var key=c.value.replace(/（\d+）$/,'');
+    s.innerHTML=(CATSUBJ[key]||[]).map(function(x){return '<option>'+x+'</option>';}).join('');}
 
   // ── 複数条件（AND/OR）検索 ── 8/4 吉田様FB
   // 検索キー：メインカテゴリー／サブカテゴリー／件名／取引先／品種／品番／ステータス
   // 連続する OR を1グループとしてまとめ、グループ同士を AND で結合する（例：1 AND (2 OR 3)）
   var XKEYS=[{k:'main',l:'メインカテゴリー'},{k:'sub',l:'サブカテゴリー'},{k:'subj',l:'件名'},{k:'acct',l:'取引先'},{k:'cat',l:'品種'},{k:'part',l:'品番'},{k:'st',l:'ステータス'}];
+  // v0.12: 8/10受領のカテゴリー5／件名62／品種10種に差し替え
   var XRECS=[
-    {d:'2026-07-17',kind:'sales',main:'対顧客活動',sub:'営業活動',subj:'引合案件',acct:'東海電子工業',cat:'コネクタ',part:'CN-320',st:'見積提示',ttl:'東海電子工業 訪問 — CN-320 引合（年間12万個の内示）'},
-    {d:'2026-07-22',kind:'sales',main:'対顧客活動',sub:'取引条件交渉',subj:'VA提案',acct:'東海電子工業',cat:'コネクタ',part:'CN-320H',st:'見積提示',ttl:'東海電子工業 — CN-320H ハイト違い派生品のVA提案'},
-    {d:'2026-07-05',kind:'sales',main:'調達関連',sub:'情報収集',subj:'所要情報',acct:'東海電子工業',cat:'端子',part:'TM-08',st:'ニーズ確認',ttl:'東海電子工業 — 圧着端子 TM-08 の所要見込みヒアリング'},
-    {d:'2026-04-20',kind:'claim',main:'対顧客活動',sub:'クレーム対応',subj:'クレーム発生',acct:'東海電子工業',cat:'コネクタ',part:'CN-320',st:'恒久対策',ttl:'東海電子工業 品質クレーム — コネクタ寸法 公差外れ（L2312）'},
-    {d:'2026-07-15',kind:'claim',main:'対顧客活動',sub:'クレーム対応',subj:'クレーム発生',acct:'関西精密コネクタ',cat:'端子',part:'CN-220',st:'原因調査',ttl:'関西精密コネクタ 品質クレーム — 端子めっき剥離（L2405）'},
-    {d:'2026-07-20',kind:'claim',main:'対顧客活動',sub:'クレーム対応',subj:'クレーム対応中',acct:'関西精密コネクタ',cat:'端子',part:'CN-220',st:'原因調査',ttl:'関西精密コネクタ — めっき剥離 原因調査の一次報告'},
-    {d:'2026-07-08',kind:'sales',main:'対顧客活動',sub:'営業活動',subj:'新規活動',acct:'関西精密コネクタ',cat:'治具・付属',part:'ACC-30',st:'提案',ttl:'関西精密コネクタ — 検査治具 ACC-30 の新規提案'},
-    {d:'2026-07-16',kind:'sales',main:'対顧客活動',sub:'営業活動',subj:'その他',acct:'北陸プレシジョン',cat:'治具・付属',part:'ACC-12',st:'提案',ttl:'北陸プレシジョン 見積フォロー — 34日間 接触なし'},
-    {d:'2026-07-02',kind:'sales',main:'対顧客活動',sub:'営業活動',subj:'引合案件',acct:'日本マイクロデバイス',cat:'端子',part:'CN-220',st:'受注',ttl:'日本マイクロデバイス Web商談 — 既存品リピート'},
-    {d:'2026-06-18',kind:'claim',main:'対顧客活動',sub:'クレーム対応',subj:'クロージング',acct:'日本マイクロデバイス',cat:'治具・付属',part:'ACC-12',st:'クローズ',ttl:'日本マイクロデバイス — 梱包ラベル誤記の是正完了'},
-    {d:'2026-07-15',kind:'meeting',main:'社内会議',sub:'定例会議',subj:'部内MTG（営業）',acct:'（社内）',cat:'—',part:'—',st:'—',ttl:'営業部 週次ミーティング 議事録'}
+    {d:'2026-08-17',kind:'f1',main:'対顧客活動',sub:'—',subj:'引合案件（一般）',acct:'東海電子工業',cat:'カレントトランス',part:'CT-320',st:'仕様詳細決定',ttl:'東海電子工業 訪問 — CT-320 引合（年間12万個の内示）'},
+    {d:'2026-08-12',kind:'f1',main:'対顧客活動',sub:'—',subj:'ＶＡ提案',acct:'東海電子工業',cat:'カレントトランス',part:'CT-320H',st:'仕様詳細決定',ttl:'東海電子工業 — CT-320H 高精度品のＶＡ提案'},
+    {d:'2026-08-05',kind:'f1',main:'対顧客活動',sub:'—',subj:'所要情報',acct:'東海電子工業',cat:'チョークコイル（自動巻き）',part:'CH-208',st:'引合検討',ttl:'東海電子工業 — CH-208 の所要見込みヒアリング'},
+    {d:'2026-08-03',kind:'f1',main:'対顧客活動',sub:'—',subj:'売価改定',acct:'関西精密コネクタ',cat:'センサーコア',part:'SC-210',st:'引合検討',ttl:'関西精密コネクタ — SC-210 売価改定の申し入れ'},
+    {d:'2026-04-20',kind:'f1',main:'対顧客活動',sub:'—',subj:'クレーム・解析依頼対応',acct:'東海電子工業',cat:'カレントトランス',part:'CT-320',st:'対顧客回答検討',ttl:'東海電子工業 品質クレーム — コア寸法 公差外れ（L2312）'},
+    {d:'2026-07-15',kind:'f1',main:'対顧客活動',sub:'—',subj:'クレーム・解析依頼対応',acct:'関西精密コネクタ',cat:'センサーコア',part:'SC-210',st:'クレーム詳細調査',ttl:'関西精密コネクタ 品質クレーム — 端子めっき剥離（L2405）'},
+    {d:'2026-07-20',kind:'f4',main:'社内会議',sub:'個別事案対応',subj:'クレーム・解析依頼対応',acct:'関西精密コネクタ',cat:'センサーコア',part:'SC-210',st:'クレーム詳細調査',ttl:'クレーム解析会議 — めっき剥離の原因調査 一次報告'},
+    {d:'2026-07-28',kind:'f5',main:'その他情報',sub:'生産拠点対応',subj:'協力会社Ａ',acct:'関西精密コネクタ',cat:'センサーコア',part:'SC-210',st:'クレーム詳細調査',ttl:'協力会社Ａ — めっき剥離の工程対策 展開依頼'},
+    {d:'2026-08-08',kind:'f1',main:'対顧客活動',sub:'—',subj:'新規活動（引合前）',acct:'北陸プレシジョン',cat:'チョークコイル（手巻き）',part:'CH-071',st:'対顧客交渉',ttl:'北陸プレシジョン — 手巻きチョーク CH-071 の新規提案'},
+    {d:'2026-08-02',kind:'f1',main:'対顧客活動',sub:'—',subj:'引合案件（数量情報）',acct:'日本マイクロデバイス',cat:'トランス',part:'TR-140',st:'量産準備',ttl:'日本マイクロデバイス Ｗｅｂ — 既存品リピートの数量確認'},
+    {d:'2026-08-06',kind:'f2',main:'対サプライヤー活動',sub:'—',subj:'価格改定',acct:'第一磁性材料',cat:'—',part:'—',st:'—',ttl:'第一磁性材料 — コア材の価格改定交渉'},
+    {d:'2026-08-07',kind:'f2',main:'対サプライヤー活動',sub:'—',subj:'材料不良',acct:'中央電線商会',cat:'—',part:'—',st:'—',ttl:'中央電線商会 — 銅線ロットの外観不良の連絡'},
+    {d:'2026-08-10',kind:'f3',main:'その他社外活動',sub:'—',subj:'開発関連',acct:'◯◯大学 工学部',cat:'—',part:'—',st:'—',ttl:'◯◯大学 — 磁性材料の共同研究 打合せ'},
+    {d:'2026-08-17',kind:'f4',main:'社内会議',sub:'定例会議',subj:'部内ＭＴＧ（営業）',acct:'（社内）',cat:'—',part:'—',st:'—',ttl:'営業部 週次ミーティング 議事録'},
+    {d:'2026-08-11',kind:'f4',main:'社内会議',sub:'個別事案対応',subj:'引合案件検討',acct:'東海電子工業',cat:'カレントトランス',part:'CT-320',st:'仕様詳細決定',ttl:'CT-320 引合 — 原価試算レビュー'}
   ];
   function xvals(k){var s=[];XRECS.forEach(function(r){if(r[k]&&r[k]!=='—'&&s.indexOf(r[k])<0)s.push(r[k]);});return s;}
   // 初期値は吉田様にいただいた例（取引先：A社 and 品種：X or Y）と同じ形にしておく
-  var xmRows=[{k:'acct',v:'東海電子工業'},{k:'cat',v:'コネクタ',j:'AND'},{k:'cat',v:'端子',j:'OR'}];
+  var xmRows=[{k:'acct',v:'東海電子工業'},{k:'cat',v:'カレントトランス',j:'AND'},{k:'cat',v:'チョークコイル（自動巻き）',j:'OR'}];
   function xmGroups(){var g=[],cur=[];xmRows.forEach(function(r,i){if(i>0&&r.j==='AND'){g.push(cur);cur=[];}cur.push(r);});g.push(cur);return g;}
   function xmLogic(){var n=0;return xmGroups().map(function(g){return g.length>1?'('+g.map(function(){return ++n;}).join(' OR ')+')':String(++n);}).join(' AND ');}
   function xmMatch(){var gs=xmGroups();return XRECS.filter(function(x){return gs.every(function(g){return g.some(function(r){return String(x[r.k]||'')===r.v;});});});}
@@ -1514,7 +1789,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         '<div class="help" style="margin-top:4px">'+xmRows.map(function(r,i){return (i?' <b>'+r.j+'</b> ':'')+'('+(i+1)+') '+keyLabelOf(r.k)+' ＝ '+r.v;}).join('')+'</div></div>'+
         (hits.length
           ?'<table class="tbl"><thead><tr><th>日付</th><th>種別</th><th>取引先</th><th>品番</th><th>件名</th></tr></thead><tbody>'+
-            hits.map(function(x){return '<tr><td>'+x.d.slice(5).replace('-','/')+'</td><td><span class="cat '+x.kind+'">'+catLabel(x.kind)+'</span></td>'+
+            hits.map(function(x){return '<tr><td>'+x.d.slice(5).replace('-','/')+'</td><td><span class="cat '+catCls(x.kind)+'">'+catLabel(x.kind)+'</span></td>'+
               '<td class="muted">'+x.acct+'</td><td><span class="code">'+x.part+'</span></td><td>'+x.ttl+'</td></tr>';}).join('')+'</tbody></table>'
           :'<div class="help">この条件に一致する活動記録はありませんでした。</div>');
       toast('複数条件（'+logic+'）で活動記録・クレームを横断検索しました');
@@ -1525,7 +1800,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       toastMsg='カテゴリ（第2階層）で活動記録・クレームを横断検索';
     }else if(mode==='subj'){
       var subjOpt=$('#x-subj');
-      keyLabel='件名 <b>'+(subjOpt&&subjOpt.value?subjOpt.value:'')+'</b>（'+TSUBS[$('#x-subjcat').value]+'）';
+      keyLabel='件名 <b>'+(subjOpt&&subjOpt.value?subjOpt.value:'')+'</b>（'+$('#x-subjcat').value+'）';
       toastMsg='件名で活動記録・クレームを横断検索';
     }else if(mode==='text'){
       var kw=$('#x-text')?$('#x-text').value:'';
@@ -1544,13 +1819,45 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     toast(toastMsg);
   });
   $('#dash-role').addEventListener('click',function(e){var b=e.target.closest('button');if(b){state.dashRole=b.dataset.role;$$('#dash-role button').forEach(function(x){x.classList.toggle('on',x===b);});renderDash();}});
-  // 取引先→品種→品番の階層絞り込み（7/22FBの品種→品番から、8/4FBで取引先起点の3階層に変更）
+  // 取引先→品種→品番の階層絞り込み（8/4FBで取引先起点の3階層に）
+  // v0.12: 品種を8/10受領資料の実データ10種へ差し替え（品番・取引先名はダミー）
+  var PRODTYPES=['センサーコア','モールドコア','単コア','チョークコイル（手巻き）','チョークコイル（自動巻き）','カレントトランス','リアクトル','トランス','カットコア','その他'];
   var PART_MASTER={
-    '東海電子工業':{'コネクタ':['CN-320 ／ 基板対基板コネクタ 0.4mm','CN-320H ／ ハイト違い派生品'],'端子':['TM-08 ／ 圧着端子']},
-    'ネクスティエレクトロニクス（商社）':{'端子':['CN-220 ／ 端子ユニット']},
-    '関西精密コネクタ':{'端子':['CN-220 ／ 端子ユニット'],'治具・付属':['ACC-30 ／ 検査治具']},
-    '日本マイクロデバイス':{'コネクタ':['CN-110 ／ 電源コネクタ'],'端子':['CN-220 ／ 端子ユニット'],'治具・付属':['ACC-12 ／ 実装治具']},
-    '北陸プレシジョン':{'治具・付属':['ACC-12 ／ 実装治具']}
+    '東海電子工業':{'カレントトランス':['CT-320 ／ 貫通型カレントトランス','CT-320H ／ 高精度品'],'チョークコイル（自動巻き）':['CH-208 ／ コモンモードチョーク']},
+    'ネクスティエレクトロニクス（商社）':{'トランス':['TR-140 ／ 絶縁トランス']},
+    '関西精密コネクタ':{'センサーコア':['SC-210 ／ 電流センサーコア'],'カットコア':['CC-050 ／ カットコア 50']},
+    '日本マイクロデバイス':{'リアクトル':['RA-410 ／ 力率改善リアクトル'],'トランス':['TR-140 ／ 絶縁トランス'],'モールドコア':['MC-118 ／ モールドコア']},
+    '北陸プレシジョン':{'チョークコイル（手巻き）':['CH-071 ／ 手巻きチョーク'],'単コア':['UC-030 ／ 単コア']}
+  };
+  // サプライヤー→材料カテゴリー（社名はダミー。件数構造は受領リスト＝仕入先×メーカーの2階層を再現）
+  var SUPPLIERS={
+    '第一磁性材料':{mat:['コア材'],maker:['Ａ製鋼']},
+    '関西メタルワークス':{mat:['コア材','成形品'],maker:['Ｂ特殊鋼','Ｃ化成']},
+    '中央電線商会':{mat:['銅線'],maker:['Ｄ電線']},
+    '東西テープ工業':{mat:['絶縁テープ','副資材'],maker:['Ｅ化学','Ｆ産業']},
+    '北都パッケージ':{mat:['梱包材'],maker:['Ｇ紙器']},
+    '南海資材':{mat:['絶縁チューブ、端子、プレスなど'],maker:['Ｈ精工','Ｉ工業']}
+  };
+  // 社員名簿（ダミー氏名。実データはSHT様提供の76名＝ＳＨＴ45／プロダクツ9／協力会社22）
+  var EMPLOYEES={
+    'ＳＨＴ':['青木 誠（営業）','石川 里奈（営業）','上田 拓也（開発営業）','遠藤 健一（技術）','大西 由紀（品質保証）','片山 悟（生産管理）','木村 隆（取締役）','小林 直人（経営企画）'],
+    'ＳＨＴプロダクツ':['佐野 邦彦（工場長）','杉本 昭子（庶務）','高原 由美（品質管理 課長）','谷口 優也（製造 課長）'],
+    '協力会社':['Ms. Alma（協力会社Ａ 社長）','Mr. Ben（協力会社Ａ）','中村 晶（協力会社Ｂ 社長）','西村 直（協力会社Ｄ 工場長）']
+  };
+  var EMP_ALL=Object.keys(EMPLOYEES).reduce(function(a,k){return a.concat(EMPLOYEES[k]);},[]);
+  // 外部名簿（先方担当者。取引先／サプライヤーごとに保持）
+  var CONTACTS={
+    '東海電子工業':['山田 太郎（購買二部 部長）','佐々木 健（第一設計課）'],
+    'ネクスティエレクトロニクス（商社）':['中村 明（業務課）'],
+    '関西精密コネクタ':['井上 恵（品質保証部 課長）','松本 亮（調達部）'],
+    '日本マイクロデバイス':['橋本 誠（購買部）'],
+    '北陸プレシジョン':['森 由香（技術部）'],
+    '第一磁性材料':['安田 実（営業部）'],
+    '関西メタルワークス':['原田 拓（営業一課）'],
+    '中央電線商会':['久保 圭（営業）'],
+    '東西テープ工業':['宮本 亜紀（営業）'],
+    '北都パッケージ':['藤井 学（営業）'],
+    '南海資材':['渡辺 隆（営業）']
   };
   // 横断検索（取引先を跨いで検索する）用に、全取引先の 品種→品番 をマージした平坦マスタ
   var PARTS=(function(){var m={};Object.keys(PART_MASTER).forEach(function(a){
@@ -1578,9 +1885,59 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     renderCats();
   }
   if($('#acct-add')){
-    $('#acct-add').addEventListener('change',function(){var v=this.value;if(v&&accts.indexOf(v)<0){accts.push(v);renderAcctChips();}this.value='';});
-    $('#acct-chips').addEventListener('click',function(e){var r=e.target.closest('[data-rm]');if(r){accts=accts.filter(function(a){return a!==r.dataset.rm;});renderAcctChips();}});
+    $('#acct-add').addEventListener('change',function(){var v=this.value;if(v&&accts.indexOf(v)<0){accts.push(v);renderAcctChips();renderSideChips();}this.value='';});
+    $('#acct-chips').addEventListener('click',function(e){var r=e.target.closest('[data-rm]');if(r){accts=accts.filter(function(a){return a!==r.dataset.rm;});renderAcctChips();renderSideChips();}});
     renderAcctChips();
+  }
+
+  // ── 8/10受領資料の新規要件 ───────────────────────────────
+  // ①活動種別7種 ②材料カテゴリー7種 ③サプライヤー ④先方（外部名簿）⑤当方・参加者（社員名簿）
+  var sideSel=[],pplSel=['青木 誠（営業）'];
+  function fillSel(id,arr,ph){var el=$(id);if(!el)return;el.innerHTML=(ph?'<option value="">'+ph+'</option>':'')+arr.map(function(x){return '<option>'+x+'</option>';}).join('');}
+  // 先方の候補＝いま選んでいる相手先（取引先 or サプライヤー）に紐づく外部名簿
+  function sideSource(){
+    var f=formOf(state.maincat);
+    if(f==='f2'){var s=$('#supp-sel');return s&&s.value?s.value:Object.keys(SUPPLIERS)[0];}
+    if(f==='f3'){var o=$('#other-sel');return o?o.value:'';}
+    return accts[0]||'';
+  }
+  function renderSideChips(){
+    var box=$('#side-chips');if(!box)return;
+    var src=sideSource(),pool=CONTACTS[src]||[];
+    sideSel=sideSel.filter(function(p){return pool.indexOf(p)>=0;});
+    box.innerHTML=sideSel.map(function(p){return '<span class="pill blue" style="gap:6px">'+p+' <a data-rmside="'+p+'" style="cursor:pointer;font-weight:800">×</a></span>';}).join('')
+      ||'<span class="help">'+(src?('「'+src+'」の担当者を選択してください（複数可）'):'先に相手先を選択してください')+'</span>';
+    $('#side-add').innerHTML='<option value="">＋ 先方を追加'+(src?('（'+src+'）'):'')+'…</option>'+
+      pool.filter(function(p){return sideSel.indexOf(p)<0;}).map(function(p){return '<option>'+p+'</option>';}).join('');
+  }
+  function renderPeople(){
+    var box=$('#ppl-chips');if(!box)return;
+    box.innerHTML=pplSel.map(function(p){return '<span class="pill blue" style="gap:6px">'+p.replace(/（.*）/,'')+' <a data-rmppl="'+p+'" style="cursor:pointer;font-weight:800">×</a></span>';}).join('')
+      ||'<span class="help">社員を選択してください（複数可）</span>';
+    $('#ppl-add').innerHTML='<option value="">＋ '+(formOf(state.maincat)==='f4'||formOf(state.maincat)==='f5'?'参加者':'当方')+'を追加…</option>'+
+      Object.keys(EMPLOYEES).map(function(g){
+        return '<optgroup label="'+g+'">'+EMPLOYEES[g].filter(function(p){return pplSel.indexOf(p)<0;}).map(function(p){return '<option>'+p+'</option>';}).join('')+'</optgroup>';
+      }).join('');
+    var f=formOf(state.maincat);
+    $('#ppl-help').innerHTML=(f==='f4'||f==='f5')
+      ? '会議名を選ぶと<b>デフォルト参加者が自動セット</b>されます（8/10「できれば理想」とのご要望を実装）。氏名のみ表示し、部署・役職は裏側で保持します。'
+      : '社員名簿（ＳＨＴ／ＳＨＴプロダクツ／協力会社）から選択します。氏名のみ表示し、部署・役職は裏側で保持する構成です。';
+  }
+  // 会議名のデフォルト参加者プリセット
+  function applyMeetPreset(subj){
+    var p=MEET_PRESET[subj];if(!p)return false;
+    p.forEach(function(x){if(pplSel.indexOf(x)<0)pplSel.push(x);});
+    renderPeople();return true;
+  }
+  if($('#ppl-add')){
+    fillSel('#acttype',ACTTYPES); fillSel('#mat-sel',MATCATS); fillSel('#supp-sel',Object.keys(SUPPLIERS));
+    $('#ppl-add').addEventListener('change',function(){var v=this.value;if(v&&pplSel.indexOf(v)<0){pplSel.push(v);renderPeople();}this.value='';});
+    $('#ppl-chips').addEventListener('click',function(e){var r=e.target.closest('[data-rmppl]');if(r){pplSel=pplSel.filter(function(p){return p!==r.dataset.rmppl;});renderPeople();}});
+    $('#side-add').addEventListener('change',function(){var v=this.value;if(v&&sideSel.indexOf(v)<0){sideSel.push(v);renderSideChips();}this.value='';});
+    $('#side-chips').addEventListener('click',function(e){var r=e.target.closest('[data-rmside]');if(r){sideSel=sideSel.filter(function(p){return p!==r.dataset.rmside;});renderSideChips();}});
+    $('#supp-sel').addEventListener('change',function(){renderSideChips();toast('サプライヤー「'+this.value+'」の担当者に候補を絞り込みました');});
+    $('#other-sel').addEventListener('change',renderSideChips);
+    renderPeople();renderSideChips();
   }
   // 入力UI 3案
   if($('#ui3-seg')){
@@ -1591,13 +1948,41 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     $('#ui3-c-btn').addEventListener('click',function(){$('#ui3-c-form').hidden=false;toast('予定から自動起票 — 内容だけ入力すれば完了');});
     $('#ui3-b').addEventListener('click',function(e){var b=e.target.closest('[data-ui3b]');if(b)toast('選択: '+b.textContent.trim().split(' ')[0]+' — 残り2問');});
   }
+  // ── マスタ画面（8/10「必要なデータベース」シート準拠）──────────────
+  var MASTER_DB=[
+    ['社員名簿','ＳＨＴ／ＳＨＴプロダクツ／協力会社','部署＞役職＞氏名','名刺取込','ok','受領済（計76名）'],
+    ['外部名簿','取引先／サプライヤー／その他','部署＞役職＞氏名','—','ng','未受領'],
+    ['（製品）品番','品種10種','品番（取引先・品種と紐付き）','ＳＨＴ様で作成','warn','「送付済み」とご記載。受領を確認できておりません'],
+    ['取引先リスト','—','社名','名刺取込により作成','ng','未受領'],
+    ['サプライヤーリスト','—','社名','名刺取込により作成','ok','受領済（明細110行）'],
+    ['その他外部先リスト','—','社名・団体名','名刺取込により作成','ng','未受領'],
+    ['部材','—','材料品番','ＳＨＴ様で作成','ng','未受領'],
+    ['引合番号簿','管理用','採番','—','warn','採番ルールを確認中（引合管理番号表）'],
+    ['品質クレーム番号簿','管理用','採番','—','ok','QCI-年度月-連番 で反映済み']
+  ];
+  function renderMaster(){
+    var b=$('#master-db');if(!b)return;
+    b.innerHTML=MASTER_DB.map(function(r){
+      var cls=r[4]==='ok'?'green':r[4]==='warn'?'amber':'gray';
+      return '<tr><td><b>'+r[0]+'</b></td><td class="muted">'+r[1]+'</td><td>'+r[2]+'</td><td class="muted">'+r[3]+'</td>'+
+        '<td><span class="pill '+cls+'">'+r[5]+'</span></td></tr>';
+    }).join('');
+    $('#master-prodtype').innerHTML=PRODTYPES.map(function(x){return '<span class="pill blue">'+x+'</span>';}).join('');
+    $('#master-matcat').innerHTML=MATCATS.map(function(x){return '<span class="pill blue">'+x+'</span>';}).join('');
+    $('#master-supp').innerHTML=Object.keys(SUPPLIERS).map(function(s){
+      var v=SUPPLIERS[s];
+      return v.mat.map(function(m,i){return '<tr><td>'+(i===0?s:'<span class="muted">〃</span>')+'</td><td class="muted">'+(v.maker[i]||'—')+'</td><td>'+m+'</td></tr>';}).join('');
+    }).join('');
+  }
+
   $('#cal').addEventListener('click',function(e){var c=e.target.closest('[data-day]');if(c){var d=c.dataset.day,info=calData[d];
     toast(info?('7/'+d+'：'+info.p+'（'+(info.f?('入力済 ✓'+(info.late?'／後付け登録':'')):'未入力 — リマインド送信可')+'）'):('7/'+d+'：予定なし'));}});
 
   renderFeed($('#home-feed'),feed);
   renderFeed($('#dash-unread'),feed.filter(function(f){return f.reads.some(function(r){return !r[2];});}),true);
   renderBars($('#home-bars'),bars);
-  renderHomeInbox();renderInbox();renderDeals();renderClaims();renderCards();renderCal();renderRoute();renderDash();if($('#maincat')){renderMaincat();renderSubcat();applyCat();}updateBadges();
+  renderHomeInbox();renderInbox();renderDeals();renderClaims();renderCards();renderCal();renderRoute();renderDash();if($('#maincat')){renderMaincat();renderSubcat();applyCat();}
+  refreshPhases();renderXCat2();renderXSubj();renderMaster();updateBadges();
 })();
 </script>
 </body>
