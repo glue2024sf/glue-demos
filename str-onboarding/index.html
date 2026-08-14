@@ -171,6 +171,16 @@
   .overdays { font-size: 11px; color: var(--err-ink); margin-left: 4px; font-weight: 700; }
   .contact { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  /* --- 触れるモック用 --- */
+  td[data-edit] { cursor: cell; }
+  td[data-edit]:hover { background: #f0f6ff; box-shadow: inset 0 0 0 1px #b6d4fb; }
+  td[data-edit] .dash { color: #b0b0b0; }
+  td.editing { background: #fff; box-shadow: inset 0 0 0 2px #0176d3; padding: 0; }
+  td.editing input, td.editing select { width: 100%; box-sizing: border-box; border: 0; outline: 0; font: inherit; padding: 6px 8px; background: #fff; }
+  .ro { color: #6b6b6b; }
+  .edithint { font-size: 11px; color: #5c5c5c; margin: 6px 0 0; }
+  .edithint b { color: #0176d3; }
 </style>
 </head>
 <body>
@@ -208,11 +218,13 @@
         </div>
       </div>
       <div class="ph-actions">
+        <button class="btn" type="button" id="btnReset">初期状態に戻す</button>
         <button class="btn" type="button">インポート</button>
         <button class="btn primary" type="button">新規</button>
       </div>
     </div>
     <p class="ph-meta" id="phMeta">6 件 • 滞留日数で並び替え • 絞り込み条件: 要催促 • 数秒前に更新</p>
+    <p class="edithint">💡 <b>日付・ToDo内容・審査結果・取引許可のセルはクリックで編集できます。</b>編集すると滞留点・待ち先・必要なアクション・滞留日数がその場で再計算され、リストビューの件数も変わります。／ このデモはデザイン確認用で、実データではありません。編集内容は保存されません（「初期状態に戻す」でリセット）。</p>
   </div>
 
   <div class="tb">
@@ -264,271 +276,7 @@
             <th class="rowmenu" scope="col"></th>
           </tr>
         </thead>
-        <tbody id="tb">
-
-          <tr data-days="28" class="overdue" data-name="アオイ商事" data-due="2026-08-05" data-rep="山田" data-tags="overdue urgent submit long all">
-            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
-            <td class="col-num stick s1">1</td>
-            <td class="stick s2"><a class="rec" href="#">株式会社アオイ商事</a></td>
-            <td>山田</td>
-            <td><span class="num hot">28</span></td>
-            <td>初回ログイン後</td>
-            <td>提出待ち</td>
-            <td><span class="badge b-err">提出催促</span></td>
-            <td class="todocell"><span class="todotext" title="審査情報の提出方法を再度ご説明。必要書類のリストを再送する">審査情報の提出方法を再度ご説明。必要書類のリストを再送する</span></td>
-            <td><span class="due">2026-08-05</span><span class="overdays">1日超過</span></td>
-            <td class="st-done"><span class="dt">2026-06-25<span class="el">42日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-09<span class="el">28日</span></span></td>
-            <td class="st-now"><span class="await">提出待ち 28日</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="badge">未審査</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="contact">03-5738-7628</span></td>
-            <td><span class="contact">aoi-shoji@example.co.jp</span></td>
-            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
-          </tr>
-
-          <tr data-days="17" data-name="北陸ストア" data-due="2026-08-08" data-rep="鈴木" data-tags="urgent submit long all">
-            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
-            <td class="col-num stick s1">2</td>
-            <td class="stick s2"><a class="rec" href="#">北陸ストア株式会社</a></td>
-            <td>鈴木</td>
-            <td><span class="num hot">17</span></td>
-            <td>審査情報 差戻後</td>
-            <td>提出待ち</td>
-            <td><span class="badge b-err">提出催促</span></td>
-            <td class="todocell"><span class="todotext" title="差戻理由（登記事項の相違）を説明し、再提出を依頼">差戻理由（登記事項の相違）を説明し、再提出を依頼</span></td>
-            <td><span class="due">2026-08-08</span></td>
-            <td class="st-done"><span class="dt">2026-07-16<span class="el">21日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-17<span class="el">20日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-19<span class="el">18日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-20<span class="el">17日</span></span></td>
-            <td class="st-now"><span class="await">再提出待ち 17日</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="contact">076-233-1100</span></td>
-            <td><span class="contact">hokuriku-store@example.co.jp</span></td>
-            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
-          </tr>
-
-          <tr data-days="10" class="overdue" data-name="みなとリテール" data-due="2026-08-04" data-rep="山田" data-tags="overdue urgent submit all">
-            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
-            <td class="col-num stick s1">3</td>
-            <td class="stick s2"><a class="rec" href="#">株式会社みなとリテール</a></td>
-            <td>山田</td>
-            <td><span class="num mid">10</span></td>
-            <td>審査情報 差戻後</td>
-            <td>提出待ち</td>
-            <td><span class="badge b-err">提出催促</span></td>
-            <td class="todocell"><span class="todotext" title="登記簿の不備箇所を先方総務とすり合わせ">登記簿の不備箇所を先方総務とすり合わせ</span></td>
-            <td><span class="due">2026-08-04</span><span class="overdays">2日超過</span></td>
-            <td class="st-done"><span class="dt">2026-07-16<span class="el">21日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-17<span class="el">20日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-25<span class="el">12日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
-            <td class="st-now"><span class="await">再提出待ち 10日</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="contact">03-3477-5111</span></td>
-            <td><span class="contact">minato-retail@example.co.jp</span></td>
-            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
-          </tr>
-
-          <tr data-days="5" data-name="さくら物産" data-due="2026-08-06" data-rep="佐藤" data-tags="urgent mail all">
-            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
-            <td class="col-num stick s1">4</td>
-            <td class="stick s2"><a class="rec" href="#">株式会社さくら物産</a></td>
-            <td>佐藤</td>
-            <td><span class="num mid">5</span></td>
-            <td>郵便発送後</td>
-            <td>本社受取待ち</td>
-            <td><span class="badge b-warn">郵便受取催促</span></td>
-            <td class="todocell"><span class="todotext" title="本社総務部へ郵便の所在を確認いただく">本社総務部へ郵便の所在を確認いただく</span></td>
-            <td><span class="due">2026-08-06</span></td>
-            <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-30<span class="el">7日</span></span></td>
-            <td class="st-done"><span class="badge b-ok">審査OK</span></td>
-            <td class="st-done"><span class="dt">2026-07-31<span class="el">6日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-01<span class="el">5日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-01<span class="el">5日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-01<span class="el">5日</span></span></td>
-            <td class="st-now"><span class="await">本社受取待ち 5日</span></td>
-            <td class="st-done"><span class="dt">2026-08-04<span class="el">2日</span></span></td>
-            <td><span class="badge b-err">謝絶</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="contact">06-6271-1000</span></td>
-            <td><span class="contact">sakura-bussan@example.co.jp</span></td>
-            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
-          </tr>
-
-          <tr data-days="4" class="overdue" data-name="東西百貨店" data-due="2026-08-03" data-rep="高橋" data-tags="overdue urgent mail all">
-            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
-            <td class="col-num stick s1">5</td>
-            <td class="stick s2"><a class="rec" href="#">東西百貨店株式会社</a></td>
-            <td>高橋</td>
-            <td><span class="num mid">4</span></td>
-            <td>郵便発送後</td>
-            <td>本社・担当者とも受取待ち</td>
-            <td><span class="badge b-warn">郵便受取催促</span></td>
-            <td class="todocell"><span class="todotext" title="郵便の受領状況を本社・店舗の双方に確認">郵便の受領状況を本社・店舗の双方に確認</span></td>
-            <td><span class="due">2026-08-03</span><span class="overdays">3日超過</span></td>
-            <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-30<span class="el">7日</span></span></td>
-            <td class="st-done"><span class="badge b-ok">審査OK</span></td>
-            <td class="st-done"><span class="dt">2026-07-31<span class="el">6日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-02<span class="el">4日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-02<span class="el">4日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-02<span class="el">4日</span></span></td>
-            <td class="st-now"><span class="await">本社受取待ち 4日</span></td>
-            <td class="st-now"><span class="await">開封待ち</span></td>
-            <td><span class="badge">未許可</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="contact">03-3273-1111</span></td>
-            <td><span class="contact">tozai-dept@example.co.jp</span></td>
-            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
-          </tr>
-
-          <tr data-days="3" data-name="カメリア" data-due="2026-08-08" data-rep="山田" data-tags="urgent mail all">
-            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
-            <td class="col-num stick s1">6</td>
-            <td class="stick s2"><a class="rec" href="#">株式会社カメリア</a></td>
-            <td>山田</td>
-            <td><span class="num mid">3</span></td>
-            <td>郵便発送後</td>
-            <td>担当者受取待ち</td>
-            <td><span class="badge b-warn">郵便受取催促</span></td>
-            <td class="todocell"><span class="todotext" title="取引担当者へ開封と署名を依頼">取引担当者へ開封と署名を依頼</span></td>
-            <td><span class="due">2026-08-08</span></td>
-            <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-30<span class="el">7日</span></span></td>
-            <td class="st-done"><span class="badge b-ok">審査OK</span></td>
-            <td class="st-done"><span class="dt">2026-07-31<span class="el">6日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-03<span class="el">3日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-03<span class="el">3日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-03<span class="el">3日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-04<span class="el">2日</span></span></td>
-            <td class="st-now"><span class="await">開封待ち 3日</span></td>
-            <td><span class="badge">未許可</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="contact">052-242-0088</span></td>
-            <td><span class="contact">camellia@example.co.jp</span></td>
-            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
-          </tr>
-
-          <tr data-days="0" data-name="ふじや" data-due="9999-12-31" data-rep="山田" data-tags="all">
-            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
-            <td class="col-num stick s1">7</td>
-            <td class="stick s2"><a class="rec" href="#">株式会社ふじや</a></td>
-            <td>山田</td>
-            <td><span class="none">—</span></td>
-            <td><span class="none">—</span></td>
-            <td><span class="none">—</span></td>
-            <td><span class="none">—</span></td>
-            <td class="todocell"><span class="todoempty">クリックして入力</span></td>
-            <td><span class="dash">—</span></td>
-            <td class="st-done"><span class="dt">2026-07-16<span class="el">21日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-17<span class="el">20日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-25<span class="el">12日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-20<span class="el">17日</span></span></td>
-            <td class="st-now"><span class="badge b-warn">審査中</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="contact">0246-22-8000</span></td>
-            <td><span class="contact">fujiya@example.co.jp</span></td>
-            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
-          </tr>
-
-          <tr data-days="0" data-name="中央トレーディング" data-due="9999-12-31" data-rep="鈴木" data-tags="all">
-            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
-            <td class="col-num stick s1">8</td>
-            <td class="stick s2"><a class="rec" href="#">中央トレーディング株式会社</a></td>
-            <td>鈴木</td>
-            <td><span class="none">—</span></td>
-            <td><span class="none">—</span></td>
-            <td><span class="none">—</span></td>
-            <td><span class="none">—</span></td>
-            <td class="todocell"><span class="todoempty">クリックして入力</span></td>
-            <td><span class="dash">—</span></td>
-            <td class="st-done"><span class="dt">2026-07-31<span class="el">6日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-01<span class="el">5日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-02<span class="el">4日</span></span></td>
-            <td><span class="dash">—</span></td>
-            <td class="st-now"><span class="await">審査待ち 4日</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="dash">—</span></td>
-            <td><span class="contact">03-3668-0321</span></td>
-            <td><span class="contact">chuo-trading@example.co.jp</span></td>
-            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
-          </tr>
-
-          <tr data-days="0" data-name="リバーサイド" data-due="9999-12-31" data-rep="佐藤" data-tags="done all">
-            <td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>
-            <td class="col-num stick s1">9</td>
-            <td class="stick s2"><a class="rec" href="#">株式会社リバーサイド</a></td>
-            <td>佐藤</td>
-            <td><span class="none">—</span></td>
-            <td><span class="none">—</span></td>
-            <td><span class="none">—</span></td>
-            <td><span class="none">—</span></td>
-            <td class="todocell"><span class="todoempty">クリックして入力</span></td>
-            <td><span class="dash">—</span></td>
-            <td class="st-done"><span class="dt">2026-07-15<span class="el">22日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-27<span class="el">10日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-28<span class="el">9日</span></span></td>
-            <td class="st-done"><span class="dt">2026-07-30<span class="el">7日</span></span></td>
-            <td class="st-done"><span class="badge b-ok">審査OK</span></td>
-            <td class="st-done"><span class="dt">2026-07-31<span class="el">6日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-02<span class="el">4日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-02<span class="el">4日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-02<span class="el">4日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-04<span class="el">2日</span></span></td>
-            <td class="st-done"><span class="dt">2026-08-05<span class="el">1日</span></span></td>
-            <td class="st-done"><span class="badge b-ok">許可</span></td>
-            <td class="st-done"><span class="dt">2026-08-06<span class="el">0日</span></span></td>
-            <td><span class="contact">03-3477-1010</span></td>
-            <td><span class="contact">riverside@example.co.jp</span></td>
-            <td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>
-          </tr>
-
-
-        </tbody>
+        <tbody id="tb"></tbody>
       </table>
     </div>
     <p class="empty-state" id="emptyState">条件に一致するレコードはありません。</p>
@@ -548,8 +296,18 @@
 
 </div>
 
+
 <script>
 (function () {
+  "use strict";
+
+  /* ============================================================
+     スマテク様 オンボーディング進捗管理 デモ（触れる版 v0.4）
+     Salesforce実装の数式と同じ判定ロジックをそのまま再現している。
+     日付・ToDo・取引許可・審査結果はクリックで編集でき、
+     滞留点／待ち先／必要なアクション／滞留日数が即座に再計算される。
+     ============================================================ */
+
   var VIEWS = {
     urgent: { label: "要催促のオンボーディング", filter: "要催促" },
     submit: { label: "提出待ち",               filter: "提出待ち" },
@@ -564,8 +322,231 @@
   var current = "urgent";
   var sortKey = "days", sortDir = -1;
 
+  var REVIEW_OPTS = ["", "未審査", "審査中", "申請中", "取引中", "取引謝絶"];
+  var TRADE_OPTS  = ["", "許可", "未許可", "謝絶"];
+
+  var SEED = [
+    { name:"株式会社アオイ商事", rep:"山田", phone:"03-5738-7628", mail:"aoi-shoji@example.co.jp",
+      acctIssued:"2026-06-25", firstLogin:"2026-07-09", submitted:"", returned:"",
+      reviewResult:"未審査", reviewDone:"", termsSent:"", termsAgreed:"",
+      mailSent:"", hqReceived:"", repOpened:"", tradeApproval:"", approvalNotice:"",
+      todo:"審査情報の提出方法を再度ご説明。必要書類のリストを再送する", todoDue:"2026-08-05" },
+
+    { name:"北陸ストア株式会社", rep:"鈴木", phone:"076-233-1100", mail:"hokuriku-store@example.co.jp",
+      acctIssued:"2026-07-16", firstLogin:"2026-07-17", submitted:"2026-07-19", returned:"2026-07-20",
+      reviewResult:"未審査", reviewDone:"", termsSent:"", termsAgreed:"",
+      mailSent:"", hqReceived:"", repOpened:"", tradeApproval:"", approvalNotice:"",
+      todo:"差戻理由（登記事項の相違）を説明し、再提出を依頼", todoDue:"2026-08-08" },
+
+    { name:"株式会社みなとリテール", rep:"山田", phone:"03-3477-5111", mail:"minato-retail@example.co.jp",
+      acctIssued:"2026-07-16", firstLogin:"2026-07-17", submitted:"2026-07-25", returned:"2026-07-27",
+      reviewResult:"未審査", reviewDone:"", termsSent:"", termsAgreed:"",
+      mailSent:"", hqReceived:"", repOpened:"", tradeApproval:"", approvalNotice:"",
+      todo:"登記簿の不備箇所を先方総務とすり合わせ", todoDue:"2026-08-04" },
+
+    { name:"株式会社さくら物産", rep:"佐藤", phone:"06-6271-1000", mail:"sakura-bussan@example.co.jp",
+      acctIssued:"2026-07-15", firstLogin:"2026-07-27", submitted:"2026-07-28", returned:"2026-07-30",
+      reviewResult:"取引中", reviewDone:"2026-07-31", termsSent:"2026-08-01", termsAgreed:"2026-08-01",
+      mailSent:"2026-08-01", hqReceived:"", repOpened:"2026-08-04", tradeApproval:"謝絶", approvalNotice:"",
+      todo:"本社総務部へ郵便の所在を確認いただく", todoDue:"2026-08-06" },
+
+    { name:"東西百貨店株式会社", rep:"高橋", phone:"03-3273-1111", mail:"tozai-dept@example.co.jp",
+      acctIssued:"2026-07-15", firstLogin:"2026-07-27", submitted:"2026-07-28", returned:"2026-07-30",
+      reviewResult:"取引中", reviewDone:"2026-07-31", termsSent:"2026-08-02", termsAgreed:"2026-08-02",
+      mailSent:"2026-08-02", hqReceived:"", repOpened:"", tradeApproval:"未許可", approvalNotice:"",
+      todo:"郵便の受領状況を本社・店舗の双方に確認", todoDue:"2026-08-03" },
+
+    { name:"株式会社カメリア", rep:"山田", phone:"052-242-0088", mail:"camellia@example.co.jp",
+      acctIssued:"2026-07-15", firstLogin:"2026-07-27", submitted:"2026-07-28", returned:"2026-07-30",
+      reviewResult:"取引中", reviewDone:"2026-07-31", termsSent:"2026-08-03", termsAgreed:"2026-08-03",
+      mailSent:"2026-08-03", hqReceived:"2026-08-04", repOpened:"", tradeApproval:"未許可", approvalNotice:"",
+      todo:"取引担当者へ開封と署名を依頼", todoDue:"2026-08-08" },
+
+    { name:"株式会社ふじや", rep:"山田", phone:"0246-22-8000", mail:"fujiya@example.co.jp",
+      acctIssued:"2026-07-16", firstLogin:"2026-07-17", submitted:"2026-07-25", returned:"2026-07-20",
+      reviewResult:"審査中", reviewDone:"", termsSent:"", termsAgreed:"",
+      mailSent:"", hqReceived:"", repOpened:"", tradeApproval:"", approvalNotice:"",
+      todo:"", todoDue:"" },
+
+    { name:"中央トレーディング株式会社", rep:"鈴木", phone:"03-3668-0321", mail:"chuo-trading@example.co.jp",
+      acctIssued:"2026-07-31", firstLogin:"2026-08-01", submitted:"2026-08-02", returned:"",
+      reviewResult:"審査中", reviewDone:"", termsSent:"", termsAgreed:"",
+      mailSent:"", hqReceived:"", repOpened:"", tradeApproval:"", approvalNotice:"",
+      todo:"", todoDue:"" },
+
+    { name:"株式会社リバーサイド", rep:"佐藤", phone:"03-3477-1010", mail:"riverside@example.co.jp",
+      acctIssued:"2026-07-15", firstLogin:"2026-07-27", submitted:"2026-07-28", returned:"2026-07-30",
+      reviewResult:"取引中", reviewDone:"2026-07-31", termsSent:"2026-08-02", termsAgreed:"2026-08-02",
+      mailSent:"2026-08-02", hqReceived:"2026-08-04", repOpened:"2026-08-05", tradeApproval:"許可", approvalNotice:"2026-08-06",
+      todo:"", todoDue:"" }
+  ];
+
+  var DATA = clone(SEED);
+
+  function clone(a) { return JSON.parse(JSON.stringify(a)); }
+
+  /* ---------- 日付ユーティリティ ---------- */
+  var TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
+  function toDate(s) { return s ? new Date(s + "T00:00:00") : null; }
+  function elapsed(s) {
+    var d = toDate(s); if (!d) return null;
+    return Math.round((TODAY - d) / 86400000);
+  }
+  function todayStr() {
+    var m = TODAY.getMonth() + 1, d = TODAY.getDate();
+    return TODAY.getFullYear() + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d);
+  }
+
+  /* ---------- 判定ロジック（Salesforceの数式と同一） ---------- */
+  // Stall_Point__c
+  function stallPoint(r) {
+    if (r.tradeApproval === "許可") return "";
+    if (r.mailSent && (!r.hqReceived || !r.repOpened)) return "郵便発送後";
+    if (r.returned && (!r.submitted || r.returned > r.submitted) && r.reviewResult === "未審査") return "審査情報 差戻後";
+    if (r.firstLogin && !r.submitted) return "初回ログイン後";
+    return "";
+  }
+  // Waiting_On__c
+  function waitingOn(r) {
+    var sp = stallPoint(r);
+    if (sp === "郵便発送後") {
+      if (!r.hqReceived && !r.repOpened) return "本社・担当者とも受取待ち";
+      if (!r.hqReceived) return "本社受取待ち";
+      if (!r.repOpened) return "担当者受取待ち";
+      return "";
+    }
+    if (sp === "審査情報 差戻後" || sp === "初回ログイン後") return "提出待ち";
+    return "";
+  }
+  // Required_Action__c
+  function requiredAction(r) {
+    var sp = stallPoint(r);
+    if (sp === "郵便発送後") return "郵便受取催促";
+    if (sp === "審査情報 差戻後" || sp === "初回ログイン後") return "提出催促";
+    return "";
+  }
+  // Customer_Stall_Days__c
+  function stallDays(r) {
+    var sp = stallPoint(r);
+    if (sp === "郵便発送後") return elapsed(r.mailSent);
+    if (sp === "審査情報 差戻後") return elapsed(r.returned);
+    if (sp === "初回ログイン後") return elapsed(r.firstLogin);
+    return null;
+  }
+  // ToDo_Overdue_Days__c
+  function todoOverdue(r) {
+    if (!r.todoDue) return null;
+    var n = elapsed(r.todoDue);
+    return n > 0 ? n : null;
+  }
+
+  /* ---------- 描画 ---------- */
   var tb = document.getElementById("tb");
-  var rows = Array.prototype.slice.call(tb.querySelectorAll("tr"));
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  // 日付セル。awaitLabel が渡され値が空なら「待ち」バッジを出す
+  function dateCell(rec, key, awaitLabel, awaitDays) {
+    var v = rec[key];
+    var attr = ' data-edit="' + key + '" data-type="date"';
+    if (v) {
+      var el = elapsed(v);
+      return '<td class="phase st-done"' + attr + '><span class="dt">' + esc(v) +
+             '<span class="el">' + el + '日</span></span></td>';
+    }
+    if (awaitLabel) {
+      return '<td class="phase st-now"' + attr + '><span class="await">' + esc(awaitLabel) +
+             (awaitDays != null ? " " + awaitDays + "日" : "") + '</span></td>';
+    }
+    return '<td class="phase"' + attr + '><span class="dash">—</span></td>';
+  }
+
+  function selectCell(rec, key) {
+    var v = rec[key];
+    var body = v ? '<span class="badge">' + esc(v) + '</span>' : '<span class="dash">—</span>';
+    return '<td class="phase" data-edit="' + key + '" data-type="' + key + '">' + body + '</td>';
+  }
+
+  function rowHtml(rec, idx) {
+    var sp = stallPoint(rec), wo = waitingOn(rec), ra = requiredAction(rec);
+    var sd = stallDays(rec), ov = todoOverdue(rec);
+
+    // 「待ち」を表示するセルを決める
+    var awaitSubmit = null, awaitHq = null, awaitRep = null;
+    if (sp === "初回ログイン後") awaitSubmit = "提出待ち";
+    if (sp === "審査情報 差戻後") awaitSubmit = "再提出待ち";
+    if (sp === "郵便発送後") {
+      if (!rec.hqReceived) awaitHq = "本社受取待ち";
+      if (!rec.repOpened) awaitRep = "開封待ち";
+    }
+
+    var numCls = sd == null ? "" : (sd >= 14 ? " hot" : (sd >= 7 ? " mid" : ""));
+    var h = [];
+    h.push('<tr data-i="' + idx + '" data-days="' + (sd == null ? 0 : sd) + '" data-name="' + esc(rec.name) +
+           '" data-due="' + esc(rec.todoDue || "9999-12-31") + '" data-rep="' + esc(rec.rep) + '"' +
+           (ov ? ' class="overdue"' : '') + '>');
+    h.push('<td class="col-chk stick s0"><input type="checkbox" aria-label="行を選択"></td>');
+    h.push('<td class="col-num stick s1"></td>');
+    h.push('<td class="stick s2"><a class="rec" href="#" onclick="return false">' + esc(rec.name) + '</a></td>');
+    h.push('<td class="ro">' + esc(rec.rep) + '</td>');
+    h.push('<td class="ro">' + (sd == null ? '<span class="dash">—</span>' : '<span class="num' + numCls + '">' + sd + '</span>') + '</td>');
+    h.push('<td class="ro">' + (sp ? esc(sp) : '<span class="dash">—</span>') + '</td>');
+    h.push('<td class="ro">' + (wo ? esc(wo) : '<span class="dash">—</span>') + '</td>');
+    h.push('<td class="ro">' + (ra ? '<span class="badge b-err">' + esc(ra) + '</span>' : '<span class="dash">—</span>') + '</td>');
+    h.push('<td class="todocell" data-edit="todo" data-type="text">' +
+           (rec.todo ? '<span class="todotext" title="' + esc(rec.todo) + '">' + esc(rec.todo) + '</span>'
+                     : '<span class="todoempty">クリックして入力</span>') + '</td>');
+    h.push('<td data-edit="todoDue" data-type="date">' +
+           (rec.todoDue ? '<span class="due">' + esc(rec.todoDue) + '</span>' +
+              (ov ? '<span class="overdays">' + ov + '日超過</span>' : '')
+                        : '<span class="dash">—</span>') + '</td>');
+    h.push(dateCell(rec, "acctIssued"));
+    h.push(dateCell(rec, "firstLogin"));
+    h.push(dateCell(rec, "submitted", awaitSubmit, sd));
+    h.push(dateCell(rec, "returned"));
+    h.push(selectCell(rec, "reviewResult"));
+    h.push(dateCell(rec, "reviewDone"));
+    h.push(dateCell(rec, "termsSent"));
+    h.push(dateCell(rec, "termsAgreed"));
+    h.push(dateCell(rec, "mailSent"));
+    h.push(dateCell(rec, "hqReceived", awaitHq, sd));
+    h.push(dateCell(rec, "repOpened", awaitRep, sd));
+    h.push(selectCell(rec, "tradeApproval"));
+    h.push(dateCell(rec, "approvalNotice"));
+    h.push('<td><span class="contact">' + esc(rec.phone) + '</span></td>');
+    h.push('<td><span class="contact">' + esc(rec.mail) + '</span></td>');
+    h.push('<td class="rowmenu"><button type="button" aria-label="行のアクション">▾</button></td>');
+    h.push('</tr>');
+    return h.join("");
+  }
+
+  function render() {
+    tb.innerHTML = DATA.map(rowHtml).join("");
+    rows = Array.prototype.slice.call(tb.querySelectorAll("tr"));
+    counts(); sortRows(); apply();
+  }
+
+  /* ---------- ビュー判定（データから算出） ---------- */
+  function inView(rec, view) {
+    var sp = stallPoint(rec), wo = waitingOn(rec), ra = requiredAction(rec);
+    var sd = stallDays(rec), ov = todoOverdue(rec);
+    switch (view) {
+      case "urgent":  return !!ra;
+      case "submit":  return wo === "提出待ち";
+      case "mail":    return wo.indexOf("受取待ち") > -1;
+      case "long":    return sd != null && sd >= 14;
+      case "overdue": return !!ov;
+      case "mine":    return rec.rep === ME;
+      case "done":    return rec.tradeApproval === "許可";
+      default:        return true;
+    }
+  }
+
+  /* ---------- 画面要素 ---------- */
+  var rows = [];
   var q = document.getElementById("q");
   var meta = document.getElementById("phMeta");
   var lvName = document.getElementById("lvName");
@@ -574,14 +555,9 @@
   var emptyState = document.getElementById("emptyState");
   var chkAll = document.getElementById("chkAll");
 
-  function inView(row, view) {
-    if (view === "mine") return row.dataset.rep === ME;
-    return (" " + row.dataset.tags + " ").indexOf(" " + view + " ") > -1;
-  }
-
   function counts() {
     Object.keys(VIEWS).forEach(function (v) {
-      var n = rows.filter(function (r) { return inView(r, v); }).length;
+      var n = DATA.filter(function (r) { return inView(r, v); }).length;
       var el = menu.querySelector('[data-count="' + v + '"]');
       if (el) el.textContent = n;
     });
@@ -590,25 +566,27 @@
   function apply() {
     var term = q.value.trim().toLowerCase();
     var shown = 0;
-    rows.forEach(function (r) {
-      var ok = inView(r, current);
-      if (ok && term) ok = r.textContent.toLowerCase().indexOf(term) > -1;
-      r.classList.toggle("hidden", !ok);
+    rows.forEach(function (tr) {
+      var rec = DATA[+tr.dataset.i];
+      var ok = inView(rec, current);
+      if (ok && term) ok = tr.textContent.toLowerCase().indexOf(term) > -1;
+      tr.classList.toggle("hidden", !ok);
       if (ok) shown++;
     });
     var sortLabel = sortKey === "days" ? "滞留日数" : (sortKey === "due" ? "ToDo期日" : "企業名");
     meta.textContent = shown + " 件 • " + sortLabel + "で並び替え • 絞り込み条件: "
-      + VIEWS[current].filter + (term ? " ／ 検索「" + q.value.trim() + "」" : "") + " • 数秒前に更新";
-    emptyState.setAttribute("data-show", shown === 0 ? "true" : "false");
+      + VIEWS[current].filter + (term ? " ／ 検索「" + q.value.trim() + "」" : "")
+      + " • 本日 " + todayStr() + " 基準";
+    if (emptyState) emptyState.setAttribute("data-show", shown === 0 ? "true" : "false");
     renumber();
   }
 
   function renumber() {
     var i = 0;
-    rows.forEach(function (r) {
-      if (r.classList.contains("hidden")) return;
+    rows.forEach(function (tr) {
+      if (tr.classList.contains("hidden")) return;
       i++;
-      r.querySelector(".col-num").textContent = i;
+      tr.querySelector(".col-num").textContent = i;
     });
   }
 
@@ -626,17 +604,80 @@
       }
       return a.dataset.name.localeCompare(b.dataset.name, "ja") * sortDir;
     });
-    sorted.forEach(function (r) { tb.appendChild(r); });
+    sorted.forEach(function (tr) { tb.appendChild(tr); });
+    rows = Array.prototype.slice.call(tb.querySelectorAll("tr"));
   }
 
+  /* ---------- インライン編集 ---------- */
+  var editing = null;
+
+  function startEdit(td) {
+    if (editing) return;
+    var tr = td.closest("tr");
+    var rec = DATA[+tr.dataset.i];
+    var key = td.dataset.edit, type = td.dataset.type;
+    var old = td.innerHTML;
+    editing = { td: td, old: old };
+    td.classList.add("editing");
+
+    var input;
+    if (type === "reviewResult" || type === "tradeApproval") {
+      input = document.createElement("select");
+      (type === "reviewResult" ? REVIEW_OPTS : TRADE_OPTS).forEach(function (o) {
+        var op = document.createElement("option");
+        op.value = o; op.textContent = o === "" ? "（空欄）" : o;
+        if (rec[key] === o) op.selected = true;
+        input.appendChild(op);
+      });
+    } else if (type === "date") {
+      input = document.createElement("input");
+      input.type = "date";
+      input.value = rec[key] || "";
+    } else {
+      input = document.createElement("input");
+      input.type = "text";
+      input.value = rec[key] || "";
+      input.placeholder = "ToDo内容を入力";
+    }
+    td.innerHTML = "";
+    td.appendChild(input);
+    input.focus();
+    if (input.select) { try { input.select(); } catch (e) {} }
+
+    function commit() {
+      if (!editing) return;
+      rec[key] = input.value || "";
+      editing = null;
+      render();
+    }
+    function cancel() {
+      if (!editing) return;
+      td.classList.remove("editing");
+      td.innerHTML = editing.old;
+      editing = null;
+    }
+    input.addEventListener("blur", commit);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); input.blur(); }
+      if (e.key === "Escape") { e.preventDefault(); input.removeEventListener("blur", commit); cancel(); }
+    });
+    if (input.tagName === "SELECT") input.addEventListener("change", function () { input.blur(); });
+  }
+
+  tb.addEventListener("click", function (e) {
+    var td = e.target.closest ? e.target.closest("td[data-edit]") : null;
+    if (!td || td.classList.contains("editing")) return;
+    if (e.target.tagName === "INPUT" && e.target.type === "checkbox") return;
+    startEdit(td);
+  });
+
+  /* ---------- 既存の操作系 ---------- */
   document.querySelectorAll("th.sortable").forEach(function (th) {
     th.addEventListener("click", function () {
-      var key = th.dataset.sort;
-      if (sortKey === key) { sortDir = -sortDir; }
-      else { sortKey = key; sortDir = key === "days" ? -1 : 1; }
+      var k = th.dataset.sort;
+      if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = k === "name" ? 1 : -1; }
       document.querySelectorAll("th.sortable").forEach(function (o) { o.setAttribute("aria-sort", "none"); });
       th.setAttribute("aria-sort", sortDir === 1 ? "ascending" : "descending");
-      th.querySelector(".arrow").textContent = sortDir === 1 ? "▲" : "▼";
       sortRows(); apply();
     });
   });
@@ -665,16 +706,27 @@
 
   q.addEventListener("input", apply);
 
-  chkAll.addEventListener("change", function () {
-    rows.forEach(function (r) {
-      if (r.classList.contains("hidden")) return;
-      var c = r.querySelector('input[type=checkbox]');
-      if (c) c.checked = chkAll.checked;
+  if (chkAll) {
+    chkAll.addEventListener("change", function () {
+      rows.forEach(function (tr) {
+        if (tr.classList.contains("hidden")) return;
+        var c = tr.querySelector('.col-chk input');
+        if (c) c.checked = chkAll.checked;
+      });
     });
-  });
+  }
 
-  counts(); sortRows(); apply();
+  var btnReset = document.getElementById("btnReset");
+  if (btnReset) {
+    btnReset.addEventListener("click", function () {
+      DATA = clone(SEED);
+      render();
+    });
+  }
+
+  render();
 })();
 </script>
+
 </body>
 </html>
