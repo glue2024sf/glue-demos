@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.12)</title>
+<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.13)</title>
 <style>
 /* SHT 活動記録CRM デモ — Salesforce Lightning 風 / 外部依存なし
    （glue hig-japan-sf デモの app.css に準拠）— 2026-07-07 定例FB反映版 */
@@ -525,7 +525,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
           <div class="row2 tf tf-f1 tf-f2 tf-f4 tf-f5">
             <div class="field"><label>対象引合</label>
               <select id="deal-sel">
-                <option value="d1">CT-320 カレントトランス 年間契約</option>
+                <option value="d1">CTB-EE1908P3 カレントトランス 年間契約</option>
                 <option value="d2">カットコア 追加発注</option>
                 <option value="none">（なし・プレ検討）</option>
                 <option value="new">＋ 新規引合をこの画面で作成…</option>
@@ -593,7 +593,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
             </div>
           </div>
           <div class="row2 xs-mode" id="xs-part" style="margin-bottom:10px;display:none">
-            <div class="field" style="margin:0"><label>品番</label><select id="x-part"><option>CT-320</option><option>SC-210</option><option>TR-140</option></select></div>
+            <div class="field" style="margin:0"><label>品番</label><select id="x-part"><option>CTB-EE1908P3</option><option>KH200Y203G102</option><option>GMK4000S001A</option></select></div>
             <div class="field" style="margin:0"><label>取引先</label><select id="x-acct"><option>すべて</option><option>東海電子工業</option><option>関西精密コネクタ</option></select></div>
           </div>
           <div class="row2 xs-mode" id="xs-cat" style="margin-bottom:10px;display:none">
@@ -698,7 +698,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
                 <div class="fitem2"><div class="l">取引先</div><div class="v">東海電子工業 <span class="pill green">自動</span></div></div>
                 <div class="fitem2"><div class="l">日時</div><div class="v">7/24 14:00 <span class="pill green">自動</span></div></div>
                 <div class="fitem2"><div class="l">件名</div><div class="v">訪問 <span class="pill green">自動</span></div></div>
-                <div class="fitem2"><div class="l">品番</div><div class="v">CT-320 <span class="pill green">前回踏襲</span></div></div>
+                <div class="fitem2"><div class="l">品番</div><div class="v">CTB-EE1908P3 <span class="pill green">前回踏襲</span></div></div>
               </div>
               <div class="field" style="margin-top:10px"><label>内容（ここだけ入力）</label><textarea style="width:100%;border:1px solid var(--line-d);border-radius:5px;padding:8px 10px" placeholder="面談で確認した事項・次アクション"></textarea></div>
             </div>
@@ -801,8 +801,8 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <div class="related act-panel">
           <div class="rl-hd"><span class="obj-icon o-act">📋</span> 同じ品番の履歴<span class="sp"></span></div>
           <div class="tl">
-            <div class="item"><span class="dot"></span><div class="when">7/1 ・ Web商談 ・ 田中</div><div class="body">技術仕様の詰め（CT-320）</div></div>
-            <div class="item"><span class="dot"></span><div class="when">6/24 ・ 訪問 ・ 田中</div><div class="body">初回引合ヒアリング（CT-320）</div></div>
+            <div class="item"><span class="dot"></span><div class="when">7/1 ・ Web商談 ・ 田中</div><div class="body">技術仕様の詰め（CTB-EE1908P3）</div></div>
+            <div class="item"><span class="dot"></span><div class="when">6/24 ・ 訪問 ・ 田中</div><div class="body">初回引合ヒアリング（CTB-EE1908P3）</div></div>
           </div>
         </div>
       </div>
@@ -865,7 +865,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <span class="obj-icon o-opp lg">💼</span>
         <div class="meta">
           <div class="crumb"><a data-goto="deals">引合</a> › レコード</div>
-          <h1>CT-320 カレントトランス 年間契約</h1>
+          <h1>CTB-EE1908P3 カレントトランス 年間契約</h1>
         </div>
         <div class="acts"><button class="btn" data-goto="activity">活動を記録</button><button class="btn">見積</button><button class="btn primary">編集</button></div>
       </div>
@@ -874,7 +874,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <div class="rf"><span class="l">取引先</span><span class="v"><a data-goto="accounts">東海電子工業</a></span></div>
         <div class="rf"><span class="l">商社経由</span><span class="v">ネクスティエレクトロニクス</span></div>
         <div class="rf"><span class="l">品種</span><span class="v">カレントトランス</span></div>
-        <div class="rf"><span class="l">品番</span><span class="v"><span class="code">CT-320</span></span></div>
+        <div class="rf"><span class="l">品番</span><span class="v"><span class="code">CTB-EE1908P3</span></span></div>
         <div class="rf"><span class="l">状態</span><span class="v"><span class="signal g"><i class="g"></i><i class="a"></i><i class="r"></i></span> 順調</span></div>
         <div class="rf"><span class="l">見込金額</span><span class="v">¥ 8,400,000</span></div>
         <div class="rf"><span class="l">確度</span><span class="v">75%</span></div>
@@ -905,11 +905,11 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
           <h3><span class="caret">▾</span> 引合 情報</h3>
           <div class="fgrid">
             <div class="fitem2"><div class="l">引合番号</div><div class="v">INQ-2605-011 <span class="pill gray" style="padding:1px 6px;font-weight:600">自動採番</span></div></div>
-            <div class="fitem2"><div class="l"><span class="req">*</span>引合名</div><div class="v">CT-320 カレントトランス 年間契約 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l"><span class="req">*</span>引合名</div><div class="v">CTB-EE1908P3 カレントトランス 年間契約 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>取引先</div><div class="v">東海電子工業 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">商社（販売経路）</div><div class="v">ネクスティエレクトロニクス <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">品種</div><div class="v">カレントトランス <span class="pencil">✎</span></div></div>
-            <div class="fitem2"><div class="l"><span class="req">*</span>製品品番</div><div class="v">CT-320 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l"><span class="req">*</span>製品品番</div><div class="v">CTB-EE1908P3 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>フェーズ（大分類）</div><div class="v">仕様詳細決定 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>見込金額</div><div class="v">¥ 8,400,000 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">確度（大フェーズ連動）</div><div class="v">75% <span class="pencil">✎</span></div></div>
@@ -925,9 +925,9 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
           <div class="tbl-wrap"><table class="lvt" style="border:0;border-radius:0">
             <thead><tr><th>品番</th><th>品名</th><th class="num">単価</th><th class="num">年間数量</th><th class="num">年間金額</th></tr></thead>
             <tbody>
-              <tr><td><span class="code">CT-320</span></td><td>貫通型カレントトランス</td><td class="num">¥58</td><td class="num">96,000</td><td class="num">¥5.6M</td></tr>
-              <tr><td><span class="code">CT-320H</span></td><td>高精度品</td><td class="num">¥64</td><td class="num">18,000</td><td class="num">¥1.2M</td></tr>
-              <tr><td><span class="code">CH-208</span></td><td>コモンモードチョーク</td><td class="num">¥320</td><td class="num">5,000</td><td class="num">¥1.6M</td></tr>
+              <tr><td><span class="code">CTB-EE1908P3</span></td><td>貫通型カレントトランス</td><td class="num">¥58</td><td class="num">96,000</td><td class="num">¥5.6M</td></tr>
+              <tr><td><span class="code">CTS-EE0904MR</span></td><td>高精度品</td><td class="num">¥64</td><td class="num">18,000</td><td class="num">¥1.2M</td></tr>
+              <tr><td><span class="code">BA2-26182IM</span></td><td>コモンモードチョーク</td><td class="num">¥320</td><td class="num">5,000</td><td class="num">¥1.6M</td></tr>
             </tbody>
           </table></div>
         </div>
@@ -1099,11 +1099,36 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       </table></div>
     </div>
 
+    <div class="card" style="margin-bottom:16px">
+      <div class="hd">⚠️ 品番と取引先は「多対多」でした<span class="sub">8/17受領データの検証結果 — 設計に影響します</span></div>
+      <div class="bd">
+        <div class="grid g4" style="margin-bottom:12px">
+          <div class="kpi"><div class="label">明細</div><div class="val tnum">428<small> 行</small></div></div>
+          <div class="kpi"><div class="label">得意先</div><div class="val tnum">69<small> 社</small></div></div>
+          <div class="kpi"><div class="label">品番</div><div class="val tnum">257<small> 件</small></div></div>
+          <div class="kpi"><div class="label">複数社に納入</div><div class="val tnum" style="color:var(--amber)">49<small> 品番</small></div></div>
+        </div>
+        <p class="help">いただいた品番表を確認したところ、<b>同じ品番を複数の得意先に納入されている</b>ことが分かりました（257品番のうち49品番。最大で<b>1品番が25社</b>）。</p>
+        <div class="tbl-wrap" style="margin-top:8px"><table class="tbl">
+          <thead><tr><th>品番</th><th class="num">納入先の社数</th></tr></thead>
+          <tbody>
+            <tr><td><span class="code">CTS-EE0904MR</span></td><td class="num">25 社</td></tr>
+            <tr><td><span class="code">CTB-EE1908P3</span></td><td class="num">19 社</td></tr>
+            <tr><td><span class="code">CMB-2208</span></td><td class="num">15 社</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout" style="margin-top:10px;flex-direction:column">
+          <div><b>▶ 設計への反映</b></div>
+          <div style="margin-top:6px">当初は「品番マスタに取引先を1つ持たせる」構成を想定しておりましたが、この形では1品番を25社へ納入されているケースを表現できません。<b>「取引先」と「品番」をつなぐ専用のデータ（取扱品番）を挟む構成</b>に変更いたします。いただいた428明細が、そのままこのデータになります。<br>これにより「A社が取り扱う品番の一覧」と「この品番を納入している会社の一覧」の両方が引けるようになります。</div>
+        </div>
+      </div>
+    </div>
+
     <div class="grid g2" style="margin-bottom:16px">
       <div class="card">
         <div class="hd">品種<span class="sub">実データ10種を反映済み</span></div>
         <div class="bd"><div id="master-prodtype" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-          <p class="help" style="margin-top:10px">✅ デモのダミー品種（コネクタ／端子／カットコア）を<b>実際の品種10種</b>に差し替えました。品番は取引先ごとのダミーです。<b>品番マスタは「送付済み」とご記載いただいていますが、こちらで受領を確認できておりません。</b>お手数ですが再送いただけますでしょうか。</p>
+          <p class="help" style="margin-top:10px">✅ 8/17にご再送いただいた <b>ＳＨＴ全品番（送付用）.xlsx</b> を解析し、<b>品番も実データ</b>に差し替えました（デモでは取引先×品種あたり最大4品番を抜粋）。<br><br>⚠️ <b>品種コードと品種名の対応をご確認ください。</b> いただいた品番表の品種は<b>コード表記</b>（CT／CS／CH／SS／SC／RE／SM／OT／CC／TR）で、8/10資料の品種名10種とは表記が異なります。数が10で一致するため1対1で対応すると考えておりますが、<b>CS・CH・SS・SM の4つ</b>がどの品種名（モールドコア／単コア／チョークコイル手巻き／チョークコイル自動巻き）に当たるか判断できておりません。デモでは「要確認」と表示しています。</p>
         </div>
       </div>
       <div class="card">
@@ -1201,7 +1226,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   function catCls(c){return (c==='f4'||c==='f5'||c==='meeting')?'meeting':(c==='f2'||c==='f3')?'claim':'sales';}
 
   var feed=[
-    {id:1,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — カレントトランス CT-320 引合',body:'購買・技術の合同レビュー。年間12万個の内示見込み。次回7/22に見積提示。',t:'32分前',attach:'議事メモ.pdf',reads:[['木','kida',1],['吉','yoshida',0]]},
+    {id:1,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — カレントトランス CTB-EE1908P3 引合',body:'購買・技術の合同レビュー。年間12万個の内示見込み。次回7/22に見積提示。',t:'32分前',attach:'議事メモ.pdf',reads:[['木','kida',1],['吉','yoshida',0]]},
     {id:2,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密コネクタ 品質クレーム — 端子めっき剥離',body:'ロットL2405で剥離3件。一次対応済、原因調査中。重大度:中。',t:'1時間前',attach:'不良写真.zip',reads:[['吉','yoshida',0],['木','kida',1]]},
     {id:3,who:'吉田',key:'yoshida',cat:'meeting',ttl:'7月 経営会議 議事録',body:'上期実績と下期方針。SFA導入の進捗を共有。※閲覧は役員限定。',t:'3時間前',attach:'経営会議_07.pdf',reads:[['田','tanaka',1]]},
     {id:4,who:'鈴木',key:'suzuki',cat:'sales',ttl:'日本マイクロデバイス Web商談 — 既存品リピート',body:'月次発注の継続確認。特段の課題なし。',t:'昨日',attach:null,reads:[['田','tanaka',1],['吉','yoshida',1]]}
@@ -1209,32 +1234,32 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
 
   var inbox={
     kurashima:[
-      {id:1,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（L2405）',acct:'関西精密コネクタ',part:'SC-210',read:false,others:[['吉','yoshida',0]],
-       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','SC-210 / L2405'],['重大度','中'],['フェーズ','原因調査'],['報告者','佐藤（品質保証部）'],['発生日','2026-07-15']],
+      {id:1,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（L2405）',acct:'関西精密コネクタ',part:'KH200Y203G102',read:false,others:[['吉','yoshida',0]],
+       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','KH200Y203G102 / L2405'],['重大度','中'],['フェーズ','原因調査'],['報告者','佐藤（品質保証部）'],['発生日','2026-07-15']],
        body:'<h4>不良内容</h4>ロット L2405 の端子めっきに剥離を3件確認。外観検査で発見、client先での実装工程には未流出。<h4>一次対応</h4>該当ロットを全数隔離。代替ロット L2407 を7/16に出荷済み。<h4>原因調査（進行中）</h4>めっき槽の温度管理記録を確認中。7/20までに一次報告予定。<h4>次アクション</h4>恒久対策案を7/22の定例で共有。'},
-      {id:2,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CT-320 引合（年間12万個の内示）',acct:'東海電子工業',part:'CT-320',read:false,others:[['木','kida',1]],
-       fields:[['取引先','東海電子工業'],['品番','CT-320'],['面談種別','訪問'],['面談相手','購買部 山田様（キーマン）'],['関連引合','CT-320 カレントトランス 年間契約'],['面談日','2026-07-17']],
-       body:'<h4>活動内容</h4>購買・技術の合同レビューを実施。年間12万個の内示見込みを口頭で確認。<h4>先方コメント</h4>「競合A社と比較検討中だが、取付治具込みの提案は評価できる」<h4>次アクション</h4>7/22に見積提示・技術折衝。ハイト違い派生品（CT-320H）も併せて提案。'},
-      {id:3,who:'鈴木',key:'suzuki',cat:'sales',ttl:'北陸プレシジョン 見積フォロー — 34日間 接触なし',acct:'北陸プレシジョン',part:'TR-140',read:false,others:[['木','kida',1]],
-       fields:[['取引先','北陸プレシジョン'],['品番','TR-140'],['面談種別','電話'],['状態','要対応（赤）'],['面談日','2026-07-16']],
+      {id:2,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CTB-EE1908P3 引合（年間12万個の内示）',acct:'東海電子工業',part:'CTB-EE1908P3',read:false,others:[['木','kida',1]],
+       fields:[['取引先','東海電子工業'],['品番','CTB-EE1908P3'],['面談種別','訪問'],['面談相手','購買部 山田様（キーマン）'],['関連引合','CTB-EE1908P3 カレントトランス 年間契約'],['面談日','2026-07-17']],
+       body:'<h4>活動内容</h4>購買・技術の合同レビューを実施。年間12万個の内示見込みを口頭で確認。<h4>先方コメント</h4>「競合A社と比較検討中だが、取付治具込みの提案は評価できる」<h4>次アクション</h4>7/22に見積提示・技術折衝。ハイト違い派生品（CTS-EE0904MR）も併せて提案。'},
+      {id:3,who:'鈴木',key:'suzuki',cat:'sales',ttl:'北陸プレシジョン 見積フォロー — 34日間 接触なし',acct:'北陸プレシジョン',part:'GMK4000S001A',read:false,others:[['木','kida',1]],
+       fields:[['取引先','北陸プレシジョン'],['品番','GMK4000S001A'],['面談種別','電話'],['状態','要対応（赤）'],['面談日','2026-07-16']],
        body:'<h4>活動内容</h4>試作品評価の状況を電話で確認。先方の担当者が異動しており、後任へ引き継ぎ中とのこと。<h4>リスク</h4>34日間接触が空いていた。信号機=赤。<h4>次アクション</h4>後任の方への挨拶訪問を7月中に設定する。'},
       {id:4,who:'木田',key:'kida',cat:'meeting',ttl:'営業部 週次ミーティング 議事録（7/15）',acct:'（社内）',part:'—',read:false,others:[['田','tanaka',1],['鈴','suzuki',0]],
        fields:[['会議区分','部門会議'],['出席者','木田・田中・鈴木・佐藤'],['開催日','2026-07-15']],
-       body:'<h4>議題</h4>①各案件の進捗共有 ②CT-320の見積方針 ③クレーム対応状況<h4>決定事項</h4>CT-320は取付治具込みのセット提案で進める。値引きは5%を上限とし、超える場合は専務決裁。<h4>宿題</h4>田中: 7/22までに見積書作成 / 佐藤: めっき剥離の原因一次報告'},
-      {id:5,who:'鈴木',key:'suzuki',cat:'sales',ttl:'日本マイクロデバイス リピート受注',acct:'日本マイクロデバイス',part:'SC-210',read:true,others:[['吉','yoshida',1]],
-       fields:[['取引先','日本マイクロデバイス'],['品番','SC-210'],['面談種別','Web商談']],
+       body:'<h4>議題</h4>①各案件の進捗共有 ②CTB-EE1908P3の見積方針 ③クレーム対応状況<h4>決定事項</h4>CTB-EE1908P3は取付治具込みのセット提案で進める。値引きは5%を上限とし、超える場合は専務決裁。<h4>宿題</h4>田中: 7/22までに見積書作成 / 佐藤: めっき剥離の原因一次報告'},
+      {id:5,who:'鈴木',key:'suzuki',cat:'sales',ttl:'日本マイクロデバイス リピート受注',acct:'日本マイクロデバイス',part:'KH200Y203G102',read:true,others:[['吉','yoshida',1]],
+       fields:[['取引先','日本マイクロデバイス'],['品番','KH200Y203G102'],['面談種別','Web商談']],
        body:'<h4>活動内容</h4>月次発注の継続確認。特段の課題なし。'}
     ],
     yoshida:[
-      {id:11,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CT-320 引合（年間12万個の内示）',acct:'東海電子工業',part:'CT-320',read:false,others:[['木','kida',1]],
-       fields:[['取引先','東海電子工業'],['品番','CT-320'],['見込金額','¥8,400,000'],['面談相手','購買部 山田様（キーマン）'],['面談日','2026-07-17']],
+      {id:11,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CTB-EE1908P3 引合（年間12万個の内示）',acct:'東海電子工業',part:'CTB-EE1908P3',read:false,others:[['木','kida',1]],
+       fields:[['取引先','東海電子工業'],['品番','CTB-EE1908P3'],['見込金額','¥8,400,000'],['面談相手','購買部 山田様（キーマン）'],['面談日','2026-07-17']],
        body:'<h4>活動内容</h4>購買・技術の合同レビュー。年間12万個の内示見込み。<h4>次アクション</h4>7/22に見積提示。値引きは5%上限、超過時は専務決裁が必要です。'},
-      {id:12,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（重大度:中）',acct:'関西精密コネクタ',part:'SC-210',read:false,others:[['田','tanaka',0]],
-       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','SC-210 / L2405'],['重大度','中'],['フェーズ','原因調査']],
+      {id:12,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（重大度:中）',acct:'関西精密コネクタ',part:'KH200Y203G102',read:false,others:[['田','tanaka',0]],
+       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','KH200Y203G102 / L2405'],['重大度','中'],['フェーズ','原因調査']],
        body:'<h4>不良内容</h4>端子めっき剥離3件。未流出。<h4>一次対応</h4>全数隔離・代替ロット出荷済み。<h4>次アクション</h4>7/20までに原因一次報告。'},
-      {id:13,who:'木田',key:'kida',cat:'sales',ttl:'大口案件 稟議前 状況共有（CT-320 / 840万円）',acct:'東海電子工業',part:'CT-320',read:false,others:[['田','tanaka',1]],
+      {id:13,who:'木田',key:'kida',cat:'sales',ttl:'大口案件 稟議前 状況共有（CTB-EE1908P3 / 840万円）',acct:'東海電子工業',part:'CTB-EE1908P3',read:false,others:[['田','tanaka',1]],
        fields:[['取引先','東海電子工業'],['見込金額','¥8,400,000'],['稟議','値引5%超の可能性あり']],
-       body:'<h4>共有事項</h4>CT-320案件、競合A社の価格攻勢により5%を超える値引き要請が入る可能性があります。<h4>ご確認</h4>専務決裁の要否について事前にご相談させてください。'},
+       body:'<h4>共有事項</h4>CTB-EE1908P3案件、競合A社の価格攻勢により5%を超える値引き要請が入る可能性があります。<h4>ご確認</h4>専務決裁の要否について事前にご相談させてください。'},
       {id:14,who:'佐藤',key:'sato',cat:'claim',ttl:'月次 品質サマリ（重大クレーム 0件）',acct:'（全社）',part:'—',read:true,others:[['田','tanaka',1]],
        fields:[['対象','全社'],['重大クレーム','0件']],body:'<h4>サマリ</h4>今月の重大クレームは0件。軽微2件はいずれも是正完了。'}
     ]
@@ -1246,19 +1271,19 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
 
   // 品番→品種の対応（活動記録フォームのPART_MASTERと同じ分類。8/4FBで引合・クレームのレコード自体にも品種・発生日・完了日を追加）
   // v0.12: 品種を8/10受領資料の実データ10種へ差し替え（品番・取引先名はダミー）
-  var PART_CAT={'CT-320':'カレントトランス','CT-320H':'カレントトランス','CH-208':'チョークコイル（自動巻き）','CH-071':'チョークコイル（手巻き）','SC-210':'センサーコア','MC-118':'モールドコア','UC-030':'単コア','RA-410':'リアクトル','TR-140':'トランス','CC-050':'カットコア'};
+  var PART_CAT={'CTB-EE1908P3':'カレントトランス','CTS-EE0904MR':'カレントトランス','KH200Y203G102':'センサーコア','GMK4000S001A':'トランス','BA2-26182IM':'リアクトル','S23-05051303U':'カットコア'};
   // フェーズは8/10受領のフェーズ表（引合＝大フェーズ7個）に差し替え
   var deals=[
-    {no:'INQ-2605-011',sig:'g',name:'CT-320 カレントトランス 年間契約',acct:'東海電子工業',part:'CT-320',phase:'仕様詳細決定',amt:'¥ 8,400,000',occ:'2026-05-12',done:'',last:'3日前',who:'田中',key:'tanaka'},
-    {no:'INQ-2606-019',sig:'a',name:'カットコア 追加発注',acct:'関西精密コネクタ',part:'CC-050',phase:'引合検討',amt:'¥ 2,100,000',occ:'2026-06-03',done:'',last:'19日前',who:'鈴木',key:'suzuki'},
-    {no:'INQ-2606-023',sig:'r',name:'手巻きチョーク 試作評価',acct:'北陸プレシジョン',part:'CH-071',phase:'対顧客交渉',amt:'¥ 5,600,000',occ:'2026-06-20',done:'',last:'34日前',who:'田中',key:'tanaka'},
-    {no:'INQ-2607-025',sig:'g',name:'絶縁トランス 定期リピート（月次）',acct:'日本マイクロデバイス',part:'TR-140',phase:'量産準備',amt:'¥ 1,300,000',occ:'2026-07-02',done:'2026-07-30',last:'昨日',who:'鈴木',key:'suzuki'}
+    {no:'INQ-2605-011',sig:'g',name:'CTB-EE1908P3 カレントトランス 年間契約',acct:'東海電子工業',part:'CTB-EE1908P3',phase:'仕様詳細決定',amt:'¥ 8,400,000',occ:'2026-05-12',done:'',last:'3日前',who:'田中',key:'tanaka'},
+    {no:'INQ-2606-019',sig:'a',name:'カットコア 追加発注',acct:'関西精密コネクタ',part:'S23-05051303U',phase:'引合検討',amt:'¥ 2,100,000',occ:'2026-06-03',done:'',last:'19日前',who:'鈴木',key:'suzuki'},
+    {no:'INQ-2606-023',sig:'r',name:'手巻きチョーク 試作評価',acct:'北陸プレシジョン',part:'BA2-35550IM',phase:'対顧客交渉',amt:'¥ 5,600,000',occ:'2026-06-20',done:'',last:'34日前',who:'田中',key:'tanaka'},
+    {no:'INQ-2607-025',sig:'g',name:'絶縁トランス 定期リピート（月次）',acct:'日本マイクロデバイス',part:'GMK4000S001A',phase:'量産準備',amt:'¥ 1,300,000',occ:'2026-07-02',done:'2026-07-30',last:'昨日',who:'鈴木',key:'suzuki'}
   ];
   // クレームは大フェーズ4個
   var claims=[
-    {id:'c1',no:'QCI-2607-02',sev:'amber',sevL:'中',ttl:'端子めっき剥離（外観不良）',acct:'関西精密コネクタ',part:'SC-210',lot:'L2405',ph:'クレーム詳細調査',phc:'amber',occ:'2026-07-15',done:'',who:'佐藤',key:'sato',reads:[['吉','yoshida',0],['木','kida',1]]},
-    {id:'c2',no:'QCI-2604-03',sev:'red',sevL:'重大',ttl:'コア寸法 公差外れ',acct:'東海電子工業',part:'CT-320',lot:'L2312',ph:'対顧客回答検討',phc:'red',occ:'2026-04-20',done:'',who:'佐藤',key:'sato',reads:[['吉','yoshida',1],['田','tanaka',1]]},
-    {id:'c3',no:'QCI-2606-01',sev:'gray',sevL:'軽微',ttl:'梱包ラベル 誤記',acct:'日本マイクロデバイス',part:'TR-140',lot:'L2404',ph:'クローズ',phc:'green',occ:'2026-06-11',done:'2026-06-18',who:'木田',key:'kida',reads:[['佐','sato',1]]}
+    {id:'c1',no:'QCI-2607-02',sev:'amber',sevL:'中',ttl:'端子めっき剥離（外観不良）',acct:'関西精密コネクタ',part:'KH200Y203G102',lot:'L2405',ph:'クレーム詳細調査',phc:'amber',occ:'2026-07-15',done:'',who:'佐藤',key:'sato',reads:[['吉','yoshida',0],['木','kida',1]]},
+    {id:'c2',no:'QCI-2604-03',sev:'red',sevL:'重大',ttl:'コア寸法 公差外れ',acct:'東海電子工業',part:'CTB-EE1908P3',lot:'L2312',ph:'対顧客回答検討',phc:'red',occ:'2026-04-20',done:'',who:'佐藤',key:'sato',reads:[['吉','yoshida',1],['田','tanaka',1]]},
+    {id:'c3',no:'QCI-2606-01',sev:'gray',sevL:'軽微',ttl:'梱包ラベル 誤記',acct:'日本マイクロデバイス',part:'GMK4000S001A',lot:'L2404',ph:'クローズ',phc:'green',occ:'2026-06-11',done:'2026-06-18',who:'木田',key:'kida',reads:[['佐','sato',1]]}
   ];
   // 採番（8/4に先方からご提供いただいた実ルールを反映）
   //  クレーム: QCI-<年度+月>-<受付順2桁>  例 QCI-2604-01（QCI=固定／2604=年度+月／-01=クレーム受付順）
@@ -1714,25 +1739,25 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   var XKEYS=[{k:'main',l:'メインカテゴリー'},{k:'sub',l:'サブカテゴリー'},{k:'subj',l:'件名'},{k:'acct',l:'取引先'},{k:'cat',l:'品種'},{k:'part',l:'品番'},{k:'st',l:'ステータス'}];
   // v0.12: 8/10受領のカテゴリー5／件名62／品種10種に差し替え
   var XRECS=[
-    {d:'2026-08-17',kind:'f1',main:'対顧客活動',sub:'—',subj:'引合案件（一般）',acct:'東海電子工業',cat:'カレントトランス',part:'CT-320',st:'仕様詳細決定',ttl:'東海電子工業 訪問 — CT-320 引合（年間12万個の内示）'},
-    {d:'2026-08-12',kind:'f1',main:'対顧客活動',sub:'—',subj:'ＶＡ提案',acct:'東海電子工業',cat:'カレントトランス',part:'CT-320H',st:'仕様詳細決定',ttl:'東海電子工業 — CT-320H 高精度品のＶＡ提案'},
-    {d:'2026-08-05',kind:'f1',main:'対顧客活動',sub:'—',subj:'所要情報',acct:'東海電子工業',cat:'チョークコイル（自動巻き）',part:'CH-208',st:'引合検討',ttl:'東海電子工業 — CH-208 の所要見込みヒアリング'},
-    {d:'2026-08-03',kind:'f1',main:'対顧客活動',sub:'—',subj:'売価改定',acct:'関西精密コネクタ',cat:'センサーコア',part:'SC-210',st:'引合検討',ttl:'関西精密コネクタ — SC-210 売価改定の申し入れ'},
-    {d:'2026-04-20',kind:'f1',main:'対顧客活動',sub:'—',subj:'クレーム・解析依頼対応',acct:'東海電子工業',cat:'カレントトランス',part:'CT-320',st:'対顧客回答検討',ttl:'東海電子工業 品質クレーム — コア寸法 公差外れ（L2312）'},
-    {d:'2026-07-15',kind:'f1',main:'対顧客活動',sub:'—',subj:'クレーム・解析依頼対応',acct:'関西精密コネクタ',cat:'センサーコア',part:'SC-210',st:'クレーム詳細調査',ttl:'関西精密コネクタ 品質クレーム — 端子めっき剥離（L2405）'},
-    {d:'2026-07-20',kind:'f4',main:'社内会議',sub:'個別事案対応',subj:'クレーム・解析依頼対応',acct:'関西精密コネクタ',cat:'センサーコア',part:'SC-210',st:'クレーム詳細調査',ttl:'クレーム解析会議 — めっき剥離の原因調査 一次報告'},
-    {d:'2026-07-28',kind:'f5',main:'その他情報',sub:'生産拠点対応',subj:'協力会社Ａ',acct:'関西精密コネクタ',cat:'センサーコア',part:'SC-210',st:'クレーム詳細調査',ttl:'協力会社Ａ — めっき剥離の工程対策 展開依頼'},
-    {d:'2026-08-08',kind:'f1',main:'対顧客活動',sub:'—',subj:'新規活動（引合前）',acct:'北陸プレシジョン',cat:'チョークコイル（手巻き）',part:'CH-071',st:'対顧客交渉',ttl:'北陸プレシジョン — 手巻きチョーク CH-071 の新規提案'},
-    {d:'2026-08-02',kind:'f1',main:'対顧客活動',sub:'—',subj:'引合案件（数量情報）',acct:'日本マイクロデバイス',cat:'トランス',part:'TR-140',st:'量産準備',ttl:'日本マイクロデバイス Ｗｅｂ — 既存品リピートの数量確認'},
+    {d:'2026-08-17',kind:'f1',main:'対顧客活動',sub:'—',subj:'引合案件（一般）',acct:'東海電子工業',cat:'カレントトランス',part:'CTB-EE1908P3',st:'仕様詳細決定',ttl:'東海電子工業 訪問 — CTB-EE1908P3 引合（年間12万個の内示）'},
+    {d:'2026-08-12',kind:'f1',main:'対顧客活動',sub:'—',subj:'ＶＡ提案',acct:'東海電子工業',cat:'カレントトランス',part:'CTS-EE0904MR',st:'仕様詳細決定',ttl:'東海電子工業 — CTS-EE0904MR 高精度品のＶＡ提案'},
+    {d:'2026-08-05',kind:'f1',main:'対顧客活動',sub:'—',subj:'所要情報',acct:'東海電子工業',cat:'ＣＳ（品種名 要確認）',part:'BA2-26182IM',st:'引合検討',ttl:'東海電子工業 — BA2-26182IM の所要見込みヒアリング'},
+    {d:'2026-08-03',kind:'f1',main:'対顧客活動',sub:'—',subj:'売価改定',acct:'関西精密コネクタ',cat:'センサーコア',part:'KH200Y203G102',st:'引合検討',ttl:'関西精密コネクタ — KH200Y203G102 売価改定の申し入れ'},
+    {d:'2026-04-20',kind:'f1',main:'対顧客活動',sub:'—',subj:'クレーム・解析依頼対応',acct:'東海電子工業',cat:'カレントトランス',part:'CTB-EE1908P3',st:'対顧客回答検討',ttl:'東海電子工業 品質クレーム — コア寸法 公差外れ（L2312）'},
+    {d:'2026-07-15',kind:'f1',main:'対顧客活動',sub:'—',subj:'クレーム・解析依頼対応',acct:'関西精密コネクタ',cat:'センサーコア',part:'KH200Y203G102',st:'クレーム詳細調査',ttl:'関西精密コネクタ 品質クレーム — 端子めっき剥離（L2405）'},
+    {d:'2026-07-20',kind:'f4',main:'社内会議',sub:'個別事案対応',subj:'クレーム・解析依頼対応',acct:'関西精密コネクタ',cat:'センサーコア',part:'KH200Y203G102',st:'クレーム詳細調査',ttl:'クレーム解析会議 — めっき剥離の原因調査 一次報告'},
+    {d:'2026-07-28',kind:'f5',main:'その他情報',sub:'生産拠点対応',subj:'協力会社Ａ',acct:'関西精密コネクタ',cat:'センサーコア',part:'KH200Y203G102',st:'クレーム詳細調査',ttl:'協力会社Ａ — めっき剥離の工程対策 展開依頼'},
+    {d:'2026-08-08',kind:'f1',main:'対顧客活動',sub:'—',subj:'新規活動（引合前）',acct:'北陸プレシジョン',cat:'ＣＨ（品種名 要確認）',part:'BA2-35550IM',st:'対顧客交渉',ttl:'北陸プレシジョン — 手巻きチョーク BA2-35550IM の新規提案'},
+    {d:'2026-08-02',kind:'f1',main:'対顧客活動',sub:'—',subj:'引合案件（数量情報）',acct:'日本マイクロデバイス',cat:'トランス',part:'GMK4000S001A',st:'量産準備',ttl:'日本マイクロデバイス Ｗｅｂ — 既存品リピートの数量確認'},
     {d:'2026-08-06',kind:'f2',main:'対サプライヤー活動',sub:'—',subj:'価格改定',acct:'第一磁性材料',cat:'—',part:'—',st:'—',ttl:'第一磁性材料 — コア材の価格改定交渉'},
     {d:'2026-08-07',kind:'f2',main:'対サプライヤー活動',sub:'—',subj:'材料不良',acct:'中央電線商会',cat:'—',part:'—',st:'—',ttl:'中央電線商会 — 銅線ロットの外観不良の連絡'},
     {d:'2026-08-10',kind:'f3',main:'その他社外活動',sub:'—',subj:'開発関連',acct:'◯◯大学 工学部',cat:'—',part:'—',st:'—',ttl:'◯◯大学 — 磁性材料の共同研究 打合せ'},
     {d:'2026-08-17',kind:'f4',main:'社内会議',sub:'定例会議',subj:'部内ＭＴＧ（営業）',acct:'（社内）',cat:'—',part:'—',st:'—',ttl:'営業部 週次ミーティング 議事録'},
-    {d:'2026-08-11',kind:'f4',main:'社内会議',sub:'個別事案対応',subj:'引合案件検討',acct:'東海電子工業',cat:'カレントトランス',part:'CT-320',st:'仕様詳細決定',ttl:'CT-320 引合 — 原価試算レビュー'}
+    {d:'2026-08-11',kind:'f4',main:'社内会議',sub:'個別事案対応',subj:'引合案件検討',acct:'東海電子工業',cat:'カレントトランス',part:'CTB-EE1908P3',st:'仕様詳細決定',ttl:'CTB-EE1908P3 引合 — 原価試算レビュー'}
   ];
   function xvals(k){var s=[];XRECS.forEach(function(r){if(r[k]&&r[k]!=='—'&&s.indexOf(r[k])<0)s.push(r[k]);});return s;}
   // 初期値は吉田様にいただいた例（取引先：A社 and 品種：X or Y）と同じ形にしておく
-  var xmRows=[{k:'acct',v:'東海電子工業'},{k:'cat',v:'カレントトランス',j:'AND'},{k:'cat',v:'チョークコイル（自動巻き）',j:'OR'}];
+  var xmRows=[{k:'acct',v:'東海電子工業'},{k:'cat',v:'カレントトランス',j:'AND'},{k:'cat',v:'ＣＳ（品種名 要確認）',j:'OR'}];
   function xmGroups(){var g=[],cur=[];xmRows.forEach(function(r,i){if(i>0&&r.j==='AND'){g.push(cur);cur=[];}cur.push(r);});g.push(cur);return g;}
   function xmLogic(){var n=0;return xmGroups().map(function(g){return g.length>1?'('+g.map(function(){return ++n;}).join(' OR ')+')':String(++n);}).join(' AND ');}
   function xmMatch(){var gs=xmGroups();return XRECS.filter(function(x){return gs.every(function(g){return g.some(function(r){return String(x[r.k]||'')===r.v;});});});}
@@ -1821,13 +1846,200 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   $('#dash-role').addEventListener('click',function(e){var b=e.target.closest('button');if(b){state.dashRole=b.dataset.role;$$('#dash-role button').forEach(function(x){x.classList.toggle('on',x===b);});renderDash();}});
   // 取引先→品種→品番の階層絞り込み（8/4FBで取引先起点の3階層に）
   // v0.12: 品種を8/10受領資料の実データ10種へ差し替え（品番・取引先名はダミー）
-  var PRODTYPES=['センサーコア','モールドコア','単コア','チョークコイル（手巻き）','チョークコイル（自動巻き）','カレントトランス','リアクトル','トランス','カットコア','その他'];
+  var PRODTYPES=['センサーコア','ＣＳ（品種名 要確認）','ＣＨ（品種名 要確認）','ＳＳ（品種名 要確認）','ＳＭ（品種名 要確認）','カレントトランス','リアクトル','トランス','カットコア','その他'];
   var PART_MASTER={
-    '東海電子工業':{'カレントトランス':['CT-320 ／ 貫通型カレントトランス','CT-320H ／ 高精度品'],'チョークコイル（自動巻き）':['CH-208 ／ コモンモードチョーク']},
-    'ネクスティエレクトロニクス（商社）':{'トランス':['TR-140 ／ 絶縁トランス']},
-    '関西精密コネクタ':{'センサーコア':['SC-210 ／ 電流センサーコア'],'カットコア':['CC-050 ／ カットコア 50']},
-    '日本マイクロデバイス':{'リアクトル':['RA-410 ／ 力率改善リアクトル'],'トランス':['TR-140 ／ 絶縁トランス'],'モールドコア':['MC-118 ／ モールドコア']},
-    '北陸プレシジョン':{'チョークコイル（手巻き）':['CH-071 ／ 手巻きチョーク'],'単コア':['UC-030 ／ 単コア']}
+      '東海電子工業': {
+          'その他': [
+              'JP-R166022S'
+          ],
+          'カットコア': [
+              'TSM-211315N'
+          ],
+          'カレントトランス': [
+              'CCB-2208',
+              'CCS-1104P3',
+              'CMB-2208',
+              'CTB-EE1908P3'
+          ],
+          'ＣＨ（品種名 要確認）': [
+              'TCS20-N14040H',
+              'TN2-08102DKB',
+              'TN2-11090',
+              'TN2-20030DK-C'
+          ],
+          'ＣＳ（品種名 要確認）': [
+              'DTS24-N12230HG',
+              'DTS24-N12230VB',
+              'DTS24-N13150VB',
+              'DTS24-N17060VB'
+          ],
+          'ＳＳ（品種名 要確認）': [
+              '882941-10050-B',
+              '882941-10060-A',
+              '882941-10080',
+              '882941-10080-Y'
+          ]
+      },
+      'ネクスティエレクトロニクス（商社）': {
+          'その他': [
+              'JP-R166022S',
+              'KH200M243H01',
+              'KH200M386H02',
+              'KH200M514H03'
+          ],
+          'カットコア': [
+              'S23-05051303U',
+              'S23-08163608C'
+          ],
+          'カレントトランス': [
+              'CCB-2208',
+              'CCS-1104P3',
+              'CMB-2208',
+              'CTB-EE1908P3'
+          ],
+          'センサーコア': [
+              'KH200Y203G102',
+              'KH200Y203G71',
+              'KH200Y203G72',
+              'KH200Y203G73'
+          ],
+          'ＣＨ（品種名 要確認）': [
+              'DC-09150B',
+              'S12HP-1422A-SP',
+              'S12P-1234BH-SP',
+              'S12PB-1410HP'
+          ],
+          'ＣＳ（品種名 要確認）': [
+              'DTS24-N12230VB',
+              'DTS24-N13150VB',
+              'DTS24-N16090VB',
+              'DTS24-N17060VB'
+          ],
+          'ＳＭ（品種名 要確認）': [
+              '030DF-M6000-000',
+              '030DF-M6000-000-MIE',
+              'JC1SNS00001',
+              'JC1SNS00002'
+          ],
+          'ＳＳ（品種名 要確認）': [
+              '0304P-M6149-000',
+              '0304P-M6149-000-Y',
+              '030E5-M6277-001',
+              '030ES-M6031-000'
+          ]
+      },
+      '関西精密コネクタ': {
+          'カレントトランス': [
+              'CCB-2208',
+              'CCB-2208L',
+              'CMB-2208',
+              'CMBL-2208'
+          ],
+          'リアクトル': [
+              'BA2-26182IM',
+              'BA2-35550IM',
+              'CAT-24500B4',
+              'CS-414401MB2'
+          ],
+          'ＣＨ（品種名 要確認）': [
+              'E-2119',
+              'E-2348',
+              'E-2417',
+              'TNM2-14100'
+          ],
+          'ＣＳ（品種名 要確認）': [
+              'DTS30-NP15060VB',
+              'TSD33-N14180VBV',
+              'TSD33-N14260VBV'
+          ],
+          'ＳＳ（品種名 要確認）': [
+              '92.46.08.256.0(HO250)',
+              '92.46.09.783.0(HAH3DR(LONGBEACH3))'
+          ]
+      },
+      '日本マイクロデバイス': {
+          'その他': [
+              'MT700C-M002'
+          ],
+          'カレントトランス': [
+              'CCB-2208',
+              'CCB-2208L',
+              'CCS-1104P',
+              'CCS-1104P3'
+          ],
+          'センサーコア': [
+              'TSJ33-A103'
+          ],
+          'トランス': [
+              'GMK4000S001A',
+              'GMK4000S001A-YONEDA'
+          ],
+          'リアクトル': [
+              'CAT-24500B1',
+              'CS-417381MA1',
+              'CS-417401MB2',
+              'CSH-23750M-H03'
+          ],
+          'ＣＨ（品種名 要確認）': [
+              'TA2-07400NFN',
+              'TD2-16230CS2',
+              'TD2-16230MKS',
+              'TN2-11090'
+          ],
+          'ＣＳ（品種名 要確認）': [
+              'DTS24-N12230HB',
+              'DTS24-N12230HG',
+              'DTS24-N12230VB',
+              'DTS24-N13150HB'
+          ],
+          'ＳＭ（品種名 要確認）': [
+              '92.24.06.248.0(HAH2DR(SEBRING))',
+              'MT700C-M001',
+              'MT700C-M001-TURUSO',
+              'MT700C-M001-TURUSO-FN'
+          ],
+          'ＳＳ（品種名 要確認）': [
+              '72.33.00.122.0',
+              '72.33.00.123.0',
+              '92.36.07.740.0',
+              '92.36.07.741.0'
+          ]
+      },
+      '北陸プレシジョン': {
+          'その他': [
+              'JP-R166022S'
+          ],
+          'カレントトランス': [
+              'CCB-2208',
+              'CCS-1104P',
+              'CCS-1104P3',
+              'CMB-2208'
+          ],
+          'リアクトル': [
+              'CS2-20401TR',
+              'KR-990021-10',
+              'RG56-26360LM'
+          ],
+          'ＣＨ（品種名 要確認）': [
+              'TA2-07400NFN',
+              'TN2-16060DK',
+              'TN2-17080DK-C',
+              'TN2-20030DK-C'
+          ],
+          'ＣＳ（品種名 要確認）': [
+              'DTS24-N12230HB',
+              'DTS24-N13150HB',
+              'DTS24-N13150VB',
+              'DTS24-N16090VB'
+          ],
+          'ＳＭ（品種名 要確認）': [
+              '1102894-00-E'
+          ],
+          'ＳＳ（品種名 要確認）': [
+              'S23-3115220506N-57',
+              'S23-3115220508F-51'
+          ]
+      }
   };
   // サプライヤー→材料カテゴリー（社名はダミー。件数構造は受領リスト＝仕入先×メーカーの2階層を再現）
   var SUPPLIERS={
@@ -1866,7 +2078,8 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   function primaryAcct(){return accts[0]||'';}
   function renderCats(){
     var c=$('#cat-sel');if(!c)return;
-    var a=primaryAcct();var cats=a?Object.keys(PART_MASTER[a]||{}):[];
+    // 品種の並びは PRODTYPES（8/10資料の順）に揃える。五十音順だと「その他」が先頭に来てしまうため
+    var a=primaryAcct();var cats=a?PRODTYPES.filter(function(t){return (PART_MASTER[a]||{})[t];}):[];
     c.disabled=!a;
     c.innerHTML=a?(cats.length?cats.map(function(x){return '<option>'+x+'</option>';}).join(''):'<option value="">この取引先の品種マスタが未登録です</option>'):'<option value="">先に取引先を選択してください</option>';
     renderParts();
@@ -1952,7 +2165,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   var MASTER_DB=[
     ['社員名簿','ＳＨＴ／ＳＨＴプロダクツ／協力会社','部署＞役職＞氏名','名刺取込','ok','受領済（計76名）'],
     ['外部名簿','取引先／サプライヤー／その他','部署＞役職＞氏名','—','ng','未受領'],
-    ['（製品）品番','品種10種','品番（取引先・品種と紐付き）','ＳＨＴ様で作成','warn','「送付済み」とご記載。受領を確認できておりません'],
+    ['（製品）品番','品種10種','品番（取引先・品種と紐付き）','ＳＨＴ様で作成','ok','受領・解析完了（69社／257品番／428明細）'],
     ['取引先リスト','—','社名','名刺取込により作成','ng','未受領'],
     ['サプライヤーリスト','—','社名','名刺取込により作成','ok','受領済（明細110行）'],
     ['その他外部先リスト','—','社名・団体名','名刺取込により作成','ng','未受領'],
