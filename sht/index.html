@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.14)</title>
+<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.15)</title>
 <style>
 /* SHT 活動記録CRM デモ — Salesforce Lightning 風 / 外部依存なし
    （glue hig-japan-sf デモの app.css に準拠）— 2026-07-07 定例FB反映版 */
@@ -847,7 +847,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       <div class="acts"><button class="btn primary" data-goto="activity">活動を記録</button></div>
     </div>
     <div class="fb-note">✅ <b>8/4 反映（v0.10）</b>：引合レコード自体の項目として<b>品種・発生日・完了日</b>を追加しました（従来は活動記録側にのみ入力）。一覧・詳細の両方で確認できます。</div>
-    <div class="fb-note">⚠️ <b>8/4 時点（v0.11）</b>：引合管理番号は「<b>月ごとに表を分けて作成順に採番</b>」まで伺っております。番号フォーマットはお送りいただいた<b>引合管理番号表</b>を確認のうえ差し替える予定のため、<b>現在の表示は仮置き</b>です。8/6の定例でご確認させてください。</div>
+    <div class="fb-note">✅ <b>8/17 反映（v0.15）</b>：お送りいただいた「<b>引合書 管理No.表</b>」の様式を拝見し、引合番号を <span class="code">SMA-2608-01</span> の形式（<b>SMA＝固定／年月／連番</b>）に差し替えました。様式が「◯年◯月度」で1枚のため、<b>連番は月ごとにリセット</b>する前提で実装しています。<br>※ <b>連番の桁数</b>は様式が空欄のため確認できておらず、クレーム番号に合わせて<b>2桁</b>で仮実装しています。また<b>年月</b>がクレーム番号と同じ「年度＋月」か、西暦下2桁＋月かもあわせてご確認させてください。<br>💡 様式の列（作成日／管理No.／作成者／<b>ユーザー名</b>／引合内容）を引合レコードの項目として追加しました。<b>「ユーザー名」は取引先とは別に、実際にお使いになる会社を指すという理解でよろしいでしょうか。</b>商社経由の場合に取引先＝商社、ユーザー＝実需要家、という使い分けと想定しております。</div>
     <div class="fb-note">✅ <b>7/31 反映（v0.8）</b>：<b>引合番号を自動採番</b>（重複防止の連番）。活動記録フォームから新規引合を作成すると、その場で番号が発行されます。</div>
     <div class="lv-toolbar"><span class="count">4 件</span><span class="spring"></span><span class="pill gray">最終接触からの経過で信号機を自動判定</span></div>
     <div class="tbl-wrap">
@@ -870,7 +870,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <div class="acts"><button class="btn" data-goto="activity">活動を記録</button><button class="btn">見積</button><button class="btn primary">編集</button></div>
       </div>
       <div class="rec-fields">
-        <div class="rf"><span class="l">引合番号</span><span class="v"><span class="code">INQ-2605-011</span> <span class="pill gray" style="padding:1px 6px">自動採番</span></span></div>
+        <div class="rf"><span class="l">引合番号</span><span class="v"><span class="code">SMA-2605-01</span> <span class="pill gray" style="padding:1px 6px">自動採番</span></span></div>
         <div class="rf"><span class="l">取引先</span><span class="v"><a data-goto="accounts">東海電子工業</a></span></div>
         <div class="rf"><span class="l">商社経由</span><span class="v">ネクスティエレクトロニクス</span></div>
         <div class="rf"><span class="l">品種</span><span class="v">カレントトランス</span></div>
@@ -904,10 +904,13 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <div class="detail-sec rtab rtab-detail">
           <h3><span class="caret">▾</span> 引合 情報</h3>
           <div class="fgrid">
-            <div class="fitem2"><div class="l">引合番号</div><div class="v">INQ-2605-011 <span class="pill gray" style="padding:1px 6px;font-weight:600">自動採番</span></div></div>
+            <div class="fitem2"><div class="l">引合番号</div><div class="v">SMA-2605-01 <span class="pill gray" style="padding:1px 6px;font-weight:600">自動採番</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>引合名</div><div class="v">CTB-EE1908P3 カレントトランス 年間契約 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>取引先</div><div class="v">東海電子工業 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">商社（販売経路）</div><div class="v">ネクスティエレクトロニクス <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">ユーザー名</div><div class="v">東海電子工業 <span class="pill amber" style="padding:1px 6px">8/17 要確認</span></div></div>
+            <div class="fitem2"><div class="l">作成者</div><div class="v">田中（営業部）<span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l">引合内容</div><div class="v">CT-320 の年間契約に向けた初回引合 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">品種</div><div class="v">カレントトランス <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>製品製品名</div><div class="v">CTB-EE1908P3 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>フェーズ（大分類）</div><div class="v">仕様詳細決定 <span class="pencil">✎</span></div></div>
@@ -1274,10 +1277,10 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   var PART_CAT={'CTB-EE1908P3':'カレントトランス','CTS-EE0904MR':'カレントトランス','KH200Y203G102':'センサーコア','GMK4000S001A':'トランス','BA2-26182IM':'リアクトル','S23-05051303U':'カットコア'};
   // フェーズは8/10受領のフェーズ表（引合＝大フェーズ7個）に差し替え
   var deals=[
-    {no:'INQ-2605-011',sig:'g',name:'CTB-EE1908P3 カレントトランス 年間契約',acct:'東海電子工業',part:'CTB-EE1908P3',phase:'仕様詳細決定',amt:'¥ 8,400,000',occ:'2026-05-12',done:'',last:'3日前',who:'田中',key:'tanaka'},
-    {no:'INQ-2606-019',sig:'a',name:'カットコア 追加発注',acct:'関西精密コネクタ',part:'S23-05051303U',phase:'引合検討',amt:'¥ 2,100,000',occ:'2026-06-03',done:'',last:'19日前',who:'鈴木',key:'suzuki'},
-    {no:'INQ-2606-023',sig:'r',name:'手巻きチョーク 試作評価',acct:'北陸プレシジョン',part:'BA2-35550IM',phase:'対顧客交渉',amt:'¥ 5,600,000',occ:'2026-06-20',done:'',last:'34日前',who:'田中',key:'tanaka'},
-    {no:'INQ-2607-025',sig:'g',name:'絶縁トランス 定期リピート（月次）',acct:'日本マイクロデバイス',part:'GMK4000S001A',phase:'量産準備',amt:'¥ 1,300,000',occ:'2026-07-02',done:'2026-07-30',last:'昨日',who:'鈴木',key:'suzuki'}
+    {no:'SMA-2605-01',sig:'g',name:'CTB-EE1908P3 カレントトランス 年間契約',acct:'東海電子工業',part:'CTB-EE1908P3',phase:'仕様詳細決定',amt:'¥ 8,400,000',occ:'2026-05-12',done:'',last:'3日前',who:'田中',key:'tanaka'},
+    {no:'SMA-2606-02',sig:'a',name:'カットコア 追加発注',acct:'関西精密コネクタ',part:'S23-05051303U',phase:'引合検討',amt:'¥ 2,100,000',occ:'2026-06-03',done:'',last:'19日前',who:'鈴木',key:'suzuki'},
+    {no:'SMA-2606-03',sig:'r',name:'手巻きチョーク 試作評価',acct:'北陸プレシジョン',part:'BA2-35550IM',phase:'対顧客交渉',amt:'¥ 5,600,000',occ:'2026-06-20',done:'',last:'34日前',who:'田中',key:'tanaka'},
+    {no:'SMA-2607-01',sig:'g',name:'絶縁トランス 定期リピート（月次）',acct:'日本マイクロデバイス',part:'GMK4000S001A',phase:'量産準備',amt:'¥ 1,300,000',occ:'2026-07-02',done:'2026-07-30',last:'昨日',who:'鈴木',key:'suzuki'}
   ];
   // クレームは大フェーズ4個
   var claims=[
@@ -1292,13 +1295,15 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   //  引合: 「月ごとに表を分けて作成順に採番」までは伺い済み。番号フォーマットは受領資料（引合管理番号表）の
   //        確認後に差し替え予定のため、現状は仮置きのまま
   var DEMO_YM='2608';                 // デモ上の現在＝2026年度8月
-  var seq={INQ:25,QCI:0};             // QCIは当月（2608）の受付実績0件からスタート
+  var seq={SMA:4,QCI:0};              // 当月（2608）の作成実績からスタート
   function padN(n,d){return ('0000'+n).slice(-d);}
+  // 引合: SMA-<年月>-<連番>  （8/17受領「引合書 管理No.表」の様式より）
+  //   SMA=固定／年月／連番。表が「◯年◯月度」で1枚のため、連番は月ごとにリセットする前提で実装
+  //   ※連番の桁数は様式が空欄のため未確認。クレーム（QCI）に合わせて2桁で仮実装
+  // クレーム: QCI-<年度+月>-<受付順2桁>
   function nextNo(prefix){
     seq[prefix]=(seq[prefix]||0)+1;
-    return prefix==='QCI'
-      ? 'QCI-'+DEMO_YM+'-'+padN(seq.QCI,2)   // 実ルール
-      : prefix+'-'+DEMO_YM+'-'+padN(seq[prefix],3); // 引合は仮置き
+    return prefix+'-'+DEMO_YM+'-'+padN(seq[prefix],2);
   }
   var cardRows=[
     {mail:'t.yamada@tokai-denshi.co.jp',ex:'山田 太郎（調達本部）',nw:'山田 太郎（購買二部）',diff:'部署変更',ok:'merge'},
@@ -1694,7 +1699,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       else{pw.style.display='none';}
     });
     $('#deal-create').addEventListener('click',function(){
-      var sel=$('#deal-sel'),no=nextNo('INQ'),o=document.createElement('option');o.value='dn';o.textContent='（新規）'+no+' CT-410 試作 引合';
+      var sel=$('#deal-sel'),no=nextNo('SMA'),o=document.createElement('option');o.value='dn';o.textContent='（新規）'+no+' CT-410 試作 引合';
       sel.insertBefore(o,sel.firstChild);sel.value='dn';$('#deal-new').hidden=true;
       var pw=$('#deal-phase-wrap');pw.style.display='';pw.innerHTML='現在のフェーズ: <b>引合入手</b> <span class="pill gray" style="padding:1px 6px">新規・自動設定</span> ／ 引合番号: <b>'+no+'</b> <span class="pill gray" style="padding:1px 6px">自動採番</span>';
       toast('この画面で新規引合を作成し、引合番号 '+no+' を自動採番して紐付けました（別画面への移動なし）');
