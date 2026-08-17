@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.13)</title>
+<title>SHT様｜活動記録CRM Salesforce 画面デモ (v0.14)</title>
 <style>
 /* SHT 活動記録CRM デモ — Salesforce Lightning 風 / 外部依存なし
    （glue hig-japan-sf デモの app.css に準拠）— 2026-07-07 定例FB反映版 */
@@ -320,7 +320,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
 <body>
 <div class="appbar">
   <div class="logo"><span class="badge">SHT</span> 活動記録CRM</div>
-  <div class="search"><input placeholder="検索（取引先・品番・活動記録…）"></div>
+  <div class="search"><input placeholder="検索（取引先・製品名・活動記録…）"></div>
   <div class="right">
     <span style="color:#cfe3f7;font-size:10.5px;font-weight:700">閲覧者:</span>
     <div class="viewer" id="viewer">
@@ -376,10 +376,10 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
           <tr><td><b>ご質問：取引先／サプライヤー／その他活動先は別DBか</b></td><td>Glueの考えを回答としてまとめました</td><td><a data-goto="master">マスタ</a></td></tr>
         </tbody>
       </table>
-      <div style="margin-top:8px">📌 <b>ご確認いただきたい点が3つあります</b>：①8/6の定例では「カテゴリーは引き合い・クレーム・その他の2〜3個」というお話でしたが、8/10の資料は<b>5カテゴリー</b>でしたので<b>資料のほうを採用</b>しています ②件名は<b>複数選択</b>のままでよろしいでしょうか ③<b>品番マスタが受領できておりません</b>（資料には「送付済み」とご記載がありました）</div>
+      <div style="margin-top:8px">📌 <b>ご確認いただきたい点が3つあります</b>：①8/6の定例では「カテゴリーは引き合い・クレーム・その他の2〜3個」というお話でしたが、8/10の資料は<b>5カテゴリー</b>でしたので<b>資料のほうを採用</b>しています ②件名は<b>複数選択</b>のままでよろしいでしょうか ③<b>製品名マスタが受領できておりません</b>（資料には「送付済み」とご記載がありました）</div>
     </div>
     <div class="fb-note">✅ <b>7/31 反映（v0.8）</b>：活動記録フィードに<b>📌固定表示</b>ボタンを追加。確認済みの記録でも、押しておけば一覧の先頭に固定表示され続けます（各記録の右下の📌ボタンで切替）。</div>
-    <div class="fb-note">✅ <b>7/22定例FB 反映（v0.3）</b>：①<b>入力UI 3案</b>で入力負荷を軽減（別タブ） ②活動記録の<b>件名を候補リスト化</b>し表記ゆれ防止 ③<b>品種→品番</b>の階層構造 ④<b>複数取引先</b>への紐付け ⑤取引先選択で当該会社・品番の活動履歴を絞り込み ⑥<b>承認フロー</b>（入口でテンプレ分け、細部の閲覧・変更は承認）</div>
+    <div class="fb-note">✅ <b>7/22定例FB 反映（v0.3）</b>：①<b>入力UI 3案</b>で入力負荷を軽減（別タブ） ②活動記録の<b>件名を候補リスト化</b>し表記ゆれ防止 ③<b>品種→製品名</b>の階層構造 ④<b>複数取引先</b>への紐付け ⑤取引先選択で当該会社・製品名の活動履歴を絞り込み ⑥<b>承認フロー</b>（入口でテンプレ分け、細部の閲覧・変更は承認）</div>
     <div class="demo-note">⚠️ レビュー用デモです。<b>本デモは一般公開されているため、会社名・お名前はすべてダミーに置き換えています</b>（協力会社4社は「協力会社Ａ〜Ｄ」と表記）。<b>品種10種・材料カテゴリー7種・件名62種・フェーズは、いただいた資料のまま</b>反映しています。スクショや手書きメモでのFBをSlackにお送りください。</div>
 
     <div class="grid g4" style="margin-bottom:16px">
@@ -434,12 +434,12 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       ・<b>対顧客活動</b>（form①・件名19）／<b>対サプライヤー活動</b>（form②・件名4）／<b>その他社外活動</b>（form③・件名2）はサブカテゴリー無し<br>
       ・<b>社内会議</b>（form④・サブ3／件名30）／<b>その他情報</b>（form⑤・サブ2／件名7）はサブカテゴリーあり<br>
       新規項目として <b>件名（詳細）の手入力</b>・<b>活動種別7種</b>・<b>先方／当方の複数選択</b>・<b>会議名ごとの参加者プリセット</b> を追加しています。必須項目（★）もフォームごとに出し分けています。</div>
-    <div class="fb-note">✅ <b>8/4 反映（v0.11）</b>：活動記録の横断検索に<b>複数条件（AND/OR）</b>タブを追加しました。<b>メインカテゴリー／サブカテゴリー／件名／取引先／品種／品番／ステータス</b>の各キーを<b>一度の検索で同時に指定</b>でき、条件どうしを<b>AND / OR</b>で組み合わせられます。連続する OR は1つのまとまりとして扱うため、いただいた例（取引先：A社 and 品種：X or Y）はそのまま <span class="code">1 AND (2 OR 3)</span> として表現されます。</div>
-    <div class="fb-note">✅ <b>8/4 反映（v0.9）</b>：品番の入力方法を<b>取引先＞品種＞品番</b>の3階層選択に変更しました。取引先を追加すると（複数紐付け時は最初の1社を基準に）、その取引先が取り扱う品種・品番だけが選択肢に絞り込まれます。品種・品番のマスタデータは取引先ごとに保持する構成です（名刺管理と同様、マスタとして登録済みの情報を活動記録側から参照する形）。</div>
+    <div class="fb-note">✅ <b>8/4 反映（v0.11）</b>：活動記録の横断検索に<b>複数条件（AND/OR）</b>タブを追加しました。<b>メインカテゴリー／サブカテゴリー／件名／取引先／品種／製品名／ステータス</b>の各キーを<b>一度の検索で同時に指定</b>でき、条件どうしを<b>AND / OR</b>で組み合わせられます。連続する OR は1つのまとまりとして扱うため、いただいた例（取引先：A社 and 品種：X or Y）はそのまま <span class="code">1 AND (2 OR 3)</span> として表現されます。</div>
+    <div class="fb-note">✅ <b>8/4 反映（v0.9）</b>：製品名の入力方法を<b>取引先＞品種＞製品名</b>の3階層選択に変更しました。取引先を追加すると（複数紐付け時は最初の1社を基準に）、その取引先が取り扱う品種・製品名だけが選択肢に絞り込まれます。品種・製品名のマスタデータは取引先ごとに保持する構成です（名刺管理と同様、マスタとして登録済みの情報を活動記録側から参照する形）。</div>
     <div class="fb-note">✅ <b>7/31 反映（v0.8）</b>：<b>引合番号・クレーム番号を自動採番</b>するようにしました。「関連する引合」「関連するクレーム」で<b>新規作成</b>を選ぶと、既存番号と重複しない番号がその場で発行されます（紙での手管理からの脱却）。</div>
     <div class="fb-note">✅ <b>7/30 要件反映（v0.7）</b>：活動記録のカテゴリを<b>メイン5分類→サブカテゴリ→件名</b>の階層に（Excel設計案準拠）／<b>必須未入力は確認送信不可</b>／横断検索に<b>本文キーワード</b>を追加。</div>
-    <div class="fb-note">✅ <b>7/23FB反映（v0.4）</b>：<b>件名を複数選択可</b>（1訪問で複数の用件）＋<b>件名候補はカテゴリ連動</b>で出し分け。カテゴリは1つに整理（2階層想定）。品番は<b>品種→品番</b>の2段選択／取引先は<b>複数紐付け</b>可。</div>
-    <div class="fb-note">✅ <b>7/28FB反映（v0.5）</b>：活動記録の横断検索を<b>品番×取引先</b>だけでなく<b>カテゴリ（品種→品番の第2階層）</b>や<b>件名</b>でも検索できるように拡張しました（右側「活動記録の横断検索」カードの切替タブでご確認いただけます）。</div>
+    <div class="fb-note">✅ <b>7/23FB反映（v0.4）</b>：<b>件名を複数選択可</b>（1訪問で複数の用件）＋<b>件名候補はカテゴリ連動</b>で出し分け。カテゴリは1つに整理（2階層想定）。製品名は<b>品種→製品名</b>の2段選択／取引先は<b>複数紐付け</b>可。</div>
+    <div class="fb-note">✅ <b>7/28FB反映（v0.5）</b>：活動記録の横断検索を<b>製品名×取引先</b>だけでなく<b>カテゴリ（品種→製品名の第2階層）</b>や<b>件名</b>でも検索できるように拡張しました（右側「活動記録の横断検索」カードの切替タブでご確認いただけます）。</div>
     <div class="fb-note">✅ <b>7/27–28FB反映（v0.6）</b>：①「関連する引合」で<b>新規引合をこの画面で作成→紐付け</b>（別画面移動なし）②既存引合を選ぶと<b>現在フェーズを自動表示</b>（毎回選択不要）③レコード側で<b>入力完了の取消（本人のみ＋回覧済みへ通知）</b>と<b>引合紐付けの後追い変更</b>（プレ検討→正式引合化で遡り紐付け）に対応。</div>
 
     <div class="grid g2">
@@ -468,7 +468,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
           </div>
 
           <!-- 相手先：カテゴリーにより 取引先／サプライヤー／活動先 が切り替わる -->
-          <div class="field tf tf-f1 tf-f4 tf-f5"><label><span class="req" id="acct-req">★</span>取引先 <span class="help" style="display:inline">（複数紐付け可・最初の1社が品番の絞り込み基準）</span></label>
+          <div class="field tf tf-f1 tf-f4 tf-f5"><label><span class="req" id="acct-req">★</span>取引先 <span class="help" style="display:inline">（複数紐付け可・最初の1社が製品名の絞り込み基準）</span></label>
             <div id="acct-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
             <select id="acct-add"><option value="">＋ 取引先を追加…</option><option>東海電子工業</option><option>ネクスティエレクトロニクス（商社）</option><option>関西精密コネクタ</option><option>日本マイクロデバイス</option><option>北陸プレシジョン</option></select>
             <p class="help" id="parent-help">商社経由の場合は親会社も自動で紐付きます</p>
@@ -509,9 +509,9 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
             <div class="field"><label>対象品種（取引先で絞り込み）</label>
               <select id="cat-sel"></select>
             </div>
-            <div class="field"><label>対象品番（取引先＞品種で絞り込み）</label>
+            <div class="field"><label>対象製品名（取引先＞品種で絞り込み）</label>
               <select id="part-sel"></select>
-              <p class="help">取引先→品種→品番の階層。品種は<b>8/10受領の実データ10種</b>に差し替え済みです</p>
+              <p class="help">取引先→品種→製品名の階層。品種は<b>8/10受領の実データ10種</b>に差し替え済みです</p>
             </div>
           </div>
           <div class="field tf tf-f2 tf-f4 tf-f5"><label>対象材料カテゴリー</label>
@@ -578,7 +578,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <div class="hd">活動記録の横断検索<span class="sub">8/4 FB反映</span>
           <div class="seg" id="xs-seg" style="margin-left:auto">
             <button data-xm="multi" class="on">複数条件 AND/OR</button>
-            <button data-xm="part">品番×取引先</button>
+            <button data-xm="part">製品名×取引先</button>
             <button data-xm="cat">カテゴリ</button>
             <button data-xm="subj">件名</button>
             <button data-xm="text">本文</button>
@@ -593,12 +593,12 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
             </div>
           </div>
           <div class="row2 xs-mode" id="xs-part" style="margin-bottom:10px;display:none">
-            <div class="field" style="margin:0"><label>品番</label><select id="x-part"><option>CTB-EE1908P3</option><option>KH200Y203G102</option><option>GMK4000S001A</option></select></div>
+            <div class="field" style="margin:0"><label>製品名</label><select id="x-part"><option>CTB-EE1908P3</option><option>KH200Y203G102</option><option>GMK4000S001A</option></select></div>
             <div class="field" style="margin:0"><label>取引先</label><select id="x-acct"><option>すべて</option><option>東海電子工業</option><option>関西精密コネクタ</option></select></div>
           </div>
           <div class="row2 xs-mode" id="xs-cat" style="margin-bottom:10px;display:none">
             <div class="field" style="margin:0"><label>品種（実データ10種）</label><select id="x-cat1"></select></div>
-            <div class="field" style="margin:0"><label>品番（第2階層）</label><select id="x-cat2"></select></div>
+            <div class="field" style="margin:0"><label>製品名（第2階層）</label><select id="x-cat2"></select></div>
           </div>
           <div class="row2 xs-mode" id="xs-subj" style="margin-bottom:10px;display:none">
             <div class="field" style="margin:0"><label>カテゴリー／サブカテゴリー</label><select id="x-subjcat"></select></div>
@@ -637,7 +637,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       </div></div>
       <div class="card"><div class="bd">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span class="pill pur">案B</span><b>ガイド型ウィザード</b></div>
-        <div class="help" style="margin-bottom:8px">カテゴリ→取引先→品番→内容を<b>1問ずつ</b>。必須だけ表示。</div>
+        <div class="help" style="margin-bottom:8px">カテゴリ→取引先→製品名→内容を<b>1問ずつ</b>。必須だけ表示。</div>
         <div class="mini-legend" style="gap:8px"><span class="pill gray">速さ ★★</span><span class="pill green">漏れ防止 ★★★</span></div>
         <div style="font-size:12px;margin-top:8px"><b>向く</b>：入力に不慣れでも漏れなく。表記ゆれゼロ。</div>
       </div></div>
@@ -667,13 +667,13 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
               <div style="flex:2;min-width:200px"><label class="help">ひとことメモ</label><input style="width:100%;border:1px solid var(--line-d);border-radius:5px;padding:8px 10px" placeholder="年間12万個の内示見込み"></div>
               <button class="btn primary" id="ui3-a-btn">登録</button>
             </div>
-            <div style="margin-top:8px"><span class="pill gray">取引先・品番・回覧先は前回値を自動セット</span> <a class="help">＋詳細を追記</a></div>
+            <div style="margin-top:8px"><span class="pill gray">取引先・製品名・回覧先は前回値を自動セット</span> <a class="help">＋詳細を追記</a></div>
           </div>
         </div>
         <!-- 案B preview -->
         <div class="ui3p" id="ui3-b" hidden>
           <div style="max-width:560px">
-            <div class="path" style="margin-bottom:12px"><div class="st done">①カテゴリ</div><div class="st cur">②取引先</div><div class="st">③品番</div><div class="st">④内容</div></div>
+            <div class="path" style="margin-bottom:12px"><div class="st done">①カテゴリ</div><div class="st cur">②取引先</div><div class="st">③製品名</div><div class="st">④内容</div></div>
             <div class="help" style="margin-bottom:8px">💡 1画面1問。押すだけで進むので迷いません。</div>
             <div style="font-weight:700;margin-bottom:8px">取引先を選択</div>
             <div style="display:flex;flex-direction:column;gap:8px">
@@ -681,7 +681,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
               <button class="btn" style="justify-content:flex-start" data-ui3b>関西精密コネクタ</button>
               <button class="btn" style="justify-content:flex-start" data-ui3b>ネクスティエレクトロニクス（商社）</button>
             </div>
-            <div style="margin-top:10px"><span class="pill blue">残り2問（品番・内容）</span></div>
+            <div style="margin-top:10px"><span class="pill blue">残り2問（製品名・内容）</span></div>
           </div>
         </div>
         <!-- 案C preview -->
@@ -698,7 +698,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
                 <div class="fitem2"><div class="l">取引先</div><div class="v">東海電子工業 <span class="pill green">自動</span></div></div>
                 <div class="fitem2"><div class="l">日時</div><div class="v">7/24 14:00 <span class="pill green">自動</span></div></div>
                 <div class="fitem2"><div class="l">件名</div><div class="v">訪問 <span class="pill green">自動</span></div></div>
-                <div class="fitem2"><div class="l">品番</div><div class="v">CTB-EE1908P3 <span class="pill green">前回踏襲</span></div></div>
+                <div class="fitem2"><div class="l">製品名</div><div class="v">CTB-EE1908P3 <span class="pill green">前回踏襲</span></div></div>
               </div>
               <div class="field" style="margin-top:10px"><label>内容（ここだけ入力）</label><textarea style="width:100%;border:1px solid var(--line-d);border-radius:5px;padding:8px 10px" placeholder="面談で確認した事項・次アクション"></textarea></div>
             </div>
@@ -753,7 +753,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     </div>
     <div class="tbl-wrap">
       <table class="lvt" style="border-radius:0 0 8px 8px">
-        <thead><tr><th class="chk"><input type="checkbox"></th><th>報告者 / 種別</th><th>件名</th><th>取引先 / 品番</th><th>既読状況</th><th style="text-align:right"></th></tr></thead>
+        <thead><tr><th class="chk"><input type="checkbox"></th><th>報告者 / 種別</th><th>件名</th><th>取引先 / 製品名</th><th>既読状況</th><th style="text-align:right"></th></tr></thead>
         <tbody id="inbox-body"></tbody>
       </table>
     </div>
@@ -799,7 +799,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
           <div class="bd" style="padding:12px 14px"><div id="rec-readers"></div></div>
         </div>
         <div class="related act-panel">
-          <div class="rl-hd"><span class="obj-icon o-act">📋</span> 同じ品番の履歴<span class="sp"></span></div>
+          <div class="rl-hd"><span class="obj-icon o-act">📋</span> 同じ製品名の履歴<span class="sp"></span></div>
           <div class="tl">
             <div class="item"><span class="dot"></span><div class="when">7/1 ・ Web商談 ・ 田中</div><div class="body">技術仕様の詰め（CTB-EE1908P3）</div></div>
             <div class="item"><span class="dot"></span><div class="when">6/24 ・ 訪問 ・ 田中</div><div class="body">初回引合ヒアリング（CTB-EE1908P3）</div></div>
@@ -851,7 +851,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     <div class="fb-note">✅ <b>7/31 反映（v0.8）</b>：<b>引合番号を自動採番</b>（重複防止の連番）。活動記録フォームから新規引合を作成すると、その場で番号が発行されます。</div>
     <div class="lv-toolbar"><span class="count">4 件</span><span class="spring"></span><span class="pill gray">最終接触からの経過で信号機を自動判定</span></div>
     <div class="tbl-wrap">
-      <table class="lvt"><thead><tr><th class="chk">状態</th><th>引合番号</th><th>引合名</th><th>取引先</th><th>品番</th><th>品種</th><th>フェーズ</th><th class="num">見込金額</th><th>発生日</th><th>完了日</th><th>最終接触</th><th>担当</th></tr></thead>
+      <table class="lvt"><thead><tr><th class="chk">状態</th><th>引合番号</th><th>引合名</th><th>取引先</th><th>製品名</th><th>品種</th><th>フェーズ</th><th class="num">見込金額</th><th>発生日</th><th>完了日</th><th>最終接触</th><th>担当</th></tr></thead>
         <tbody id="deals-body"></tbody>
       </table>
     </div>
@@ -874,7 +874,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         <div class="rf"><span class="l">取引先</span><span class="v"><a data-goto="accounts">東海電子工業</a></span></div>
         <div class="rf"><span class="l">商社経由</span><span class="v">ネクスティエレクトロニクス</span></div>
         <div class="rf"><span class="l">品種</span><span class="v">カレントトランス</span></div>
-        <div class="rf"><span class="l">品番</span><span class="v"><span class="code">CTB-EE1908P3</span></span></div>
+        <div class="rf"><span class="l">製品名</span><span class="v"><span class="code">CTB-EE1908P3</span></span></div>
         <div class="rf"><span class="l">状態</span><span class="v"><span class="signal g"><i class="g"></i><i class="a"></i><i class="r"></i></span> 順調</span></div>
         <div class="rf"><span class="l">見込金額</span><span class="v">¥ 8,400,000</span></div>
         <div class="rf"><span class="l">確度</span><span class="v">75%</span></div>
@@ -909,7 +909,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
             <div class="fitem2"><div class="l"><span class="req">*</span>取引先</div><div class="v">東海電子工業 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">商社（販売経路）</div><div class="v">ネクスティエレクトロニクス <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">品種</div><div class="v">カレントトランス <span class="pencil">✎</span></div></div>
-            <div class="fitem2"><div class="l"><span class="req">*</span>製品品番</div><div class="v">CTB-EE1908P3 <span class="pencil">✎</span></div></div>
+            <div class="fitem2"><div class="l"><span class="req">*</span>製品製品名</div><div class="v">CTB-EE1908P3 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>フェーズ（大分類）</div><div class="v">仕様詳細決定 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l"><span class="req">*</span>見込金額</div><div class="v">¥ 8,400,000 <span class="pencil">✎</span></div></div>
             <div class="fitem2"><div class="l">確度（大フェーズ連動）</div><div class="v">75% <span class="pencil">✎</span></div></div>
@@ -921,9 +921,9 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
           </div>
         </div>
         <div class="related rtab rtab-related" hidden>
-          <div class="rl-hd"><span class="obj-icon o-prod">📦</span> 対象品番<span class="cnt">(3)</span><span class="sp"></span><a class="more">品番を追加</a></div>
+          <div class="rl-hd"><span class="obj-icon o-prod">📦</span> 対象製品名<span class="cnt">(3)</span><span class="sp"></span><a class="more">製品名を追加</a></div>
           <div class="tbl-wrap"><table class="lvt" style="border:0;border-radius:0">
-            <thead><tr><th>品番</th><th>品名</th><th class="num">単価</th><th class="num">年間数量</th><th class="num">年間金額</th></tr></thead>
+            <thead><tr><th>製品名</th><th>品名</th><th class="num">単価</th><th class="num">年間数量</th><th class="num">年間金額</th></tr></thead>
             <tbody>
               <tr><td><span class="code">CTB-EE1908P3</span></td><td>貫通型カレントトランス</td><td class="num">¥58</td><td class="num">96,000</td><td class="num">¥5.6M</td></tr>
               <tr><td><span class="code">CTS-EE0904MR</span></td><td>高精度品</td><td class="num">¥64</td><td class="num">18,000</td><td class="num">¥1.2M</td></tr>
@@ -959,7 +959,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     <div class="fb-note">✅ <b>8/4 反映（v0.11）</b>：クレーム番号を、ご提供いただいた実際の採番ルール <span class="code">QCI-2604-01</span>（QCI＝固定／2604＝年度＋月／-01＝クレーム受付順）に差し替えました。<b>末尾の M・H は付与しません</b>。新規クレームを作成すると当月の受付順で自動採番されます。<br>※ 年度をまたぐ2027年1〜3月の表記（<span class="code">2701</span> か <span class="code">2613</span> か）は確認中のため、本デモは2026年度内の番号のみ表示しています。</div>
     <div class="fb-note">✅ <b>8/4 反映（v0.10）</b>：クレームレコード自体の項目として<b>品種・発生日・完了日</b>を追加しました（従来は活動記録側にのみ入力）。クローズ済みのクレームは完了日が表示されます。</div>
     <div class="fb-note">✅ <b>7/31 反映（v0.8）</b>：<b>クレーム番号を自動採番</b>。活動記録フォームの「関連するクレーム」から新規作成すると、その場で番号が発行されます。</div>
-    <div class="fb-note">✅ <b>7/7FB反映</b>：①引合と同様の<b>フェーズ管理</b>を適用 ②<b>製品品番</b>欄を追加し品番×取引先で横断検索 ③1レコード追記更新／都度新規レコード紐づけの両方式に対応</div>
+    <div class="fb-note">✅ <b>7/7FB反映</b>：①引合と同様の<b>フェーズ管理</b>を適用 ②<b>製品製品名</b>欄を追加し製品名×取引先で横断検索 ③1レコード追記更新／都度新規レコード紐づけの両方式に対応</div>
 
     <div class="fb-note">✅ <b>8/10 反映（v0.12）</b>：いただいたフェーズ表のとおり、品質クレームを<b>大フェーズ4個 ＋ フェーズ内手続き14個</b>の2段構造にしました。引合と同じくチェックの取り消しが可能です。<br>💡 <b>Glueからのご提案</b>：「受付」に<b>解析依頼受付／クレーム受付</b>の2入口、「クローズ」に<b>クローズ（クレーム）／クローズ（解析依頼）</b>の2出口があるため、<b>区分（クレーム／解析依頼）</b>という項目を設けて出し分ける構成をご提案します。顧客報告の要否が変わるはずのため、レポートも分離できます。</div>
 
@@ -971,9 +971,9 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       </div>
     </div>
 
-    <div class="lv-toolbar"><span class="count">3 件</span><span class="spring"></span><input class="s" placeholder="品番で絞り込み..."></div>
+    <div class="lv-toolbar"><span class="count">3 件</span><span class="spring"></span><input class="s" placeholder="製品名で絞り込み..."></div>
     <div class="tbl-wrap">
-      <table class="lvt"><thead><tr><th class="chk">重大度</th><th>クレーム番号</th><th>件名</th><th>取引先</th><th>品番 / ロット</th><th>品種</th><th>フェーズ</th><th>発生日</th><th>完了日</th><th>報告者</th><th>回覧</th></tr></thead>
+      <table class="lvt"><thead><tr><th class="chk">重大度</th><th>クレーム番号</th><th>件名</th><th>取引先</th><th>製品名 / ロット</th><th>品種</th><th>フェーズ</th><th>発生日</th><th>完了日</th><th>報告者</th><th>回覧</th></tr></thead>
         <tbody id="claims-body"></tbody>
       </table>
     </div>
@@ -1100,17 +1100,17 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     </div>
 
     <div class="card" style="margin-bottom:16px">
-      <div class="hd">⚠️ 品番と取引先は「多対多」でした<span class="sub">8/17受領データの検証結果 — 設計に影響します</span></div>
+      <div class="hd">⚠️ 製品名と取引先は「多対多」でした<span class="sub">8/17受領データの検証結果 — 設計に影響します</span></div>
       <div class="bd">
         <div class="grid g4" style="margin-bottom:12px">
           <div class="kpi"><div class="label">明細</div><div class="val tnum">428<small> 行</small></div></div>
           <div class="kpi"><div class="label">得意先</div><div class="val tnum">69<small> 社</small></div></div>
-          <div class="kpi"><div class="label">品番</div><div class="val tnum">257<small> 件</small></div></div>
-          <div class="kpi"><div class="label">複数社に納入</div><div class="val tnum" style="color:var(--amber)">49<small> 品番</small></div></div>
+          <div class="kpi"><div class="label">製品名</div><div class="val tnum">257<small> 件</small></div></div>
+          <div class="kpi"><div class="label">複数社に納入</div><div class="val tnum" style="color:var(--amber)">49<small> 製品名</small></div></div>
         </div>
-        <p class="help">いただいた品番表を確認したところ、<b>同じ品番を複数の得意先に納入されている</b>ことが分かりました（257品番のうち49品番。最大で<b>1品番が25社</b>）。</p>
+        <p class="help">いただいた製品名表を確認したところ、<b>同じ製品名を複数の得意先に納入されている</b>ことが分かりました（257製品名のうち49製品名。最大で<b>1製品名が25社</b>）。</p>
         <div class="tbl-wrap" style="margin-top:8px"><table class="tbl">
-          <thead><tr><th>品番</th><th class="num">納入先の社数</th></tr></thead>
+          <thead><tr><th>製品名</th><th class="num">納入先の社数</th></tr></thead>
           <tbody>
             <tr><td><span class="code">CTS-EE0904MR</span></td><td class="num">25 社</td></tr>
             <tr><td><span class="code">CTB-EE1908P3</span></td><td class="num">19 社</td></tr>
@@ -1119,7 +1119,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
         </table></div>
         <div class="callout" style="margin-top:10px;flex-direction:column">
           <div><b>▶ 設計への反映</b></div>
-          <div style="margin-top:6px">当初は「品番マスタに取引先を1つ持たせる」構成を想定しておりましたが、この形では1品番を25社へ納入されているケースを表現できません。<b>「取引先」と「品番」をつなぐ専用のデータ（取扱品番）を挟む構成</b>に変更いたします。いただいた428明細が、そのままこのデータになります。<br>これにより「A社が取り扱う品番の一覧」と「この品番を納入している会社の一覧」の両方が引けるようになります。</div>
+          <div style="margin-top:6px">当初は「製品名マスタに取引先を1つ持たせる」構成を想定しておりましたが、この形では1製品名を25社へ納入されているケースを表現できません。<b>「取引先」と「製品名」をつなぐ専用のデータ（取扱製品名）を挟む構成</b>に変更いたします。いただいた428明細が、そのままこのデータになります。<br>これにより「A社が取り扱う製品名の一覧」と「この製品名を納入している会社の一覧」の両方が引けるようになります。</div>
         </div>
       </div>
     </div>
@@ -1128,7 +1128,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       <div class="card">
         <div class="hd">品種<span class="sub">実データ10種を反映済み</span></div>
         <div class="bd"><div id="master-prodtype" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-          <p class="help" style="margin-top:10px">✅ 8/17にご再送いただいた <b>ＳＨＴ全品番（送付用）.xlsx</b> を解析し、<b>品番も実データ</b>に差し替えました（デモでは取引先×品種あたり最大4品番を抜粋）。<br><br>⚠️ <b>品種コードと品種名の対応をご確認ください。</b> いただいた品番表の品種は<b>コード表記</b>（CT／CS／CH／SS／SC／RE／SM／OT／CC／TR）で、8/10資料の品種名10種とは表記が異なります。数が10で一致するため1対1で対応すると考えておりますが、<b>CS・CH・SS・SM の4つ</b>がどの品種名（モールドコア／単コア／チョークコイル手巻き／チョークコイル自動巻き）に当たるか判断できておりません。デモでは「要確認」と表示しています。</p>
+          <p class="help" style="margin-top:10px">✅ 8/17にご再送いただいた <b>ＳＨＴ全品番（送付用）.xlsx</b> を解析し、<b>製品名も実データ</b>に差し替えました（デモでは取引先×品種あたり最大4件を抜粋）。<br><br>✅ <b>8/17のご指摘を反映し、「品番」という表記を「製品名」に統一しました。</b> 各製品に割り振られている<b>製品コード番号はCRMでは管理しません</b>（併記も行いません）。社内で通常「製品名」で管理されているとのことでしたので、それに合わせています。<br><br>⚠️ <b>品種コードと品種名の対応をご確認ください。</b> いただいた製品名表の品種は<b>コード表記</b>（CT／CS／CH／SS／SC／RE／SM／OT／CC／TR）で、8/10資料の品種名10種とは表記が異なります。数が10で一致するため1対1で対応すると考えておりますが、<b>CS・CH・SS・SM の4つ</b>がどの品種名（モールドコア／単コア／チョークコイル手巻き／チョークコイル自動巻き）に当たるか判断できておりません。デモでは「要確認」と表示しています。</p>
         </div>
       </div>
       <div class="card">
@@ -1235,27 +1235,27 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   var inbox={
     kurashima:[
       {id:1,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（L2405）',acct:'関西精密コネクタ',part:'KH200Y203G102',read:false,others:[['吉','yoshida',0]],
-       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','KH200Y203G102 / L2405'],['重大度','中'],['フェーズ','原因調査'],['報告者','佐藤（品質保証部）'],['発生日','2026-07-15']],
+       fields:[['取引先','関西精密コネクタ'],['製品名 / ロット','KH200Y203G102 / L2405'],['重大度','中'],['フェーズ','原因調査'],['報告者','佐藤（品質保証部）'],['発生日','2026-07-15']],
        body:'<h4>不良内容</h4>ロット L2405 の端子めっきに剥離を3件確認。外観検査で発見、client先での実装工程には未流出。<h4>一次対応</h4>該当ロットを全数隔離。代替ロット L2407 を7/16に出荷済み。<h4>原因調査（進行中）</h4>めっき槽の温度管理記録を確認中。7/20までに一次報告予定。<h4>次アクション</h4>恒久対策案を7/22の定例で共有。'},
       {id:2,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CTB-EE1908P3 引合（年間12万個の内示）',acct:'東海電子工業',part:'CTB-EE1908P3',read:false,others:[['木','kida',1]],
-       fields:[['取引先','東海電子工業'],['品番','CTB-EE1908P3'],['面談種別','訪問'],['面談相手','購買部 山田様（キーマン）'],['関連引合','CTB-EE1908P3 カレントトランス 年間契約'],['面談日','2026-07-17']],
+       fields:[['取引先','東海電子工業'],['製品名','CTB-EE1908P3'],['面談種別','訪問'],['面談相手','購買部 山田様（キーマン）'],['関連引合','CTB-EE1908P3 カレントトランス 年間契約'],['面談日','2026-07-17']],
        body:'<h4>活動内容</h4>購買・技術の合同レビューを実施。年間12万個の内示見込みを口頭で確認。<h4>先方コメント</h4>「競合A社と比較検討中だが、取付治具込みの提案は評価できる」<h4>次アクション</h4>7/22に見積提示・技術折衝。ハイト違い派生品（CTS-EE0904MR）も併せて提案。'},
       {id:3,who:'鈴木',key:'suzuki',cat:'sales',ttl:'北陸プレシジョン 見積フォロー — 34日間 接触なし',acct:'北陸プレシジョン',part:'GMK4000S001A',read:false,others:[['木','kida',1]],
-       fields:[['取引先','北陸プレシジョン'],['品番','GMK4000S001A'],['面談種別','電話'],['状態','要対応（赤）'],['面談日','2026-07-16']],
+       fields:[['取引先','北陸プレシジョン'],['製品名','GMK4000S001A'],['面談種別','電話'],['状態','要対応（赤）'],['面談日','2026-07-16']],
        body:'<h4>活動内容</h4>試作品評価の状況を電話で確認。先方の担当者が異動しており、後任へ引き継ぎ中とのこと。<h4>リスク</h4>34日間接触が空いていた。信号機=赤。<h4>次アクション</h4>後任の方への挨拶訪問を7月中に設定する。'},
       {id:4,who:'木田',key:'kida',cat:'meeting',ttl:'営業部 週次ミーティング 議事録（7/15）',acct:'（社内）',part:'—',read:false,others:[['田','tanaka',1],['鈴','suzuki',0]],
        fields:[['会議区分','部門会議'],['出席者','木田・田中・鈴木・佐藤'],['開催日','2026-07-15']],
        body:'<h4>議題</h4>①各案件の進捗共有 ②CTB-EE1908P3の見積方針 ③クレーム対応状況<h4>決定事項</h4>CTB-EE1908P3は取付治具込みのセット提案で進める。値引きは5%を上限とし、超える場合は専務決裁。<h4>宿題</h4>田中: 7/22までに見積書作成 / 佐藤: めっき剥離の原因一次報告'},
       {id:5,who:'鈴木',key:'suzuki',cat:'sales',ttl:'日本マイクロデバイス リピート受注',acct:'日本マイクロデバイス',part:'KH200Y203G102',read:true,others:[['吉','yoshida',1]],
-       fields:[['取引先','日本マイクロデバイス'],['品番','KH200Y203G102'],['面談種別','Web商談']],
+       fields:[['取引先','日本マイクロデバイス'],['製品名','KH200Y203G102'],['面談種別','Web商談']],
        body:'<h4>活動内容</h4>月次発注の継続確認。特段の課題なし。'}
     ],
     yoshida:[
       {id:11,who:'田中',key:'tanaka',cat:'sales',ttl:'東海電子工業 訪問 — CTB-EE1908P3 引合（年間12万個の内示）',acct:'東海電子工業',part:'CTB-EE1908P3',read:false,others:[['木','kida',1]],
-       fields:[['取引先','東海電子工業'],['品番','CTB-EE1908P3'],['見込金額','¥8,400,000'],['面談相手','購買部 山田様（キーマン）'],['面談日','2026-07-17']],
+       fields:[['取引先','東海電子工業'],['製品名','CTB-EE1908P3'],['見込金額','¥8,400,000'],['面談相手','購買部 山田様（キーマン）'],['面談日','2026-07-17']],
        body:'<h4>活動内容</h4>購買・技術の合同レビュー。年間12万個の内示見込み。<h4>次アクション</h4>7/22に見積提示。値引きは5%上限、超過時は専務決裁が必要です。'},
       {id:12,who:'佐藤',key:'sato',cat:'claim',ttl:'関西精密 品質クレーム — 端子めっき剥離（重大度:中）',acct:'関西精密コネクタ',part:'KH200Y203G102',read:false,others:[['田','tanaka',0]],
-       fields:[['取引先','関西精密コネクタ'],['品番 / ロット','KH200Y203G102 / L2405'],['重大度','中'],['フェーズ','原因調査']],
+       fields:[['取引先','関西精密コネクタ'],['製品名 / ロット','KH200Y203G102 / L2405'],['重大度','中'],['フェーズ','原因調査']],
        body:'<h4>不良内容</h4>端子めっき剥離3件。未流出。<h4>一次対応</h4>全数隔離・代替ロット出荷済み。<h4>次アクション</h4>7/20までに原因一次報告。'},
       {id:13,who:'木田',key:'kida',cat:'sales',ttl:'大口案件 稟議前 状況共有（CTB-EE1908P3 / 840万円）',acct:'東海電子工業',part:'CTB-EE1908P3',read:false,others:[['田','tanaka',1]],
        fields:[['取引先','東海電子工業'],['見込金額','¥8,400,000'],['稟議','値引5%超の可能性あり']],
@@ -1269,8 +1269,8 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   var dashBars=[{l:'東海電子工業',v:100,n:'18件'},{l:'関西精密コネクタ',v:74,n:'13件'},{l:'ネクスティ（商社）',v:61,n:'11件'},{l:'日本マイクロデバイス',v:52,n:'9件'},{l:'北陸プレシジョン',v:40,n:'7件'}];
   var repBars=[{l:'東海電子工業',v:100,n:'12件'},{l:'関西精密コネクタ',v:58,n:'7件'},{l:'北陸プレシジョン',v:25,n:'3件'}];
 
-  // 品番→品種の対応（活動記録フォームのPART_MASTERと同じ分類。8/4FBで引合・クレームのレコード自体にも品種・発生日・完了日を追加）
-  // v0.12: 品種を8/10受領資料の実データ10種へ差し替え（品番・取引先名はダミー）
+  // 製品名→品種の対応（活動記録フォームのPART_MASTERと同じ分類。8/4FBで引合・クレームのレコード自体にも品種・発生日・完了日を追加）
+  // v0.12: 品種を8/10受領資料の実データ10種へ差し替え（製品名・取引先名はダミー）
   var PART_CAT={'CTB-EE1908P3':'カレントトランス','CTS-EE0904MR':'カレントトランス','KH200Y203G102':'センサーコア','GMK4000S001A':'トランス','BA2-26182IM':'リアクトル','S23-05051303U':'カットコア'};
   // フェーズは8/10受領のフェーズ表（引合＝大フェーズ7個）に差し替え
   var deals=[
@@ -1722,11 +1722,11 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     $('#rec-uncomplete').addEventListener('click',function(){toast('入力完了を取消しました（入力者本人）— 回覧済みの方へ「取消」を通知しました');});
     $('#rec-linkdeal').addEventListener('click',function(){toast('正式引合に遡って紐付けました（入力完了は維持・引合紐付け項目のみ変更）');});
   }
-  // 活動記録の横断検索：品番×取引先／カテゴリ（第2階層）／件名 のいずれでも検索可（7/28FB）
-  var XS_HELP={multi:'検索キーを複数組み合わせ、AND / OR を指定して活動記録・クレームを絞り込みます。連続する OR は1つのまとまりとして扱います（例：1 AND (2 OR 3)）。',part:'品番と取引先の組み合わせで、活動記録・クレームを横断検索します。',cat:'品種（大カテゴリ）→品番（第2階層）で絞り込み、活動記録・クレームを横断検索します。',subj:'分類（カテゴリ）と件名で、活動記録・クレームを横断検索します。',text:'活動記録の本文（内容）に含まれるキーワードで全文検索します（例：本文に「断線不良」を含む記録を抽出・7/30FB）。'};
+  // 活動記録の横断検索：製品名×取引先／カテゴリ（第2階層）／件名 のいずれでも検索可（7/28FB）
+  var XS_HELP={multi:'検索キーを複数組み合わせ、AND / OR を指定して活動記録・クレームを絞り込みます。連続する OR は1つのまとまりとして扱います（例：1 AND (2 OR 3)）。',part:'製品名と取引先の組み合わせで、活動記録・クレームを横断検索します。',cat:'品種（大カテゴリ）→製品名（第2階層）で絞り込み、活動記録・クレームを横断検索します。',subj:'分類（カテゴリ）と件名で、活動記録・クレームを横断検索します。',text:'活動記録の本文（内容）に含まれるキーワードで全文検索します（例：本文に「断線不良」を含む記録を抽出・7/30FB）。'};
   function renderXCat2(){var c=$('#x-cat1');var p=$('#x-cat2');if(!c||!p)return;
     if(!c.options.length)c.innerHTML=Object.keys(PARTS).map(function(x){return '<option>'+x+'</option>';}).join('');
-    p.innerHTML=(PARTS[c.value]||[]).map(function(x){return '<option>'+x+'</option>';}).join('')||'<option value="">（品番なし）</option>';}
+    p.innerHTML=(PARTS[c.value]||[]).map(function(x){return '<option>'+x+'</option>';}).join('')||'<option value="">（製品名なし）</option>';}
   // 件名検索：8/10受領の カテゴリー／サブカテゴリー → 件名（全62種）で絞り込む
   function renderXSubj(){var c=$('#x-subjcat');var s=$('#x-subj');if(!c||!s)return;
     if(!c.options.length)c.innerHTML=Object.keys(CATSUBJ).map(function(k){return '<option>'+k+'（'+CATSUBJ[k].length+'）</option>';}).join('');
@@ -1734,9 +1734,9 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     s.innerHTML=(CATSUBJ[key]||[]).map(function(x){return '<option>'+x+'</option>';}).join('');}
 
   // ── 複数条件（AND/OR）検索 ── 8/4 吉田様FB
-  // 検索キー：メインカテゴリー／サブカテゴリー／件名／取引先／品種／品番／ステータス
+  // 検索キー：メインカテゴリー／サブカテゴリー／件名／取引先／品種／製品名／ステータス
   // 連続する OR を1グループとしてまとめ、グループ同士を AND で結合する（例：1 AND (2 OR 3)）
-  var XKEYS=[{k:'main',l:'メインカテゴリー'},{k:'sub',l:'サブカテゴリー'},{k:'subj',l:'件名'},{k:'acct',l:'取引先'},{k:'cat',l:'品種'},{k:'part',l:'品番'},{k:'st',l:'ステータス'}];
+  var XKEYS=[{k:'main',l:'メインカテゴリー'},{k:'sub',l:'サブカテゴリー'},{k:'subj',l:'件名'},{k:'acct',l:'取引先'},{k:'cat',l:'品種'},{k:'part',l:'製品名'},{k:'st',l:'ステータス'}];
   // v0.12: 8/10受領のカテゴリー5／件名62／品種10種に差し替え
   var XRECS=[
     {d:'2026-08-17',kind:'f1',main:'対顧客活動',sub:'—',subj:'引合案件（一般）',acct:'東海電子工業',cat:'カレントトランス',part:'CTB-EE1908P3',st:'仕様詳細決定',ttl:'東海電子工業 訪問 — CTB-EE1908P3 引合（年間12万個の内示）'},
@@ -1813,7 +1813,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       $('#x-result').innerHTML='<div class="callout" style="margin-bottom:8px">フィルタロジック <b class="code">'+logic+'</b> ／ <b>'+hits.length+' 件</b>該当'+
         '<div class="help" style="margin-top:4px">'+xmRows.map(function(r,i){return (i?' <b>'+r.j+'</b> ':'')+'('+(i+1)+') '+keyLabelOf(r.k)+' ＝ '+r.v;}).join('')+'</div></div>'+
         (hits.length
-          ?'<table class="tbl"><thead><tr><th>日付</th><th>種別</th><th>取引先</th><th>品番</th><th>件名</th></tr></thead><tbody>'+
+          ?'<table class="tbl"><thead><tr><th>日付</th><th>種別</th><th>取引先</th><th>製品名</th><th>件名</th></tr></thead><tbody>'+
             hits.map(function(x){return '<tr><td>'+x.d.slice(5).replace('-','/')+'</td><td><span class="cat '+catCls(x.kind)+'">'+catLabel(x.kind)+'</span></td>'+
               '<td class="muted">'+x.acct+'</td><td><span class="code">'+x.part+'</span></td><td>'+x.ttl+'</td></tr>';}).join('')+'</tbody></table>'
           :'<div class="help">この条件に一致する活動記録はありませんでした。</div>');
@@ -1833,8 +1833,8 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
       toastMsg='本文キーワードで活動記録・クレームを全文検索';
     }else{
       var p=$('#x-part').value,a=$('#x-acct').value;
-      keyLabel='品番 <b>'+p+'</b>'+(a==='すべて'?'':' × '+a);
-      toastMsg='品番×取引先で活動記録・クレームを横断検索';
+      keyLabel='製品名 <b>'+p+'</b>'+(a==='すべて'?'':' × '+a);
+      toastMsg='製品名×取引先で活動記録・クレームを横断検索';
     }
     $('#x-result').innerHTML='<div class="callout" style="margin-bottom:8px">'+keyLabel+' の履歴</div>'+
       '<table class="tbl"><thead><tr><th>日付</th><th>種別</th><th>件名</th></tr></thead><tbody>'+
@@ -1844,8 +1844,8 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     toast(toastMsg);
   });
   $('#dash-role').addEventListener('click',function(e){var b=e.target.closest('button');if(b){state.dashRole=b.dataset.role;$$('#dash-role button').forEach(function(x){x.classList.toggle('on',x===b);});renderDash();}});
-  // 取引先→品種→品番の階層絞り込み（8/4FBで取引先起点の3階層に）
-  // v0.12: 品種を8/10受領資料の実データ10種へ差し替え（品番・取引先名はダミー）
+  // 取引先→品種→製品名の階層絞り込み（8/4FBで取引先起点の3階層に）
+  // v0.12: 品種を8/10受領資料の実データ10種へ差し替え（製品名・取引先名はダミー）
   var PRODTYPES=['センサーコア','ＣＳ（品種名 要確認）','ＣＨ（品種名 要確認）','ＳＳ（品種名 要確認）','ＳＭ（品種名 要確認）','カレントトランス','リアクトル','トランス','カットコア','その他'];
   var PART_MASTER={
       '東海電子工業': {
@@ -2071,7 +2071,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     '北都パッケージ':['藤井 学（営業）'],
     '南海資材':['渡辺 隆（営業）']
   };
-  // 横断検索（取引先を跨いで検索する）用に、全取引先の 品種→品番 をマージした平坦マスタ
+  // 横断検索（取引先を跨いで検索する）用に、全取引先の 品種→製品名 をマージした平坦マスタ
   var PARTS=(function(){var m={};Object.keys(PART_MASTER).forEach(function(a){
     Object.keys(PART_MASTER[a]).forEach(function(c){m[c]=m[c]||[];
       PART_MASTER[a][c].forEach(function(p){if(m[c].indexOf(p)<0)m[c].push(p);});});});return m;})();
@@ -2088,13 +2088,13 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
     var c=$('#cat-sel');var p=$('#part-sel');if(!c||!p)return;
     var a=primaryAcct();var list=(a&&PART_MASTER[a]&&PART_MASTER[a][c.value])||[];
     p.disabled=!a||!c.value;
-    p.innerHTML=list.length?list.map(function(x){return '<option>'+x+'</option>';}).join(''):'<option value="">'+(a?'品番なし':'先に取引先を選択してください')+'</option>';
+    p.innerHTML=list.length?list.map(function(x){return '<option>'+x+'</option>';}).join(''):'<option value="">'+(a?'製品名なし':'先に取引先を選択してください')+'</option>';
   }
   if($('#cat-sel')){$('#cat-sel').addEventListener('change',renderParts);}
-  // 複数取引先チップ（7/22FB）／最初に追加した取引先を品番カスケードの基準にする（8/4FB）
+  // 複数取引先チップ（7/22FB）／最初に追加した取引先を製品名カスケードの基準にする（8/4FB）
   var accts=['東海電子工業'];
   function renderAcctChips(){var el=$('#acct-chips');if(!el)return;
-    el.innerHTML=accts.map(function(a,i){return '<span class="pill blue" style="gap:6px">'+a+(i===0?' <span class="pill green" style="padding:1px 6px">品番の基準</span>':'')+(a.indexOf('ネクスティ')>=0?' <span class="pill gray" style="padding:1px 6px">親: アイシン</span>':'')+' <a data-rm="'+a+'" style="cursor:pointer;font-weight:800">×</a></span>';}).join('')||'<span class="help">取引先を追加してください</span>';
+    el.innerHTML=accts.map(function(a,i){return '<span class="pill blue" style="gap:6px">'+a+(i===0?' <span class="pill green" style="padding:1px 6px">製品名の基準</span>':'')+(a.indexOf('ネクスティ')>=0?' <span class="pill gray" style="padding:1px 6px">親: アイシン</span>':'')+' <a data-rm="'+a+'" style="cursor:pointer;font-weight:800">×</a></span>';}).join('')||'<span class="help">取引先を追加してください</span>';
     renderCats();
   }
   if($('#acct-add')){
@@ -2165,7 +2165,7 @@ table.lvt{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;b
   var MASTER_DB=[
     ['社員名簿','ＳＨＴ／ＳＨＴプロダクツ／協力会社','部署＞役職＞氏名','名刺取込','ok','受領済（計76名）'],
     ['外部名簿','取引先／サプライヤー／その他','部署＞役職＞氏名','—','ng','未受領'],
-    ['（製品）品番','品種10種','品番（取引先・品種と紐付き）','ＳＨＴ様で作成','ok','受領・解析完了（69社／257品番／428明細）'],
+    ['製品名','品種10種','製品名（取引先・品種と紐付き）','ＳＨＴ様で作成','ok','受領・解析完了（69社／257製品名／428明細）'],
     ['取引先リスト','—','社名','名刺取込により作成','ng','未受領'],
     ['サプライヤーリスト','—','社名','名刺取込により作成','ok','受領済（明細110行）'],
     ['その他外部先リスト','—','社名・団体名','名刺取込により作成','ng','未受領'],
