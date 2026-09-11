@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大扇産業様｜Salesforce アニマルヘルスケア事業部 デモ</title>
+<style>
+  :root{
+    --sf-navy:#032d60; --sf-blue:#0176d3; --sf-blue-d:#014486; --sf-blue-l:#eaf4fd;
+    --bg:#f3f3f3; --panel:#ffffff; --border:#e5e5e5; --border2:#dddbda;
+    --text:#181818; --muted:#706e6b; --link:#0b5cab;
+    --green:#2e844a; --green-bg:#ebf7ee;
+    --amber:#a86403; --amber-bg:#fef6e6;
+    --red:#ba0517; --red-bg:#fdeded;
+    --purple:#7c3aed; --purple-bg:#f3eefe;
+    --segA:#ba0517; --segB:#a86403; --segC:#5867e8; --segD:#2e844a; --segNone:#9b9994;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;font-family:-apple-system,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif;background:var(--bg);color:var(--text);font-size:14px;}
+  button{font-family:inherit;cursor:pointer;}
+  a{color:var(--link);}
+
+  .gheader{background:var(--sf-navy);color:#fff;display:flex;align-items:center;gap:14px;padding:8px 16px;position:sticky;top:0;z-index:40;}
+  .gheader .logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;}
+  .gheader .logo .cloud{width:26px;height:18px;background:#fff;border-radius:10px;position:relative;flex:0 0 auto;}
+  .gheader .logo .cloud:before{content:"";position:absolute;width:11px;height:11px;background:#fff;border-radius:50%;top:-5px;left:4px;}
+  .gheader .logo .cloud:after{content:"";position:absolute;width:8px;height:8px;background:#fff;border-radius:50%;top:-3px;left:14px;}
+  .gheader .right{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12px;}
+  .gheader .note{font-size:11.5px;color:#cfe3f7;}
+  .avatar{width:30px;height:30px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;background:#2e844a;}
+
+  .appnav{background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:2px;padding:0 16px;box-shadow:0 1px 2px rgba(0,0,0,.05);overflow-x:auto;position:sticky;top:46px;z-index:39;}
+  .appname{font-weight:700;font-size:14px;margin-right:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+  .appname .sq{width:18px;height:18px;background:linear-gradient(135deg,#2e844a,#6fcf97);border-radius:4px;}
+  .tab{padding:12px 13px;font-size:13px;color:#080707;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;}
+  .tab:hover{background:#f3f9ff;}
+  .tab.active{color:var(--sf-blue);border-bottom-color:var(--sf-blue);font-weight:600;}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:16px;padding-bottom:60px;}
+  .screen{display:none;}
+  .screen.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  .pagehead{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .pagehead .ico{width:40px;height:40px;border-radius:7px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;flex:0 0 auto;}
+  .pagehead .ico.blue{background:var(--sf-blue);} .pagehead .ico.purple{background:var(--purple);}
+  .pagehead h2{margin:0;font-size:18px;}
+  .pagehead .sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+  @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr);}}
+  .kpi{background:#fff;border:1px solid var(--border2);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;}
+  .kpi .n{font-size:22px;font-weight:800;}
+  .kpi .l{font-size:11px;color:var(--muted);}
+  .kpi .d{font-size:11px;font-weight:700;margin-top:2px;}
+  .kpi.r .n{color:var(--red);} .kpi.a .n{color:var(--amber);} .kpi.g .n{color:var(--green);} .kpi.b .n{color:var(--sf-blue);}
+
+  .card{background:var(--panel);border:1px solid var(--border2);border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.04);overflow:hidden;margin-bottom:14px;}
+  .card .chead{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;flex-wrap:wrap;}
+  .card .chead .badge{margin-left:auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:#eee;color:#444;}
+  .chead.red{background:var(--red-bg);color:var(--red);} .chead.red .badge{background:var(--red);color:#fff;}
+  .chead.amber{background:var(--amber-bg);color:var(--amber);} .chead.amber .badge{background:var(--amber);color:#fff;}
+  .chead.blue{background:var(--sf-blue-l);color:var(--sf-blue-d);} .chead.blue .badge{background:var(--sf-blue);color:#fff;}
+  .chead.green{background:var(--green-bg);color:var(--green);} .chead.green .badge{background:var(--green);color:#fff;}
+
+  .pill{font-size:10px;font-weight:700;padding:1px 7px;border-radius:9px;white-space:nowrap;display:inline-block;}
+  .pill.red{background:var(--red-bg);color:var(--red);} .pill.amber{background:var(--amber-bg);color:var(--amber);}
+  .pill.green{background:var(--green-bg);color:var(--green);} .pill.blue{background:var(--sf-blue-l);color:var(--sf-blue-d);}
+  .pill.gray{background:#eee;color:#555;} .pill.purple{background:var(--purple-bg);color:#5b21b6;}
+
+  .seg{font-size:11px;font-weight:800;padding:2px 8px;border-radius:5px;color:#fff;display:inline-block;}
+  .seg.A{background:var(--segA);} .seg.B{background:var(--segB);} .seg.C{background:var(--segC);} .seg.D{background:var(--segD);} .seg.none{background:var(--segNone);}
+
+  table.lt{width:100%;border-collapse:collapse;font-size:13px;}
+  table.lt th{text-align:left;font-size:11px;color:var(--muted);font-weight:600;padding:8px 12px;border-bottom:1px solid var(--border);background:#fafafa;white-space:nowrap;}
+  table.lt td{padding:9px 12px;border-bottom:1px solid #f1f1f1;vertical-align:top;}
+  table.lt tr{cursor:pointer;} table.lt tbody tr:hover{background:#f7fbff;}
+  table.lt tbody tr.sel{background:var(--sf-blue-l);}
+  .tablewrap{overflow-x:auto;}
+
+  /* bars for 浸透率 */
+  .barrow{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid #f1f1f1;}
+  .barrow:last-child{border-bottom:none;}
+  .barrow .lbl{width:150px;font-size:12.5px;font-weight:600;flex:0 0 auto;}
+  .barrow .bartrack{flex:1;height:16px;background:#f0f0f0;border-radius:8px;overflow:hidden;position:relative;}
+  .barrow .barfill{height:100%;background:var(--green);border-radius:8px;display:flex;align-items:center;}
+  .barrow .target{position:absolute;top:-4px;bottom:-4px;width:2px;background:#333;}
+  .barrow .target:after{content:attr(data-lbl);position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:#333;white-space:nowrap;}
+  .barrow .val{width:56px;text-align:right;font-weight:700;font-size:13px;flex:0 0 auto;}
+
+  .toggle2{display:inline-flex;background:#f0f0f0;border-radius:18px;padding:2px;margin-left:auto;}
+  .toggle2 button{background:transparent;border:none;padding:5px 12px;border-radius:16px;font-size:11.5px;font-weight:700;color:#555;}
+  .toggle2 button.on{background:#fff;color:var(--sf-blue-d);box-shadow:0 1px 2px rgba(0,0,0,.15);}
+
+  .varbox{background:#fafafa;border:1px solid var(--border2);border-radius:6px;padding:10px 12px;font-size:12px;}
+  .varbox .vrow{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #e5e5e5;}
+  .varbox .vrow:last-child{border-bottom:none;}
+  .varbox .vrow.hit{background:var(--green-bg);margin:0 -12px;padding:4px 12px;border-radius:4px;}
+  .varbox .vk{color:var(--muted);} .varbox .vv{font-weight:700;}
+
+  .distbar{display:flex;height:26px;border-radius:6px;overflow:hidden;margin:10px 0;}
+  .distbar div{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;}
+
+  .note{margin-top:14px;background:#fff;border:1px solid var(--border2);border-radius:8px;padding:14px 16px;font-size:12.5px;color:#444;}
+  .alertbox{background:var(--amber-bg);border:1px solid #f3d795;border-radius:6px;padding:10px 13px;font-size:12.5px;color:#7a4a02;display:flex;gap:8px;margin-bottom:10px;}
+  .alertbox.blue{background:var(--sf-blue-l);border-color:#bcdcff;color:#0b4a86;}
+  .alertbox.gray{background:#f4f4f4;border-color:#ddd;color:#555;}
+  .alertbox.red{background:var(--red-bg);border-color:#f3b6b6;color:#8a0d18;}
+
+  .stepflow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0;}
+  .step{background:#fff;border:1px solid var(--border2);border-radius:6px;padding:8px 12px;font-size:12px;flex:1 1 140px;text-align:center;}
+  .step.off{opacity:.35;text-decoration:line-through;}
+  .step.on{border-color:var(--sf-blue);background:var(--sf-blue-l);color:var(--sf-blue-d);font-weight:700;}
+  .stepArrow{color:#bbb;}
+
+  .field{padding:8px 0;border-bottom:1px solid #f3f3f3;}
+  .field:last-child{border-bottom:none;}
+  .field .k{font-size:11px;color:var(--muted);}
+  .field .v{font-size:13px;font-weight:600;margin-top:2px;}
+  .fields{padding:6px 14px;}
+
+  /* Lightning Experience 風の画面 */
+  .lexbox{background:#fff;border:1px solid var(--border2);border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.04);overflow:hidden;margin-bottom:14px;}
+  .lexhead{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);}
+  .lexico{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;flex:0 0 auto;background:#7f8de1;}
+  .lexico.evt{background:#e9a53f;} .lexico.ds{background:#3ba755;}
+  .eyebrow{font-size:11.5px;color:var(--muted);}
+  .rectitle{font-size:17px;font-weight:700;line-height:1.25;}
+  .lexact{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;}
+  .btn{border:1px solid var(--border2);background:#fff;border-radius:4px;padding:5px 12px;font-size:12.5px;color:var(--link);font-weight:600;cursor:pointer;}
+  .btn.pri{background:var(--sf-blue);border-color:var(--sf-blue);color:#fff;}
+  .lexsub{display:flex;align-items:center;gap:12px;padding:7px 14px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);flex-wrap:wrap;background:#fbfbfb;}
+  .lexsearch{margin-left:auto;border:1px solid var(--border2);border-radius:4px;padding:5px 10px;font-size:12px;color:#aaa;min-width:210px;background:#fff;}
+  .hlfields{display:flex;gap:28px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border);background:#fbfbfb;}
+  .rectabs{display:flex;gap:2px;padding:0 14px;border-bottom:1px solid var(--border);}
+  .rectab{padding:10px 14px;font-size:13px;border-bottom:3px solid transparent;color:#080707;}
+  .rectab.on{color:var(--sf-blue);border-bottom-color:var(--sf-blue);font-weight:700;}
+  .cols{display:grid;grid-template-columns:2fr 1fr;gap:14px;align-items:start;}
+  @media(max-width:900px){.cols{grid-template-columns:1fr;}}
+  .sect{border-bottom:1px solid var(--border);}
+  .sect:last-child{border-bottom:none;}
+  .secth{padding:9px 14px;font-weight:700;font-size:12.5px;background:#fafafa;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;padding:6px 14px 10px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+  .fx{padding:7px 0;border-bottom:1px solid #f3f3f3;}
+  .fx .k{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .fx .v{font-size:13px;font-weight:600;margin-top:3px;}
+  .fx .v.empty{color:#b9b9b9;font-weight:500;}
+  .api{font-size:10.5px;color:#a2a2a2;font-family:ui-monospace,Menlo,monospace;}
+  .rl{border-top:1px solid var(--border);}
+  .rlh{padding:9px 14px;font-weight:700;font-size:12.5px;display:flex;align-items:center;gap:8px;background:#fafafa;}
+  .rlh .cnt{font-weight:500;color:var(--muted);font-size:11.5px;}
+  .rlh .more{margin-left:auto;font-size:12px;color:var(--link);font-weight:600;}
+
+  /* 経営会議ダッシュボード */
+  .dash{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;}
+  @media(max-width:980px){.dash{grid-template-columns:1fr;}}
+  .span2{grid-column:span 2;}
+  @media(max-width:980px){.span2{grid-column:span 1;}}
+  .dcard{background:#fff;border:1px solid var(--border2);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+  .dcard .dh{padding:9px 12px;border-bottom:1px solid var(--border);font-weight:700;font-size:12.5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .dcard .dh .rid{font-size:10px;font-weight:700;color:#fff;background:#9b9994;border-radius:3px;padding:1px 5px;}
+  .dcard .db{padding:12px;flex:1;}
+  .dcard .df{padding:7px 12px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);line-height:1.6;}
+  .dcard.blocked{border-color:#f3d795;background:#fffdf5;}
+  .bigno{font-size:25px;font-weight:800;line-height:1.15;}
+  .subno{font-size:11px;color:var(--muted);margin-top:3px;}
+  .hbar{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:12px;}
+  .hbar .hl{width:66px;flex:0 0 auto;font-weight:600;}
+  .hbar .ht{flex:1;height:14px;background:#f0f0f0;border-radius:7px;overflow:hidden;}
+  .hbar .hf{height:100%;border-radius:7px;background:var(--sf-blue);}
+  .hbar .hv{width:84px;text-align:right;flex:0 0 auto;font-weight:700;}
+  .fun{display:flex;flex-direction:column;gap:4px;}
+  .fun div{color:#fff;font-size:11.5px;font-weight:700;padding:6px 10px;border-radius:4px;display:flex;justify-content:space-between;}
+
+  /* 商談フェーズ パス */
+  .path{display:flex;gap:3px;padding:12px 14px;overflow-x:auto;background:#fbfbfb;border-bottom:1px solid var(--border);}
+  .pstep{flex:1 1 0;min-width:96px;position:relative;background:#e5e5e5;color:#514f4d;font-size:11.5px;font-weight:600;padding:8px 10px 8px 20px;clip-path:polygon(0 0,calc(100% - 11px) 0,100% 50%,calc(100% - 11px) 100%,0 100%,11px 50%);text-align:center;white-space:nowrap;}
+  .pstep:first-child{padding-left:12px;clip-path:polygon(0 0,calc(100% - 11px) 0,100% 50%,calc(100% - 11px) 100%,0 100%);}
+  .pstep.done{background:#c9e7d3;color:#0b5a2b;}
+  .pstep.now{background:var(--sf-blue);color:#fff;}
+
+  /* データの入り口（出所）表示 */
+  .src{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;white-space:nowrap;display:inline-block;border:1px solid transparent;vertical-align:middle;}
+  .src.imp{background:var(--sf-blue-l);color:var(--sf-blue-d);border-color:#bcdcff;}
+  .src.man{background:var(--green-bg);color:var(--green);border-color:#bfe3ca;}
+  .src.auto{background:var(--purple-bg);color:#5b21b6;border-color:#d9c9fb;}
+  .src.todo{background:var(--amber-bg);color:var(--amber);border-color:#f3d795;}
+
+  .legend{background:#fff;border:1px solid var(--border2);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;gap:18px;flex-wrap:wrap;align-items:center;font-size:12px;}
+  .legend .lt{font-weight:700;font-size:12px;color:var(--muted);margin-right:2px;}
+  .legend .li{display:flex;align-items:center;gap:6px;color:#444;}
+
+  .inflow{background:#fff;border:1px solid var(--border2);border-radius:8px;margin-bottom:14px;overflow:hidden;}
+  .inflow .ih{padding:9px 14px;border-bottom:1px solid var(--border);font-weight:700;font-size:12.5px;background:#fafafa;}
+  .inflow table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .inflow th{text-align:left;font-size:11px;color:var(--muted);font-weight:600;padding:7px 14px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  .inflow td{padding:8px 14px;border-bottom:1px solid #f1f1f1;vertical-align:top;}
+  .inflow tr:last-child td{border-bottom:none;}
+  .inflow .who{white-space:nowrap;color:var(--muted);font-size:11.5px;}
+  code.f{background:#f4f4f4;border:1px solid #e5e5e5;border-radius:3px;padding:0 4px;font-size:11.5px;}
+
+  .demonotice{background:#fffbe6;border:1px solid #f0d78a;border-radius:6px;padding:8px 13px;font-size:12.5px;color:#6b5200;margin-bottom:14px;}
+  #toast{position:fixed;top:84px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--green);color:#fff;padding:12px 22px;border-radius:8px;font-weight:600;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:.3s;z-index:80;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* 製品別予定表 */
+  table.lt.prod{font-size:11.5px;border-collapse:collapse;white-space:nowrap;}
+  table.lt.prod th{padding:6px 8px;text-align:center;background:#f4f6f8;position:sticky;top:0;z-index:3;}
+  table.lt.prod td{padding:4px 8px;border-bottom:1px solid #eee;}
+  table.lt.prod td.num,table.lt.prod th.num{text-align:right;font-variant-numeric:tabular-nums;}
+  table.lt.prod th.num{text-align:center;}
+  table.lt.prod .pstick{position:sticky;left:0;background:#fff;z-index:2;min-width:170px;white-space:normal;}
+  table.lt.prod .pstick2{position:sticky;left:170px;background:#fff;z-index:2;min-width:130px;white-space:normal;}
+  table.lt.prod .pstick3{position:sticky;left:300px;background:#fff;z-index:2;min-width:52px;}
+  table.lt.prod th.pstick{left:0;z-index:5;} table.lt.prod th.pstick2{left:170px;z-index:5;} table.lt.prod th.pstick3{left:300px;z-index:5;}
+  table.lt.prod .pname{font-weight:700;vertical-align:top;padding-top:8px;border-right:1px solid var(--border);}
+  table.lt.prod .pgrp{font-weight:600;color:#333;vertical-align:top;padding-top:6px;border-right:1px solid var(--border);}
+  table.lt.prod .pmet{color:var(--muted);border-right:1px solid var(--border);}
+  table.lt.prod tr.gtop td{border-top:1px solid #d8d8d8;}
+  table.lt.prod .tot{background:#fff4d6;font-weight:700;}
+  table.lt.prod .past{background:#fafafa;color:var(--muted);}
+  table.lt.prod .rate{color:var(--green);}
+  table.lt.prod .pdblue{background:#dbe9f7;}
+  table.lt.prod .pdamber{background:#ffc000;}
+  table.lt.prod .pdyellow{background:#ffff66;}
+  table.lt.prod tr.pnego td{color:#8a6d00;font-style:italic;}
+  table.lt.prod tr.pgap td{height:7px;padding:0;border-bottom:2px solid var(--border);background:#fff;}
+  #prodwrap{max-height:560px;overflow:auto;}
+</style>
+</head>
+<body>
+
+<div class="gheader">
+  <div class="logo"><span class="cloud"></span>大扇産業 CRM ｜ アニマルヘルスケア</div>
+  <div class="right">
+    <span class="note">デモ画面（HTMLモック）／社名・数値はすべてダミー</span>
+    <div class="avatar">A</div>
+  </div>
+</div>
+
+<div class="appnav" id="appnav">
+  <div class="appname"><span class="sq"></span>アニマル事業部</div>
+  <div class="tab active" data-tab="exec" onclick="go('exec')">経営会議ダッシュボード</div>
+  <div class="tab" data-tab="accounts" onclick="go('accounts')">取引先（動物病院）</div>
+  <div class="tab" data-tab="account" onclick="go('account')">取引先 詳細ページ</div>
+  <div class="tab" data-tab="opp" onclick="go('opp')">案件（商談）</div>
+  <div class="tab" data-tab="oppdetail" onclick="go('oppdetail')">案件 詳細ページ</div>
+  <div class="tab" data-tab="penetration" onclick="go('penetration')">浸透率ダッシュボード</div>
+  <div class="tab" data-tab="segment" onclick="go('segment')">DSセグメント</div>
+  <div class="tab" data-tab="report" onclick="go('report')">訪問記録→CSV</div>
+  <div class="tab" data-tab="sources" onclick="go('sources')">データの入り口 一覧</div>
+</div>
+
+<div class="wrap">
+
+  <div class="demonotice">ℹ️ これは実際に動くアプリではありません。画面と操作の流れをつかんでいただくためのイメージです（表示している数値・社名・人名・施設コードはダミー、動物病院名はすべて架空です）。</div>
+
+  <div class="legend">
+    <span class="lt">データの入り口</span>
+    <span class="li"><span class="src imp">📥 月次取込</span> ディーラーのExcelを月1回インポート</span>
+    <span class="li"><span class="src man">✍️ 手入力</span> 大扇の担当者が画面で入力</span>
+    <span class="li"><span class="src auto">⚙️ 自動</span> Salesforceが計算・入力不要</span>
+    <span class="li"><span class="src todo">❓ 未確定</span> 入れ方がまだ決まっていない</span>
+  </div>
+
+  <section class="screen active" id="screen-exec">
+
+    <div class="lexbox">
+      <div class="lexhead">
+        <div class="lexico" style="background:#0176d3;">📊</div>
+        <div>
+          <div class="eyebrow">ダッシュボード ｜ 表示対象：経営層（社長・専務・管理部）</div>
+          <div class="rectitle">64期 予実報告｜アニマルヘルスケア事業部（8月月中会議用）</div>
+        </div>
+        <div class="lexact">
+          <button class="btn" onclick="toast('モックのため動作しません')">📧 会議前日に自動配信</button>
+          <button class="btn pri" onclick="toast('モックのため動作しません')">PDFで保存</button>
+        </div>
+      </div>
+      <div class="lexsub">
+        <span>最終更新：2026/08/12 6:00（毎朝自動更新）</span>
+        <span class="pill gray">単位：千円</span>
+        <span class="pill blue" id="exec-approver">確認：担当A／担当C／担当D／担当E　作成：担当B</span>
+        <div class="toggle2">
+          <button id="buA" onclick="setBU('all')">全社（3事業部）</button>
+          <button id="buM" onclick="setBU('medical')">メディカル</button>
+          <button class="on" id="buN" onclick="setBU('animal')">アニマル</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="bu-all" style="display:none;">
+
+    <div class="alertbox blue"><span>💡</span><div>3事業部の経営会議資料を1枚に重ねたイメージです（メディカル＝月初会議資料、アニマル＝64期予実報告書 8月月中会議用と同じ体裁。<b>数値はダミー</b>）。<b>P&amp;Pは会議資料の体裁を別途設計する</b>ため、ここでは空欄にしています。</div></div>
+
+    <div class="dash">
+      <div class="dcard">
+        <div class="dh">3事業部 年間売上（目標／実績・見込）</div>
+        <div class="db">
+          <div class="bigno" style="color:var(--amber);">¥1,074,686<span style="font-size:14px;">千円</span></div>
+          <div class="subno">年間目標 ¥1,179,246千円に対して <b>91.1%</b>（△¥104,560千円）<br>※P&amp;Pを除く2事業部の合計</div>
+        </div>
+        <div class="df">出所：<code class="f">SalesPlan__c</code> を <code class="f">BusinessUnit__c</code> で集計</div>
+      </div>
+      <div class="dcard">
+        <div class="dh">3事業部 年間粗利</div>
+        <div class="db">
+          <div class="bigno" style="color:var(--green);">¥361,867<span style="font-size:14px;">千円</span></div>
+          <div class="subno">年間目標 ¥395,316千円に対して <b>91.5%</b>／粗利率 33.7%</div>
+        </div>
+        <div class="df">粗利率はメディカル29.1%・アニマル59.5%と構造が大きく違います</div>
+      </div>
+      <div class="dcard blocked">
+        <div class="dh">P&amp;P<span class="src todo">❓ 未確定</span></div>
+        <div class="db">
+          <div class="bigno" style="color:#b9b9b9;">—</div>
+          <div class="subno">会議資料（月次の計画・実績）の体裁を決めたあと、この1枚に追加します</div>
+        </div>
+        <div class="df">P&amp;Pは受注管理表・依頼台帳・見積台帳などの管理が中心です</div>
+      </div>
+    </div>
+
+    <div class="lexbox">
+      <div class="dh" style="padding:10px 14px;border-bottom:1px solid var(--border);"><b>事業部別 年間 予実（単位：千円）</b></div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th>事業部</th><th>売上目標</th><th>売上 実績・見込</th><th>差異</th><th>達成率</th><th>粗利目標</th><th>粗利 実績・見込</th><th>粗利率</th><th>集計の粒度</th></tr></thead>
+          <tbody>
+            <tr><td>メディカル</td><td>980,000</td><td>914,200</td><td style="color:var(--red);">△65,800</td><td><span class="pill amber">93.3%</span></td><td>277,000</td><td>266,400</td><td>29.1%</td><td>顧客×製品×月（4区分：成形品・装置・金型・メンテ）</td></tr>
+            <tr><td>アニマル</td><td>199,246</td><td>160,486</td><td style="color:var(--red);">△38,760</td><td><span class="pill amber">80.5%</span></td><td>118,316</td><td>95,467</td><td>59.5%</td><td>製品×月＋国内／海外（四半期集計）</td></tr>
+            <tr style="color:#b9b9b9;"><td>P&amp;P</td><td>—</td><td>—</td><td>—</td><td><span class="pill gray">未確定</span></td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr style="font-weight:700;background:#fafafa;"><td>合計（2事業部）</td><td>1,179,246</td><td>1,074,686</td><td style="color:var(--red);">△104,560</td><td>91.1%</td><td>395,316</td><td>361,867</td><td>33.7%</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<code class="f">SalesPlan__c</code> を事業部別に集計（数値はダミー）</div>
+    </div>
+
+    <div class="alertbox red"><span>🔑</span><div><b>3事業部を1枚に並べるときは、2つの点をどう揃えるかを設計時に決めます。</b>①集計の粒度（メディカルは顧客×製品×月の4区分、アニマルは製品×月＋国内/海外）　②会議のタイミング（メディカルは月初・月中・翌月初の3回、アニマルは月中の1回）。</div></div>
+    </div>
+
+    <div id="bu-medical" style="display:none;">
+
+    <div class="alertbox blue"><span>💡</span><div>メディカル事業部の<b>月初会議資料（8月月初会議・7月度）</b>と同じ体裁でSalesforce上に表示するイメージです。区分・行の並び・【主な差異】の構成を同じ形で出します（<b>数値はダミー</b>）。</div></div>
+
+    <div class="dash">
+      <div class="dcard">
+        <div class="dh">7月度 単月 売上</div>
+        <div class="db">
+          <div class="bigno" style="color:var(--red);">¥78,700<span style="font-size:14px;">千円</span></div>
+          <div class="subno">期首目標 ¥131,300千円に対して <b>△¥52,600千円</b></div>
+        </div>
+        <div class="df">装置の月ズレが主因（下の【主な差異】参照）</div>
+      </div>
+      <div class="dcard">
+        <div class="dh">年間 売上</div>
+        <div class="db">
+          <div class="bigno" style="color:var(--amber);">¥914,200<span style="font-size:14px;">千円</span></div>
+          <div class="subno">年間目標 ¥980,000千円に対して <b>93.3%</b>（△¥65,800千円）</div>
+        </div>
+        <div class="df">出所：<code class="f">SalesPlan__c</code> の①期首計画と②〜④予定</div>
+      </div>
+      <div class="dcard">
+        <div class="dh">年間 粗利</div>
+        <div class="db">
+          <div class="bigno" style="color:var(--green);">¥266,400<span style="font-size:14px;">千円</span></div>
+          <div class="subno">粗利率 29.1%（目標 28.3%）／目標比 △¥10,600千円</div>
+        </div>
+        <div class="df">粗利率は目標を上回っています</div>
+      </div>
+    </div>
+
+    <div class="lexbox">
+      <div class="dh" style="padding:10px 14px;border-bottom:1px solid var(--border);"><b>7月度　単月・年間（単位：千円）</b><span class="src auto">⚙️ 自動</span></div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead>
+            <tr><th rowspan="2">区分</th><th rowspan="2"></th><th colspan="3" style="text-align:center;border-left:1px solid var(--border);">単月（7月度）</th><th colspan="3" style="text-align:center;border-left:1px solid var(--border);">年間</th></tr>
+            <tr><th style="border-left:1px solid var(--border);">期首目標</th><th>実績（見込）</th><th>差異</th><th style="border-left:1px solid var(--border);">目標</th><th>実績（見込）</th><th>差異</th></tr>
+          </thead>
+          <tbody>
+            <tr style="background:#fafafa;font-weight:700;"><td rowspan="3">全体</td><td>売上</td><td>131,300</td><td>78,700</td><td style="color:var(--red);">△52,600</td><td>980,000</td><td>914,200</td><td style="color:var(--red);">△65,800</td></tr>
+            <tr style="background:#fafafa;font-weight:700;"><td>粗利</td><td>43,500</td><td>22,600</td><td style="color:var(--red);">△20,900</td><td>277,000</td><td>266,400</td><td style="color:var(--red);">△10,600</td></tr>
+            <tr style="background:#fafafa;"><td>粗利率</td><td>33.1%</td><td>28.7%</td><td>—</td><td>28.3%</td><td>29.1%</td><td>—</td></tr>
+            <tr><td rowspan="3">成形品</td><td>売上</td><td>54,300</td><td>63,800</td><td style="color:var(--green);">＋9,500</td><td>650,000</td><td>638,400</td><td style="color:var(--red);">△11,600</td></tr>
+            <tr><td>粗利</td><td>12,700</td><td>15,300</td><td style="color:var(--green);">＋2,600</td><td>143,000</td><td>151,700</td><td style="color:var(--green);">＋8,700</td></tr>
+            <tr><td>粗利率</td><td>23.4%</td><td>24.0%</td><td>—</td><td>22.0%</td><td>23.8%</td><td>—</td></tr>
+            <tr><td rowspan="3">装置</td><td>売上</td><td>61,500</td><td>9,700</td><td style="color:var(--red);">△51,800</td><td>230,000</td><td>171,900</td><td style="color:var(--red);">△58,100</td></tr>
+            <tr><td>粗利</td><td>25,800</td><td>4,900</td><td style="color:var(--red);">△20,900</td><td>92,000</td><td>78,400</td><td style="color:var(--red);">△13,600</td></tr>
+            <tr><td>粗利率</td><td>42.0%</td><td>50.5%</td><td>—</td><td>40.0%</td><td>45.6%</td><td>—</td></tr>
+            <tr><td rowspan="3">金型</td><td>売上</td><td>10,900</td><td>0</td><td style="color:var(--red);">△10,900</td><td>45,000</td><td>51,300</td><td style="color:var(--green);">＋6,300</td></tr>
+            <tr><td>粗利</td><td>2,300</td><td>0</td><td style="color:var(--red);">△2,300</td><td>9,000</td><td>10,500</td><td style="color:var(--green);">＋1,500</td></tr>
+            <tr><td>粗利率</td><td>21.1%</td><td>—</td><td>—</td><td>20.0%</td><td>20.5%</td><td>—</td></tr>
+            <tr><td rowspan="3">メンテ</td><td>売上</td><td>4,600</td><td>5,200</td><td style="color:var(--green);">＋600</td><td>55,000</td><td>52,600</td><td style="color:var(--red);">△2,400</td></tr>
+            <tr><td>粗利</td><td>2,700</td><td>2,400</td><td style="color:var(--red);">△300</td><td>33,000</td><td>25,800</td><td style="color:var(--red);">△7,200</td></tr>
+            <tr><td>粗利率</td><td>58.7%</td><td>46.2%</td><td>—</td><td>60.0%</td><td>49.0%</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<code class="f">SalesPlan__c</code>。成形品／装置／金型／メンテの区分は <code class="f">Product2</code> の製品分類で自動集計</div>
+    </div>
+
+    <div class="lexbox">
+      <div class="dh" style="padding:10px 14px;border-bottom:1px solid var(--border);"><b>【主な差異】消耗品（単位：千円）</b><span class="src man">✍️ 備考のみ手入力</span></div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th>顧客</th><th></th><th>目標</th><th>着地見込</th><th>差異</th><th>備考（差異理由）</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="2">顧客A社</td><td>売上</td><td>21,400</td><td>33,900</td><td style="color:var(--green);">＋12,500</td><td rowspan="2">価格改定差異</td></tr>
+            <tr><td>粗利</td><td>3,500</td><td>6,800</td><td style="color:var(--green);">＋3,300</td></tr>
+            <tr><td rowspan="2">顧客B社</td><td>売上</td><td>7,900</td><td>9,300</td><td style="color:var(--green);">＋1,400</td><td rowspan="2">価格改定差異</td></tr>
+            <tr><td>粗利</td><td>1,200</td><td>1,500</td><td style="color:var(--green);">＋300</td></tr>
+            <tr><td>顧客C社</td><td>売上</td><td>7,200</td><td>7,150</td><td style="color:var(--red);">△50</td><td>—</td></tr>
+            <tr><td>顧客D社</td><td>売上</td><td>1,400</td><td>1,850</td><td style="color:var(--green);">＋450</td><td>—</td></tr>
+            <tr><td>顧客E社</td><td>売上</td><td>4,100</td><td>3,300</td><td style="color:var(--red);">△800</td><td>数量減（出荷先の都合）</td></tr>
+            <tr><td>顧客F社</td><td>売上</td><td>3,300</td><td>2,100</td><td style="color:var(--red);">△1,200</td><td>月ズレ（部材の納期遅れ）</td></tr>
+            <tr><td>顧客G社</td><td>売上</td><td>800</td><td>0</td><td style="color:var(--red);">△800</td><td>月ズレ 7月→8月</td></tr>
+            <tr style="background:var(--red-bg);"><td>装置（その他）</td><td>売上</td><td>61,500</td><td>9,700</td><td style="color:var(--red);">△51,800</td><td>開栓機　月ズレ 7月→8月</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<code class="f">SalesPlan__c</code> の顧客別差異。金額の抽出は自動で、<b>書くのは備考（<code class="f">VarianceReason__c</code>）だけ</b>になります</div>
+    </div>
+
+    <div class="alertbox red"><span>🔑</span><div>Excelで粗利率を数式で出していると、売上がゼロの月に <code>#DIV/0!</code> が表示されます。Salesforceの集計では、この種のエラーは出ません。</div></div>
+
+    <div class="note">💡 会議資料は、4月〜3月の各月に加えて第1〜第4四半期・上期／下期、さらに<b>「前回会議」列と「差異」列</b>、前期実績が横に並ぶ構成です。「前回会議との差分」は月3回の会議（月初・月中・翌月初）で見るポイントで、Salesforceでは時点別の項目として自動で記録されます。</div>
+    <div class="note">💡 承認欄（管理部／部門長／担当）は、Salesforceの承認プロセスに置き換えられます。</div>
+    </div>
+
+    <div id="bu-animal">
+
+    <div class="alertbox blue"><span>💡</span><div>この画面は、現在の会議資料<b>「64期予実報告書（8月月中会議用）」と同じ体裁</b>でSalesforce上に表示するイメージです。行と列の構成、国内／海外の内訳、四半期・上期下期の集計を同じ形で出します（<b>数値はダミー</b>）。違うのは、この表を作るための手作業がなくなる点です。</div></div>
+
+    <div class="dash">
+      <div class="dcard">
+        <div class="dh">64期 年次計画（売上）<span class="src man">✍️ 期首に登録</span></div>
+        <div class="db">
+          <div class="bigno">¥199,246<span style="font-size:14px;">千円</span></div>
+          <div class="subno">国内 ¥145,066千円 ／ 海外 ¥54,180千円</div>
+        </div>
+        <div class="df">出所：<code class="f">SalesPlan__c</code> の①期首計画。年度頭に一度登録すれば以後は固定</div>
+      </div>
+      <div class="dcard">
+        <div class="dh">実績／見込／交渉（8月月中）<span class="src auto">⚙️ 自動</span></div>
+        <div class="db">
+          <div class="bigno" style="color:var(--amber);">¥160,486<span style="font-size:14px;">千円</span></div>
+          <div class="subno">対年次計画 <b>80.5%</b>（△¥38,760千円）</div>
+        </div>
+        <div class="df">出所：<code class="f">SalesPlan__c</code> の③月中予定。ディーラー見込（Forecast）の取込＋交渉中案件の上乗せ</div>
+      </div>
+      <div class="dcard">
+        <div class="dh">粗利（実績／見込／交渉）<span class="src auto">⚙️ 自動</span></div>
+        <div class="db">
+          <div class="bigno" style="color:var(--green);">¥95,467<span style="font-size:14px;">千円</span></div>
+          <div class="subno">粗利率 59.5% ／ 年次粗利計画 ¥118,316千円</div>
+        </div>
+        <div class="df">出所：単価表（原価・出し値）から自動計算</div>
+      </div>
+    </div>
+
+    <div class="lexbox">
+      <div class="dh" style="padding:10px 14px;border-bottom:1px solid var(--border);">
+        <b>アニマルヘルスケア事業部　64期 売上</b>
+        <div class="toggle2">
+          <button class="on" id="tmQ" onclick="setTerm('q')">四半期・上下期</button>
+          <button id="tmM" onclick="setTerm('m')">月次12ヶ月</button>
+        </div>
+      </div>
+      <div class="tablewrap" id="term-q">
+        <table class="lt">
+          <thead><tr><th></th><th>第1四半期</th><th>第2四半期</th><th>上期合計</th><th>第3四半期</th><th>第4四半期</th><th>下期合計</th><th>64期合計</th></tr></thead>
+          <tbody>
+            <tr><td><b>年次計画</b> <span class="src man">✍️</span></td><td>37,946</td><td>35,420</td><td>73,366</td><td>79,210</td><td>46,670</td><td>125,880</td><td><b>199,246</b></td></tr>
+            <tr style="color:var(--muted);"><td>　国内</td><td>19,886</td><td>26,390</td><td>46,276</td><td>61,150</td><td>37,640</td><td>98,790</td><td>145,066</td></tr>
+            <tr style="color:var(--muted);"><td>　海外（スポットフォーム）</td><td>18,060</td><td>9,030</td><td>27,090</td><td>18,060</td><td>9,030</td><td>27,090</td><td>54,180</td></tr>
+            <tr style="background:var(--sf-blue-l);"><td><b>実績／見込／交渉（8月月中）</b> <span class="src auto">⚙️</span></td><td>28,916</td><td>35,420</td><td>64,336</td><td>68,620</td><td>27,530</td><td>96,150</td><td><b>160,486</b></td></tr>
+            <tr><td>実績／見込（ディーラー見込のみ） <span class="src imp">📥</span></td><td>28,916</td><td>35,420</td><td>64,336</td><td>9,470</td><td>9,470</td><td>18,940</td><td>83,276</td></tr>
+            <tr style="font-weight:700;"><td>対年次計画 達成率</td><td>76.2%</td><td>100.0%</td><td><span class="pill amber">87.7%</span></td><td>86.6%</td><td>59.0%</td><td><span class="pill red">76.4%</span></td><td><span class="pill amber">80.5%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tablewrap" id="term-m" style="display:none;">
+        <table class="lt">
+          <thead><tr><th></th><th>4月</th><th>5月</th><th>6月</th><th>7月</th><th>8月</th><th>9月</th><th>10月</th><th>11月</th><th>12月</th><th>1月</th><th>2月</th><th>3月</th><th>64期合計</th></tr></thead>
+          <tbody>
+            <tr><td><b>年次計画</b></td><td>10,416</td><td>0</td><td>27,530</td><td>0</td><td>25,950</td><td>9,470</td><td>17,150</td><td>11,030</td><td>51,030</td><td>9,470</td><td>9,030</td><td>28,170</td><td><b>199,246</b></td></tr>
+            <tr style="background:var(--sf-blue-l);"><td><b>実績／見込／交渉</b></td><td>10,416</td><td>0</td><td>18,500</td><td>0</td><td>9,030</td><td>26,390</td><td>0</td><td>9,030</td><td>59,590</td><td>0</td><td>9,030</td><td>18,500</td><td><b>160,486</b></td></tr>
+            <tr style="color:var(--muted);"><td>　国内</td><td>10,416</td><td>0</td><td>9,470</td><td>0</td><td>0</td><td>26,390</td><td>0</td><td>0</td><td>59,590</td><td>0</td><td>0</td><td>9,470</td><td>115,336</td></tr>
+            <tr style="color:var(--muted);"><td>　海外</td><td>0</td><td>0</td><td>9,030</td><td>0</td><td>9,030</td><td>0</td><td>0</td><td>9,030</td><td>0</td><td>0</td><td>9,030</td><td>9,030</td><td>45,150</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<code class="f">SalesPlan__c</code>（<code class="f">TargetMonth__c</code> で月次・四半期・上下期を自動集計）。<b>現在の会議資料と同じ行構成</b>で表示します</div>
+    </div>
+
+    <div class="lexbox">
+      <div class="dh" style="padding:10px 14px;border-bottom:1px solid var(--border);"><b>アニマルヘルスケア事業部　64期 粗利</b><span class="src auto">⚙️ 自動</span></div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th></th><th>第1四半期</th><th>第2四半期</th><th>上期合計</th><th>第3四半期</th><th>第4四半期</th><th>下期合計</th><th>64期合計</th></tr></thead>
+          <tbody>
+            <tr><td><b>年次粗利計画</b></td><td>23,405</td><td>21,426</td><td>44,831</td><td>44,791</td><td>28,694</td><td>73,485</td><td><b>118,316</b></td></tr>
+            <tr style="color:var(--muted);"><td>　国内</td><td>11,666</td><td>15,556</td><td>27,222</td><td>33,051</td><td>22,824</td><td>55,875</td><td>83,097</td></tr>
+            <tr style="color:var(--muted);"><td>　海外</td><td>11,739</td><td>5,870</td><td>17,609</td><td>11,740</td><td>5,870</td><td>17,610</td><td>35,219</td></tr>
+            <tr style="background:var(--green-bg);"><td><b>実績／見込／交渉（8月月中）</b></td><td>17,536</td><td>21,426</td><td>38,962</td><td>38,515</td><td>17,990</td><td>56,505</td><td><b>95,467</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：商品ごとの原価・出し値（単価表）を <code class="f">Product2</code> の価格として持ち、数量から自動計算</div>
+    </div>
+
+
+    <div class="lexbox">
+      <div class="dh" style="padding:10px 14px;border-bottom:1px solid var(--border);">
+        <b>アニマルヘルスケア事業部　64期 製品別予定表（8品目）</b>
+        <div class="toggle2">
+          <button class="on" id="pdQ" onclick="setProdTerm('q')">四半期・上下期</button>
+          <button id="pdM" onclick="setProdTerm('m')">月次12ヶ月</button>
+        </div>
+      </div>
+      <div class="lexsub" style="border-top:none;">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <input type="checkbox" id="pdNego" onchange="renderProducts()"> 「交渉」の行も表示する（通常は非表示）
+        </label>
+        <span class="pill gray">本数＝本／金額・粗利＝千円</span>
+        <span class="src auto">⚙️ 金額・粗利は単価表から自動計算</span>
+      </div>
+      <div class="tablewrap" id="prodwrap"></div>
+      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">
+        出所：<code class="f">SalesPlan__c</code>（<code class="f">Product2</code> × <code class="f">TargetMonth__c</code>）。行の構成・グループの並び・過去3期の比較列は、現在の製品別予定表と同じ形で表示します（数値はダミー）。<br>
+        ※Excelでは合計欄に手打ちの調整を入れると、製品別の積み上げと年間合計がずれることがあります。Salesforceでは明細から積み上げるため、この種のずれは発生しません。
+      </div>
+    </div>
+
+    <div class="dash">
+      <div class="dcard span2">
+        <div class="dh">前回会議からの増減とその理由<span class="src man">✍️ 手入力</span></div>
+        <div class="db">
+          <div class="alertbox blue" style="margin:0 0 10px;"><span>📈</span><div>5月月中 83,066千円 → <b>8月月中 160,486千円</b></div></div>
+          <div class="tablewrap">
+            <table class="lt">
+              <thead><tr><th>対象月</th><th>増減</th><th>理由</th></tr></thead>
+              <tbody>
+                <tr><td>8月</td><td style="color:var(--green);font-weight:700;">＋9,030</td><td>スポットフォーム（海外）1ロット</td></tr>
+                <tr><td>9月</td><td style="color:var(--green);font-weight:700;">＋16,920</td><td>イヤクリーナー 1ロット</td></tr>
+                <tr><td>11月</td><td style="color:var(--green);font-weight:700;">＋9,030</td><td>スポットフォーム（海外）1ロット</td></tr>
+                <tr><td>12月</td><td style="color:var(--red);font-weight:700;">▲9,030</td><td>スポットフォーム（海外）1ロット（11月へ前倒し）</td></tr>
+                <tr><td>12月</td><td style="color:var(--green);font-weight:700;">＋42,000</td><td>シャンプー250・4L 各1ロット</td></tr>
+                <tr><td>3月</td><td style="color:var(--green);font-weight:700;">＋9,470</td><td>スポットフォーム（国内）1ロット</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="df">出所：<code class="f">SalesPlan__c.VarianceReason__c</code>（差異理由）。会議のたびに時点を記録するので、<b>増減は自動で出て、理由だけを書けば済みます</b></div>
+      </div>
+
+      <div class="dcard">
+        <div class="dh">昨対比<span class="src auto">⚙️ 自動</span></div>
+        <div class="db">
+          <div class="bigno" style="color:var(--amber);">84%</div>
+          <div class="subno">64期見込 160,486 ／ 63期実績 190,620（千円）</div>
+          <div class="hbar" style="margin-top:12px;"><div class="hl">64期見込</div><div class="ht"><div class="hf" style="width:84%;background:var(--sf-blue);"></div></div><div class="hv">160,486</div></div>
+          <div class="hbar"><div class="hl">63期</div><div class="ht"><div class="hf" style="width:100%;"></div></div><div class="hv">190,620</div></div>
+          <div class="hbar"><div class="hl">62期</div><div class="ht"><div class="hf" style="width:81%;"></div></div><div class="hv">154,005</div></div>
+          <div class="hbar"><div class="hl">61期</div><div class="ht"><div class="hf" style="width:72%;"></div></div><div class="hv">136,854</div></div>
+          <div class="hbar"><div class="hl">60期</div><div class="ht"><div class="hf" style="width:67%;"></div></div><div class="hv">128,400</div></div>
+        </div>
+        <div class="df">出所：過去年度の <code class="f">SalesPlan__c</code> 実績。過去5期分の実績を初期移行すれば自動で並びます</div>
+      </div>
+    </div>
+
+    <div class="dash">
+      <div class="dcard span2">
+        <div class="dh">製品別 販売戦略（通期・千円）<span class="src auto">⚙️ 自動</span></div>
+        <div class="db">
+          <div class="hbar"><div class="hl">SF（海外）</div><div class="ht"><div class="hf" style="width:100%;background:var(--purple);"></div></div><div class="hv">45,150</div></div>
+          <div class="hbar"><div class="hl">SF（国内）</div><div class="ht"><div class="hf" style="width:84%;"></div></div><div class="hv">37,880</div></div>
+          <div class="hbar"><div class="hl">シャンプー4L</div><div class="ht"><div class="hf" style="width:81%;"></div></div><div class="hv">36,456</div></div>
+          <div class="hbar"><div class="hl">イヤクリーナー</div><div class="ht"><div class="hf" style="width:37%;"></div></div><div class="hv">16,920</div></div>
+          <div class="hbar"><div class="hl">シャンプー250</div><div class="ht"><div class="hf" style="width:35%;"></div></div><div class="hv">15,960</div></div>
+          <div class="hbar"><div class="hl">ダーマルカーム</div><div class="ht"><div class="hf" style="width:18%;"></div></div><div class="hv">8,120</div></div>
+          <div class="hbar"><div class="hl">ホイップ</div><div class="ht"><div class="hf" style="width:1%;background:#ccc;"></div></div><div class="hv">0</div></div>
+          <div style="margin-top:10px;font-size:12px;color:var(--muted);">国内合計 115,336 ／ 海外 45,150 ／ <b style="color:var(--text);">総計 160,486</b></div>
+        </div>
+        <div class="df">出所：<code class="f">SalesPlan__c</code> を製品で切り替えるだけで、製品別の販売戦略表と同じ形が出ます</div>
+      </div>
+
+      <div class="dcard">
+        <div class="dh">学会・新製品の予定<span class="rid">活動</span><span class="src man">✍️ 手入力</span></div>
+        <div class="db" style="font-size:12px;line-height:1.75;">
+          <div><b>9月下旬（土・日）　学会A</b><br><span style="color:var(--muted);">製品展示・新製品の告知</span></div>
+          <div style="margin-top:8px;"><b>10月中旬（金〜日）　シンポジウムB</b><br><span style="color:var(--muted);">獣医皮膚科領域の展示</span></div>
+          <div style="margin-top:8px;"><b>10月下旬（土・日）　研究会C</b><br><span style="color:var(--muted);">製品展示</span></div>
+          <div style="margin-top:8px;"><b>翌年3月下旬（土・日）　学会D</b><br><span style="color:var(--muted);">シャンプー・ダーマルカーム</span></div>
+        </div>
+        <div class="df">Salesforceでは<b>キャンペーン＋活動</b>として持ち、展示会後のフォロー漏れも追えます</div>
+      </div>
+    </div>
+
+    <div class="inflow">
+      <div class="ih">会議資料の5つの表が、Salesforceでどこに載るか</div>
+      <table>
+        <thead><tr><th>会議資料の表</th><th>載せ先</th><th>入り口</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>月次予実報告書</td><td>この画面の売上・粗利ブロック</td><td><span class="src man">✍️</span> 期首計画は年1回、予定は会議のたび</td><td><span class="pill blue">製品×月で集計</span> 他事業部と粒度を揃えるかは設計時に決定</td></tr>
+          <tr><td>製品別販売戦略</td><td>製品別カード</td><td><span class="src auto">⚙️</span> 同じデータの切り口を変えるだけ</td><td><span class="pill green">そのまま出せます</span></td></tr>
+          <tr><td>昨対比</td><td>昨対比カード</td><td><span class="src man">✍️</span> 過去の実績を初期移行</td><td><span class="pill green">移行すれば自動</span></td></tr>
+          <tr><td>学会・新製品の予定</td><td>キャンペーン／活動</td><td><span class="src man">✍️</span> 予定が決まったとき</td><td><span class="pill green">そのまま出せます</span></td></tr>
+          <tr><td>単価表（原価・出し値）</td><td><code class="f">Product2</code> の価格</td><td><span class="src man">✍️</span> 改訂のつど</td><td><span class="pill blue">改訂履歴を保持</span> 価格改訂の世代ごとに持てます</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alertbox red"><span>🔑</span><div><b>Excelで数式を持ち続けると、参照先のシートが動いたときに <code>#REF!</code> エラーが出ることがあります。</b>Salesforceでは集計が壊れないので、この種の直し作業がなくなります。</div></div>
+
+    <div class="note">💡 3事業部を1枚に並べる経営会議用のダッシュボードも同じ仕組みで作れます。ただしメディカル・P&amp;Pは月次見込（顧客×製品×月）、アニマルは年次計画＋四半期と<b>粒度が違う</b>ため、揃えるかどうかを設計時に決めます。</div>
+    </div>
+
+    <div class="note">💡 構成要素の並び・グラフの種類・絞り込み条件は自由に変えられます。会議で実際に見る順序をお聞かせいただければ、そのとおりに組みます。</div>
+  </section>
+
+  <section class="screen" id="screen-accounts">
+
+    <div class="lexbox">
+      <div class="lexhead">
+        <div class="lexico">🏥</div>
+        <div>
+          <div class="eyebrow">取引先（オブジェクト：<span class="api">Account</span>）</div>
+          <div class="rectitle">アニマル：オーツ取扱病院 ▾</div>
+        </div>
+        <div class="lexact">
+          <button class="btn" onclick="toast('モックのため動作しません')">インポート</button>
+          <button class="btn pri" onclick="toast('モックのため動作しません')">新規</button>
+        </div>
+      </div>
+      <div class="lexsub">
+        <span>5,400 件 ・ 数分前に更新</span>
+        <span class="pill blue">絞り込み：ディーラー営業所 ＝ すべて</span>
+        <span class="pill gray">並び替え：発注停止日数の降順</span>
+        <div class="lexsearch">🔍 このリストを検索…</div>
+      </div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr>
+            <th>取引先名<br><span class="src imp">📥 取込</span></th>
+            <th>施設コード<br><span class="src imp">📥 取込</span></th>
+            <th>ディーラー営業所<br><span class="src imp">📥 取込</span></th>
+            <th>DSセグメント<br><span class="src auto">⚙️ 自動</span></th>
+            <th>最終発注日<br><span class="src auto">⚙️ 自動</span></th>
+            <th>発注停止日数<br><span class="src auto">⚙️ 自動</span></th>
+            <th>訪問月数<br><span class="src auto">⚙️ 自動</span></th>
+            <th>大扇 担当者<br><span class="src todo">❓ 未確定</span></th>
+          </tr></thead>
+          <tbody>
+            <tr><td><a href="javascript:void(0)" onclick="go('account')">さくら動物病院</a></td><td>9000123</td><td>01東日本営業所</td><td><span class="seg C">C6</span></td><td>2026/07/15</td><td>17日</td><td>3ヶ月</td><td>担当A</td></tr>
+            <tr><td><a href="javascript:void(0)" onclick="toast('モックのため、詳細ページはさくら動物病院のみです')">こまち動物病院</a></td><td>9000456</td><td>07中部営業所</td><td><span class="seg A">A</span></td><td>2026/05/30</td><td><span class="pill red">63日</span></td><td>1ヶ月</td><td>担当B</td></tr>
+            <tr><td><a href="javascript:void(0)" onclick="toast('モックのため、詳細ページはさくら動物病院のみです')">あおば動物病院</a></td><td>9000078</td><td>01東日本営業所</td><td><span class="seg B">B2</span></td><td>2026/06/20</td><td><span class="pill red">42日</span></td><td>2ヶ月</td><td>担当B</td></tr>
+            <tr><td><a href="javascript:void(0)" onclick="toast('モックのため、詳細ページはさくら動物病院のみです')">のぞみ動物病院</a></td><td>9000789</td><td>09九州営業所</td><td><span class="seg C">C7</span></td><td>2026/07/03</td><td><span class="pill amber">29日</span></td><td>2ヶ月</td><td>担当C</td></tr>
+            <tr><td><a href="javascript:void(0)" onclick="toast('モックのため、詳細ページはさくら動物病院のみです')">ひまわり動物クリニック</a></td><td>9000345</td><td>05関西営業所</td><td><span class="seg D">D14</span></td><td>2026/07/10</td><td>22日</td><td>4ヶ月</td><td>担当C</td></tr>
+            <tr><td><a href="javascript:void(0)" onclick="toast('モックのため、詳細ページはさくら動物病院のみです')">みどり動物病院</a></td><td>9000612</td><td>05関西営業所</td><td><span class="seg none">--</span></td><td>—</td><td>—</td><td>0ヶ月</td><td style="color:#b9b9b9;">未設定</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="lexsub" style="border-bottom:none;"><span>6件を表示中（全5,400件）</span></div>
+    </div>
+
+    <div class="inflow">
+      <div class="ih">このリストの列がどこから来ているか</div>
+      <table>
+        <thead><tr><th>列</th><th>入り口</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>取引先名・施設コード・ディーラー営業所</td><td><span class="src imp">📥 月次取込</span></td><td>ディーラーのExcelから自動で作られます。1件ずつ手で登録する必要はありません</td></tr>
+          <tr><td>DSセグメント・最終発注日・発注停止日数・訪問月数</td><td><span class="src auto">⚙️ 自動</span></td><td><code class="f">DSSegment__c</code> <code class="f">LastOrderDate__c</code> <code class="f">OrderStopDays__c</code> <code class="f">VisitMonthsThisFY__c</code>。取込と訪問記録から計算されます</td></tr>
+          <tr><td>大扇 担当者</td><td><span class="src todo">❓ 未確定</span></td><td>大扇産業側の担当者は導入時に設定します。設定すると、担当者ごとの絞り込みと訪問漏れの検知に使えます</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alertbox blue"><span>💡</span><div>このリストは<b>「発注が止まっている病院を上から見る」</b>使い方を想定しています。赤い日数が発注停止検知（30日／40日）の対象です。リストの条件や列は自由に作れるので、営業所別・担当者別など必要な切り口をお聞かせください。</div></div>
+    <div class="note">💡 病院名をクリックすると詳細ページに移動します（モックでは「さくら動物病院」のみ）。</div>
+  </section>
+
+  <section class="screen" id="screen-account">
+
+    <div class="lexbox">
+      <div class="lexhead">
+        <div class="lexico">🏥</div>
+        <div>
+          <div class="eyebrow">取引先（オブジェクト：<span class="api">Account</span>）</div>
+          <div class="rectitle">さくら動物病院</div>
+        </div>
+        <div class="lexact">
+          <button class="btn" onclick="go('accounts')">← リストに戻る</button>
+          <button class="btn" onclick="toast('モックのため動作しません')">編集</button>
+          <button class="btn pri" onclick="go('report')">訪問記録を登録</button>
+        </div>
+      </div>
+      <div class="hlfields">
+        <div class="fx" style="border:none;padding:0;"><div class="k">施設コード <span class="src imp">📥</span></div><div class="v">9000123</div></div>
+        <div class="fx" style="border:none;padding:0;"><div class="k">DSセグメント <span class="src auto">⚙️</span></div><div class="v"><span class="seg C">C6</span></div></div>
+        <div class="fx" style="border:none;padding:0;"><div class="k">ディーラー営業所 <span class="src imp">📥</span></div><div class="v">01東日本営業所</div></div>
+        <div class="fx" style="border:none;padding:0;"><div class="k">最終発注日 <span class="src auto">⚙️</span></div><div class="v">2026/07/15</div></div>
+        <div class="fx" style="border:none;padding:0;"><div class="k">発注停止日数 <span class="src auto">⚙️</span></div><div class="v">17日</div></div>
+        <div class="fx" style="border:none;padding:0;"><div class="k">大扇 担当者 <span class="src todo">❓</span></div><div class="v">担当A</div></div>
+      </div>
+      <div class="rectabs">
+        <div class="rectab on">詳細</div>
+        <div class="rectab">関連</div>
+        <div class="rectab">活動</div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div>
+        <div class="lexbox">
+          <div class="sect">
+            <div class="secth">🏥 病院の基本情報 <span class="src imp">📥 取込</span><span class="src man">✍️ 一部は手入力</span></div>
+            <div class="grid2">
+              <div class="fx"><div class="k">取引先名 <span class="api">Name</span> <span class="src imp">📥</span></div><div class="v">さくら動物病院</div></div>
+              <div class="fx"><div class="k">施設コード <span class="api">FacilityCode__c</span> <span class="src imp">📥</span></div><div class="v">9000123<span class="pill gray" style="margin-left:6px;">外部ID・重複不可</span></div></div>
+              <div class="fx"><div class="k">都道府県 <span class="api">BillingState</span> <span class="src imp">📥</span></div><div class="v">東京都</div></div>
+              <div class="fx"><div class="k">住所 <span class="api">BillingStreet</span> <span class="src imp">📥</span></div><div class="v">世田谷区◯◯ 1-2-3</div></div>
+              <div class="fx"><div class="k">勤務医数 <span class="api">VetCount__c</span> <span class="src man">✍️</span></div><div class="v">3名</div></div>
+              <div class="fx"><div class="k">休診日 <span class="api">ClosedDays__c</span> <span class="src man">✍️</span></div><div class="v">水曜・日曜午後</div></div>
+              <div class="fx"><div class="k">診療時間 <span class="api">OpenHours__c</span> <span class="src man">✍️</span></div><div class="v">9:00-12:00 ／ 16:00-19:00</div></div>
+              <div class="fx"><div class="k">HP有無 <span class="api">HasWebsite__c</span> <span class="src man">✍️</span></div><div class="v">✓ あり</div></div>
+              <div class="fx"><div class="k">犬猫以外の診療 <span class="api">TreatsExotic__c</span> <span class="src man">✍️</span></div><div class="v empty">—</div></div>
+              <div class="fx"><div class="k">所属学会 <span class="api">AcademicSociety__c</span> <span class="src man">✍️</span></div><div class="v">日本獣医皮膚科学会</div></div>
+              <div class="fx"><div class="k">SF使用のきっかけ <span class="api">SFTrigger__c</span> <span class="src man">✍️</span></div><div class="v">展示会でのサンプル配布</div></div>
+            </div>
+          </div>
+
+          <div class="sect">
+            <div class="secth">📥 ディーラー情報（ディーラー提供） <span class="src imp">📥 月次取込</span></div>
+            <div class="grid2">
+              <div class="fx"><div class="k">ディーラー営業所 <span class="api">DealerOffice__c</span> <span class="src imp">📥</span></div><div class="v">01東日本営業所</div></div>
+              <div class="fx"><div class="k">ディーラー営業員 <span class="api">DealerRep__c</span> <span class="src imp">📥</span></div><div class="v">01営業員A</div></div>
+              <div class="fx"><div class="k">ディーラーセグメント <span class="api">DealerSegment__c</span> <span class="src imp">📥</span></div><div class="v">地区区分07<span class="pill gray" style="margin-left:6px;">DSセグメントとは別物</span></div></div>
+              <div class="fx"><div class="k">大扇 担当者 <span class="api">OwnerId</span> <span class="src todo">❓ 未確定</span></div><div class="v empty">未設定</div></div>
+            </div>
+            <div class="alertbox gray" style="margin:0 14px 12px;"><span>⚠️</span><div>上の「営業所」「営業員」は<b>ディーラー側の組織</b>です。大扇産業側の担当者は「大扇 担当者」として別に持ち、担当者での絞り込みや訪問漏れの検知に使います。</div></div>
+          </div>
+
+          <div class="sect">
+            <div class="secth">⚙️ セグメント・実績（すべて自動計算） <span class="src auto">⚙️ 入力不要</span></div>
+            <div class="grid2">
+              <div class="fx"><div class="k">DSセグメント <span class="api">DSSegment__c</span> <span class="src auto">⚙️</span></div><div class="v"><span class="seg C">C6</span> <a href="javascript:void(0)" onclick="go('segment')" style="font-size:11.5px;margin-left:6px;">判定の内訳を見る</a></div></div>
+              <div class="fx"><div class="k">顧客ランク <span class="api">CustomerRank__c</span> <span class="src todo">❓ 未確定</span></div><div class="v empty">しきい値の設定後に自動表示</div></div>
+              <div class="fx"><div class="k">最終発注日 <span class="api">LastOrderDate__c</span> <span class="src auto">⚙️</span></div><div class="v">2026/07/15</div></div>
+              <div class="fx"><div class="k">発注停止日数 <span class="api">OrderStopDays__c</span> <span class="src auto">⚙️</span></div><div class="v">17日<span class="pill green" style="margin-left:6px;">30日未満</span></div></div>
+              <div class="fx"><div class="k">訪問月数（当年度） <span class="api">VisitMonthsThisFY__c</span> <span class="src auto">⚙️</span></div><div class="v">3ヶ月</div></div>
+              <div class="fx"><div class="k">全製品 近2年 <span class="src auto">⚙️</span></div><div class="v">18本</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lexbox">
+          <div class="rlh">📊 ディーラー実績 <span class="api">DealerSales__c</span> <span class="cnt">4件を表示（全31件）</span> <span class="src imp">📥 月次取込</span><span class="more">すべて表示</span></div>
+          <div class="tablewrap">
+            <table class="lt">
+              <thead><tr><th>外部キー <span class="api">ExternalKey__c</span></th><th>対象年月</th><th>製品</th><th>数量（本）</th><th>ディーラー営業所</th></tr></thead>
+              <tbody>
+                <tr><td>9000123-SF001-202607</td><td>2026/07</td><td>オーツスポットフォーム</td><td>2</td><td>01東日本営業所</td></tr>
+                <tr><td>9000123-SH002-202607</td><td>2026/07</td><td>オーツシャンプーエクストラ</td><td>1</td><td>01東日本営業所</td></tr>
+                <tr><td>9000123-SF001-202606</td><td>2026/06</td><td>オーツスポットフォーム</td><td>2</td><td>01東日本営業所</td></tr>
+                <tr><td>9000123-EC003-202605</td><td>2026/05</td><td>オーツイヤークリーナー</td><td>1</td><td>01東日本営業所</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="lexsub" style="border-bottom:none;">施設コード7桁＋全製商品管理コード＋発行年月（YYYYMM）を外部キーにして、毎月の取込で上書きされます。同じ月を二重に取り込んでも重複しません。</div>
+        </div>
+
+        <div class="lexbox">
+          <div class="rlh">📝 活動履歴 <span class="api">Event</span> <span class="cnt">3件を表示（全11件）</span> <span class="src man">✍️ 手入力</span><span class="more">すべて表示</span></div>
+          <div class="tablewrap">
+            <table class="lt">
+              <thead><tr><th>訪問日</th><th>訪問種別 <span class="api">VisitType__c</span></th><th>訪問結果 <span class="api">VisitResult__c</span></th><th>実訪問者 <span class="api">OwnerId</span></th><th>訪問メモ</th></tr></thead>
+              <tbody>
+                <tr><td>2026/07/22</td><td>訪問</td><td>〇</td><td>担当A</td><td>院長より新製品の反応良好。次回展示会の案内を依頼された。</td></tr>
+                <tr><td>2026/05/14</td><td>展示会</td><td>〇</td><td>担当A</td><td>ブースへ来訪。シャンプーのサンプルを渡した。</td></tr>
+                <tr><td>2026/03/09</td><td>訪問</td><td>△</td><td>担当B</td><td>院長不在。看護師へ資料のみ手渡し。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="lexsub" style="border-bottom:none;">ここに溜まった記録が、そのままディーラー報告用CSVと訪問月数の自動集計に流れます。</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="lexbox">
+          <div class="secth">🔔 発注停止アラート</div>
+          <div style="padding:12px 14px;">
+            <div class="alertbox" style="margin-bottom:10px;"><span>⏱</span><div>最終発注から<b>17日</b>が経過しています。30日で担当者へ通知、40日で上長にも通知します。</div></div>
+            <div class="alertbox red" style="margin-bottom:0;"><span>❓</span><div>この日数はディーラーの<b>月次データ</b>から算出します。月次データでの30日／40日の数え方は、導入時に決めます。</div></div>
+          </div>
+        </div>
+
+        <div class="lexbox">
+          <div class="secth">🗺 地図での位置 <span class="src imp">📥 住所から自動</span></div>
+          <div style="padding:12px 14px;">
+            <div style="background:linear-gradient(135deg,#eef4ea,#e3edf7);border:1px solid var(--border2);border-radius:6px;height:150px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--muted);font-size:12px;">
+              <div style="font-size:26px;">📍</div>
+              <div>Customer Compass（地図表示）</div>
+              <div style="font-size:11px;">世田谷区 ／ DSセグメント C</div>
+            </div>
+            <div class="alertbox" style="margin:10px 0 0;"><span>❓</span><div>ピンの色分けは現在DSセグメント別です。いま使っている地図の目印（<b>✩</b>・<b>❤</b> など）に合わせて変えられます。</div></div>
+          </div>
+        </div>
+
+        <div class="lexbox">
+          <div class="secth">📌 この画面の入力負荷</div>
+          <div style="padding:6px 14px 12px;">
+            <div class="fx"><div class="k">自動で埋まる項目</div><div class="v" style="color:var(--purple);">16項目</div></div>
+            <div class="fx"><div class="k">手で入れる項目</div><div class="v" style="color:var(--green);">7項目（病院の属性・初回のみ）</div></div>
+            <div class="fx" style="border:none;"><div class="k">訪問のたびに入れる項目</div><div class="v" style="color:var(--green);">5項目</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">💡 この詳細ページのレイアウト（項目の並び・セクションの分け方・関連リストの順番）は自由に変えられます。現場で見たい順にお聞かせください。</div>
+  </section>
+
+  <section class="screen" id="screen-opp">
+
+    <div class="alertbox" style="margin-bottom:14px;"><span>⚠️</span><div><b>アニマル事業部は、訪問活動と実績で管理する運用を基本とします。</b>案件管理は全社共通の機能として用意しており、この画面は<b>アニマル事業部でも案件管理を併用する場合のイメージ</b>です。使う場合はアニマル用のフェーズ定義が必要になります。</div></div>
+
+    <div class="lexbox">
+      <div class="lexhead">
+        <div class="lexico" style="background:#fcb95b;">💼</div>
+        <div>
+          <div class="eyebrow">案件（オブジェクト：<span class="api">Opportunity</span>）</div>
+          <div class="rectitle">アニマル：進行中の案件 ▾ <span class="pill amber">たたき台</span></div>
+        </div>
+        <div class="lexact">
+          <button class="btn" onclick="toast('モックのため動作しません')">インポート</button>
+          <button class="btn pri" onclick="toast('モックのため動作しません')">新規</button>
+        </div>
+      </div>
+      <div class="lexsub">
+        <span>6 件 ・ 数分前に更新</span>
+        <span class="pill blue">絞り込み：フェーズ ≠ 失注</span>
+        <span class="pill gray">並び替え：完了予定日の昇順</span>
+        <div class="lexsearch">🔍 このリストを検索…</div>
+      </div>
+      <div class="lexsub" style="background:#fff;">
+        <span style="color:var(--muted);">ほかのリストビュー：</span>
+        <span class="pill gray">自分の案件</span>
+        <span class="pill gray">今月完了予定</span>
+        <span class="pill gray">次のアクション期限が過ぎたもの</span>
+        <span class="pill gray">営業所別</span>
+      </div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr>
+            <th>案件名<br><span class="src man">✍️ 手入力</span></th>
+            <th>取引先<br><span class="src man">✍️ 選ぶだけ</span></th>
+            <th>DSセグメント<br><span class="src auto">⚙️ 自動</span></th>
+            <th>フェーズ<br><span class="src man">✍️ 手で進める</span></th>
+            <th>金額<br><span class="src man">✍️ 手入力</span></th>
+            <th>完了予定日<br><span class="src man">✍️ 手入力</span></th>
+            <th>次のアクション<br><span class="src man">✍️ 手入力</span></th>
+            <th>次のアクション期限<br><span class="src man">✍️ 手入力</span></th>
+            <th>所有者<br><span class="src auto">⚙️ 自動</span></th>
+          </tr></thead>
+          <tbody>
+            <tr><td><a href="javascript:void(0)" onclick="go('oppdetail')">さくら動物病院｜シャンプー定期採用の提案</a></td><td>さくら動物病院</td><td><span class="seg C">C6</span></td><td><span class="pill blue">提案</span></td><td>¥180,000</td><td>2026/09/30</td><td>POP試作を持参して再訪</td><td>2026/09/12</td><td>担当A</td></tr>
+            <tr><td><a href="javascript:void(0)" onclick="toast('モックのため、詳細ページは1件のみです')">中部ディーラー勉強会｜共同企画</a></td><td>のぞみ動物病院</td><td><span class="seg C">C7</span></td><td><span class="pill green">受注</span></td><td>¥60,000</td><td>2026/09/05</td><td>—</td><td>—</td><td>担当B</td></tr>
+            <tr><td><a href="javascript:void(0)" onclick="toast('モックのため、詳細ページは1件のみです')">あおば動物病院｜スポットフォーム再開の打診</a></td><td>あおば動物病院</td><td><span class="seg B">B2</span></td><td><span class="pill amber">情報収集</span></td><td>¥120,000</td><td>2026/10/31</td><td>発注停止の理由を確認する</td><td><span class="pill red">2026/08/29 期限超過</span></td><td>担当B</td></tr>
+            <tr><td><a href="javascript:void(0)" onclick="toast('モックのため、詳細ページは1件のみです')">ひまわり動物クリニック｜イヤークリーナー切替</a></td><td>ひまわり動物クリニック</td><td><span class="seg D">D14</span></td><td><span class="pill amber">情報収集</span></td><td>¥95,000</td><td>2026/10/15</td><td>他社品との比較資料を送る</td><td>2026/09/25</td><td>担当C</td></tr>
+            <tr><td><a href="javascript:void(0)" onclick="toast('モックのため、詳細ページは1件のみです')">こまち動物病院｜スポットフォーム再導入</a></td><td>こまち動物病院</td><td><span class="seg A">A</span></td><td><span class="pill amber">情報収集</span></td><td>—</td><td>2026/11/30</td><td>63日発注が止まっている理由を訪問して確認</td><td><span class="pill amber">2026/09/08</span></td><td>担当B</td></tr>
+            <tr><td><a href="javascript:void(0)" onclick="toast('モックのため、詳細ページは1件のみです')">秋季展示会（東京）｜フォロー一括</a></td><td>（複数病院）</td><td>—</td><td><span class="pill blue">提案</span></td><td>¥250,000</td><td>2026/12/20</td><td>名刺取込後にフォロー担当を割り振る</td><td>2026/10/05</td><td>担当A</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="lexsub" style="border-bottom:none;"><span>6件を表示中（全6件）</span></div>
+    </div>
+
+    <div class="inflow">
+      <div class="ih">このリストの列がどこから来ているか</div>
+      <table>
+        <thead><tr><th>列</th><th>入り口</th><th>誰が・どこで</th></tr></thead>
+        <tbody>
+          <tr><td>案件名・フェーズ・金額・完了予定日・次のアクション・期限</td><td><span class="src man">✍️ 手入力</span></td><td>訪問した営業担当者が、案件の詳細ページで入力します。取引先や実績のように取込では埋まりません</td></tr>
+          <tr><td>取引先</td><td><span class="src man">✍️ 選ぶだけ</span></td><td>取込済みの動物病院から選びます。新規に病院名を打ち込む必要はありません</td></tr>
+          <tr><td>DSセグメント</td><td><span class="src auto">⚙️ 自動</span></td><td>取引先の <code class="f">DSSegment__c</code> をそのまま表示。案件側で入力するものではありません</td></tr>
+          <tr><td>所有者</td><td><span class="src auto">⚙️ 自動</span></td><td>案件を作成した本人が入ります</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alertbox blue"><span>💡</span><div>このリストは<b>「次のアクション期限が過ぎた案件を上から潰す」</b>使い方を想定しています。赤い期限が対応漏れです。ただし<b>期限も次のアクションも手入力なので、入れてもらえなければこのリストは空のまま</b>になります。ここが訪問記録中心の運用との一番の違いです。</div></div>
+    <div class="note">💡 案件名をクリックすると詳細ページに移動します（モックでは1件目のみ）。</div>
+  </section>
+
+  <section class="screen" id="screen-oppdetail">
+
+    <div class="alertbox" style="margin-bottom:14px;"><span>⚠️</span><div><b>アニマル事業部は、訪問活動と実績で管理する運用を基本とします。</b>案件管理は全社共通の機能として用意しており、この画面は<b>アニマル事業部でも案件管理を併用する場合のイメージ</b>です。使う場合はアニマル用のフェーズ定義が必要になります。</div></div>
+
+    <div class="lexbox">
+      <div class="lexhead">
+        <div class="lexico" style="background:#fcb95b;">💼</div>
+        <div>
+          <div class="eyebrow">案件（<span class="api">Opportunity</span>）</div>
+          <div class="rectitle">さくら動物病院｜シャンプー定期採用の提案</div>
+        </div>
+        <div class="lexact">
+          <button class="btn" onclick="go('opp')">← リストに戻る</button>
+          <button class="btn" onclick="go('account')">取引先を見る</button>
+          <button class="btn" onclick="toast('モックのため動作しません')">編集</button>
+          <button class="btn pri" onclick="toast('モックのため動作しません')">フェーズを進める</button>
+        </div>
+      </div>
+      <div class="path">
+        <div class="pstep done">情報収集</div>
+        <div class="pstep now">提案</div>
+        <div class="pstep">見積提出</div>
+        <div class="pstep">稟議中</div>
+        <div class="pstep">受注</div>
+        <div class="pstep">納入</div>
+        <div class="pstep">検収</div>
+      </div>
+      <div class="lexsub"><span>⚠️ このフェーズは<b>メディカル事業部の定義を仮に当てたもの</b>です。アニマルで使う場合は、訪問→サンプル提供→採用といった実態に合うフェーズを定義し直す必要があります。</span></div>
+      <div class="hlfields">
+        <div class="fx" style="border:none;padding:0;"><div class="k">取引先 <span class="src man">✍️</span></div><div class="v"><a href="javascript:void(0)" onclick="go('account')">さくら動物病院</a></div></div>
+        <div class="fx" style="border:none;padding:0;"><div class="k">金額 <span class="src man">✍️</span></div><div class="v">¥180,000</div></div>
+        <div class="fx" style="border:none;padding:0;"><div class="k">完了予定日 <span class="src man">✍️</span></div><div class="v">2026/09/30</div></div>
+        <div class="fx" style="border:none;padding:0;"><div class="k">次回訪問日 <span class="src man">✍️</span></div><div class="v">2026/09/18</div></div>
+        <div class="fx" style="border:none;padding:0;"><div class="k">所有者 <span class="src auto">⚙️</span></div><div class="v">担当A</div></div>
+      </div>
+      <div class="rectabs">
+        <div class="rectab on">詳細</div>
+        <div class="rectab">関連</div>
+        <div class="rectab">活動</div>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div>
+        <div class="lexbox">
+          <div class="sect">
+            <div class="secth">💼 案件の基本情報 <span class="src man">✍️ すべて手入力</span></div>
+            <div class="grid2">
+              <div class="fx"><div class="k">案件名 <span class="api">Name</span> <span class="src man">✍️</span></div><div class="v">さくら動物病院｜シャンプー定期採用の提案</div></div>
+              <div class="fx"><div class="k">取引先 <span class="api">AccountId</span> <span class="src man">✍️ 選ぶだけ</span></div><div class="v">さくら動物病院</div></div>
+              <div class="fx"><div class="k">フェーズ <span class="api">StageName</span> <span class="src man">✍️</span></div><div class="v">提案</div></div>
+              <div class="fx"><div class="k">完了予定日 <span class="api">CloseDate</span> <span class="src man">✍️</span></div><div class="v">2026/09/30</div></div>
+              <div class="fx"><div class="k">金額 <span class="api">Amount</span> <span class="src man">✍️</span></div><div class="v">¥180,000（概算）<span class="pill gray" style="margin-left:6px;">受注時は必須</span></div></div>
+              <div class="fx"><div class="k">顧客担当者 <span class="api">CustomerContact__c</span> <span class="src man">✍️ 選ぶだけ</span></div><div class="v">院長</div></div>
+              <div class="fx"><div class="k">同行者 <span class="api">Companion__c</span> <span class="src man">✍️</span></div><div class="v">商品開発 ◯◯</div></div>
+              <div class="fx"><div class="k">仕入先 <span class="api">SupplierId__c</span> <span class="src todo">❓ P&amp;P用</span></div><div class="v empty">アニマルでは未使用</div></div>
+            </div>
+          </div>
+
+          <div class="sect">
+            <div class="secth">📝 案件の進捗管理項目 <span class="src man">✍️ すべて手入力</span></div>
+            <div class="grid2">
+              <div class="fx"><div class="k">顧客お困りごと <span class="api">CustomerIssue__c</span> <span class="src man">✍️</span></div><div class="v">皮膚疾患の再診が多く、院内でのケア提案に手が回っていない</div></div>
+              <div class="fx"><div class="k">提案内容 <span class="api">ProposalDetail__c</span> <span class="src man">✍️</span></div><div class="v">シャンプーとイヤークリーナーのセット提案。院内掲示用POPを提供</div></div>
+              <div class="fx"><div class="k">トラブル・クレーム <span class="api">TroubleNote__c</span> <span class="src man">✍️</span></div><div class="v empty">—</div></div>
+              <div class="fx"><div class="k">商品動向6ヶ月見通し <span class="api">Outlook6M__c</span> <span class="src man">✍️</span></div><div class="v">秋以降の皮膚疾患シーズンで採用拡大の見込み</div></div>
+              <div class="fx"><div class="k">年間見通し <span class="api">OutlookAnnual__c</span> <span class="src man">✍️</span></div><div class="v">年間24本程度</div></div>
+              <div class="fx"><div class="k">顧客新商品 <span class="api">CustomerNewProduct__c</span> <span class="src man">✍️</span></div><div class="v empty">—</div></div>
+              <div class="fx"><div class="k">課題・次のアクション <span class="api">NextAction__c</span> <span class="src man">✍️</span></div><div class="v">POP試作を持参して再訪</div></div>
+              <div class="fx"><div class="k">次のアクション期限 <span class="api">NextActionDue__c</span> <span class="src man">✍️</span></div><div class="v">2026/09/12</div></div>
+              <div class="fx"><div class="k">次回訪問日 <span class="api">NextVisitDate__c</span> <span class="src man">✍️</span></div><div class="v">2026/09/18</div></div>
+              <div class="fx"><div class="k">所有者 <span class="api">OwnerId</span> <span class="src auto">⚙️ 自動</span></div><div class="v">担当A（作成した本人）</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lexbox">
+          <div class="rlh">📦 案件商品 <span class="api">OpportunityLineItem</span> <span class="cnt">2件</span> <span class="src man">✍️ 商品マスタから選ぶ</span><span class="more">すべて表示</span></div>
+          <div class="tablewrap">
+            <table class="lt">
+              <thead><tr><th>商品</th><th>数量</th><th>単価</th><th>小計</th></tr></thead>
+              <tbody>
+                <tr><td>オーツシャンプーエクストラ</td><td>12</td><td>¥10,000</td><td>¥120,000</td></tr>
+                <tr><td>オーツイヤークリーナー</td><td>6</td><td>¥10,000</td><td>¥60,000</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="lexsub" style="border-bottom:none;">商品を並べると、金額（<code class="f">Amount</code>）は合計から自動で入ります。概算のまま進める運用でも構いません。</div>
+        </div>
+
+        <div class="lexbox">
+          <div class="rlh">📝 活動履歴 <span class="api">Event</span> <span class="cnt">2件</span> <span class="src man">✍️ 手入力</span><span class="more">すべて表示</span></div>
+          <div class="tablewrap">
+            <table class="lt">
+              <thead><tr><th>訪問日</th><th>訪問種別</th><th>訪問結果</th><th>実訪問者</th><th>訪問メモ</th></tr></thead>
+              <tbody>
+                <tr><td>2026/07/22</td><td>訪問</td><td>〇</td><td>担当A</td><td>院長より新製品の反応良好。次回展示会の案内を依頼された。</td></tr>
+                <tr><td>2026/05/14</td><td>展示会</td><td>〇</td><td>担当A</td><td>ブースへ来訪。シャンプーのサンプルを渡した。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="lexsub" style="border-bottom:none;">同じ訪問記録が、取引先側からも案件側からも見えます。二重に入力する必要はありません。</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="lexbox">
+          <div class="secth">🚪 どこで誰が入れるか</div>
+          <div style="padding:6px 14px 12px;">
+            <div class="fx"><div class="k">入力する画面</div><div class="v">案件の詳細ページ（この画面）</div></div>
+            <div class="fx"><div class="k">入力する人</div><div class="v">訪問した営業担当者</div></div>
+            <div class="fx"><div class="k">入力するタイミング</div><div class="v">案件が立ち上がったとき ＋ 状況が動いたつど</div></div>
+            <div class="fx"><div class="k">手で入れる項目</div><div class="v" style="color:var(--green);">17項目</div></div>
+            <div class="fx" style="border:none;"><div class="k">自動で埋まる項目</div><div class="v" style="color:var(--purple);">2項目（所有者・金額合計）</div></div>
+          </div>
+          <div class="alertbox" style="margin:0 14px 14px;"><span>⚠️</span><div>取引先・実績・訪問記録の画面と違い、<b>案件はほぼすべてが手入力</b>です。訪問記録（5項目）に比べて現場の負担が大きく増えます。</div></div>
+        </div>
+
+        <div class="lexbox">
+          <div class="secth">❓ 運用の選択肢</div>
+          <div style="padding:12px 14px;">
+            <div class="alertbox blue" style="margin-bottom:10px;"><span>Ａ</span><div><b>案件管理は使わない</b><br><span style="font-size:11.5px;">訪問記録と実績だけで回します。現場の入力は5項目のまま。提案の進み具合は訪問メモで追う形になります。</span></div></div>
+            <div class="alertbox" style="margin-bottom:0;"><span>Ｂ</span><div><b>案件管理も使う</b><br><span style="font-size:11.5px;">この画面を使います。アニマル用のフェーズ定義（訪問→サンプル提供→採用など）を決める必要があり、現場の入力項目が17増えます。</span></div></div>
+          </div>
+        </div>
+
+        <div class="lexbox">
+          <div class="secth">📖 他事業部のフェーズ定義</div>
+          <div style="padding:10px 14px;font-size:12px;line-height:1.7;">
+            <div><b>メディカル</b><br>情報収集 → 提案 → 見積提出 → 稟議中 → 受注 → 納入 → 検収</div>
+            <div style="margin-top:8px;"><b>P&amp;P</b><br>引合 → サンプル依頼 → 原価計算 → 見積提出 → 受注 → 量産手配 → 納入</div>
+            <div style="margin-top:8px;color:var(--muted);"><b>アニマル</b><br>未定義（訪問記録中心の運用のため）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">💡 ご参考：ディーラー経由の販売で自社は販促が中心という商流では、受注金額を案件として積み上げる意味が薄くなります。その場合は、訪問記録と実績だけで回す運用が向いています。</div>
+  </section>
+
+  <section class="screen" id="screen-penetration">
+    <div class="pagehead">
+      <div class="ico">📈</div>
+      <div><h2>浸透率ダッシュボード ｜ 2026年7月</h2>
+        <div class="sub">浸透率＝納入軒数÷母数×100。母数はディーラー提供値をそのまま保持</div></div>
+    </div>
+
+    <div class="alertbox blue"><span>💡</span><div>手作業での「並べ直し・COUNTIF・VLOOKUP」が不要になり、この画面が<b>自動で毎月最新化</b>されます。</div></div>
+
+    <div class="inflow">
+      <div class="ih">この画面を動かすために入れるもの</div>
+      <table>
+        <thead><tr><th>入れるもの</th><th>入り口</th><th>誰が・いつ</th><th>格納先</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>ディーラーの月次販売実績（Excel）</td>
+            <td><span class="src imp">📥 月次取込</span> Excelをそのままインポート（API連携なし）</td>
+            <td class="who">アニマル事業部の担当者1名<br>毎月1回（5分程度）</td>
+            <td><code class="f">DealerSales__c</code><br>施設コード7桁＋管理コード＋YYYYMM で上書き取込</td>
+          </tr>
+          <tr>
+            <td>営業所ごとの母数（動物病院口座数）</td>
+            <td><span class="src todo">❓ 未確定</span> 月次Excelに含めるか、別途入手するかを導入時に決めます</td>
+            <td class="who">毎月または年1回</td>
+            <td><code class="f">DealerBaseCount__c</code></td>
+          </tr>
+          <tr>
+            <td>納入軒数・浸透率・目標との差</td>
+            <td><span class="src auto">⚙️ 自動</span> 取込データから計算</td>
+            <td class="who">入力不要</td>
+            <td>レポート／ダッシュボード</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi g"><div class="n">28.6%</div><div class="l">関西営業所（現状最高） <span class="src auto">⚙️ 自動</span></div><div class="d" style="color:var(--green)">目標40%まであと11.4pt</div></div>
+      <div class="kpi b"><div class="n">23.9%</div><div class="l">全社平均浸透率 <span class="src auto">⚙️ 自動</span></div><div class="d" style="color:var(--sf-blue)">目標35%まであと11.1pt</div></div>
+      <div class="kpi a"><div class="n">6品目</div><div class="l">集計対象製品数 <span class="src imp">📥 取込</span></div><div class="d" style="color:var(--amber)">現状手作業はSF1品目のみ</div></div>
+      <div class="kpi r"><div class="n">約8,700</div><div class="l">対象動物病院（うちオーツ取扱約5,400） <span class="src todo">❓ 未確定</span></div><div class="d" style="color:var(--muted)">DealerBaseCount__c</div></div>
+    </div>
+
+    <div class="card">
+      <div class="chead">営業所別 浸透率
+        <div class="toggle2">
+          <button class="on" id="axA" onclick="setAxis('office')">営業所のみ・全オーツ（DS6相当）</button>
+          <button id="axB" onclick="setAxis('product')">営業所×製品（DS4相当）</button>
+        </div>
+      </div>
+      <div id="axis-office">
+        <div class="barrow"><div class="lbl">関西営業所</div><div class="bartrack"><div class="barfill" style="width:63.6%"></div><div class="target" style="left:88.9%" data-lbl="40%"></div></div><div class="val">28.6%</div></div>
+        <div class="barrow"><div class="lbl">東日本営業所</div><div class="bartrack"><div class="barfill" style="width:53.8%"></div><div class="target" style="left:88.9%" data-lbl="40%"></div></div><div class="val">24.2%</div></div>
+        <div class="barrow"><div class="lbl">中部営業所</div><div class="bartrack"><div class="barfill" style="width:47.8%"></div><div class="target" style="left:88.9%" data-lbl="40%"></div></div><div class="val">21.5%</div></div>
+        <div class="barrow"><div class="lbl">九州営業所</div><div class="bartrack"><div class="barfill" style="width:37.3%"></div><div class="target" style="left:88.9%" data-lbl="40%"></div></div><div class="val">16.8%</div></div>
+        <div class="barrow"><div class="lbl">全営業所計</div><div class="bartrack"><div class="barfill" style="width:53.1%;background:var(--sf-blue)"></div><div class="target" style="left:77.8%" data-lbl="35%"></div></div><div class="val">23.9%</div></div>
+      </div>
+      <div id="axis-product" style="display:none;">
+        <table class="lt">
+          <thead><tr><th>営業所</th><th>オーツスポットフォーム</th><th>オーツシャンプーエクストラ</th><th>オーツイヤークリーナー</th><th>その他3品目 計</th></tr></thead>
+          <tbody>
+            <tr><td>関西営業所</td><td>25.3%</td><td>17.1%</td><td>13.6%</td><td>11.2%</td></tr>
+            <tr><td>東日本営業所</td><td>21.4%</td><td>14.9%</td><td>11.8%</td><td>9.3%</td></tr>
+            <tr><td>中部営業所</td><td>19.2%</td><td>13.3%</td><td>10.7%</td><td>8.6%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chead">母数・納入軒数の内訳（DealerSales__c／DealerBaseCount__c）<span class="badge">関西営業所・7月</span></div>
+      <div class="fields" style="display:flex;gap:24px;flex-wrap:wrap;">
+        <div class="field"><div class="k">母数（ディーラー提供値をそのまま保持） <span class="src todo">❓ 入り口が未確定</span></div><div class="v">1,560病院</div></div>
+        <div class="field"><div class="k">納入軒数（重複排除カウント・6品目いずれか納入あり） <span class="src auto">⚙️ 自動</span></div><div class="v">446病院</div></div>
+        <div class="field"><div class="k">浸透率 <span class="src auto">⚙️ 自動</span></div><div class="v" style="color:var(--green);">446 ÷ 1,560 × 100 = 28.6%</div></div>
+      </div>
+    </div>
+
+    <div class="note">💡 「営業所」はディーラー側の組織です（画面上でも明示）。大扇産業側の担当者は、取引先の担当者として別に持ちます。</div>
+  </section>
+
+  <section class="screen" id="screen-segment">
+    <div class="pagehead">
+      <div class="ico purple">🏷️</div>
+      <div><h2>DSセグメント 自動判定</h2>
+        <div class="sub">いまExcelで使っている判定ルールをそのまま再現。評価順序 A→B→C→D→-- を厳守</div></div>
+    </div>
+
+    <div class="inflow">
+      <div class="ih">この画面を動かすために入れるもの</div>
+      <table>
+        <thead><tr><th>入れるもの</th><th>入り口</th><th>誰が・いつ</th><th>格納先</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>施設コード・病院名・ディーラー営業所・ディーラーセグメント</td>
+            <td><span class="src imp">📥 月次取込</span> 浸透率と同じ月次Excelから自動で作られます</td>
+            <td class="who">入力不要（新規コードは自動作成）</td>
+            <td><code class="f">Account</code></td>
+          </tr>
+          <tr>
+            <td>判定に使う本数（SF近2年・過去3年・全製品4年ほか）</td>
+            <td><span class="src auto">⚙️ 自動</span> 取込済みの実績を年度で集計</td>
+            <td class="who">入力不要・毎月の取込後に再計算</td>
+            <td><code class="f">Account</code> の集計項目</td>
+          </tr>
+          <tr>
+            <td>セグメントの判定結果（A〜D・--）</td>
+            <td><span class="src auto">⚙️ 自動</span> 評価順序どおりに自動判定</td>
+            <td class="who">入力不要</td>
+            <td><code class="f">Account.DSSegment__c</code></td>
+          </tr>
+          <tr>
+            <td>大扇産業側の担当者</td>
+            <td><span class="src todo">❓ 未確定</span> 画面上の「営業所」はディーラー側の組織のため、大扇産業側の担当者は別に設定します</td>
+            <td class="who">導入時に設定</td>
+            <td><code class="f">Account.OwnerId</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="chead">サンプル：さくら動物病院（施設コード 9000123）<span class="badge seg C">現在のセグメント：C6</span></div>
+      <div class="fields" style="display:flex;gap:24px;flex-wrap:wrap;padding-top:10px;">
+        <div class="field"><div class="k">施設コード（外部ID） <span class="src imp">📥 取込</span></div><div class="v">9000123</div></div>
+        <div class="field"><div class="k">ディーラー営業所 <span class="src imp">📥 取込</span></div><div class="v">01東日本営業所（ディーラー側組織）</div></div>
+        <div class="field"><div class="k">ディーラーセグメント（参考・別物） <span class="src imp">📥 取込</span></div><div class="v">地区区分07</div></div>
+      </div>
+      <div style="padding:0 14px 14px;">
+        <div class="varbox">
+          <div class="vrow"><div class="vk">SF近2年（25＋26年度）</div><div class="vv">6本</div></div>
+          <div class="vrow"><div class="vk">SF過去3年（22〜24年度）</div><div class="vv">2本</div></div>
+          <div class="vrow"><div class="vk">SF24（24年度）</div><div class="vv">2本</div></div>
+          <div class="vrow"><div class="vk">全製品4年（23〜26年度・6品目合計）</div><div class="vv">31本</div></div>
+          <div class="vrow"><div class="vk">全製品近2年（25＋26年度・6品目合計）</div><div class="vv">18本</div></div>
+        </div>
+      </div>
+      <div class="chead" style="border-top:1px solid var(--border);">判定ロジック（上から順に評価・最初に合致したものを採用） <span class="src auto">⚙️ 自動・入力不要</span></div>
+      <table class="lt">
+        <thead><tr><th>順</th><th>セグメント</th><th>条件</th><th>判定</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><span class="seg A">A</span></td><td>SF近2年=0 かつ 全製品4年&gt;0</td><td>SF近2年=6 ≠ 0 → 非該当</td></tr>
+          <tr><td>2</td><td><span class="seg B">B</span></td><td>SF近2年&gt;0 かつ SF過去3年=0</td><td>SF過去3年=2 ≠ 0 → 非該当</td></tr>
+          <tr class="sel" style="background:var(--green-bg);"><td>3</td><td><span class="seg C">C</span></td><td>SF近2年&gt;5 かつ SF近2年&gt;SF24×1.5</td><td><b>6&gt;5 かつ 6&gt;2×1.5=3 → 合致 ✅（付与値：SF近2年=6 → 表示「C6」）</b></td></tr>
+          <tr style="opacity:.5"><td>4</td><td><span class="seg D">D</span></td><td>SF近2年&gt;11</td><td>（評価対象外・すでに③で確定）</td></tr>
+          <tr style="opacity:.5"><td>5</td><td><span class="seg none">--</span></td><td>いずれにも該当せず</td><td>（評価対象外）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="chead">セグメント分布（全5,380件）<span class="badge">自動判定結果</span></div>
+      <div class="distbar">
+        <div style="width:40.1%;background:var(--segA);">A 2,160</div><div style="width:8.7%;background:var(--segC);">C 470</div><div style="width:6.1%;background:var(--segB);">B 330</div><div style="width:4.8%;background:var(--segD);">D 260</div><div style="width:38.7%;background:var(--segNone);">-- 2,080</div><div style="width:1.5%;background:#444;">他80</div>
+      </div>
+      <div class="alertbox gray" style="margin:0 14px 14px;"><span>⚠️</span><div><b>C（成長）とD（大口）は排他ではありません。</b>評価順序上、SF近2年が12本以上でも1.5倍成長条件を満たす病院はDではなくCに分類されます。「大口かつ成長」を区別したい場合は、判定ルールに追加できます。</div></div>
+    </div>
+
+    <div class="note">💡 Excelで年度を数式に直接書いていると、毎年数式の手直しが必要になります。Salesforceでは「当年度／前年度」の相対参照で実装し、年度切替の手作業をなくします。</div>
+  </section>
+
+  <section class="screen" id="screen-report">
+    <div class="pagehead">
+      <div class="ico blue">📝</div>
+      <div><h2>訪問記録の入力 → ディーラー報告用CSVの自動出力</h2>
+        <div class="sub">入力するだけで、ディーラーの管理コード順に並んだCSVが出ます</div></div>
+    </div>
+
+    <div class="inflow">
+      <div class="ih">この画面を動かすために入れるもの</div>
+      <table>
+        <thead><tr><th>入れるもの</th><th>入り口</th><th>誰が・いつ</th><th>格納先</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>訪問日・訪問種別・訪問結果・訪問メモ</td>
+            <td><span class="src man">✍️ 手入力</span> Salesforceの訪問記録画面。項目は5つだけ</td>
+            <td class="who">訪問した本人<br>訪問のつど（1件1分程度）</td>
+            <td><code class="f">Event</code></td>
+          </tr>
+          <tr>
+            <td>訪問先の動物病院</td>
+            <td><span class="src man">✍️ 手入力</span> ただし取込済みの病院から選ぶだけ（新規入力ではありません）</td>
+            <td class="who">訪問した本人</td>
+            <td><code class="f">Event.WhatId</code> → <code class="f">Account</code></td>
+          </tr>
+          <tr>
+            <td>実訪問者・管理コード・営業所</td>
+            <td><span class="src auto">⚙️ 自動</span> 保存した本人と、取込済みの病院情報から埋まります</td>
+            <td class="who">入力不要</td>
+            <td><code class="f">Event.OwnerId</code> ／ <code class="f">Account</code></td>
+          </tr>
+          <tr>
+            <td>CSVの列の並びと項目</td>
+            <td><span class="src todo">❓ 未確定</span> いまのディーラー報告書と同じ並びに設定します</td>
+            <td class="who">事業部の担当者</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="chead">① 訪問記録を入力（活動：Event） <span class="src man">✍️ ここだけが手入力です</span></div>
+      <div class="fields">
+        <div class="field"><div class="k">動物病院 <span class="src man">✍️ 選ぶだけ</span></div><div class="v">さくら動物病院（施設コード 9000123）</div></div>
+        <div class="field"><div class="k">訪問日 ／ 訪問種別 <span class="src man">✍️ 手入力</span></div><div class="v">2026/07/22 ／ 訪問</div></div>
+        <div class="field"><div class="k">訪問結果 <span class="src man">✍️ 手入力</span></div><div class="v">〇</div></div>
+        <div class="field"><div class="k">実訪問者 <span class="src auto">⚙️ 自動（保存した本人）</span></div><div class="v">担当A</div></div>
+        <div class="field"><div class="k">訪問メモ <span class="src man">✍️ 手入力</span></div><div class="v">院長より新製品の反応良好。次回展示会の案内を依頼された。</div></div>
+      </div>
+    </div>
+
+    <div class="stepflow">
+      <div class="step on">✅ 訪問記録を保存</div>
+      <div class="stepArrow">→</div>
+      <div class="step off">シート結合解除・フィルタ設定</div>
+      <div class="stepArrow">→</div>
+      <div class="step off">LEFT関数で得意先コード抽出</div>
+      <div class="stepArrow">→</div>
+      <div class="step off">COUNTIFで新規病院検出</div>
+      <div class="stepArrow">→</div>
+      <div class="step off">VLOOKUPで実訪問者転記</div>
+      <div class="stepArrow">→</div>
+      <div class="step off">参照式を手で延長</div>
+      <div class="stepArrow">→</div>
+      <div class="step on">✅ 管理コード順に自動整列 → CSV出力</div>
+    </div>
+    <div class="alertbox blue"><span>💡</span><div>グレーアウトした手順1〜6（いまの手作業）は<b>すべて不要</b>になります。実施するのは訪問記録の保存だけです。</div></div>
+
+    <div class="card">
+      <div class="chead">② 生成されたCSV（ディーラー報告フォーマット・管理コード順）<span class="badge">出力プレビュー</span></div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr>
+            <th>管理コード<br><span class="src imp">📥 取込</span></th>
+            <th>動物病院名<br><span class="src imp">📥 取込</span></th>
+            <th>営業所<br><span class="src imp">📥 取込</span></th>
+            <th>訪問日<br><span class="src man">✍️ 手入力</span></th>
+            <th>訪問結果<br><span class="src man">✍️ 手入力</span></th>
+            <th>実訪問者<br><span class="src auto">⚙️ 自動</span></th>
+            <th>訪問種別<br><span class="src man">✍️ 手入力</span></th>
+          </tr></thead>
+          <tbody>
+            <tr><td>9000078</td><td>あおば動物病院</td><td>東日本営業所</td><td>2026/07/18</td><td>〇</td><td>担当B</td><td>訪問</td></tr>
+            <tr><td>9000123</td><td>さくら動物病院</td><td>東日本営業所</td><td>2026/07/22</td><td>〇</td><td>担当A</td><td>訪問</td></tr>
+            <tr><td>9000345</td><td>ひまわり動物クリニック</td><td>関西営業所</td><td>2026/07/20</td><td>〇</td><td>担当C</td><td>展示会</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:10px 14px;"><button class="pill blue" style="cursor:pointer;border:none;padding:6px 14px;font-size:12px;" onclick="toast('CSVをダウンロードしました（モック）')">📥 CSVダウンロード</button></div>
+    </div>
+
+    <div class="note">💡 新規の施設コードを検出した場合は、Accountを自動作成し担当者へ通知します。行追加の手作業は発生しません。</div>
+    <div class="note">💬 ほかに追加できる項目の例（ディーラーへの提出物に含めるかは、運用に合わせて選べます）：
+      <ul style="margin:6px 0 0;padding-left:18px;">
+        <li>対応者（訪問時に応対した先方担当者名。例：院長／看護師さん）</li>
+        <li>都道府県／住所（ディーラー側が既に保有している場合は不要）</li>
+        <li>ディーラー営業員（ディーラー側の担当者名）</li>
+        <li>訪問メモ（社外提出物に含めるか、社内利用に留めるか）</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-sources">
+    <div class="pagehead">
+      <div class="ico blue">🚪</div>
+      <div><h2>データの入り口 一覧</h2>
+        <div class="sub">機能ごとに、何を・どこから・誰が・いつ入れるか</div></div>
+    </div>
+
+    <div class="alertbox blue"><span>💡</span><div>現場で<b>手を動かすのは2つだけ</b>です。月1回のExcel取込（担当1名・5分）と、訪問のつどの訪問記録入力（5項目）。それ以外はすべて自動で埋まります。</div></div>
+
+    <div class="card">
+      <div class="chead blue">機能ごとの入り口<span class="badge">機能別</span></div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th>機能</th><th>入れるもの</th><th>入り口</th><th>誰が</th><th>頻度</th><th>格納先</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><b>ディーラー実績の月次取込</b></td>
+              <td>ディーラーの月次販売実績Excel</td>
+              <td><span class="src imp">📥 月次取込</span><br>画面からファイルを選んで取込</td>
+              <td>アニマル事業部 担当1名</td>
+              <td>毎月1回</td>
+              <td><code class="f">DealerSales__c</code></td>
+            </tr>
+            <tr>
+              <td><b>浸透率の自動算出</b></td>
+              <td>納入軒数（分子）</td>
+              <td><span class="src auto">⚙️ 自動</span><br>月次取込データから計算</td>
+              <td>—</td>
+              <td>取込のつど</td>
+              <td>レポート</td>
+            </tr>
+            <tr>
+              <td><b>浸透率の自動算出</b></td>
+              <td>母数＝営業所の動物病院口座数（分母）</td>
+              <td><span class="src todo">❓ 未確定</span><br>入手経路を導入時に決めます</td>
+              <td>事業部の担当者</td>
+              <td>毎月または年1回</td>
+              <td><code class="f">DealerBaseCount__c</code></td>
+            </tr>
+            <tr>
+              <td><b>DSセグメントの自動判定</b></td>
+              <td>判定に使う本数と判定結果</td>
+              <td><span class="src auto">⚙️ 自動</span><br>いまの判定ルールどおりに再現</td>
+              <td>—</td>
+              <td>取込のつど</td>
+              <td><code class="f">Account.DSSegment__c</code></td>
+            </tr>
+            <tr>
+              <td><b>DSセグメントの自動判定</b></td>
+              <td>大扇産業側の担当者</td>
+              <td><span class="src todo">❓ 未確定</span><br>導入時に設定します</td>
+              <td>事業部の担当者</td>
+              <td>初期設定時</td>
+              <td><code class="f">Account.OwnerId</code></td>
+            </tr>
+            <tr>
+              <td><b>訪問記録の一元管理</b></td>
+              <td>訪問日・種別・結果・メモ・訪問先</td>
+              <td><span class="src man">✍️ 手入力</span><br>訪問記録画面で5項目</td>
+              <td>訪問した本人</td>
+              <td>訪問のつど</td>
+              <td><code class="f">Event</code></td>
+            </tr>
+            <tr>
+              <td><b>ディーラー報告用CSV</b></td>
+              <td>報告書の列の並びと項目</td>
+              <td><span class="src todo">❓ 未確定</span><br>いまの報告書と同じ並びに設定します</td>
+              <td>事業部の担当者</td>
+              <td>1回（設計時）</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><b>地図可視化</b></td>
+              <td>病院の住所（ピンの位置）</td>
+              <td><span class="src imp">📥 取込</span><br>月次取込で作られた病院情報をそのまま利用</td>
+              <td>—</td>
+              <td>取込のつど</td>
+              <td>Customer Compass</td>
+            </tr>
+            <tr style="background:#fffdf5;">
+              <td><b>案件管理（全社共通）</b></td>
+              <td>案件名・フェーズ・金額・提案内容ほか17項目</td>
+              <td><span class="src man">✍️ 手入力</span><br>案件の詳細ページで営業担当が入力</td>
+              <td>訪問した営業担当者</td>
+              <td>案件が動くつど</td>
+              <td><code class="f">Opportunity</code></td>
+            </tr>
+            <tr style="background:#fffdf5;">
+              <td><b>案件管理（全社共通）</b></td>
+              <td>アニマルで案件管理を使うかどうか</td>
+              <td><span class="src todo">❓ 未確定</span><br>使う場合はアニマル用のフェーズ定義が必要</td>
+              <td>事業部</td>
+              <td>導入時</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td><b>地図可視化</b></td>
+              <td>ピンの色分けルール</td>
+              <td><span class="src todo">❓ 未確定</span><br>いまの地図の目印（✩ ／ ❤）に合わせて設定します</td>
+              <td>事業部の担当者</td>
+              <td>1回（設計時）</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chead green">現場の月次サイクル<span class="badge">実際にやること</span></div>
+      <div class="stepflow" style="padding:14px;">
+        <div class="step on">① ディーラーからExcelが届く</div>
+        <div class="stepArrow">→</div>
+        <div class="step on">② 画面から取込（担当1名・5分）</div>
+        <div class="stepArrow">→</div>
+        <div class="step">③ 浸透率・セグメントが自動更新</div>
+        <div class="stepArrow">→</div>
+        <div class="step">④ 訪問記録は日々入力するだけ</div>
+        <div class="stepArrow">→</div>
+        <div class="step">⑤ 報告用CSVを出力</div>
+      </div>
+      <div class="alertbox gray" style="margin:0 14px 14px;"><span>⚠️</span><div>青枠の①②が人の手で行う唯一の月次作業です。③〜⑤に手作業は発生しません。</div></div>
+    </div>
+
+    <div class="card">
+      <div class="chead amber">導入時に決める5つの設定<span class="badge">設定項目</span></div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th>項目</th><th>決めると何ができるか</th></tr></thead>
+          <tbody>
+            <tr><td>母数（動物病院口座数）の入手経路</td><td>浸透率を自動で計算できます。分子（納入軒数）だけでは率が出せません</td></tr>
+            <tr><td>大扇産業側の担当者</td><td>訪問漏れの検知と、担当ごとの絞り込みができます</td></tr>
+            <tr><td>ディーラー報告書の列の並び</td><td>CSVの列を報告書と同じ並びで出力できます</td></tr>
+            <tr><td>地図の目印（✩ ／ ❤）の意味</td><td>地図のピンを運用に合わせて色分けできます</td></tr>
+            <tr><td>案件管理（商談）を使うかどうか</td><td>使う場合はアニマル用のフェーズ定義を作ります。現場の入力は17項目増えます（<a href="javascript:void(0)" onclick="go('opp')">案件画面を見る</a>）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<div id="toast">✓ 保存しました</div>
+
+<script>
+function go(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const el=document.getElementById('screen-'+name); if(el) el.classList.add('active');
+  document.querySelectorAll('.appnav .tab').forEach(t=>t.classList.remove('active'));
+  const t=document.querySelector('.appnav .tab[data-tab="'+name+'"]'); if(t) t.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function setBU(which){
+  var map={all:'buA',medical:'buM',animal:'buN'};
+  for(var k in map){ document.getElementById(map[k]).classList.toggle('on',k===which);
+    document.getElementById('bu-'+k).style.display = (k===which)?'':'none'; }
+  var ap={all:'メディカル＋アニマル（P&Pは準備中）',medical:'作成：担当F／確認：担当G（8月月初会議・7月度）',animal:'確認：担当A／担当C／担当D／担当E　作成：担当B'};
+  document.getElementById('exec-approver').textContent=ap[which];
+}
+function setTerm(which){
+  document.getElementById('tmQ').classList.toggle('on',which==='q');
+  document.getElementById('tmM').classList.toggle('on',which==='m');
+  document.getElementById('term-q').style.display = which==='q' ? '' : 'none';
+  document.getElementById('term-m').style.display = which==='m' ? '' : 'none';
+}
+function setAxis(which){
+  document.getElementById('axA').classList.toggle('on',which==='office');
+  document.getElementById('axB').classList.toggle('on',which==='product');
+  document.getElementById('axis-office').style.display = which==='office' ? '' : 'none';
+  document.getElementById('axis-product').style.display = which==='product' ? '' : 'none';
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent='✓ '+msg.replace(/^✓ /,'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+const AP={"products":[{"n":"オーツシャンプー 250ml [1lot.15,000]","hasNego":true,"g":{"plan":{"qty":[0,0,0,0,0,0,0,0,15000,0,0,0],"amt":[0,0,0,0,0,0,0,0,15960000,0,0,0],"gp":[0,0,0,0,0,0,0,0,7820000,0,0,0]},"fcstNego":{"qty":[0,0,0,0,0,0,0,0,15000,0,0,0],"amt":[0,0,0,0,0,0,0,0,15960000,0,0,0],"gp":[0,0,0,0,0,0,0,0,7820000,0,0,0]},"zq":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]},"nego":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]}},"t":{"plan":{"qty":15000,"amt":15960000,"gp":7820000,"rate":0.0},"fcstNego":{"qty":15000,"amt":15960000,"gp":7820000,"rate":0.49},"zq":{"qty":0,"amt":0,"gp":0,"rate":0.0},"nego":{"qty":0,"amt":0,"gp":0,"rate":0.0}},"past":{"p61":{"qty":15000,"amt":14364000,"gp":6607000},"p62":{"qty":15000,"amt":15162000,"gp":7126000},"p63":{"qty":15000,"amt":15960000,"gp":7820000}}},{"n":"オーツシャンプー 4L [1lot.2,000]","hasNego":true,"g":{"plan":{"qty":[800,0,0,0,0,0,0,0,2000,0,0,0],"amt":[10416000,0,0,0,0,0,0,0,26040000,0,0,0],"gp":[5416000,0,0,0,0,0,0,0,13541000,0,0,0]},"fcstNego":{"qty":[800,0,0,0,0,0,0,0,2000,0,0,0],"amt":[10416000,0,0,0,0,0,0,0,26040000,0,0,0],"gp":[5416000,0,0,0,0,0,0,0,13541000,0,0,0]},"zq":{"qty":[800,0,0,0,0,0,0,0,0,0,0,0],"amt":[10416000,0,0,0,0,0,0,0,0,0,0,0],"gp":[5416000,0,0,0,0,0,0,0,0,0,0,0]},"nego":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]}},"t":{"plan":{"qty":2800,"amt":36456000,"gp":18957000,"rate":0.0},"fcstNego":{"qty":2800,"amt":36456000,"gp":18957000,"rate":0.52},"zq":{"qty":800,"amt":10416000,"gp":5416000,"rate":0.52},"nego":{"qty":0,"amt":0,"gp":0,"rate":0.0}},"past":{"p61":{"qty":2000,"amt":23436000,"gp":11015000},"p62":{"qty":0,"amt":0,"gp":0},"p63":{"qty":2000,"amt":26040000,"gp":13020000}}},{"n":"オーツダーマルカーム 125ml [1lot.10,000]","hasNego":true,"g":{"plan":{"qty":[0,0,0,0,0,0,10000,0,0,0,0,10000],"amt":[0,0,0,0,0,0,8120000,0,0,0,0,8120000],"gp":[0,0,0,0,0,0,5034000,0,0,0,0,5034000]},"fcstNego":{"qty":[0,0,0,0,0,0,0,0,10000,0,0,0],"amt":[0,0,0,0,0,0,0,0,8120000,0,0,0],"gp":[0,0,0,0,0,0,0,0,5034000,0,0,0]},"zq":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]},"nego":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]}},"t":{"plan":{"qty":20000,"amt":16240000,"gp":10068000,"rate":0.0},"fcstNego":{"qty":10000,"amt":8120000,"gp":5034000,"rate":0.62},"zq":{"qty":0,"amt":0,"gp":0,"rate":0.0},"nego":{"qty":0,"amt":0,"gp":0,"rate":0.0}},"past":{"p61":{"qty":10000,"amt":7308000,"gp":4385000},"p62":{"qty":20000,"amt":15428000,"gp":8948000},"p63":{"qty":10000,"amt":8120000,"gp":5116000}}},{"n":"オーツイヤークリーナー 125ml [1lot.20,000]","hasNego":true,"g":{"plan":{"qty":[0,0,0,0,20000,0,0,0,0,0,0,0],"amt":[0,0,0,0,16920000,0,0,0,0,0,0,0],"gp":[0,0,0,0,9306000,0,0,0,0,0,0,0]},"fcstNego":{"qty":[0,0,0,0,0,20000,0,0,0,0,0,0],"amt":[0,0,0,0,0,16920000,0,0,0,0,0,0],"gp":[0,0,0,0,0,9306000,0,0,0,0,0,0]},"zq":{"qty":[0,0,0,0,0,20000,0,0,0,0,0,0],"amt":[0,0,0,0,0,16920000,0,0,0,0,0,0],"gp":[0,0,0,0,0,9306000,0,0,0,0,0,0]},"nego":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]}},"t":{"plan":{"qty":20000,"amt":16920000,"gp":9306000,"rate":0.0},"fcstNego":{"qty":20000,"amt":16920000,"gp":9306000,"rate":0.55},"zq":{"qty":20000,"amt":16920000,"gp":9306000,"rate":0.55},"nego":{"qty":0,"amt":0,"gp":0,"rate":0.0}},"past":{"p61":{"qty":20000,"amt":15228000,"gp":6853000},"p62":{"qty":20000,"amt":16074000,"gp":7394000},"p63":{"qty":20000,"amt":16920000,"gp":8798000}}},{"n":"オーツスポットフォーム（＆リファイン） 200ml【国内用】 [1lot.10,000]","hasNego":true,"g":{"plan":{"qty":[0,0,10000,0,0,10000,0,10000,0,10000,0,10000],"amt":[0,0,9470000,0,0,9470000,0,9470000,0,9470000,0,9470000],"gp":[0,0,6250000,0,0,6250000,0,6250000,0,6250000,0,6250000]},"fcstNego":{"qty":[0,0,10000,0,0,10000,0,0,10000,0,0,10000],"amt":[0,0,9470000,0,0,9470000,0,0,9470000,0,0,9470000],"gp":[0,0,6250000,0,0,6250000,0,0,6250000,0,0,6250000]},"zq":{"qty":[0,0,10000,0,0,10000,0,0,10000,0,0,10000],"amt":[0,0,9470000,0,0,9470000,0,0,9470000,0,0,9470000],"gp":[0,0,6250000,0,0,6250000,0,0,6250000,0,0,6250000]},"nego":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]}},"t":{"plan":{"qty":50000,"amt":47350000,"gp":31250000,"rate":0.0},"fcstNego":{"qty":40000,"amt":37880000,"gp":25000000,"rate":0.66},"zq":{"qty":40000,"amt":37880000,"gp":25000000,"rate":0.66},"nego":{"qty":0,"amt":0,"gp":0,"rate":0.0}},"past":{"p61":{"qty":50000,"amt":42615000,"gp":25143000},"p62":{"qty":70000,"amt":62976000,"gp":37786000},"p63":{"qty":70000,"amt":66290000,"gp":42426000}}},{"n":"オーツスポットフォーム（＆リファイン） 200ml【海外用】 [1lot.10,000]","hasNego":true,"g":{"plan":{"qty":[0,0,20000,0,10000,0,10000,0,10000,0,10000,0],"amt":[0,0,18060000,0,9030000,0,9030000,0,9030000,0,9030000,0],"gp":[0,0,11739000,0,5870000,0,5870000,0,5870000,0,5870000,0]},"fcstNego":{"qty":[0,0,10000,0,10000,0,0,10000,0,0,10000,10000],"amt":[0,0,9030000,0,9030000,0,0,9030000,0,0,9030000,9030000],"gp":[0,0,5870000,0,5870000,0,0,5870000,0,0,5870000,5870000]},"zq":{"qty":[0,0,10000,0,10000,0,0,0,0,0,0,0],"amt":[0,0,9030000,0,9030000,0,0,0,0,0,0,0],"gp":[0,0,5870000,0,5870000,0,0,0,0,0,0,0]},"nego":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]}},"t":{"plan":{"qty":60000,"amt":54180000,"gp":35219000,"rate":0.0},"fcstNego":{"qty":50000,"amt":45150000,"gp":29350000,"rate":0.6501},"zq":{"qty":20000,"amt":18060000,"gp":11740000,"rate":0.6501},"nego":{"qty":0,"amt":0,"gp":0,"rate":0.0}},"past":{"p61":{"qty":30000,"amt":24381000,"gp":14385000},"p62":{"qty":40000,"amt":34314000,"gp":19902000},"p63":{"qty":50000,"amt":45150000,"gp":28896000}}},{"n":"オーツホイップクリームシャンプー 200ml [1lot.10,000]","hasNego":true,"g":{"plan":{"qty":[0,0,0,0,0,0,0,0,0,0,0,10000],"amt":[0,0,0,0,0,0,0,0,0,0,0,10580000],"gp":[0,0,0,0,0,0,0,0,0,0,0,5290000]},"fcstNego":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]},"zq":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]},"nego":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]}},"t":{"plan":{"qty":10000,"amt":10580000,"gp":5290000,"rate":0.0},"fcstNego":{"qty":0,"amt":0,"gp":0,"rate":0.0},"zq":{"qty":0,"amt":0,"gp":0,"rate":0.0},"nego":{"qty":0,"amt":0,"gp":0,"rate":0.0}},"past":{"p61":{"qty":10000,"amt":9522000,"gp":4285000},"p62":{"qty":10000,"amt":10051000,"gp":5327000},"p63":{"qty":10000,"amt":10580000,"gp":5396000}}},{"n":"シャンプーボトルセット （200ml詰め替え用容器） [1lot.20,000]","hasNego":false,"g":{"plan":{"qty":[0,0,0,0,0,0,0,20000,0,0,0,0],"amt":[0,0,0,0,0,0,0,1560000,0,0,0,0],"gp":[0,0,0,0,0,0,0,406000,0,0,0,0]},"fcstNego":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]},"zq":{"qty":[0,0,0,0,0,0,0,0,0,0,0,0],"amt":[0,0,0,0,0,0,0,0,0,0,0,0],"gp":[0,0,0,0,0,0,0,0,0,0,0,0]}},"t":{"plan":{"qty":20000,"amt":1560000,"gp":406000,"rate":0.0},"fcstNego":{"qty":0,"amt":0,"gp":0,"rate":0.0},"zq":{"qty":0,"amt":0,"gp":0,"rate":0.0}},"past":{"p61":{"qty":0,"amt":0,"gp":0},"p62":{"qty":0,"amt":0,"gp":0},"p63":{"qty":20000,"amt":1560000,"gp":281000}}}]};
+
+/* ===== 製品別予定表 ===== */
+let PD_TERM='q';
+const PD_MONTHS=['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
+const pdSum=(a,s,e)=>a.slice(s,e).reduce((x,y)=>x+y,0);
+const pdCols=(arr)=>{
+  if(PD_TERM==='m') return arr.slice();
+  const q1=pdSum(arr,0,3),q2=pdSum(arr,3,6),q3=pdSum(arr,6,9),q4=pdSum(arr,9,12);
+  return [q1,q2,q1+q2,q3,q4,q3+q4];
+};
+const pdHead=()=> PD_TERM==='m' ? PD_MONTHS.slice() : ['第1四半期','第2四半期','上期合計','第3四半期','第4四半期','下期合計'];
+const pdQty=n=> n===0?'-':n.toLocaleString('ja-JP')+'本';
+const pdYen=n=> n===0?'-':Math.round(n/1000).toLocaleString('ja-JP');
+const pdRate=(gp,amt)=> amt>0 ? (gp/amt*100).toFixed(1)+'%' : '-';
+
+const PD_GROUPS=[
+  {k:'plan',     label:'年次計画',                 fill:'pdblue',  metrics:['qty','amt','gp']},
+  {k:'fcstNego', label:'実績／見込／交渉（8月月中）', fill:'pdamber', metrics:['qty','amt','gp','rate']},
+  {k:'zq',       label:'実績／見込（ディーラー見込）',  fill:'pdyellow',metrics:['qty','amt','gp','rate']},
+  {k:'nego',     label:'交渉',                     fill:'pdyellow',metrics:['qty','amt','gp','rate']}
+];
+const PD_MLABEL={qty:'本数',amt:'金額',gp:'粗利',rate:'粗利率'};
+
+function renderProducts(){
+  const showNego=document.getElementById('pdNego').checked;
+  const head=pdHead();
+  let h='<table class="lt prod"><thead><tr>'+
+    '<th class="pstick">製品</th><th class="pstick2">区分</th><th class="pstick3"></th>'+
+    head.map(m=>'<th class="num">'+m+'</th>').join('')+
+    '<th class="num tot">64期合計</th><th class="num past">61期</th><th class="num past">62期</th><th class="num past">63期</th>'+
+    '</tr></thead><tbody>';
+  AP.products.forEach(p=>{
+    const groups=PD_GROUPS.filter(g=>p.g[g.k] && (g.k!=='nego' || (showNego && p.hasNego)));
+    const rowspan=groups.reduce((n,g)=>n+g.metrics.length,0);
+    let first=true;
+    groups.forEach(g=>{
+      const src=p.g[g.k], tot=p.t[g.k]||{};
+      g.metrics.forEach((m,mi)=>{
+        let r='<tr class="'+(g.k==='nego'?'pnego':'')+(mi===0?' gtop':'')+'">';
+        if(first){ r+='<td class="pstick pname" rowspan="'+rowspan+'">'+p.n+'</td>'; first=false; }
+        if(mi===0){ r+='<td class="pstick2 pgrp" rowspan="'+g.metrics.length+'">'+g.label+'</td>'; }
+        r+='<td class="pstick3 pmet">'+PD_MLABEL[m]+'</td>';
+        if(m==='rate'){
+          const amt=pdCols(src.amt), gp=pdCols(src.gp);
+          amt.forEach((a,i)=>{ r+='<td class="num rate">'+pdRate(gp[i],a)+'</td>'; });
+          r+='<td class="num tot rate">'+(tot.amt>0?(tot.gp/tot.amt*100).toFixed(1)+'%':'-')+'</td>';
+          ['p61','p62','p63'].forEach(k=>{ const q=p.past[k]; r+='<td class="num past rate">'+(q&&q.amt>0?(q.gp/q.amt*100).toFixed(1)+'%':'-')+'</td>'; });
+        } else {
+          const vals=pdCols(src[m]);
+          vals.forEach(v=>{
+            const cls=(m==='qty'&&v>0)?' '+g.fill:'';
+            r+='<td class="num'+cls+'">'+(m==='qty'?pdQty(v):pdYen(v))+'</td>';
+          });
+          r+='<td class="num tot">'+(m==='qty'?pdQty(tot.qty||0):pdYen(tot[m]||0))+'</td>';
+          ['p61','p62','p63'].forEach(k=>{ const q=p.past[k]||{};
+            r+='<td class="num past">'+(m==='qty'?pdQty(q.qty||0):pdYen(q[m]||0))+'</td>'; });
+        }
+        r+='</tr>'; h+=r;
+      });
+    });
+    h+='<tr class="pgap"><td colspan="'+(3+head.length+4)+'"></td></tr>';
+  });
+  h+='</tbody></table>';
+  document.getElementById('prodwrap').innerHTML=h;
+}
+function setProdTerm(w){
+  PD_TERM=w;
+  document.getElementById('pdQ').classList.toggle('on',w==='q');
+  document.getElementById('pdM').classList.toggle('on',w==='m');
+  renderProducts();
+}
+renderProducts();
+
+</script>
+</body>
+</html>
