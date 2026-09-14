@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>個人事業主 確定申告フロー デモ ｜ 税理士法人マスエージェント様</title>
+<style>
+/* =====================================================================
+   demo-base.css — Glue Salesforce デモ 共通スタイル (SLDS Lightning 再現)
+   ---------------------------------------------------------------------
+   ・案件横断で共通の「chrome（ヘッダ/タブ/レコード作法）」と
+     「コンポーネントライブラリ」をここに集約する。
+   ・案件固有の色/業務独自パーツだけを各 index.html の <style> に追記する。
+   ・配布時は build.sh がこのファイルを <style> へインライン展開し、
+     単一HTML（ダブルクリックで開ける / 添付で送れる）にする。
+   ・出典: docs/aion/demo (基準実装) + tsubasa(帳票/フォーム) を統合。
+   ===================================================================== */
+
+:root{
+  --brand:#0176d3; --brand-dark:#014486; --brand-50:#eaf4fb;
+  --bg:#f3f3f3; --card:#ffffff; --border:#dddbda; --border-light:#f3f2f2;
+  --text:#181818; --text-2:#3e3e3c; --text-mute:#706e6b;
+  --success:#2e844a; --success-bg:#cdefc4; --warn:#fe9339; --warn-bg:#fef0e6;
+  --error:#ba0517; --error-bg:#fdd9d4; --info:#0176d3;
+  --shadow-card:0 2px 2px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.06);
+  --shadow-hover:0 2px 4px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.08);
+  --radius:.25rem;
+  /* 外部ツール色（案件で使う/使わないは任意。不要なら無視でOK） */
+  --chatwork:#e57400; --chatwork-bg:#fff4e6;
+  --claude:#cc785c; --claude-bg:#f5e9e2;
+  --sheets:#0f9d58; --sheets-bg:#e6f4ea;
+  /* 論点パネル */
+  --disc:#7a5cff; --disc-bg:#f1edff; --disc-border:#c9bcff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Salesforce Sans","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+  font-size:13px; color:var(--text); background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit; cursor:pointer}
+a{color:var(--brand); text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ===== Global Header ===== */
+.global-header{
+  background:linear-gradient(0deg,#032e61,#0176d3); height:48px;
+  display:flex; align-items:center; padding:0 16px; gap:12px;
+  position:sticky; top:0; z-index:1000;
+}
+.app-launcher{
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.1); border-radius:3px; cursor:pointer;
+}
+.app-launcher:hover{background:rgba(255,255,255,.2)}
+.app-launcher::before{
+  content:""; width:14px;height:14px;
+  background-image:
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px);
+  background-size:5px 5px;
+  background-position:0 0,5px 0,10px 0,0 5px,5px 5px,10px 5px,0 10px,5px 10px,10px 10px;
+  background-repeat:no-repeat;
+}
+.app-name{
+  color:#fff; font-weight:700; font-size:14px;
+  padding-left:12px; border-left:1px solid rgba(255,255,255,.3);
+}
+.app-name .sub{font-weight:400; opacity:.8; margin-left:6px; font-size:12px}
+.gh-spacer{flex:1}
+.gh-search{
+  background:rgba(255,255,255,.95); border-radius:3px; padding:6px 12px;
+  width:380px; display:flex; align-items:center; gap:8px; font-size:13px;
+}
+.gh-search input{border:0;outline:0;flex:1;background:transparent;font-size:13px}
+.gh-actions{display:flex; gap:8px; align-items:center}
+.gh-actions .icon-btn{
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  color:#fff; cursor:pointer; border-radius:50%;
+}
+.gh-actions .icon-btn:hover{background:rgba(255,255,255,.15)}
+.gh-user{
+  width:32px;height:32px;border-radius:50%;
+  background:#a5d8ff;color:#0b4a83;display:flex;align-items:center;justify-content:center;
+  font-weight:700; cursor:pointer; font-size:12px;
+}
+
+/* ===== App Bar (Tabs) ===== */
+.app-bar{
+  background:#fff; border-bottom:1px solid var(--border);
+  display:flex; align-items:stretch; padding:0 16px; height:40px;
+  position:sticky; top:48px; z-index:999; overflow-x:auto;
+}
+.app-bar .tab{
+  padding:0 16px; display:flex; align-items:center; gap:6px; cursor:pointer;
+  border-bottom:3px solid transparent; color:var(--text-2); font-weight:400;
+  font-size:13px; user-select:none; white-space:nowrap;
+}
+.app-bar .tab:hover{background:var(--brand-50)}
+.app-bar .tab.active{border-bottom-color:var(--brand); color:var(--brand); font-weight:700}
+
+/* ===== Main content ===== */
+.main{padding:12px 16px; max-width:1440px; margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+
+/* ===== Object Page Header ===== */
+.obj-header{
+  background:#fff; padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.obj-header .row1{display:flex; align-items:center; gap:12px}
+.obj-icon{
+  width:40px;height:40px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  color:#fff; font-size:18px; font-weight:700;
+}
+/* 標準オブジェクトのアイコン色（SLDS準拠）。案件のカスタムobjは追記する */
+.obj-icon.account{background:#ff9a3c}
+.obj-icon.lead{background:#f88962}
+.obj-icon.opp{background:#fcb95b}
+.obj-icon.contact{background:#7f8de1}
+.obj-icon.quote{background:#a094ed}
+.obj-icon.order{background:#2e844a}
+.obj-icon.case{background:#f2cf5b}
+.obj-icon.report{background:#76ded9}
+.obj-icon.dashboard{background:#e6437f}
+.obj-icon.home{background:#0176d3}
+.obj-icon.custom{background:#5867e8}
+.obj-icon.chatwork{background:var(--chatwork)}
+.obj-icon.claude{background:var(--claude)}
+.obj-icon.sheets{background:var(--sheets)}
+.obj-title{flex:1}
+.obj-title .label{color:var(--text-mute); font-size:12px}
+.obj-title .name{font-size:18px; font-weight:700}
+.obj-actions{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+
+/* ===== Buttons ===== */
+.btn{
+  padding:6px 14px; border:1px solid var(--border); background:#fff;
+  border-radius:var(--radius); font-size:13px; color:var(--text);
+}
+.btn:hover{background:var(--border-light)}
+.btn.primary{background:var(--brand); color:#fff; border-color:var(--brand)}
+.btn.primary:hover{background:var(--brand-dark)}
+.btn.success{background:var(--success); color:#fff; border-color:var(--success)}
+.btn.success:hover{filter:brightness(0.95)}
+.btn.warn{background:var(--warn); color:#fff; border-color:var(--warn)}
+.btn.small{padding:3px 10px; font-size:12px}
+
+/* ===== Highlights Panel ===== */
+.highlights{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  padding:12px 16px; display:flex; gap:32px; margin-bottom:8px; flex-wrap:wrap;
+}
+.highlights .item{min-width:120px}
+.highlights .lbl{color:var(--text-mute); font-size:12px}
+.highlights .val{font-size:15px; font-weight:700; margin-top:2px}
+
+/* ===== Path Component (Sales/Stage Path) ===== */
+.path{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px; display:flex; padding:0; overflow:hidden;
+}
+.path .stage{
+  flex:1; padding:10px 0; text-align:center; position:relative;
+  background:#ecebea; color:var(--text-2); font-size:12px; cursor:pointer;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+  margin-right:-12px; min-width:0;
+}
+.path .stage:first-child{ clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%) }
+.path .stage:last-child{
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%); margin-right:0;
+}
+.path .stage.completed{background:#4bc076; color:#fff}
+.path .stage.current{background:var(--brand); color:#fff; font-weight:700}
+.path .stage:hover{filter:brightness(0.95)}
+.path-label{
+  display:flex; align-items:center; gap:6px;
+  padding:4px 12px 0; font-size:11px; color:var(--text-mute); background:#fff;
+  border:1px solid var(--border); border-bottom:0; border-radius:var(--radius) var(--radius) 0 0;
+}
+.path-label .badge{margin-left:auto}
+
+/* ===== Layout grids ===== */
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.two-col-3{display:grid; grid-template-columns:2fr 1fr; gap:8px}
+@media(max-width:1000px){ .two-col,.two-col-3{grid-template-columns:1fr} }
+
+/* ===== Card ===== */
+.card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.card .card-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.card .card-head .actions{margin-left:auto; display:flex; gap:6px}
+.card .card-body{padding:12px 16px}
+.sec-title{
+  font-size:12px; font-weight:700; color:var(--text-2);
+  padding:8px 16px; background:#fafaf9; border-bottom:1px solid var(--border-light);
+}
+
+/* ===== Field rows (read view) ===== */
+.field-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 24px}
+.field{padding:8px 0; border-bottom:1px solid var(--border-light)}
+.field .lbl{color:var(--text-mute); font-size:12px; margin-bottom:2px}
+.field .val{font-size:13px}
+.field.full{grid-column:1/-1}
+.field .val .ai-source{
+  display:inline-block; padding:1px 6px; border-radius:8px;
+  font-size:10px; background:var(--claude-bg); color:var(--claude);
+  margin-left:6px; vertical-align:middle;
+}
+.field .val .cw-source{ background:var(--chatwork-bg); color:var(--chatwork); }
+
+/* ===== Edit form (inline / modal) ===== */
+.form-2col{display:grid; grid-template-columns:1fr 1fr; gap:12px 24px}
+.form-row{display:flex; flex-direction:column; gap:4px}
+.form-row.full{grid-column:1/-1}
+.form-row label{font-size:12px; color:var(--text-2); font-weight:700}
+.form-row label .req{color:var(--error); margin-left:2px}
+.form-row input,.form-row select,.form-row textarea{
+  font-family:inherit; font-size:13px; padding:6px 10px;
+  border:1px solid var(--border); border-radius:var(--radius); background:#fff; color:var(--text);
+}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{
+  outline:0; border-color:var(--brand); box-shadow:0 0 0 2px var(--brand-50);
+}
+@media(max-width:700px){ .form-2col{grid-template-columns:1fr} }
+
+/* ===== Table ===== */
+.tbl{width:100%; border-collapse:collapse; background:#fff; font-size:13px}
+.tbl th{
+  background:#fafaf9; text-align:left; padding:8px 12px;
+  border-bottom:1px solid var(--border); font-weight:700; color:var(--text-2); font-size:12px;
+}
+.tbl td{padding:8px 12px; border-bottom:1px solid var(--border-light)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .num{text-align:right}
+.tbl tbody tr:hover{background:var(--brand-50)}
+.tbl .name-link{font-weight:700; cursor:pointer; color:var(--brand)}
+
+/* ===== Badges ===== */
+.badge{display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700}
+.badge.info{background:#e0f0fb; color:#0176d3}
+.badge.success{background:var(--success-bg); color:var(--success)}
+.badge.warn{background:var(--warn-bg); color:var(--warn)}
+.badge.error{background:var(--error-bg); color:var(--error)}
+.badge.gray{background:#ecebea; color:var(--text-mute)}
+.badge.cw{background:var(--chatwork-bg); color:var(--chatwork)}
+.badge.claude{background:var(--claude-bg); color:var(--claude)}
+.badge.sheets{background:var(--sheets-bg); color:var(--sheets)}
+
+/* ===== Related list card ===== */
+.related-card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px;
+}
+.related-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.related-head .count{color:var(--text-mute); font-weight:400; font-size:12px}
+.related-head .actions{margin-left:auto}
+
+/* ===== Activity Timeline ===== */
+.timeline{padding:8px 16px}
+.tl-item{display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border-light)}
+.tl-item:last-child{border-bottom:0}
+.tl-icon{
+  width:28px; height:28px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff;
+}
+.tl-icon.call{background:#76ded9}
+.tl-icon.mail{background:#fcb95b}
+.tl-icon.meet{background:#0176d3}
+.tl-icon.task{background:#4bca81}
+.tl-icon.cw{background:var(--chatwork)}
+.tl-icon.claude{background:var(--claude)}
+.tl-body{flex:1}
+.tl-meta{font-size:11px; color:var(--text-mute)}
+.tl-title{font-weight:700; margin-top:1px}
+.tl-desc{color:var(--text-2); margin-top:2px; font-size:12px}
+
+/* ===== Dashboard widgets ===== */
+.dash-grid{display:grid; grid-template-columns:repeat(12,1fr); gap:8px}
+.widget{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px}
+.widget.span-3{grid-column:span 3}
+.widget.span-4{grid-column:span 4}
+.widget.span-6{grid-column:span 6}
+.widget.span-8{grid-column:span 8}
+.widget.span-12{grid-column:span 12}
+.w-title{font-weight:700; font-size:13px; margin-bottom:6px; color:var(--text-2)}
+.w-big{font-size:28px; font-weight:700; line-height:1.1}
+.w-sub{font-size:11px; color:var(--text-mute); margin-top:2px}
+.w-sub.up{color:var(--success)}
+.w-sub.down{color:var(--error)}
+
+/* Bar chart (CSS only) */
+.bar-chart-wrap{padding:8px 0 0}
+.bar-chart{display:flex; align-items:flex-end; gap:6px; height:160px; padding:0 4px}
+.bar-chart .bar{
+  flex:1; background:linear-gradient(0deg,#0176d3,#4faae8);
+  border-radius:3px 3px 0 0; position:relative; display:flex; flex-direction:column;
+  justify-content:flex-end; align-items:center; min-width:0;
+}
+.bar-chart .bar .v{font-size:10px; color:var(--text-2); position:absolute; top:-16px}
+.bar-chart .bar .x{font-size:10px; color:var(--text-mute); position:absolute; bottom:-18px}
+
+/* Donut (conic-gradient) */
+.donut-wrap{display:flex; align-items:center; gap:14px; padding:6px 0}
+.donut{width:120px; height:120px; border-radius:50%}
+.legend{flex:1; font-size:12px}
+.lg-item{display:flex; align-items:center; gap:6px; padding:3px 0}
+.lg-dot{width:10px; height:10px; border-radius:2px}
+
+/* ===== Misc ===== */
+.help-text{color:var(--text-mute); font-size:11px}
+.crumb{font-size:11px; color:var(--text-mute); margin-bottom:4px}
+.crumb a{color:var(--text-mute); cursor:pointer}
+.crumb .sep{margin:0 4px; color:#bbb}
+
+/* ===== Callout (in-screen note) ===== */
+.callout{
+  background:var(--brand-50); border-left:3px solid var(--brand);
+  padding:10px 14px; border-radius:0 var(--radius) var(--radius) 0;
+  margin-bottom:10px; font-size:12px;
+}
+.callout.warn{background:var(--warn-bg); border-color:var(--warn)}
+.callout.success{background:var(--success-bg); border-color:var(--success)}
+.callout strong{font-weight:700}
+
+/* ===== Modal ===== */
+.modal-bg{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.4);
+  z-index:2000; align-items:center; justify-content:center; padding:24px;
+}
+.modal-bg.active{display:flex}
+.modal{
+  background:#fff; border-radius:6px; max-width:880px; width:100%;
+  max-height:90vh; overflow:auto; box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+.modal-head{padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center}
+.modal-head .title{font-weight:700; font-size:15px; flex:1}
+.modal-head .close{cursor:pointer; font-size:20px; color:var(--text-mute)}
+.modal-body{padding:20px}
+.modal-foot{padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end}
+
+/* ===== Toast ===== */
+.toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:#181818; color:#fff; padding:12px 20px; border-radius:6px; font-size:13px;
+  box-shadow:0 4px 16px rgba(0,0,0,.3); opacity:0; pointer-events:none;
+  transition:opacity .25s, transform .25s; z-index:3000; max-width:90vw;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.success{background:#1b5e2f}
+
+/* ===== 帳票 / PDF プレビュー (見積書・請求書・契約書) ===== */
+.pdf-toolbar{
+  background:#3c3c3c; color:#eee; padding:6px 14px; font-size:12px;
+  display:flex; align-items:center; gap:12px; border-radius:6px 6px 0 0;
+}
+.pdf-page{
+  background:#fff; max-width:760px; margin:0 auto; padding:48px 56px;
+  box-shadow:0 2px 12px rgba(0,0,0,.15); font-size:13px; color:#222;
+}
+.pdf-hdr{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px}
+.pdf-title{font-size:24px; font-weight:700; letter-spacing:.3em; border-bottom:2px solid #222; padding-bottom:6px}
+.pdf-tbl{width:100%; border-collapse:collapse; margin:18px 0; font-size:12px}
+.pdf-tbl th{background:#333; color:#fff; padding:8px 10px; text-align:left}
+.pdf-tbl td{padding:8px 10px; border-bottom:1px solid #ddd}
+.pdf-tbl .num{text-align:right}
+.pdf-amount-box{border:2px solid #222; padding:10px 16px; display:inline-block; font-size:18px; font-weight:700; margin:10px 0}
+.pdf-stamp{
+  width:64px;height:64px;border:2px solid #d33;border-radius:50%;color:#d33;
+  display:flex;align-items:center;justify-content:center;font-size:11px;transform:rotate(-12deg);
+}
+.pdf-bottom{margin-top:32px; font-size:11px; color:#555}
+
+/* =====================================================================
+   論点パネル (.disc) ── デモ品質の核
+   画面ごとに「出典 / 論点 / ※要確認」を載せ、デモを意思決定文書にする。
+   bodyに class="disc-on" が付くと表示。右下トグルで全画面ON/OFF。
+   プレゼン中は隠し(clean)、FB/レビュー時は表示に切替える運用。
+   ===================================================================== */
+.disc{display:none}
+body.disc-on .disc{
+  display:block;
+  background:var(--disc-bg); border:1px solid var(--disc-border); border-left:4px solid var(--disc);
+  border-radius:0 var(--radius) var(--radius) 0; padding:10px 14px; margin:0 0 10px; font-size:12px;
+}
+.disc .disc-q{font-weight:700; color:var(--disc); margin-bottom:3px}
+.disc .disc-src{font-size:11px; color:var(--text-mute); margin-bottom:4px}
+.disc .disc-src::before{content:"📎 出典: "}
+.disc .disc-body{color:var(--text-2); line-height:1.6}
+.disc .disc-flag{
+  display:inline-block; background:var(--warn-bg); color:var(--warn);
+  font-weight:700; font-size:11px; padding:1px 7px; border-radius:8px; margin:0 2px;
+}
+.disc .disc-flag::before{content:"※要確認 "}
+/* 論点トグル（右下固定） */
+.disc-toggle{
+  position:fixed; right:18px; bottom:18px; z-index:2500;
+  background:var(--disc); color:#fff; border:0; border-radius:20px;
+  padding:9px 16px; font-size:13px; font-weight:700; box-shadow:0 3px 10px rgba(0,0,0,.25);
+}
+.disc-toggle:hover{filter:brightness(1.05)}
+body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid var(--disc-border)}
+
+/* ===== Responsive ===== */
+@media(max-width:1000px){
+  .dash-grid{grid-template-columns:repeat(4,1fr)}
+  .widget.span-3,.widget.span-4{grid-column:span 2}
+  .widget.span-6,.widget.span-8,.widget.span-12{grid-column:span 4}
+  .gh-search{display:none}
+}
+
+</style>
+<style>
+.obj-icon.kojin{background:#a094ed}
+.obj-icon.sched{background:#76ded9}
+.obj-icon.memo{background:#5867e8}
+
+/* 4段階の矢羽根（決算矢羽根と同じ見た目で比較しやすくする） */
+.path .stage.kojin-current{background:var(--brand); color:#fff; font-weight:700}
+
+.tbl td .pill{display:inline-block; padding:1px 8px; border-radius:10px; font-size:11px}
+.pill.g{background:#eaf7ee; color:#1b7f4b}
+.pill.y{background:#fff7e6; color:#7a5b00}
+.pill.b{background:#eef4ff; color:#0176d3}
+
+.compare{display:grid; grid-template-columns:1fr 1fr; gap:0}
+.compare .col{padding:12px 16px}
+.compare .col:first-child{border-right:1px solid var(--border-light)}
+.compare h5{margin:0 0 8px; font-size:12px; color:var(--text-mute)}
+.compare ul{margin:0; padding-left:18px; font-size:12px; line-height:1.8}
+@media(max-width:900px){.compare{grid-template-columns:1fr}.compare .col:first-child{border-right:0; border-bottom:1px solid var(--border-light)}}
+</style>
+</head>
+<body>
+
+<div class="global-header">
+  <div class="app-launcher">⠿</div>
+  <div class="app-name">大阪支社</div>
+  <div class="gh-spacer"></div>
+  <div class="gh-user">担当A</div>
+</div>
+
+<div class="app-bar">
+  <div class="tab active" data-go="p-flow">📗 確定申告の流れ</div>
+  <div class="tab" data-go="p-sched">📊 年間の対応スケジュール</div>
+  <div class="tab" data-go="p-memo">📓 決算（法人）との違い・ご確認いただきたいこと</div>
+</div>
+
+<div class="main">
+
+<!-- ============ 確定申告の流れ ============ -->
+<div class="page active" id="p-flow">
+
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon kojin">個</div>
+      <div class="obj-title">
+        <small>個人事業主 確定申告</small>
+        <h1>サンプル：山田商店　2026年分</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    法人の決算は「決算月」を起点に矢羽根が動きますが、個人事業主の確定申告は<b style="display:inline">暦年（1〜12月）で固定</b>です。決算月という概念がないため、法人の決算矢羽根とは別の流れとして用意しています。
+  </div>
+
+  <div class="path-label">進捗 <span class="badge info">決算書作成</span></div>
+  <div class="path">
+    <div class="stage completed">1. 記帳・資料整理</div>
+    <div class="stage kojin-current">2. 決算書作成</div>
+    <div class="stage">3. 申告書作成・提出</div>
+    <div class="stage">4. 納税・消費税申告</div>
+  </div>
+
+  <div class="under" style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-top:8px">
+    <h4 style="margin:0 0 4px;font-size:13px">フェーズごとの内容</h4>
+    <table class="tbl">
+      <thead><tr><th style="width:22%">フェーズ</th><th>やること</th><th style="width:18%">目安の時期</th></tr></thead>
+      <tbody>
+        <tr><td>1. 記帳・資料整理</td><td>年間を通じた記帳、レシート・請求書等の資料収集</td><td>通年</td></tr>
+        <tr><td>2. 決算書作成</td><td>青色申告決算書（or 収支内訳書）の作成、棚卸・減価償却の整理</td><td>1月上旬〜2月中旬</td></tr>
+        <tr><td>3. 申告書作成・提出</td><td>所得税確定申告書の作成、e-Tax or 書面での提出</td><td>2月16日〜3月15日</td></tr>
+        <tr><td>4. 納税・消費税申告</td><td>所得税の納税確認。課税事業者は消費税確定申告も</td><td>所得税〜3/15、消費税〜3/31</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="q" style="background:#f4f6ff;border:1px solid #d6ddff;border-left:4px solid #5867e8;border-radius:0 6px 6px 0;padding:10px 14px;font-size:12px;color:#2f3a8c;margin:8px 0 0">
+    <b>ご確認いただきたいこと</b>
+    この4段階で個人事業主のお客様の実態と合っているか。インボイス対応で消費税の申告が必要な方が増えている前提で4番目を独立させていますが、免税事業者の方が多ければ3段階に統合する案もあります。
+  </div>
+
+</div>
+
+<!-- ============ 年間の対応スケジュール ============ -->
+<div class="page" id="p-sched">
+
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon sched">年</div>
+      <div class="obj-title"><small>個人事業主向け</small><h1>年間の対応スケジュール（日付ベース）</h1></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    issue #31で決めた「年次イベントは日付ベースでタスク生成」の考え方を、個人事業主の確定申告にもそのまま当てはめています。暦年で固定のため、法人のように決算月で時期がずれることはありません。
+  </div>
+
+  <div class="card">
+    <div class="card-head">お客様ごとに自動で立つタスク（イメージ）</div>
+    <table class="tbl">
+      <thead><tr><th>業務</th><th>関与先</th><th>生成日</th><th>期限</th><th>状態</th></tr></thead>
+      <tbody>
+        <tr><td>決算書作成の準備依頼</td><td>山田商店</td><td>2027-01-05</td><td>2027-02-10</td><td><span class="pill b">自動</span></td></tr>
+        <tr><td>確定申告書 作成・提出</td><td>山田商店</td><td>2027-02-01</td><td>2027-03-15</td><td><span class="pill b">自動</span></td></tr>
+        <tr><td>消費税確定申告（課税事業者）</td><td>山田商店</td><td>2027-02-01</td><td>2027-03-31</td><td><span class="pill b">自動</span></td></tr>
+        <tr><td>予定納税（第1期）</td><td>山田商店</td><td>2026-06-15</td><td>2026-07-31</td><td><span class="pill g">完了</span></td></tr>
+        <tr><td>予定納税（第2期）</td><td>山田商店</td><td>2026-10-15</td><td>2026-11-30</td><td><span class="pill b">自動</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="q" style="background:#f4f6ff;border:1px solid #d6ddff;border-left:4px solid #5867e8;border-radius:0 6px 6px 0;padding:10px 14px;font-size:12px;color:#2f3a8c">
+    <b>決めていただきたいこと</b>
+    消費税確定申告のタスクは、免税事業者のお客様には出さない想定です。課税事業者かどうかをどの項目で持つか（取引先側／その他業務レコード側）は#31の設計と合わせて整理します。
+  </div>
+
+</div>
+
+<!-- ============ 決算との違い・メモ ============ -->
+<div class="page" id="p-memo">
+
+  <div class="obj-header">
+    <div class="row1">
+      <div class="obj-icon memo">メ</div>
+      <div class="obj-title"><small>9/11 ToDoの反映</small><h1>決算（法人）との違い・ご確認いただきたいこと</h1></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">法人の決算矢羽根と、何が違うか</div>
+    <div class="compare">
+      <div class="col">
+        <h5>法人（既存の決算矢羽根）</h5>
+        <ul>
+          <li>決算月を基準にした相対月（1〜12ヶ月目）</li>
+          <li>月次会計の10ヶ月目到達で自動生成</li>
+          <li>5段階（事前検討→巡回チェック→申告書チェック→申告・納品→報酬改定確認）</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h5>個人事業主（このデモ）</h5>
+        <ul>
+          <li>暦年（1〜12月）で固定、決算月の概念がない</li>
+          <li>年が明けたら日付ベースで自動生成（#31と同じ考え方）</li>
+          <li>4段階（記帳・資料整理→決算書作成→申告書作成・提出→納税・消費税申告）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">こちらから確認させていただきたいこと</div>
+    <table class="tbl">
+      <thead><tr><th style="width:34%">論点</th><th>Glueの考え</th></tr></thead>
+      <tbody>
+        <tr><td>4段階の粒度でよいか</td><td>法人の5段階と比べるとシンプルにしています。個人事業主は関わる業務の幅が法人より狭いことが多いため、まずはこの粒度で試作しました</td></tr>
+        <tr><td>消費税申告を独立させるか</td><td>インボイス対応で課税事業者が増えている前提です。免税事業者が中心であれば3段階に統合できます</td></tr>
+        <tr><td>年末調整との関係</td><td>従業員を雇っている個人事業主は年末調整も必要になりますが、このデモには含めていません。該当するお客様がどの程度いるか教えてください</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="mini" style="font-size:11px;color:var(--text-mute)">※ 会社名・担当者名はすべて架空のものです。標準的な申告期限（所得税3/15・消費税3/31）を前提にしていますが、年によって多少前後する場合があります。</p>
+
+</div>
+
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+function show(id){
+  var tab=document.querySelector('.app-bar .tab[data-go="'+id+'"]');
+  var page=document.getElementById(id);
+  if(!tab||!page) return;
+  document.querySelectorAll('.app-bar .tab').forEach(function(x){x.classList.remove('active')});
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});
+  tab.classList.add('active'); page.classList.add('active');
+}
+document.querySelectorAll('.app-bar .tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    show(t.dataset.go);
+    if(history.replaceState) history.replaceState(null,'','#'+t.dataset.go.replace('p-',''));
+    window.scrollTo(0,0);
+  });
+});
+if(location.hash) show('p-'+location.hash.slice(1));
+</script>
+</body>
+</html>
