@@ -179,6 +179,63 @@
   .note{margin-top:14px;background:#fff;border:1px solid var(--border2);border-radius:8px;padding:14px 16px;font-size:12.5px;color:#444;}
   #toast{position:fixed;top:84px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--green);color:#fff;padding:12px 22px;border-radius:8px;font-weight:600;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:.3s;z-index:80;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ===== 追加画面（見積台帳／議事録／活動／月次見込／商品・仕入先／レポート） ===== */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
+  @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr);}}
+  .kpi{background:#fff;border:1px solid var(--border2);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;}
+  .kpi .n{font-size:22px;font-weight:800;}
+  .kpi .l{font-size:11px;color:var(--muted);}
+  .kpi .d{font-size:11px;font-weight:700;margin-top:2px;}
+  .kpi.r .n{color:var(--red);} .kpi.a .n{color:var(--amber);} .kpi.g .n{color:var(--green);} .kpi.b .n{color:var(--sf-blue);}
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:900px){.twocol{grid-template-columns:1fr;}}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border);background:#fafafa;font-size:12.5px;}
+  .toolbar input,.toolbar select{padding:6px 9px;border:1px solid var(--border2);border-radius:6px;font-family:inherit;font-size:12.5px;background:#fff;}
+  .toolbar .sp{margin-left:auto;}
+  .btn{padding:6px 12px;border:1px solid var(--border2);background:#fff;border-radius:6px;font-size:12.5px;color:var(--sf-blue);font-weight:600;white-space:nowrap;}
+  .btn.primary{background:var(--sf-blue);color:#fff;border-color:var(--sf-blue);}
+  .btn.sm{padding:3px 9px;font-size:11.5px;}
+  .segbtns{display:inline-flex;}
+  .segbtn{border:1px solid var(--border2);background:#fff;padding:6px 12px;font-size:12px;color:#444;margin-left:-1px;white-space:nowrap;}
+  .segbtn:first-child{border-radius:6px 0 0 6px;margin-left:0;} .segbtn:last-child{border-radius:0 6px 6px 0;}
+  .segbtn.on{background:var(--sf-blue);color:#fff;border-color:var(--sf-blue);font-weight:700;position:relative;}
+  table.lt tr.sel td{background:#eaf4fd;}
+  table.lt td.num,table.lt th.num{text-align:right;font-variant-numeric:tabular-nums;}
+  table.lt tfoot td{font-weight:700;background:#fafafa;border-top:2px solid var(--border2);}
+  .lkx{color:var(--link);cursor:pointer;text-decoration:underline;}
+  .aibox{background:var(--purple-bg);border:1px solid #ddd0fb;border-radius:6px;padding:9px 11px;font-size:12.5px;margin-top:8px;color:#3b1d80;line-height:1.65;}
+  .aibox b{color:#5b21b6;}
+  #oppBody td:nth-child(5),#oppBody td:last-child,#dash td.num,#screen-dash .lt td:first-child{white-space:nowrap;}
+  .emptyrow td{text-align:center;color:var(--muted);cursor:default;}
+  /* 月次見込グリッド */
+  table.xls.grid td.in{padding:0;}
+  table.xls.grid input{width:62px;border:1px solid transparent;background:transparent;text-align:right;font:inherit;padding:3px 5px;font-variant-numeric:tabular-nums;}
+  table.xls.grid input:hover{border-color:#9fc3e8;background:#fff;}
+  table.xls.grid input:focus{outline:none;border-color:var(--sf-blue);background:#fff;box-shadow:0 0 0 2px #cfe6fb;}
+  table.xls.grid input.chg{background:#fff4e5;}
+  table.xls.grid th.cur,table.xls.grid td.cur{border-left:2px solid var(--sf-blue);}
+  table.xls.grid td.upd{font-size:10.5px;color:var(--muted);}
+  .os-j,.os-j input{color:#1f4fd8 !important;font-weight:700;}
+  .os-g,.os-g input{color:#8b4513 !important;font-weight:700;}
+  .os-n,.os-n input{color:#00a2d8 !important;font-weight:700;}
+  .oslg{display:inline-flex;align-items:center;gap:4px;margin-right:12px;}
+  /* 横棒・縦棒チャート（CSSのみ） */
+  .hbars{padding:12px 14px;}
+  .hb{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:12px;}
+  .hb .lbl{width:118px;flex:0 0 auto;color:#444;}
+  .hb .trk{flex:1;background:#f1f1f1;border-radius:4px;height:18px;overflow:hidden;}
+  .hb .fill{height:100%;background:var(--sf-blue);border-radius:4px;}
+  .hb .fill.lt{background:#b8dcf7;} .hb .fill.red{background:#e36b6b;} .hb .fill.amber{background:#f0b84d;}
+  .hb .num{width:130px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;flex:0 0 auto;}
+  .vc{display:flex;align-items:flex-end;gap:6px;height:170px;padding:24px 14px 0;}
+  .vc .grp{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:2px;height:100%;}
+  .vc .b{width:42%;max-width:16px;border-radius:3px 3px 0 0;min-height:1px;}
+  .vc .b.plan{background:#cfcfcf;} .vc .b.act{background:var(--sf-blue);} .vc .b.fc{background:#b8dcf7;}
+  .vcaxis{display:flex;gap:6px;padding:4px 14px 10px;}
+  .vcaxis span{flex:1;text-align:center;font-size:10.5px;color:var(--muted);}
+  .vclg{display:flex;gap:14px;font-size:11.5px;color:#444;padding:0 14px 12px;flex-wrap:wrap;}
+  .vclg i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px;}
 </style>
 </head>
 <body>
@@ -199,6 +256,12 @@
   <div class="tab" data-tab="meeting" onclick="go('meeting')">月次会議資料</div>
   <div class="tab" data-tab="oppty" onclick="go('oppty')">案件・見積</div>
   <div class="tab" data-tab="request" onclick="go('request')">依頼書</div>
+  <div class="tab" data-tab="quotes" onclick="go('quotes')">見積台帳</div>
+  <div class="tab" data-tab="notes" onclick="go('notes')">議事録</div>
+  <div class="tab" data-tab="activity" onclick="go('activity')">活動</div>
+  <div class="tab" data-tab="plan" onclick="go('plan')">月次見込</div>
+  <div class="tab" data-tab="products" onclick="go('products')">商品・仕入先</div>
+  <div class="tab" data-tab="dash" onclick="go('dash')">レポート・ダッシュボード</div>
   <div class="tab step2" data-tab="drawing" onclick="go('drawing')">図面管理（Step2）</div>
 </div>
 
@@ -259,6 +322,20 @@
               <div class="ritem clk" onclick="go('request')"><div class="t lk">⏰ 原価計算書作成依頼が10日超過</div><div class="d">起票者へアラート送信済み</div></div>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>👤 取引先責任者<span class="cnt">4件</span></h3>
+        <div class="tablewrap">
+          <table class="lt">
+            <thead><tr><th>氏名</th><th>部署</th><th>役職</th><th>メール</th><th>電話</th><th>キーマン</th></tr></thead>
+            <tbody>
+              <tr onclick="toast('取引先責任者「高橋 一郎」を開きました（モック）')"><td><b>高橋 一郎</b></td><td>購買部</td><td>部長</td><td>i.takahashi@hokuriku-kasei.example</td><td>076-000-1201</td><td><span class="pill red">★ キーマン</span></td></tr>
+              <tr onclick="toast('取引先責任者「中村 美咲」を開きました（モック）')"><td><b>中村 美咲</b></td><td>開発部</td><td>主任</td><td>m.nakamura@hokuriku-kasei.example</td><td>076-000-1315</td><td><span class="pill red">★ キーマン</span></td></tr>
+              <tr onclick="toast('取引先責任者「山口 健」を開きました（モック）')"><td>山口 健</td><td>品質保証部</td><td>課長</td><td>k.yamaguchi@hokuriku-kasei.example</td><td>076-000-1402</td><td>－</td></tr>
+              <tr onclick="toast('取引先責任者「小林 由香」を開きました（モック）')"><td>小林 由香</td><td>購買部</td><td>担当</td><td>y.kobayashi@hokuriku-kasei.example</td><td>076-000-1208</td><td>－</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -331,6 +408,20 @@
         <div class="related">
           <div class="ritem"><div class="t">2026031　2026/08/14</div><div class="d">試作サンプル提示。原価計算書の作成を富山大泉工業へ依頼予定</div></div>
         </div>
+      </div>
+      <div class="panel">
+        <h3>🚶 訪問記録（議事録へのリンク付き）<span class="cnt">3件</span></h3>
+        <div class="tablewrap">
+          <table class="lt">
+            <thead><tr><th>訪問日</th><th>種別</th><th>訪問者</th><th>面談者</th><th>内容</th><th>議事録</th></tr></thead>
+            <tbody>
+              <tr onclick="openNote('2026031')"><td>2026/08/14</td><td><span class="pill blue">訪問</span></td><td>佐藤／商品開発（大阪）</td><td>高橋部長・中村様</td><td>新規容器の試作サンプルを提示。反応良好</td><td><span class="lkx">📝 2026031</span></td></tr>
+              <tr onclick="toast('活動を開きました（モック）')"><td>2026/07/16</td><td><span class="pill gray">電話</span></td><td>佐藤</td><td>高橋部長</td><td>競合A社の単価攻勢について情報交換</td><td>－</td></tr>
+              <tr onclick="toast('活動を開きました（モック）')"><td>2026/06/24</td><td><span class="pill blue">訪問</span></td><td>佐藤</td><td>中村様</td><td>食品向け容器の引合ヒアリング</td><td>－</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="xlsnote">現行カルテの訪問記録シートでは「議事録」列にファイルの保存場所を文字で書いていましたが、ここでは議事録レコードへのリンクになり、クリックで本文を開けます。</div>
       </div>
     </div>
   </section>
@@ -721,6 +812,36 @@
         </div>
       </div>
     </div>
+
+    <div class="panel">
+      <h3>📦 商品明細<span class="cnt">2件 ｜ 概算（見積確定時に数量・単価を更新）</span></h3>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th>商品</th><th>商品コード</th><th>仕入先</th><th class="num">数量</th><th class="num">販売単価</th><th class="num">仕入単価</th><th class="num">金額</th><th class="num">粗利</th><th class="num">粗利率</th></tr></thead>
+          <tbody>
+            <tr onclick="go('products')"><td><span class="lkx">食品向け容器 Bタイプ</span></td><td>P6002</td><td>竹内プロス</td><td class="num">100,000</td><td class="num">68.00</td><td class="num">56.50</td><td class="num">6,800,000</td><td class="num">1,150,000</td><td class="num">16.9%</td></tr>
+            <tr onclick="go('products')"><td><span class="lkx">食品向け容器 Bタイプ用キャップ</span></td><td>P6003</td><td>竹内プロス</td><td class="num">100,000</td><td class="num">17.00</td><td class="num">13.90</td><td class="num">1,700,000</td><td class="num">310,000</td><td class="num">18.2%</td></tr>
+          </tbody>
+          <tfoot><tr><td colspan="6">合計（案件の金額に自動反映）</td><td class="num">8,500,000</td><td class="num">1,460,000</td><td class="num">17.2%</td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="twocol">
+      <div class="panel">
+        <h3>📄 見積台帳（この案件）<span class="cnt">2件</span></h3>
+        <div class="related">
+          <div class="ritem clk" onclick="openQuote('Q-2026-0301','2')"><div class="t lk">Q-2026-0301　Rev.2</div><div class="d">2026/08/10 ｜ ¥8,500,000（概算）｜ <span class="pill blue">提出済</span></div></div>
+          <div class="ritem clk" onclick="openQuote('Q-2026-0301','1')"><div class="t lk">Q-2026-0301　Rev.1</div><div class="d">2026/07/25 ｜ ¥9,200,000 ｜ <span class="pill gray">旧版</span></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>🗒️ 議事録（この案件）<span class="cnt">1件</span></h3>
+        <div class="related">
+          <div class="ritem clk" onclick="openNote('2026031')"><div class="t lk">2026031　2026/08/14</div><div class="d">試作サンプル提示／原価計算書の作成依頼へ</div></div>
+        </div>
+      </div>
+    </div>
   </section>
 
   
@@ -772,6 +893,288 @@
   </section>
 
   
+  <!-- ===== 見積台帳 ===== -->
+  <section class="screen" id="screen-quotes">
+    <div class="pagehead">
+      <div class="ico">📄</div>
+      <div><h2>見積台帳</h2>
+        <div class="sub">見積書・原価計算書はSalesforce上では作らず、PDFを添付して保管します。見積番号・顧客・案件のどこからでも探せます</div></div>
+    </div>
+
+    <div class="card">
+      <div class="chead">見積台帳 一覧（P&amp;P）<span class="badge" id="quoteCount">0件</span></div>
+      <div class="toolbar">
+        <input type="text" id="quoteSearch" oninput="renderQuotes()" placeholder="🔍 見積番号・顧客・名称で検索" style="min-width:240px;">
+        <select id="quoteStatus" onchange="renderQuotes()">
+          <option value="">状態：すべて</option><option>提出済</option><option>受注</option><option>旧版</option>
+        </select>
+        <span class="sp"></span>
+        <button type="button" class="btn" onclick="toast('新規見積を登録しました（モック）')">＋ 新規</button>
+      </div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th>見積番号</th><th>Rev</th><th>発行日付</th><th>名称</th><th>顧客（提出先）</th><th>案件</th><th>商品</th><th class="num">見積金額</th><th>予定納期</th><th>受注日</th><th class="num">受注金額</th><th>状態</th><th>PDF</th></tr></thead>
+          <tbody id="quoteBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" id="quoteDetail"></div>
+
+    <div class="note">💡 同じ見積番号の改訂は Rev（改訂番号）で履歴を残します。状態は「受注日が入っているか」「新しいRevがあるか」から自動で表示しており、手で色を塗る必要はありません。</div>
+  </section>
+
+  <!-- ===== 議事録 ===== -->
+  <section class="screen" id="screen-notes">
+    <div class="pagehead">
+      <div class="ico">🗒️</div>
+      <div><h2>議事録</h2>
+        <div class="sub">P&amp;Pでは台帳を新しく作ります。顧客・案件に紐づけ、顧客カルテの「活動・議事録」タブに新しい順で並びます</div></div>
+    </div>
+
+    <div class="card">
+      <div class="chead">議事録 一覧<span class="badge" id="noteCount">0件</span></div>
+      <div class="toolbar">
+        <select id="noteAcc" onchange="renderNotes()"><option value="">取引先：すべて</option></select>
+        <select id="noteOpp" onchange="renderNotes()"><option value="">案件：すべて</option></select>
+        <span class="sp"></span>
+        <button type="button" class="btn" onclick="toast('議事録を新規作成しました（モック）')">＋ 新規</button>
+      </div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th>議事録番号</th><th>作成日</th><th>取引先</th><th>案件</th><th>打合せ内容（件名）</th><th>面談者</th><th>訪問者</th></tr></thead>
+          <tbody id="noteBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" id="noteDetail"></div>
+  </section>
+
+  <!-- ===== 活動 ===== -->
+  <section class="screen" id="screen-activity">
+    <div class="pagehead">
+      <div class="ico blue">📅</div>
+      <div><h2>活動（行動・ToDo）</h2>
+        <div class="sub">Outlookに入れた予定がそのまま行動として登録され、訪問後は bellSales AI の要約が訪問メモとネクストアクションに入ります</div></div>
+    </div>
+
+    <div class="card">
+      <div class="chead blue">📆 今後の予定（Outlookから自動登録）<span class="badge">本日 2026/08/25〜</span></div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th>日時</th><th>件名</th><th>取引先</th><th>訪問種別</th><th>実訪問者</th><th>登録元</th></tr></thead>
+          <tbody>
+            <tr onclick="toast('行動を開きました（モック）')"><td><b>08/25（火）10:00</b></td><td>YWLN キャップ 納期前倒しの打合せ</td><td>近畿製薬工業株式会社</td><td><span class="pill blue">訪問</span></td><td>佐藤</td><td><span class="pill gray">Outlook</span></td></tr>
+            <tr onclick="toast('行動を開きました（モック）')"><td><b>08/25（火）16:00</b></td><td>角瓶 2ロット目の数量確認</td><td>西日本パック株式会社</td><td><span class="pill gray">電話</span></td><td>山本</td><td><span class="pill gray">Outlook</span></td></tr>
+            <tr onclick="toast('行動を開きました（モック）')"><td>08/27（木）13:30</td><td>年末増産分の見積説明</td><td>東海食品包材株式会社</td><td><span class="pill blue">訪問</span></td><td>田中</td><td><span class="pill gray">Outlook</span></td></tr>
+            <tr onclick="go('oppty')"><td>09/02（水）14:00</td><td>原価計算書の説明・価格すり合わせ</td><td>北陸化成株式会社</td><td><span class="pill blue">訪問</span></td><td>佐藤</td><td><span class="pill gray">Outlook</span></td></tr>
+            <tr onclick="toast('行動を開きました（モック）')"><td>09/09（水）10:00</td><td>包装資材展 ブース来訪対応</td><td>（複数）</td><td><span class="pill purple">展示会</span></td><td>佐藤・山本</td><td><span class="pill gray">Outlook</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chead">🎙️ 最近の訪問記録（bellSales AI の要約）<span class="badge">3件</span></div>
+      <div class="related" id="visitList"></div>
+      <div class="xlsnote">売上見込みの数字は <b>AIが自動で書き換えることはありません</b>。見込に関わる発言は「レコメンド」として出し、担当者が確認してから月次見込に反映します。</div>
+    </div>
+
+    <div class="card">
+      <div class="chead amber">☑️ ToDo<span class="badge" id="todoCount">0件</span></div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th style="width:36px;">完了</th><th>期日</th><th>件名</th><th>関連先</th><th>担当</th><th>作成元</th></tr></thead>
+          <tbody id="todoBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 月次見込 ===== -->
+  <section class="screen" id="screen-plan">
+    <div class="pagehead">
+      <div class="ico">🗓️</div>
+      <div><h2>月次見込 ｜ 顧客 × 商品 × 12ヶ月</h2>
+        <div class="sub">営業が見込を入力する画面です。「月次会議資料」タブは、ここに入った数字を集計して現行の体裁で見せる閲覧用の画面です</div></div>
+    </div>
+
+    <div class="alertbox blue"><span>🔁</span><div><b>入力はこの画面、会議で見るのは「月次会議資料」。</b>同じデータを2か所で入力することはありません。月初・月中・翌月初の各会議で、その時点の予定をここで確定すると、会議資料と差異報告に自動で反映されます。<button type="button" class="btn sm" style="margin-left:6px;" onclick="go('meeting')">月次会議資料を開く →</button></div></div>
+
+    <div class="alertbox" style="background:var(--purple-bg);border-color:#ddd0fb;color:#3b1d80;"><span>🤖</span><div style="flex:1;"><b>bellSales AI からのレコメンド（自動では書き換えません）</b><br>8/20 東海食品包材 訪問の録音から「年末は前年の1.2倍くらい出そう」を検出しました。<b>冷凍スープ用ロール 12月：900 → 1,080 千円</b> の修正候補です。
+      <div style="margin-top:6px;"><button type="button" class="btn sm primary" onclick="applyReco()">確認して反映</button> <button type="button" class="btn sm" onclick="toast('レコメンドを見送りました（モック）')">見送る</button></div></div></div>
+
+    <div class="card">
+      <div class="chead blue">月次見込 一括入力（65期：2026年4月〜2027年3月）<span class="badge">単位：千円</span></div>
+      <div class="toolbar">
+        <span>表示する時点：</span>
+        <span class="segbtns" id="snapBtns">
+          <button type="button" class="segbtn" data-snap="plan" onclick="setSnap('plan')">① 期首計画</button>
+          <button type="button" class="segbtn" data-snap="ms" onclick="setSnap('ms')">② 月初予定</button>
+          <button type="button" class="segbtn on" data-snap="mm" onclick="setSnap('mm')">③ 月中予定</button>
+          <button type="button" class="segbtn" data-snap="nms" onclick="setSnap('nms')">④ 翌月初予定</button>
+        </span>
+        <span class="sp"></span>
+        <button type="button" class="btn" onclick="toast('Excelと同じ操作で複数行を貼り付けできます（モック）')">📋 Excelから貼り付け</button>
+        <button type="button" class="btn primary" onclick="savePlan()">💾 保存</button>
+      </div>
+      <div class="legend">
+        <span class="oslg"><span class="sw sw-act"></span>実績（売上明細から取込・編集不可）</span>
+        <span class="oslg"><b>受注区分：</b></span>
+        <span class="oslg os-n">■ 内示</span>
+        <span class="oslg os-g">■ 受注済（原料確保未定）</span>
+        <span class="oslg os-j">■ 受注</span>
+        <span class="oslg">■ 黒字＝見込のみ</span>
+      </div>
+      <div class="tablewrap">
+        <table class="xls grid a3" id="planGrid"></table>
+      </div>
+      <div class="xlsnote">白いセルはそのまま数字を書き換えられます（変更したセルは色が付きます）。4〜7月は商奉行クラウドの売上明細で実績に置き換わっています。文字色は受注区分で、現行Excelの色分けを選択リストの項目として持たせたものです。</div>
+    </div>
+
+    <div class="card">
+      <div class="chead">2026年7月度 ｜ 4時点の予定と着地、差異①〜⑥<span class="badge">差異はすべて自動計算</span></div>
+      <div class="tablewrap">
+        <table class="xls a3" id="planJul"></table>
+      </div>
+      <div class="xlsnote">差異①期首→月初　②期首→月中　③期首→翌月初　④月初→月中　⑤月中→翌月初　⑥期首→着地。現行の差異報告書と同じ6本を、入力された数字から自動で出します。差異理由だけは担当者が文章で記入します。</div>
+    </div>
+  </section>
+
+  <!-- ===== 商品・仕入先 ===== -->
+  <section class="screen" id="screen-products">
+    <div class="pagehead">
+      <div class="ico blue">📦</div>
+      <div><h2>商品・仕入先</h2>
+        <div class="sub">商品は商奉行クラウドの商品コードで整備し、主要仕入先を紐づけます。仕入先は取引先の「仕入先」種別として同じ台帳で管理します</div></div>
+    </div>
+
+    <div class="subtabs">
+      <div class="subtab active" data-sub4="prod" onclick="gosub4('prod')">① 商品マスター</div>
+      <div class="subtab" data-sub4="sup" onclick="gosub4('sup')">② 仕入先</div>
+      <div class="subtab" data-sub4="matrix" onclick="gosub4('matrix')">③ 商品 × 仕入先（複数仕入先）</div>
+    </div>
+
+    <div class="subscreen active" id="sub4-prod">
+      <div class="card">
+        <div class="chead">商品マスター（P&amp;P）<span class="badge">10件</span></div>
+        <div class="tablewrap">
+          <table class="lt">
+            <thead><tr><th>商品コード</th><th>商品名</th><th>事業部</th><th>主要仕入先</th><th>ほかに取引のある仕入先</th></tr></thead>
+            <tbody id="prodBody"></tbody>
+          </table>
+        </div>
+        <div class="xlsnote">商品コードをキーにすることで、見積・月次見込・売上実績を同じ商品で突き合わせられます（現行の営業Excelには商品コード列がありません）。</div>
+      </div>
+    </div>
+
+    <div class="subscreen" id="sub4-sup">
+      <div class="card">
+        <div class="chead">仕入先 一覧<span class="badge">47件中 9件を表示</span></div>
+        <div class="tablewrap">
+          <table class="lt">
+            <thead><tr><th>仕入先名</th><th>取引先の種別</th><th>取引状態</th><th>主な取扱</th><th class="num">取扱商品数</th><th>自社担当者</th></tr></thead>
+            <tbody id="supBody"></tbody>
+          </table>
+        </div>
+        <div class="xlsnote">現行の仕入先一覧（Excel・47件）を先に登録します。得意先と同じ取引先の台帳に「仕入先」種別で入れるため、得意先でもあり仕入先でもある会社も1件で扱えます。</div>
+      </div>
+    </div>
+
+    <div class="subscreen" id="sub4-matrix">
+      <div class="card">
+        <div class="chead">商品 × 仕入先<span class="badge">● 主要仕入先　○ 取引実績あり（数字は仕入単価）</span></div>
+        <div class="tablewrap">
+          <table class="xls" id="matrixTbl"></table>
+        </div>
+        <div class="xlsnote">1つの商品に複数の仕入先がある場合も、月次見込と案件の明細で「どの仕入先から」を記録するため、仕入先別の売上・粗利をレポートで出せます。</div>
+      </div>
+    </div>
+
+    <div class="alertbox gray"><span>ℹ️</span><div>仕入・在庫・原価の実管理（発注〜入荷）は2ndフェーズです。1stフェーズでは、商品に主要仕入先を持たせ、月次見込と案件に仕入先を記録するところまでを行います。</div></div>
+  </section>
+
+  <!-- ===== レポート・ダッシュボード ===== -->
+  <section class="screen" id="screen-dash">
+    <div class="pagehead">
+      <div class="ico blue">📈</div>
+      <div><h2>P&amp;P事業部 ダッシュボード</h2>
+        <div class="sub">案件・依頼書・月次見込の数字から自動で集計しています。表の体裁で見る場合は「月次会議資料」タブを使います</div></div>
+    </div>
+
+    <div class="kpis" id="dashKpis"></div>
+
+    <div class="twocol">
+      <div class="card">
+        <div class="chead blue">案件パイプライン（フェーズ別）<span class="badge">未受注＋受注後</span></div>
+        <div class="hbars" id="dashStage"></div>
+      </div>
+      <div class="card">
+        <div class="chead blue">受注予定月別の金額<span class="badge">1年以上先も含む</span></div>
+        <div class="hbars" id="dashClose"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chead blue">月次見込の予実（65期・千円）<span class="badge">月次見込から集計</span></div>
+      <div class="vc" id="dashVc"></div>
+      <div class="vcaxis" id="dashVcAxis"></div>
+      <div class="vclg"><span><i style="background:#cfcfcf"></i>期首計画</span><span><i style="background:var(--sf-blue)"></i>実績</span><span><i style="background:#b8dcf7"></i>最新の予定（見込）</span></div>
+    </div>
+
+    <div class="twocol">
+      <div class="card">
+        <div class="chead red">依頼書の滞留（回答待ち）<span class="badge">10日超過は自動アラート</span></div>
+        <div class="tablewrap">
+          <table class="lt">
+            <thead><tr><th>依頼番号</th><th>依頼区分</th><th>取引先</th><th class="num">経過日数</th><th>状況</th></tr></thead>
+            <tbody>
+              <tr onclick="go('request')"><td>#REQ-0231</td><td>原価計算書作成依頼</td><td>北陸化成株式会社</td><td class="num">12日</td><td><span class="pill red">超過（期限 08/13）</span></td></tr>
+              <tr onclick="go('request')"><td>#REQ-0225</td><td>サンプル作成依頼</td><td>竹内興産株式会社</td><td class="num">7日</td><td><span class="pill green">期限内（あと3日）</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="hbars">
+          <div class="hb"><span class="lbl">10日超過</span><span class="trk"><span class="fill red" style="display:block;width:50%"></span></span><span class="num">1件</span></div>
+          <div class="hb"><span class="lbl">7〜9日</span><span class="trk"><span class="fill amber" style="display:block;width:50%"></span></span><span class="num">1件</span></div>
+          <div class="hb"><span class="lbl">6日以内</span><span class="trk"><span class="fill" style="display:block;width:0%"></span></span><span class="num">0件</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="chead green">仕入先別 売上・粗利（65期 4〜7月実績）<span class="badge">千円</span></div>
+        <div class="tablewrap">
+          <table class="lt">
+            <thead><tr><th>仕入先</th><th class="num">売上</th><th class="num">粗利</th><th class="num">粗利率</th></tr></thead>
+            <tbody id="dashSup"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chead amber">7月度 期首計画との差異が大きい顧客・商品<span class="badge">差異⑥ 期首→着地</span></div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th>取引先</th><th>商品</th><th class="num">期首計画</th><th class="num">着地</th><th class="num">差異</th><th>差異理由</th></tr></thead>
+          <tbody id="dashVar"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chead">案件一覧 ｜ いつ・どこまで進んでいるか<span class="badge" id="oppCount">0件</span></div>
+      <div class="tablewrap">
+        <table class="lt">
+          <thead><tr><th>案件名</th><th>取引先</th><th>フェーズ</th><th class="num">金額</th><th>完了予定日</th><th>次のアクション</th><th>担当</th></tr></thead>
+          <tbody id="oppBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="note">💡 このほか、差異報告（4時点の差異と理由）、訪問漏れ・売上減の検知、仕入先別の売上・粗利などをレポートとして用意します。表示の単位・並び順は、現行の会議資料に合わせて調整します。</div>
+  </section>
+
   <section class="screen" id="screen-drawing">
     <div class="pagehead">
       <div class="ico gray">📐</div>
@@ -851,6 +1254,320 @@ function filterFiles(){
   });
   document.getElementById('filebox-empty').style.display=visibleCount===0?'flex':'none';
 }
+
+/* ===== 追加画面（見積台帳／議事録／活動／月次見込／商品・仕入先／レポート） ===== */
+function yen(n){return n?Number(n).toLocaleString('ja-JP'):'－';}
+function k(n){return n?Number(n).toLocaleString('ja-JP'):'－';}
+function sgn(n){if(!n) return '<span style="color:#999">0</span>';const s=(n>0?'+':'')+Number(n).toLocaleString('ja-JP');return n<0?'<span style="color:#c00">'+s+'</span>':s;}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function gosub4(name){
+  document.querySelectorAll('#screen-products .subscreen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sub4-'+name).classList.add('active');
+  document.querySelectorAll('#screen-products .subtab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('#screen-products .subtab[data-sub4="'+name+'"]').classList.add('active');
+}
+const OPP_HOKURIKU='北陸化成｜新規容器（食品向け）開発案件';
+
+/* --- 見積台帳 --- */
+const QUOTES=[
+  {no:'Q-2026-0312',rev:'1',date:'2026/08/18',name:'冷凍スープ用ロール 年末増産分',acc:'東海食品包材株式会社',opp:'東海食品包材｜冷凍スープ用ロール 年末増産',prod:'冷凍スープ用ロール 240×120',amt:2340000,due:'2026/11/25',dept:'資材部',ct:'森 様',end:'－',by:'田中',files:['見積書_東海食品包材_ロール年末_r1.pdf','原価計算書_ロール240x120.pdf'],note:'8/27 訪問時に説明予定'},
+  {no:'Q-2026-0308',rev:'1',date:'2026/08/12',name:'バイオプラボトル（白）追加ロット',acc:'関西ヘルスケア株式会社',opp:'関西ヘルスケア｜バイオプラボトル 追加ロット',prod:'バイオプラボトル（白）',amt:1512000,due:'2026/12/05',dept:'購買部',ct:'松井 様',end:'－',by:'佐藤',files:['見積書_関西ヘルスケア_ボトル追加_r1.pdf'],note:'原料確保の見通しを添えて提出'},
+  {no:'Q-2026-0301',rev:'2',date:'2026/08/10',name:'新規容器（食品向け）概算',acc:'北陸化成株式会社',opp:OPP_HOKURIKU,prod:'食品向け容器 Bタイプ ほか',amt:8500000,due:'2027/08/31',dept:'購買部',ct:'高橋 一郎',end:'－',by:'佐藤',files:['見積書_北陸化成_食品容器_v2.pdf','原価計算書_依頼中.pdf'],note:'概算。原価計算書の受領後に実額へ更新'},
+  {no:'Q-2026-0301',rev:'1',date:'2026/07/25',name:'新規容器（食品向け）概算',acc:'北陸化成株式会社',opp:OPP_HOKURIKU,prod:'食品向け容器 Bタイプ ほか',amt:9200000,due:'2027/08/31',dept:'購買部',ct:'高橋 一郎',end:'－',by:'佐藤',files:['見積書_北陸化成_食品容器_v1.pdf'],note:'肉厚変更（Rev.2）により減額',old:true},
+  {no:'Q-2026-0119',rev:'2',date:'2026/07/15',name:'化粧品容器 定期リピート',acc:'北陸化成株式会社',opp:'北陸化成｜化粧品容器 定期リピート',prod:'化粧品用黒色容器 Aタイプ',amt:3200000,due:'2026/09/30',odate:'2026/08/20',oamt:3200000,cdue:'2026/09/26',dept:'購買部',ct:'高橋 一郎',end:'－',by:'佐藤',files:['見積書_北陸化成_化粧品容器_r2.pdf','原価計算書_Aタイプ_2026.pdf'],note:''},
+  {no:'Q-2026-0143',rev:'1',date:'2026/05/20',name:'角瓶 500mL 黒（新規開発）初回ロット',acc:'西日本パック株式会社',opp:'西日本パック｜角瓶 500mL 黒 初回ロット',prod:'角瓶 500mL 黒（新規開発）',amt:1490000,due:'2026/07/31',odate:'2026/06/02',oamt:1490000,cdue:'2026/07/29',dept:'生産管理部',ct:'岡本 様',end:'－',by:'山本',files:['見積書_西日本パック_角瓶_r1.pdf'],note:''},
+  {no:'Q-2026-0092',rev:'1',date:'2026/04/08',name:'YWLN 容器・キャップ 定期',acc:'近畿製薬工業株式会社',opp:'近畿製薬工業｜YWLN 容器・キャップ 定期',prod:'YWLN 容器／キャップ',amt:1053600,due:'2026/10/10',odate:'2026/04/18',oamt:1053600,cdue:'2026/10/15',dept:'購買課',ct:'西田 様',end:'－',by:'佐藤',files:['見積書_近畿製薬工業_YWLN_r1.pdf'],note:''}
+];
+function qStatus(q){return q.old?'旧版':(q.odate?'受注':'提出済');}
+function qPill(q){const s=qStatus(q);return '<span class="pill '+(s==='受注'?'green':s==='旧版'?'gray':'blue')+'">'+s+'</span>';}
+let curQuote=null;
+function renderQuotes(){
+  const q=(document.getElementById('quoteSearch').value||'').trim().toLowerCase();
+  const st=document.getElementById('quoteStatus').value;
+  const rows=QUOTES.filter(x=>(!st||qStatus(x)===st)&&(!q||(x.no+x.acc+x.name+x.opp+x.prod).toLowerCase().includes(q)));
+  document.getElementById('quoteCount').textContent=rows.length+'件';
+  document.getElementById('quoteBody').innerHTML=rows.length?rows.map(x=>{
+    const key=x.no+'|'+x.rev;
+    return '<tr class="'+(curQuote===key?'sel':'')+'" onclick="showQuote(\''+x.no+'\',\''+x.rev+'\')"><td><span class="lkx">'+x.no+'</span></td><td>'+x.rev+'</td><td>'+x.date+'</td><td>'+esc(x.name)+'</td><td>'+esc(x.acc)+'</td><td>'+esc(x.opp)+'</td><td>'+esc(x.prod)+'</td><td class="num">'+yen(x.amt)+'</td><td>'+x.due+'</td><td>'+(x.odate||'－')+'</td><td class="num">'+yen(x.oamt)+'</td><td>'+qPill(x)+'</td><td>📎 '+x.files.length+'</td></tr>';
+  }).join(''):'<tr class="emptyrow"><td colspan="13">該当する見積がありません</td></tr>';
+}
+function showQuote(no,rev){
+  const x=QUOTES.find(q=>q.no===no&&q.rev===rev); if(!x) return;
+  curQuote=no+'|'+rev; renderQuotes();
+  const f=(kk,v)=>'<div class="field"><div class="k">'+kk+'</div><div class="v">'+v+'</div></div>';
+  const accLink=x.acc==='北陸化成株式会社'?'<span class="lkx" onclick="go(\'account\')">'+x.acc+'</span>':esc(x.acc);
+  const oppLink=x.opp===OPP_HOKURIKU?'<span class="lkx" onclick="go(\'oppty\')">'+esc(x.opp)+'</span>':esc(x.opp);
+  document.getElementById('quoteDetail').innerHTML=
+    '<div class="chead blue">📄 '+x.no+'　Rev.'+x.rev+'　'+esc(x.name)+'<span class="badge">'+qStatus(x)+'</span></div>'+
+    '<div class="reclayout" style="padding:14px;">'+
+      '<div class="panel" style="margin:0;"><h3>見積情報</h3><div class="fields">'+
+        f('見積番号 ／ Rev',x.no+' ／ '+x.rev)+f('発行日付',x.date)+f('作成者',x.by)+f('顧客（提出先）',accLink)+f('部署名',x.dept)+f('担当者名',x.ct)+f('最終顧客',x.end)+f('案件',oppLink)+
+      '</div></div>'+
+      '<div>'+
+        '<div class="panel"><h3>金額・納期</h3><div class="fields">'+
+          f('見積金額','¥'+yen(x.amt))+f('予定納期',x.due)+f('受注日',x.odate||'－')+f('決定納期',x.cdue||'－')+f('受注金額',x.oamt?'¥'+yen(x.oamt):'－')+f('備考',esc(x.note)||'－')+
+        '</div></div>'+
+        '<div class="panel" style="margin:0;"><h3>📎 添付ファイル（見積書・原価計算書）<span class="cnt">'+x.files.length+'件</span></h3><div style="padding:10px 14px;">'+
+          x.files.map(fn=>'<div class="filebox" style="cursor:pointer" onclick="toast(\''+fn+' を開きました（モック）\')"><div class="fic">📎</div><div><div class="fn">'+esc(fn)+'</div><div class="fd">クリックでプレビュー</div></div></div>').join('')+
+        '</div></div>'+
+      '</div>'+
+    '</div>';
+}
+function openQuote(no,rev){go('quotes');showQuote(no,rev);}
+
+/* --- 議事録 --- */
+const NOTES=[
+  {no:'2026033',date:'2026/08/20',acc:'東海食品包材株式会社',opp:'東海食品包材｜冷凍スープ用ロール 年末増産',subj:'年末増産分の数量感と納期の確認',att:'資材部 森様',vis:'田中',
+   body:'年末の冷凍スープ需要が前年より強い見込み。12月分は前年の1.2倍程度を検討中とのこと。\n納期は11月下旬の入荷を希望。原反の確保が間に合うかを大成ラミックへ確認する。',
+   next:['8/27 訪問で年末増産分の見積（Q-2026-0312）を説明（田中）','大成ラミックへ12月分の原反確保を打診（田中）'],files:[],src:'bellSales AI の要約から作成'},
+  {no:'2026031',date:'2026/08/14',acc:'北陸化成株式会社',opp:OPP_HOKURIKU,subj:'新規容器（食品向け）試作サンプルの提示',att:'購買部 高橋部長、開発部 中村様',vis:'佐藤、商品開発（大阪）',
+   body:'試作サンプル（肉厚を0.2mm薄くした新形状）を提示。強度・外観とも反応は良好。\n量産時の価格感を知りたいとのことで、原価計算書の作成を富山大泉工業へ依頼する。\n受注は先方の新商品発売に合わせ、2027年8月頃の見込み。',
+   next:['原価計算書の作成を富山大泉工業へ依頼（依頼書 #REQ-0231）','9/2 訪問で原価計算書をもとに価格をすり合わせ（佐藤）'],files:['議事録_北陸化成_20260814.docx'],src:''},
+  {no:'2026029',date:'2026/08/06',acc:'近畿製薬工業株式会社',opp:'近畿製薬工業｜YWLN 容器・キャップ 定期',subj:'10月納品分の前倒し相談',att:'購買課 西田様',vis:'佐藤',
+   body:'10月納品分のうち、キャップのみ2週間の前倒しができないかとの相談。\n容器は予定どおりで問題なし。',
+   next:['マルエムへキャップの前倒し可否を確認（佐藤）','8/25 訪問で回答'],files:[],src:''},
+  {no:'2026026',date:'2026/07/29',acc:'西日本パック株式会社',opp:'西日本パック｜角瓶 500mL 黒 量産2ロット目',subj:'角瓶 2ロット目の仕様確認',att:'生産管理部 岡本様',vis:'山本',
+   body:'初回ロットは問題なく納品済み。2ロット目は数量を増やしたいとの意向。\nラベル位置の微修正あり。図面の改訂版を先方から受領予定。',
+   next:['2ロット目の見積を作成（山本）','改訂図面の受領後、武内プレスへ共有'],files:['議事録_西日本パック_20260729.docx'],src:''},
+  {no:'2026019',date:'2026/07/08',acc:'関西ヘルスケア株式会社',opp:'関西ヘルスケア｜バイオプラボトル 追加ロット',subj:'原料（バイオマス樹脂）の確保状況の共有',att:'購買部 松井様',vis:'佐藤、田中',
+   body:'10月分は注文をいただいたが、原料の確保が未定のため月次見込は「受注済（原料確保未定）」で登録。\n原料メーカーの回答は8月中旬の予定。',
+   next:['原料確保の見通しを先方へ回答（佐藤）'],files:[],src:''}
+];
+let curNote=null;
+function initNotes(){
+  const accs=[...new Set(NOTES.map(n=>n.acc))], opps=[...new Set(NOTES.map(n=>n.opp))];
+  document.getElementById('noteAcc').insertAdjacentHTML('beforeend',accs.map(a=>'<option>'+esc(a)+'</option>').join(''));
+  document.getElementById('noteOpp').insertAdjacentHTML('beforeend',opps.map(a=>'<option>'+esc(a)+'</option>').join(''));
+}
+function renderNotes(){
+  const a=document.getElementById('noteAcc').value, o=document.getElementById('noteOpp').value;
+  const rows=NOTES.filter(n=>(!a||n.acc===a)&&(!o||n.opp===o)).sort((x,y)=>y.date.localeCompare(x.date));
+  document.getElementById('noteCount').textContent=rows.length+'件';
+  document.getElementById('noteBody').innerHTML=rows.length?rows.map(n=>'<tr class="'+(curNote===n.no?'sel':'')+'" onclick="showNote(\''+n.no+'\')"><td><span class="lkx">'+n.no+'</span></td><td>'+n.date+'</td><td>'+esc(n.acc)+'</td><td>'+esc(n.opp)+'</td><td>'+esc(n.subj)+'</td><td>'+esc(n.att)+'</td><td>'+esc(n.vis)+'</td></tr>').join(''):'<tr class="emptyrow"><td colspan="7">該当する議事録がありません</td></tr>';
+}
+function showNote(no){
+  const n=NOTES.find(x=>x.no===no); if(!n) return;
+  curNote=no; renderNotes();
+  const f=(kk,v)=>'<div class="field"><div class="k">'+kk+'</div><div class="v">'+v+'</div></div>';
+  const accLink=n.acc==='北陸化成株式会社'?'<span class="lkx" onclick="go(\'account\');gosub(\'s5\')">'+n.acc+'</span>':esc(n.acc);
+  const oppLink=n.opp===OPP_HOKURIKU?'<span class="lkx" onclick="go(\'oppty\')">'+esc(n.opp)+'</span>':esc(n.opp);
+  document.getElementById('noteDetail').innerHTML=
+    '<div class="chead blue">🗒️ 議事録 '+n.no+'　'+esc(n.subj)+'<span class="badge">'+n.date+'</span></div>'+
+    '<div class="reclayout" style="padding:14px;">'+
+      '<div class="panel" style="margin:0;"><h3>基本情報</h3><div class="fields">'+
+        f('議事録番号',n.no)+f('作成日',n.date)+f('取引先',accLink)+f('案件',oppLink)+f('面談者',esc(n.att))+f('訪問者',esc(n.vis))+(n.src?f('作成元',esc(n.src)):'')+
+      '</div></div>'+
+      '<div>'+
+        '<div class="panel"><h3>📝 本文</h3><div class="longtext">'+esc(n.body)+'</div></div>'+
+        '<div class="panel"><h3>➡️ 次回アクション</h3><div class="related">'+n.next.map(t=>'<div class="ritem"><div class="t">・'+esc(t)+'</div></div>').join('')+'</div></div>'+
+        '<div class="panel" style="margin:0;"><h3>📎 添付<span class="cnt">'+n.files.length+'件</span></h3><div style="padding:10px 14px;">'+
+          (n.files.length?n.files.map(fn=>'<div class="filebox" style="cursor:pointer" onclick="toast(\''+fn+' を開きました（モック）\')"><div class="fic">📎</div><div><div class="fn">'+esc(fn)+'</div><div class="fd">Wordファイルをそのまま添付</div></div></div>').join(''):'<div style="font-size:12px;color:var(--muted);">添付なし</div>')+
+        '</div></div>'+
+      '</div>'+
+    '</div>';
+}
+function openNote(no){go('notes');showNote(no);}
+
+/* --- 活動 --- */
+const VISITS=[
+  {date:'2026/08/20',acc:'東海食品包材株式会社',type:'訪問',who:'田中',resp:'資材部 森様',res:'〇',memo:'年末の冷凍スープ需要が前年より強い見込み。12月分を前年の1.2倍程度で検討中。納期は11月下旬入荷を希望。',next:'8/27 に年末増産分の見積を説明／大成ラミックへ原反確保を打診',reco:'冷凍スープ用ロール 12月：900 → 1,080 千円（担当者の確認待ち）',note:'2026033'},
+  {date:'2026/08/14',acc:'北陸化成株式会社',type:'訪問',who:'佐藤',resp:'購買部 高橋部長、開発部 中村様',res:'〇',memo:'新規容器（食品向け）の試作サンプルを提示。強度・外観とも反応良好。量産時の価格感を知りたいとのこと。',next:'原価計算書の作成を富山大泉工業へ依頼／9/2 に価格のすり合わせ',reco:'',note:'2026031'},
+  {date:'2026/08/06',acc:'近畿製薬工業株式会社',type:'訪問',who:'佐藤',resp:'購買課 西田様',res:'△',memo:'10月納品分のうちキャップのみ2週間の前倒し相談。容器は予定どおり。',next:'マルエムへ前倒し可否を確認し、8/25 に回答',reco:'',note:'2026029'}
+];
+function renderVisits(){
+  document.getElementById('visitList').innerHTML=VISITS.map(v=>
+    '<div class="ritem"><div class="t">'+v.date+'　'+esc(v.acc)+'　<span class="pill blue">'+v.type+'</span> <span class="pill '+(v.res==='〇'?'green':'amber')+'">訪問結果 '+v.res+'</span></div>'+
+    '<div class="d">実訪問者：'+esc(v.who)+'　｜　対応者：'+esc(v.resp)+'　｜　議事録：<span class="lkx" onclick="openNote(\''+v.note+'\')">📝 '+v.note+'</span></div>'+
+    '<div class="aibox"><b>訪問メモ（AI要約）</b>　'+esc(v.memo)+'<br><b>ネクストアクション</b>　'+esc(v.next)+
+    (v.reco?'<br><b>見込レコメンド</b>　'+esc(v.reco)+' <button type="button" class="btn sm" onclick="go(\'plan\')">月次見込で確認 →</button>':'')+'</div></div>'
+  ).join('');
+}
+const TODOS=[
+  {due:'2026/08/16',over:true,subj:'原価計算書の受領確認（依頼書 #REQ-0231）',acc:'北陸化成株式会社',who:'佐藤',src:'依頼書アラート（自動）',pill:'red',go:'request'},
+  {due:'2026/08/25',subj:'YWLN キャップ 前倒し可否を先方へ回答',acc:'近畿製薬工業株式会社',who:'佐藤',src:'bellSales AI',pill:'purple'},
+  {due:'2026/08/27',subj:'年末増産分の見積説明資料を準備',acc:'東海食品包材株式会社',who:'田中',src:'bellSales AI',pill:'purple'},
+  {due:'2026/08/31',subj:'月次見込 翌月初予定の入力（9月分）',acc:'－',who:'佐藤',src:'月次サイクル（定期）',pill:'gray',go:'plan'},
+  {due:'2026/09/01',subj:'角瓶 2ロット目の見積を作成',acc:'西日本パック株式会社',who:'山本',src:'手動',pill:'gray'}
+];
+function renderTodos(){
+  document.getElementById('todoCount').textContent=TODOS.length+'件';
+  document.getElementById('todoBody').innerHTML=TODOS.map((t,i)=>
+    '<tr'+(t.go?' onclick="go(\''+t.go+'\')"':'')+'><td onclick="event.stopPropagation()"><input type="checkbox" onchange="toast(this.checked?\'ToDoを完了にしました（モック）\':\'ToDoを未完了に戻しました（モック）\')"></td><td>'+(t.over?'<span class="pill red">'+t.due+' 期限超過</span>':t.due)+'</td><td>'+esc(t.subj)+'</td><td>'+esc(t.acc)+'</td><td>'+esc(t.who)+'</td><td><span class="pill '+t.pill+'">'+esc(t.src)+'</span></td></tr>'
+  ).join('');
+}
+
+/* --- 月次見込 --- */
+const MONTHS=['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
+const CUR=4; /* 8月＝当月。4〜7月は実績確定 */
+const PLAN_ROWS=[
+  {c:'北陸化成',p:'化粧品用黒色容器 Aタイプ',s:'富山大泉工業',m:.18,plan:[1900,2000,1950,2000,2050,2000,1950,2100,2200,1800,1900,2000],act:[1880,2140,1720,2060],f:[[1.0,1.02,1.03],[1.0,1.0,1.02],[1.0,1.05,1.05]],os:'jjgn----',j:[2000,2000,2050,2080,2060],reason:'定期分に加え販促品の追加発注',st:'受注',pr:'100%',by:'佐藤 08/24'},
+  {c:'北陸化成',p:'食品向け容器 Bタイプ',s:'竹内プロス',m:.17,plan:[650,700,700,700,750,700,700,750,800,650,700,700],act:[610,720,690,640],f:[[1.0,.96,.96],[1.0,1.0,1.0],[.95,.95,.95]],os:'jjnn----',j:[700,700,680,650,640],reason:'先方の在庫調整で一部を翌月へ',st:'受注',pr:'100%',by:'佐藤 08/24'},
+  {c:'近畿製薬工業',p:'YWLN 容器 HRS90429500',s:'マルエム',m:.18,plan:[800,800,850,850,800,800,900,900,850,800,800,850],act:[820,760,880,810],f:[[1.0,1.0,1.0],[1.0,1.0,1.0],[1.0,1.0,1.0]],os:'jjjn----',j:[850,850,820,820,810],reason:'',st:'受注',pr:'100%',by:'佐藤 08/21'},
+  {c:'近畿製薬工業',p:'YWLN キャップ HRS90429502',s:'マルエム',m:.2,plan:[300,300,320,320,300,300,340,340,320,300,300,320],act:[310,290,330,305],f:[[1.0,1.0,1.0],[1.0,1.0,1.0],[1.0,1.0,1.0]],os:'jjjn----',j:[320,320,310,310,305],reason:'',st:'受注',pr:'100%',by:'佐藤 08/21'},
+  {c:'東海食品包材',p:'冷凍スープ用ロール 240×120',s:'大成ラミック',m:.1,plan:[450,420,400,450,500,550,650,800,900,500,450,480],act:[430,410,380,420],f:[[1.0,.96,.96],[1.0,1.0,1.0],[1.0,1.05,1.1]],os:'jjnnn---',j:[450,450,430,420,420],reason:'天候不順で出荷が減少',st:'受注',pr:'100%',by:'田中 08/20'},
+  {c:'関西ヘルスケア',p:'バイオプラボトル（白）',s:'ヤスダプラスチック',m:.196,plan:[0,0,150,180,180,230,390,350,170,0,350,350],act:[0,0,160,180],f:[[1.0,1.0,1.0],[1.0,1.0,1.0],[1.0,1.0,1.0]],os:'jjgn--nn',j:[180,180,180,180,180],reason:'',st:'受注',pr:'100%',by:'佐藤 08/19'},
+  {c:'西日本パック',p:'角瓶 500mL 黒（新規開発）',s:'武内プレス',m:.168,plan:[0,0,0,850,500,0,520,0,0,0,0,1100],act:[0,0,0,846],f:[[1.0,1.0,1.0],[1.0,1.0,1.0],[1.0,1.15,1.15]],os:'j-n----n',j:[850,850,850,846,846],reason:'',st:'受注',pr:'100%',by:'山本 08/22'}
+];
+const SNAP_IDX={plan:-1,ms:0,mm:1,nms:2};
+const SNAP_LABEL={plan:'期首計画',ms:'月初予定',mm:'月中予定',nms:'翌月初予定'};
+let curSnap='mm'; const planEdits={plan:{},ms:{},mm:{},nms:{}};
+function baseVal(r,i,snap){
+  const p=r.plan[i]; const si=SNAP_IDX[snap];
+  if(si<0||i>6) return p;
+  return Math.round(p*r.f[i-CUR][si]/10)*10;
+}
+function cellVal(ri,i,snap){
+  snap=snap||curSnap; const r=PLAN_ROWS[ri];
+  if(i<CUR) return r.act[i];
+  const e=planEdits[snap][ri+'-'+i];
+  return e!=null?e:baseVal(r,i,snap);
+}
+const OS_CLS={j:'os-j',g:'os-g',n:'os-n','-':''};
+function renderPlanGrid(){
+  const snap=curSnap;
+  let h='<thead><tr><th>取引先</th><th>商品</th><th>仕入先</th>'+MONTHS.map((m,i)=>'<th class="'+(i===CUR?'cur':'')+'">'+m+(i<CUR?'<br><span style="font-weight:400">実績</span>':i===CUR?'<br><span style="font-weight:400">当月</span>':'')+'</th>').join('')+'<th>今期計</th><th>最終更新</th></tr></thead><tbody>';
+  PLAN_ROWS.forEach((r,ri)=>{
+    h+='<tr><td class="cust">'+esc(r.c)+'</td><td class="lbl">'+esc(r.p)+'</td><td class="lbl">'+esc(r.s)+'</td>';
+    for(let i=0;i<12;i++){
+      if(i<CUR){h+='<td class="num act">'+k(r.act[i])+'</td>';continue;}
+      const v=cellVal(ri,i,snap); const chg=planEdits[snap][ri+'-'+i]!=null;
+      h+='<td class="in '+(OS_CLS[r.os[i-CUR]]||'')+(i===CUR?' cur':'')+'"><input class="'+(chg?'chg':'')+'" value="'+(v?v.toLocaleString('ja-JP'):'')+'" data-r="'+ri+'" data-i="'+i+'" oninput="planInput(this)" aria-label="'+esc(r.c+' '+r.p+' '+MONTHS[i])+'"></td>';
+    }
+    h+='<td class="num sum" id="pt-'+ri+'"></td><td class="upd">'+esc(r.by)+'</td></tr>';
+  });
+  h+='</tbody><tfoot><tr><td colspan="3">P&amp;P事業部 計（'+SNAP_LABEL[snap]+'）</td>'+MONTHS.map((m,i)=>'<td class="num'+(i===CUR?' cur':'')+'" id="pf-'+i+'"></td>').join('')+'<td class="num" id="pf-all"></td><td></td></tr></tfoot>';
+  document.getElementById('planGrid').innerHTML=h;
+  recalcPlan();
+}
+function recalcPlan(){
+  let all=0; const col=new Array(12).fill(0);
+  PLAN_ROWS.forEach((r,ri)=>{let t=0;for(let i=0;i<12;i++){const v=cellVal(ri,i)||0;t+=v;col[i]+=v;}document.getElementById('pt-'+ri).textContent=k(t);all+=t;});
+  col.forEach((v,i)=>document.getElementById('pf-'+i).textContent=k(v));
+  document.getElementById('pf-all').textContent=k(all);
+}
+function planInput(el){
+  const n=parseInt(String(el.value).replace(/[^0-9]/g,''),10);
+  planEdits[curSnap][el.dataset.r+'-'+el.dataset.i]=isNaN(n)?0:n;
+  el.classList.add('chg'); recalcPlan();
+}
+function setSnap(s){
+  curSnap=s;
+  document.querySelectorAll('#snapBtns .segbtn').forEach(b=>b.classList.toggle('on',b.dataset.snap===s));
+  renderPlanGrid();
+}
+function savePlan(){
+  const n=Object.keys(planEdits[curSnap]).length;
+  toast(SNAP_LABEL[curSnap]+'を保存しました（変更 '+n+' セル・モック）');
+}
+function applyReco(){
+  const ri=PLAN_ROWS.findIndex(r=>r.c==='東海食品包材');
+  planEdits[curSnap][ri+'-8']=1080; renderPlanGrid();
+  toast('12月の'+SNAP_LABEL[curSnap]+'を 1,080 に更新しました（更新者：田中）');
+}
+function renderPlanJul(){
+  let h='<thead><tr><th>取引先</th><th>商品</th><th>仕入先</th><th>受注区分</th><th>確度</th><th>①期首計画</th><th>②月初</th><th>③月中</th><th>④翌月初</th><th>⑤着地（実績）</th><th>差異①</th><th>差異②</th><th>差異③</th><th>差異④</th><th>差異⑤</th><th>差異⑥</th><th>差異理由</th></tr></thead><tbody>';
+  const tot=[0,0,0,0,0];
+  PLAN_ROWS.forEach(r=>{
+    const [p,ms,mm,nms,a]=r.j; [p,ms,mm,nms,a].forEach((v,i)=>tot[i]+=v);
+    h+='<tr><td class="cust">'+esc(r.c)+'</td><td class="lbl">'+esc(r.p)+'</td><td class="lbl">'+esc(r.s)+'</td><td class="os-j">'+r.st+'</td><td>'+r.pr+'</td>'+
+      '<td class="num plan">'+k(p)+'</td><td class="num">'+k(ms)+'</td><td class="num">'+k(mm)+'</td><td class="num">'+k(nms)+'</td><td class="num act">'+k(a)+'</td>'+
+      [ms-p,mm-p,nms-p,mm-ms,nms-mm,a-p].map(v=>'<td class="num sum">'+sgn(v)+'</td>').join('')+
+      '<td class="lbl">'+(esc(r.reason)||'－')+'</td></tr>';
+  });
+  const [p,ms,mm,nms,a]=tot;
+  h+='</tbody><tfoot><tr><td colspan="5">計</td>'+[p,ms,mm,nms,a].map(v=>'<td class="num">'+k(v)+'</td>').join('')+[ms-p,mm-p,nms-p,mm-ms,nms-mm,a-p].map(v=>'<td class="num">'+sgn(v)+'</td>').join('')+'<td></td></tr></tfoot>';
+  document.getElementById('planJul').innerHTML=h;
+}
+
+/* --- 商品・仕入先 --- */
+const PRODS=[
+  {code:'P6001',name:'化粧品用黒色容器 Aタイプ',sup:{'富山大泉工業':['●','41.20'],'栄章科学':['○','43.80']},note:'栄章科学は繁忙期の補完'},
+  {code:'P6002',name:'食品向け容器 Bタイプ',sup:{'竹内プロス':['●','56.50'],'富山大泉工業':['○','54.90']},note:'富山大泉工業へ量産移管を検討中'},
+  {code:'P6003',name:'食品向け容器 Bタイプ用キャップ',sup:{'竹内プロス':['●','13.90']}},
+  {code:'P2002',name:'軸 ハイマーカー 赤',sup:{'東洋化成':['●','5.71']}},
+  {code:'P4210',name:'YWLN 容器 HRS90429500',sup:{'マルエム':['●','25.80']}},
+  {code:'P4212',name:'YWLN キャップ HRS90429502',sup:{'マルエム':['●','9.95'],'東洋化成':['○','10.30']}},
+  {code:'P1181',name:'冷凍スープ用ロール 240×120',sup:{'大成ラミック':['●','23.10']}},
+  {code:'P7710',name:'バイオプラボトル（白）',sup:{'ヤスダプラスチック':['●','15.20'],'富山大泉工業':['○','15.80']}},
+  {code:'P8801',name:'角瓶 500mL 黒（新規開発）',sup:{'武内プレス':['●','62.00'],'富山大泉工業':['○','60.50']}},
+  {code:'P5501',name:'ZCCF抽出液 充填品 5本入り',sup:{'磯矢硝子':['●','381.00']}}
+];
+const SUPS=[
+  {name:'富山大泉工業',main:'容器の成形・製造（グループ工場）',who:'佐藤'},
+  {name:'竹内プロス',main:'食品向け容器・キャップ',who:'佐藤'},
+  {name:'栄章科学',main:'化粧品容器（補完）',who:'山本'},
+  {name:'東洋化成',main:'筆記具部材・キャップ',who:'田中'},
+  {name:'マルエム',main:'医薬品容器',who:'佐藤'},
+  {name:'大成ラミック',main:'食品包材フィルム',who:'田中'},
+  {name:'ヤスダプラスチック',main:'バイオプラボトル',who:'佐藤'},
+  {name:'武内プレス',main:'角瓶・ブロー成形品',who:'山本'},
+  {name:'磯矢硝子',main:'ガラス容器・充填',who:'田中'}
+];
+function primarySup(p){return Object.keys(p.sup).find(s=>p.sup[s][0]==='●');}
+function renderProducts(){
+  document.getElementById('prodBody').innerHTML=PRODS.map(p=>{
+    const others=Object.keys(p.sup).filter(s=>p.sup[s][0]!=='●');
+    return '<tr onclick="gosub4(\'matrix\')"><td>'+p.code+'</td><td><b>'+esc(p.name)+'</b></td><td><span class="pill purple">P&amp;P</span></td><td>'+esc(primarySup(p))+'</td><td>'+(others.length?others.map(esc).join('、')+(p.note?'<div style="font-size:11px;color:var(--muted)">'+esc(p.note)+'</div>':''):'－')+'</td></tr>';
+  }).join('');
+  document.getElementById('supBody').innerHTML=SUPS.map(s=>{
+    const n=PRODS.filter(p=>p.sup[s.name]).length;
+    return '<tr onclick="toast(\'仕入先「'+s.name+'」を開きました（モック）\')"><td><b>'+esc(s.name)+'</b></td><td><span class="pill gray">仕入先</span></td><td><span class="pill green">取引中</span></td><td>'+esc(s.main)+'</td><td class="num">'+n+'</td><td>'+esc(s.who)+'</td></tr>';
+  }).join('');
+  let h='<thead><tr><th>商品コード</th><th>商品名</th>'+SUPS.map(s=>'<th>'+esc(s.name)+'</th>').join('')+'</tr></thead><tbody>';
+  PRODS.forEach(p=>{
+    h+='<tr><td>'+p.code+'</td><td class="lbl">'+esc(p.name)+'</td>'+SUPS.map(s=>{const v=p.sup[s.name];return v?'<td class="num'+(v[0]==='●'?' act':'')+'">'+v[0]+' '+v[1]+'</td>':'<td></td>';}).join('')+'</tr>';
+  });
+  document.getElementById('matrixTbl').innerHTML=h+'</tbody>';
+}
+
+/* --- レポート・ダッシュボード --- */
+const STAGES=['','01_引合','02_サンプル依頼','03_原価計算','04_見積提出','05_受注','06_量産手配','07_納入'];
+const OPPS=[
+  {name:OPP_HOKURIKU,acc:'北陸化成株式会社',st:3,amt:8500000,close:'2027/08/31',next:'原価計算書の受領待ち（#REQ-0231）',who:'佐藤',link:'oppty'},
+  {name:'近畿製薬工業｜新規点眼容器 開発',acc:'近畿製薬工業株式会社',st:2,amt:4800000,close:'2027/03/31',next:'サンプル評価結果の回収',who:'佐藤'},
+  {name:'西日本パック｜角瓶 500mL 黒 量産2ロット目',acc:'西日本パック株式会社',st:4,amt:2980000,close:'2026/10/15',next:'8/25 数量確認の電話',who:'山本'},
+  {name:'東海食品包材｜冷凍スープ用ロール 年末増産',acc:'東海食品包材株式会社',st:4,amt:2340000,close:'2026/10/20',next:'8/27 見積説明',who:'田中'},
+  {name:'関西ヘルスケア｜バイオプラボトル 追加ロット',acc:'関西ヘルスケア株式会社',st:4,amt:1512000,close:'2026/11/10',next:'原料確保の見通しを回答',who:'佐藤'},
+  {name:'阪神理化｜充填品 パッケージ刷新',acc:'阪神理化株式会社',st:1,amt:1200000,close:'2027/01/29',next:'仕様ヒアリング',who:'山本'},
+  {name:'北陸化成｜化粧品容器 定期リピート',acc:'北陸化成株式会社',st:5,amt:3200000,close:'2026/09/30',next:'9/26 納品',who:'佐藤'},
+  {name:'中部容器｜Dチップ 年間契約',acc:'中部容器株式会社',st:6,amt:2100000,close:'2026/09/15',next:'初回ロットの出荷調整',who:'田中'}
+];
+function stPill(s){const c=s<=2?'gray':s===3?'amber':s===4?'blue':'green';return '<span class="pill '+c+'">'+STAGES[s]+'</span>';}
+function man(n){return '¥'+(n/1000000).toFixed(1)+'M';}
+function hbar(lbl,v,max,num,cls){return '<div class="hb"><span class="lbl">'+lbl+'</span><span class="trk"><span class="fill '+(cls||'')+'" style="display:block;width:'+(max?Math.round(v/max*100):0)+'%"></span></span><span class="num">'+num+'</span></div>';}
+function renderDash(){
+  const open=OPPS.filter(o=>o.st<5), near=open.filter(o=>o.close<='2026/11/30');
+  const sum=a=>a.reduce((t,o)=>t+o.amt,0);
+  let planTot=0,latest=0;
+  PLAN_ROWS.forEach((r,ri)=>{for(let i=0;i<12;i++){planTot+=r.plan[i];latest+=cellVal(ri,i,'mm')||0;}});
+  document.getElementById('dashKpis').innerHTML=
+    '<div class="kpi b"><div class="n">'+man(sum(open))+'</div><div class="l">未受注の案件パイプライン（'+open.length+'件）</div><div class="d" style="color:var(--sf-blue)">1年以上先の開発案件を含む</div></div>'+
+    '<div class="kpi g"><div class="n">'+man(sum(near))+'</div><div class="l">3ヶ月以内（〜11月）の受注見込（'+near.length+'件）</div><div class="d" style="color:var(--green)">すべて見積提出済み</div></div>'+
+    '<div class="kpi r"><div class="n">1件</div><div class="l">依頼書 未回答（10日超過）</div><div class="d" style="color:var(--red)">#REQ-0231 原価計算書</div></div>'+
+    '<div class="kpi a"><div class="n">'+(latest/planTot*100).toFixed(1)+'%</div><div class="l">65期 着地見込 ÷ 期首計画</div><div class="d" style="color:var(--amber)">実績＋月中予定 '+k(latest)+' ／ 計画 '+k(planTot)+' 千円</div></div>';
+  const st=[];for(let s=1;s<=7;s++){const a=OPPS.filter(o=>o.st===s);st.push({s,amt:sum(a),n:a.length});}
+  const smax=Math.max(...st.map(x=>x.amt));
+  document.getElementById('dashStage').innerHTML=st.map(x=>hbar(STAGES[x.s],x.amt,smax,(x.amt?man(x.amt):'－')+'（'+x.n+'件）',x.s>=5?'lt':'')).join('');
+  const buckets=[['2026/09',o=>o.close.startsWith('2026/09')],['2026/10',o=>o.close.startsWith('2026/10')],['2026/11',o=>o.close.startsWith('2026/11')],['2026/12',o=>o.close.startsWith('2026/12')],['2027/01〜03',o=>o.close>='2027/01'&&o.close<'2027/04'],['2027/04以降',o=>o.close>='2027/04']].map(([l,fn])=>{const a=OPPS.filter(fn);return {l,amt:sum(a),n:a.length};});
+  const bmax=Math.max(...buckets.map(x=>x.amt));
+  document.getElementById('dashClose').innerHTML=buckets.map(x=>hbar(x.l,x.amt,bmax,(x.amt?man(x.amt):'－')+'（'+x.n+'件）',x.l==='2027/04以降'?'amber':'')).join('')+'<div style="font-size:11.5px;color:var(--muted);margin-top:8px;">オレンジは受注が1年以上先の開発案件です。</div>';
+  const pl=new Array(12).fill(0),lt=new Array(12).fill(0);
+  PLAN_ROWS.forEach((r,ri)=>{for(let i=0;i<12;i++){pl[i]+=r.plan[i];lt[i]+=cellVal(ri,i,'mm')||0;}});
+  const vmax=Math.max(...pl,...lt);
+  document.getElementById('dashVc').innerHTML=MONTHS.map((m,i)=>'<div class="grp" title="'+m+'：計画 '+k(pl[i])+' ／ '+(i<CUR?'実績':'見込')+' '+k(lt[i])+'"><div class="b plan" style="height:'+Math.round(pl[i]/vmax*100)+'%"></div><div class="b '+(i<CUR?'act':'fc')+'" style="height:'+Math.round(lt[i]/vmax*100)+'%"></div></div>').join('');
+  document.getElementById('dashVcAxis').innerHTML=MONTHS.map(m=>'<span>'+m+'</span>').join('');
+  const sup={};
+  PLAN_ROWS.forEach(r=>{const s=r.act.reduce((t,v)=>t+v,0);sup[r.s]=sup[r.s]||{s:0,g:0};sup[r.s].s+=s;sup[r.s].g+=Math.round(s*r.m);});
+  document.getElementById('dashSup').innerHTML=Object.keys(sup).sort((a,b)=>sup[b].s-sup[a].s).map(n=>'<tr onclick="go(\'products\');gosub4(\'sup\')"><td>'+esc(n)+'</td><td class="num">'+k(sup[n].s)+'</td><td class="num">'+k(sup[n].g)+'</td><td class="num">'+(sup[n].g/sup[n].s*100).toFixed(1)+'%</td></tr>').join('');
+  const vr=PLAN_ROWS.map(r=>({r,d:r.j[4]-r.j[0]})).filter(x=>x.d!==0).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).slice(0,5);
+  document.getElementById('dashVar').innerHTML=vr.map(x=>'<tr onclick="go(\'plan\')"><td>'+esc(x.r.c)+'</td><td>'+esc(x.r.p)+'</td><td class="num">'+k(x.r.j[0])+'</td><td class="num">'+k(x.r.j[4])+'</td><td class="num">'+sgn(x.d)+'</td><td>'+(esc(x.r.reason)||'<span style="color:var(--red)">未記入</span>')+'</td></tr>').join('');
+  document.getElementById('oppCount').textContent=OPPS.length+'件';
+  document.getElementById('oppBody').innerHTML=OPPS.slice().sort((a,b)=>a.close.localeCompare(b.close)).map(o=>'<tr onclick="'+(o.link?'go(\''+o.link+'\')':'toast(\'案件を開きました（モック）\')')+'"><td><span class="lkx">'+esc(o.name)+'</span></td><td>'+esc(o.acc)+'</td><td>'+stPill(o.st)+'</td><td class="num">'+yen(o.amt)+'</td><td>'+o.close+(o.close>='2027/08'?' <span class="pill amber">1年以上先</span>':'')+'</td><td>'+esc(o.next)+'</td><td>'+esc(o.who)+'</td></tr>').join('');
+}
+
+/* 初期描画 */
+renderQuotes(); showQuote('Q-2026-0301','2'); initNotes(); renderNotes(); showNote('2026031'); renderVisits(); renderTodos();
+renderPlanGrid(); renderPlanJul(); renderProducts(); renderDash();
 </script>
 </body>
 </html>
