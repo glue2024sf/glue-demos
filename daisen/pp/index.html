@@ -702,11 +702,18 @@
       <div>
         <div class="panel">
           <h3>📄 見積書・原価計算書</h3>
-          <div style="padding:12px 14px;">
+          <div style="padding:10px 14px 0;">
+            <input type="text" id="fileSearchInput" oninput="filterFiles()" placeholder="🔍 ファイル名で検索" style="width:100%;padding:7px 10px;border:1px solid var(--border2);border-radius:6px;font-size:12.5px;font-family:inherit;">
+          </div>
+          <div style="padding:10px 14px;" id="filebox-list">
             <div class="filebox"><div class="fic">📎</div><div><div class="fn">見積書_北陸化成_食品容器_v2.pdf</div><div class="fd">Q-2026-0301 ｜ 2026/08/10 更新</div></div></div>
             <div class="filebox"><div class="fic">📎</div><div><div class="fn">原価計算書_依頼中.pdf</div><div class="fd">富山大泉工業より作成待ち（依頼書#REQ-0231）</div></div></div>
+            <div class="filebox" id="filebox-empty" style="display:none;justify-content:center;color:var(--muted);">該当するファイルがありません</div>
           </div>
-          <div class="alertbox gray" style="margin:0 14px 14px;"><span>⚠️</span><div><b>Salesforce上で見積書・原価計算書は生成しません。</b>ファイルとして添付し、案件・見積レコードに紐づけます。</div></div>
+          <div style="padding:0 14px 14px;">
+            <button onclick="toast('ファイルをアップロードしました（モック）')" style="width:100%;padding:10px;border:1px dashed var(--border2);border-radius:6px;background:#fff;color:var(--sf-blue);font-size:12.5px;font-weight:600;cursor:pointer;">📤 ドラッグ＆ドロップ、またはクリックしてPDFを追加</button>
+          </div>
+          <div class="alertbox gray" style="margin:0 14px 14px;"><span>⚠️</span><div><b>Salesforce上で見積書・原価計算書は生成しません。</b>ファイルとして添付し、案件・見積レコードに紐づけます。ドラッグ＆ドロップまたはボタン操作でアップロードでき、あとからファイル名で検索できます。</div></div>
         </div>
         <div class="panel">
           <h3>📝 顧客のお困りごと・提案内容</h3>
@@ -724,7 +731,7 @@
         <div class="sub">依頼日から10日経過かつステータス「依頼中」の場合、起票者へ通知＋ToDo作成</div></div>
     </div>
 
-    <div class="alertbox amber"><span>❓</span><div><b>依頼書タブを含める場合のデモ画面です。</b>依頼書機能を1stフェーズに含めるかは未確定です。</div></div>
+    <div class="alertbox blue"><span>✅</span><div><b>依頼書は最初の稼働範囲（1stフェーズ）に含めます</b>（9/11にご回答いただいた内容を反映）。</div></div>
 
     <div class="alertbox red"><span>⏰</span><div><b>依頼書 #REQ-0231（原価計算書作成依頼）が依頼日から12日経過し、未回答です。</b>起票者（佐藤）へ通知・ToDoを自動作成しました。</div></div>
 
@@ -833,6 +840,17 @@ function toggleEdit(){
   b.textContent=on?'✏️ 編集モード：ON':'✏️ 編集モード';
 }
 function toast(msg){const t=document.getElementById('toast');t.textContent='✓ '+msg.replace(/^✓ /,'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function filterFiles(){
+  const q=document.getElementById('fileSearchInput').value.trim().toLowerCase();
+  const items=document.querySelectorAll('#filebox-list .filebox:not(#filebox-empty)');
+  let visibleCount=0;
+  items.forEach(el=>{
+    const match=el.querySelector('.fn').textContent.toLowerCase().includes(q);
+    el.style.display=match?'':'none';
+    if(match) visibleCount++;
+  });
+  document.getElementById('filebox-empty').style.display=visibleCount===0?'flex':'none';
+}
 </script>
 </body>
 </html>
