@@ -228,6 +228,15 @@
   table.lt.prod tr.pnego td{color:#8a6d00;font-style:italic;}
   table.lt.prod tr.pgap td{height:7px;padding:0;border-bottom:2px solid var(--border);background:#fff;}
   #prodwrap{max-height:560px;overflow:auto;}
+  .cols>*,.grid2>*,.lexbox{min-width:0;} .fx .v{overflow-wrap:anywhere;}
+  /* 編集モード */
+  .edittoggle{background:transparent;border:1px solid #9fc3e8;color:#fff;border-radius:14px;padding:4px 12px;font-size:12px;white-space:nowrap;cursor:pointer;}
+  .edittoggle.on{background:#fe9339;border-color:#fe9339;color:#032d60;font-weight:700;}
+  .editbanner{background:#fff4e5;border-bottom:2px solid #fe9339;color:#7a4a02;font-size:13px;font-weight:600;padding:9px 16px;text-align:center;}
+  body.editing .wrap{outline:2px dashed #fe9339;outline-offset:-4px;}
+  #todo-filters .btn.on{background:var(--sf-blue);color:#fff;border-color:var(--sf-blue);}
+  tr.todo-done td{color:#aaa;text-decoration:line-through;}
+  .tabnew{font-size:9px;font-weight:800;color:#fff;background:#fe9339;border-radius:6px;padding:0 5px;margin-left:4px;vertical-align:1px;}
 </style>
 </head>
 <body>
@@ -236,6 +245,7 @@
   <div class="logo"><span class="cloud"></span>大扇産業 CRM ｜ アニマルヘルスケア</div>
   <div class="right">
     <span class="note">デモ画面（HTMLモック）／社名・数値はすべてダミー</span>
+    <button type="button" class="edittoggle" id="edittoggle" onclick="toggleEdit()">✏️ 編集モード</button>
     <div class="avatar">A</div>
   </div>
 </div>
@@ -246,12 +256,19 @@
   <div class="tab" data-tab="accounts" onclick="go('accounts')">取引先（動物病院）</div>
   <div class="tab" data-tab="account" onclick="go('account')">取引先 詳細ページ</div>
   <div class="tab" data-tab="opp" onclick="go('opp')">案件（商談）</div>
+  <div class="tab" data-tab="contacts" onclick="go('contacts')">取引先責任者<span class="tabnew">NEW</span></div>
   <div class="tab" data-tab="oppdetail" onclick="go('oppdetail')">案件 詳細ページ</div>
+  <div class="tab" data-tab="activity" onclick="go('activity')">活動（訪問記録）<span class="tabnew">NEW</span></div>
+  <div class="tab" data-tab="todo" onclick="go('todo')">ToDo<span class="tabnew">NEW</span></div>
+  <div class="tab" data-tab="sales" onclick="go('sales')">販売実績<span class="tabnew">NEW</span></div>
+  <div class="tab" data-tab="pricebook" onclick="go('pricebook')">商品・価格表<span class="tabnew">NEW</span></div>
   <div class="tab" data-tab="penetration" onclick="go('penetration')">浸透率ダッシュボード</div>
   <div class="tab" data-tab="segment" onclick="go('segment')">DSセグメント</div>
   <div class="tab" data-tab="report" onclick="go('report')">訪問記録→CSV</div>
+  <div class="tab" data-tab="dash" onclick="go('dash')">レポート・ダッシュボード<span class="tabnew">NEW</span></div>
   <div class="tab" data-tab="sources" onclick="go('sources')">データの入り口 一覧</div>
 </div>
+<div class="editbanner" id="editbanner" hidden>✏️ 編集モード中：編集内容は保存されません。変更したい箇所を書き換えて画面を撮り、お送りください（再読み込みで元に戻ります）</div>
 
 <div class="wrap">
 
@@ -266,6 +283,7 @@
   </div>
 
   <section class="screen active" id="screen-exec">
+    <div class="alertbox blue" style="margin-bottom:14px;"><span>🌏</span><div><b>国内／海外の内訳は、販売実績の事業所コードから機械的に付けたフラグで集計します</b>（事業所コード01〜08＝国内、CA営業部以外＝海外。推定は行いません）。明細は<a href="javascript:void(0)" onclick="go('sales')">販売実績</a>タブでご確認いただけます。</div></div>
 
     <div class="lexbox">
       <div class="lexhead">
@@ -302,7 +320,7 @@
           <div class="bigno" style="color:var(--amber);">¥1,074,686<span style="font-size:14px;">千円</span></div>
           <div class="subno">年間目標 ¥1,179,246千円に対して <b>91.1%</b>（△¥104,560千円）<br>※P&amp;Pを除く2事業部の合計</div>
         </div>
-        <div class="df">出所：<code class="f">SalesPlan__c</code> を <code class="f">BusinessUnit__c</code> で集計</div>
+        <div class="df">出所：<b>月次見込</b> を <b>事業部</b> で集計</div>
       </div>
       <div class="dcard">
         <div class="dh">3事業部 年間粗利</div>
@@ -335,7 +353,7 @@
           </tbody>
         </table>
       </div>
-      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<code class="f">SalesPlan__c</code> を事業部別に集計（数値はダミー）</div>
+      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<b>月次見込</b> を事業部別に集計（数値はダミー）</div>
     </div>
 
     <div class="alertbox red"><span>🔑</span><div><b>3事業部を1枚に並べるときは、2つの点をどう揃えるかを設計時に決めます。</b>①集計の粒度（メディカルは顧客×製品×月の4区分、アニマルは製品×月＋国内/海外）　②会議のタイミング（メディカルは月初・月中・翌月初の3回、アニマルは月中の1回）。</div></div>
@@ -360,7 +378,7 @@
           <div class="bigno" style="color:var(--amber);">¥914,200<span style="font-size:14px;">千円</span></div>
           <div class="subno">年間目標 ¥980,000千円に対して <b>93.3%</b>（△¥65,800千円）</div>
         </div>
-        <div class="df">出所：<code class="f">SalesPlan__c</code> の①期首計画と②〜④予定</div>
+        <div class="df">出所：<b>月次見込</b> の①期首計画と②〜④予定</div>
       </div>
       <div class="dcard">
         <div class="dh">年間 粗利</div>
@@ -399,7 +417,7 @@
           </tbody>
         </table>
       </div>
-      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<code class="f">SalesPlan__c</code>。成形品／装置／金型／メンテの区分は <code class="f">Product2</code> の製品分類で自動集計</div>
+      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<b>月次見込</b>。成形品／装置／金型／メンテの区分は <b>商品</b> の製品分類で自動集計</div>
     </div>
 
     <div class="lexbox">
@@ -421,7 +439,7 @@
           </tbody>
         </table>
       </div>
-      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<code class="f">SalesPlan__c</code> の顧客別差異。金額の抽出は自動で、<b>書くのは備考（<code class="f">VarianceReason__c</code>）だけ</b>になります</div>
+      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<b>月次見込</b> の顧客別差異。金額の抽出は自動で、<b>書くのは備考（<b>差異理由</b>）だけ</b>になります</div>
     </div>
 
     <div class="alertbox red"><span>🔑</span><div>Excelで粗利率を数式で出していると、売上がゼロの月に <code>#DIV/0!</code> が表示されます。Salesforceの集計では、この種のエラーは出ません。</div></div>
@@ -441,7 +459,7 @@
           <div class="bigno">¥199,246<span style="font-size:14px;">千円</span></div>
           <div class="subno">国内 ¥145,066千円 ／ 海外 ¥54,180千円</div>
         </div>
-        <div class="df">出所：<code class="f">SalesPlan__c</code> の①期首計画。年度頭に一度登録すれば以後は固定</div>
+        <div class="df">出所：<b>月次見込</b> の①期首計画。年度頭に一度登録すれば以後は固定</div>
       </div>
       <div class="dcard">
         <div class="dh">実績／見込／交渉（8月月中）<span class="src auto">⚙️ 自動</span></div>
@@ -449,7 +467,7 @@
           <div class="bigno" style="color:var(--amber);">¥160,486<span style="font-size:14px;">千円</span></div>
           <div class="subno">対年次計画 <b>80.5%</b>（△¥38,760千円）</div>
         </div>
-        <div class="df">出所：<code class="f">SalesPlan__c</code> の③月中予定。ディーラー見込（Forecast）の取込＋交渉中案件の上乗せ</div>
+        <div class="df">出所：<b>月次見込</b> の③月中予定。ディーラー見込（Forecast）の取込＋交渉中案件の上乗せ</div>
       </div>
       <div class="dcard">
         <div class="dh">粗利（実績／見込／交渉）<span class="src auto">⚙️ 自動</span></div>
@@ -493,7 +511,7 @@
           </tbody>
         </table>
       </div>
-      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<code class="f">SalesPlan__c</code>（<code class="f">TargetMonth__c</code> で月次・四半期・上下期を自動集計）。<b>現在の会議資料と同じ行構成</b>で表示します</div>
+      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：<b>月次見込</b>（<b>対象年月</b> で月次・四半期・上下期を自動集計）。<b>現在の会議資料と同じ行構成</b>で表示します</div>
     </div>
 
     <div class="lexbox">
@@ -509,7 +527,7 @@
           </tbody>
         </table>
       </div>
-      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：商品ごとの原価・出し値（単価表）を <code class="f">Product2</code> の価格として持ち、数量から自動計算</div>
+      <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">出所：商品ごとの原価・出し値（単価表）を <b>商品</b> の価格として持ち、数量から自動計算</div>
     </div>
 
 
@@ -530,7 +548,7 @@
       </div>
       <div class="tablewrap" id="prodwrap"></div>
       <div class="df" style="padding:8px 14px;border-top:1px solid var(--border);background:#fafafa;font-size:11px;color:var(--muted);">
-        出所：<code class="f">SalesPlan__c</code>（<code class="f">Product2</code> × <code class="f">TargetMonth__c</code>）。行の構成・グループの並び・過去3期の比較列は、現在の製品別予定表と同じ形で表示します（数値はダミー）。<br>
+        出所：<b>月次見込</b>（<b>商品</b> × <b>対象年月</b>）。行の構成・グループの並び・過去3期の比較列は、現在の製品別予定表と同じ形で表示します（数値はダミー）。<br>
         ※Excelでは合計欄に手打ちの調整を入れると、製品別の積み上げと年間合計がずれることがあります。Salesforceでは明細から積み上げるため、この種のずれは発生しません。
       </div>
     </div>
@@ -554,7 +572,7 @@
             </table>
           </div>
         </div>
-        <div class="df">出所：<code class="f">SalesPlan__c.VarianceReason__c</code>（差異理由）。会議のたびに時点を記録するので、<b>増減は自動で出て、理由だけを書けば済みます</b></div>
+        <div class="df">出所：<b>月次見込の差異理由</b>（差異理由）。会議のたびに時点を記録するので、<b>増減は自動で出て、理由だけを書けば済みます</b></div>
       </div>
 
       <div class="dcard">
@@ -568,7 +586,7 @@
           <div class="hbar"><div class="hl">61期</div><div class="ht"><div class="hf" style="width:72%;"></div></div><div class="hv">136,854</div></div>
           <div class="hbar"><div class="hl">60期</div><div class="ht"><div class="hf" style="width:67%;"></div></div><div class="hv">128,400</div></div>
         </div>
-        <div class="df">出所：過去年度の <code class="f">SalesPlan__c</code> 実績。過去5期分の実績を初期移行すれば自動で並びます</div>
+        <div class="df">出所：過去年度の <b>月次見込</b> 実績。過去5期分の実績を初期移行すれば自動で並びます</div>
       </div>
     </div>
 
@@ -585,7 +603,7 @@
           <div class="hbar"><div class="hl">ホイップ</div><div class="ht"><div class="hf" style="width:1%;background:#ccc;"></div></div><div class="hv">0</div></div>
           <div style="margin-top:10px;font-size:12px;color:var(--muted);">国内合計 115,336 ／ 海外 45,150 ／ <b style="color:var(--text);">総計 160,486</b></div>
         </div>
-        <div class="df">出所：<code class="f">SalesPlan__c</code> を製品で切り替えるだけで、製品別の販売戦略表と同じ形が出ます</div>
+        <div class="df">出所：<b>月次見込</b> を製品で切り替えるだけで、製品別の販売戦略表と同じ形が出ます</div>
       </div>
 
       <div class="dcard">
@@ -609,7 +627,7 @@
           <tr><td>製品別販売戦略</td><td>製品別カード</td><td><span class="src auto">⚙️</span> 同じデータの切り口を変えるだけ</td><td><span class="pill green">そのまま出せます</span></td></tr>
           <tr><td>昨対比</td><td>昨対比カード</td><td><span class="src man">✍️</span> 過去の実績を初期移行</td><td><span class="pill green">移行すれば自動</span></td></tr>
           <tr><td>学会・新製品の予定</td><td>キャンペーン／活動</td><td><span class="src man">✍️</span> 予定が決まったとき</td><td><span class="pill green">そのまま出せます</span></td></tr>
-          <tr><td>単価表（原価・出し値）</td><td><code class="f">Product2</code> の価格</td><td><span class="src man">✍️</span> 改訂のつど</td><td><span class="pill blue">改訂履歴を保持</span> 価格改訂の世代ごとに持てます</td></tr>
+          <tr><td>単価表（原価・出し値）</td><td><b>商品</b> の価格</td><td><span class="src man">✍️</span> 改訂のつど</td><td><span class="pill blue">改訂履歴を保持</span> 価格改訂の世代ごとに持てます</td></tr>
         </tbody>
       </table>
     </div>
@@ -623,12 +641,13 @@
   </section>
 
   <section class="screen" id="screen-accounts">
+    <div class="alertbox blue" style="margin-bottom:14px;"><span>🏥</span><div><b>動物病院 約6,000件は、取引先として初期投入します。</b>B2B（ディーラー・代理店）とB2C（動物病院）を1つのデータベースで持ち、<b>タイプ</b>で分けます。下の一覧は動物病院タイプで絞り込んだ状態です。</div></div>
 
     <div class="lexbox">
       <div class="lexhead">
         <div class="lexico">🏥</div>
         <div>
-          <div class="eyebrow">取引先（オブジェクト：<span class="api">Account</span>）</div>
+          <div class="eyebrow">取引先</div>
           <div class="rectitle">アニマル：オーツ取扱病院 ▾</div>
         </div>
         <div class="lexact">
@@ -673,7 +692,7 @@
         <thead><tr><th>列</th><th>入り口</th><th>備考</th></tr></thead>
         <tbody>
           <tr><td>取引先名・施設コード・ディーラー営業所</td><td><span class="src imp">📥 月次取込</span></td><td>ディーラーのExcelから自動で作られます。1件ずつ手で登録する必要はありません</td></tr>
-          <tr><td>DSセグメント・最終発注日・発注停止日数・訪問月数</td><td><span class="src auto">⚙️ 自動</span></td><td><code class="f">DSSegment__c</code> <code class="f">LastOrderDate__c</code> <code class="f">OrderStopDays__c</code> <code class="f">VisitMonthsThisFY__c</code>。取込と訪問記録から計算されます</td></tr>
+          <tr><td>DSセグメント・最終発注日・発注停止日数・訪問月数</td><td><span class="src auto">⚙️ 自動</span></td><td><b>DSセグメント</b> <b>最終発注日</b> <b>発注停止日数</b> <b>訪問月数</b>。取込と訪問記録から計算されます</td></tr>
           <tr><td>大扇 担当者</td><td><span class="src todo">❓ 未確定</span></td><td>大扇産業側の担当者は導入時に設定します。設定すると、担当者ごとの絞り込みと訪問漏れの検知に使えます</td></tr>
         </tbody>
       </table>
@@ -689,7 +708,7 @@
       <div class="lexhead">
         <div class="lexico">🏥</div>
         <div>
-          <div class="eyebrow">取引先（オブジェクト：<span class="api">Account</span>）</div>
+          <div class="eyebrow">取引先</div>
           <div class="rectitle">さくら動物病院</div>
         </div>
         <div class="lexact">
@@ -719,27 +738,27 @@
           <div class="sect">
             <div class="secth">🏥 病院の基本情報 <span class="src imp">📥 取込</span><span class="src man">✍️ 一部は手入力</span></div>
             <div class="grid2">
-              <div class="fx"><div class="k">取引先名 <span class="api">Name</span> <span class="src imp">📥</span></div><div class="v">さくら動物病院</div></div>
-              <div class="fx"><div class="k">施設コード <span class="api">FacilityCode__c</span> <span class="src imp">📥</span></div><div class="v">9000123<span class="pill gray" style="margin-left:6px;">外部ID・重複不可</span></div></div>
-              <div class="fx"><div class="k">都道府県 <span class="api">BillingState</span> <span class="src imp">📥</span></div><div class="v">東京都</div></div>
-              <div class="fx"><div class="k">住所 <span class="api">BillingStreet</span> <span class="src imp">📥</span></div><div class="v">世田谷区◯◯ 1-2-3</div></div>
-              <div class="fx"><div class="k">勤務医数 <span class="api">VetCount__c</span> <span class="src man">✍️</span></div><div class="v">3名</div></div>
-              <div class="fx"><div class="k">休診日 <span class="api">ClosedDays__c</span> <span class="src man">✍️</span></div><div class="v">水曜・日曜午後</div></div>
-              <div class="fx"><div class="k">診療時間 <span class="api">OpenHours__c</span> <span class="src man">✍️</span></div><div class="v">9:00-12:00 ／ 16:00-19:00</div></div>
-              <div class="fx"><div class="k">HP有無 <span class="api">HasWebsite__c</span> <span class="src man">✍️</span></div><div class="v">✓ あり</div></div>
-              <div class="fx"><div class="k">犬猫以外の診療 <span class="api">TreatsExotic__c</span> <span class="src man">✍️</span></div><div class="v empty">—</div></div>
-              <div class="fx"><div class="k">所属学会 <span class="api">AcademicSociety__c</span> <span class="src man">✍️</span></div><div class="v">日本獣医皮膚科学会</div></div>
-              <div class="fx"><div class="k">SF使用のきっかけ <span class="api">SFTrigger__c</span> <span class="src man">✍️</span></div><div class="v">展示会でのサンプル配布</div></div>
+              <div class="fx"><div class="k">取引先名 <span class="src imp">📥</span></div><div class="v">さくら動物病院</div></div>
+              <div class="fx"><div class="k">施設コード <span class="src imp">📥</span></div><div class="v">9000123<span class="pill gray" style="margin-left:6px;">外部ID・重複不可</span></div></div>
+              <div class="fx"><div class="k">都道府県 <span class="src imp">📥</span></div><div class="v">東京都</div></div>
+              <div class="fx"><div class="k">住所 <span class="src imp">📥</span></div><div class="v">世田谷区◯◯ 1-2-3</div></div>
+              <div class="fx"><div class="k">勤務医数 <span class="src man">✍️</span></div><div class="v">3名</div></div>
+              <div class="fx"><div class="k">休診日 <span class="src man">✍️</span></div><div class="v">水曜・日曜午後</div></div>
+              <div class="fx"><div class="k">診療時間 <span class="src man">✍️</span></div><div class="v">9:00-12:00 ／ 16:00-19:00</div></div>
+              <div class="fx"><div class="k">HP有無 <span class="src man">✍️</span></div><div class="v">✓ あり</div></div>
+              <div class="fx"><div class="k">犬猫以外の診療 <span class="src man">✍️</span></div><div class="v empty">—</div></div>
+              <div class="fx"><div class="k">所属学会 <span class="src man">✍️</span></div><div class="v">日本獣医皮膚科学会</div></div>
+              <div class="fx"><div class="k">SF使用のきっかけ <span class="src man">✍️</span></div><div class="v">展示会でのサンプル配布</div></div>
             </div>
           </div>
 
           <div class="sect">
             <div class="secth">📥 ディーラー情報（ディーラー提供） <span class="src imp">📥 月次取込</span></div>
             <div class="grid2">
-              <div class="fx"><div class="k">ディーラー営業所 <span class="api">DealerOffice__c</span> <span class="src imp">📥</span></div><div class="v">01東日本営業所</div></div>
-              <div class="fx"><div class="k">ディーラー営業員 <span class="api">DealerRep__c</span> <span class="src imp">📥</span></div><div class="v">01営業員A</div></div>
-              <div class="fx"><div class="k">ディーラーセグメント <span class="api">DealerSegment__c</span> <span class="src imp">📥</span></div><div class="v">地区区分07<span class="pill gray" style="margin-left:6px;">DSセグメントとは別物</span></div></div>
-              <div class="fx"><div class="k">大扇 担当者 <span class="api">OwnerId</span> <span class="src todo">❓ 未確定</span></div><div class="v empty">未設定</div></div>
+              <div class="fx"><div class="k">ディーラー営業所 <span class="src imp">📥</span></div><div class="v">01東日本営業所</div></div>
+              <div class="fx"><div class="k">ディーラー営業員 <span class="src imp">📥</span></div><div class="v">01営業員A</div></div>
+              <div class="fx"><div class="k">ディーラーセグメント <span class="src imp">📥</span></div><div class="v">地区区分07<span class="pill gray" style="margin-left:6px;">DSセグメントとは別物</span></div></div>
+              <div class="fx"><div class="k">大扇 担当者 <span class="src todo">❓ 未確定</span></div><div class="v empty">未設定</div></div>
             </div>
             <div class="alertbox gray" style="margin:0 14px 12px;"><span>⚠️</span><div>上の「営業所」「営業員」は<b>ディーラー側の組織</b>です。大扇産業側の担当者は「大扇 担当者」として別に持ち、担当者での絞り込みや訪問漏れの検知に使います。</div></div>
           </div>
@@ -747,21 +766,21 @@
           <div class="sect">
             <div class="secth">⚙️ セグメント・実績（すべて自動計算） <span class="src auto">⚙️ 入力不要</span></div>
             <div class="grid2">
-              <div class="fx"><div class="k">DSセグメント <span class="api">DSSegment__c</span> <span class="src auto">⚙️</span></div><div class="v"><span class="seg C">C6</span> <a href="javascript:void(0)" onclick="go('segment')" style="font-size:11.5px;margin-left:6px;">判定の内訳を見る</a></div></div>
-              <div class="fx"><div class="k">顧客ランク <span class="api">CustomerRank__c</span> <span class="src todo">❓ 未確定</span></div><div class="v empty">しきい値の設定後に自動表示</div></div>
-              <div class="fx"><div class="k">最終発注日 <span class="api">LastOrderDate__c</span> <span class="src auto">⚙️</span></div><div class="v">2026/07/15</div></div>
-              <div class="fx"><div class="k">発注停止日数 <span class="api">OrderStopDays__c</span> <span class="src auto">⚙️</span></div><div class="v">17日<span class="pill green" style="margin-left:6px;">30日未満</span></div></div>
-              <div class="fx"><div class="k">訪問月数（当年度） <span class="api">VisitMonthsThisFY__c</span> <span class="src auto">⚙️</span></div><div class="v">3ヶ月</div></div>
+              <div class="fx"><div class="k">DSセグメント <span class="src auto">⚙️</span></div><div class="v"><span class="seg C">C6</span> <a href="javascript:void(0)" onclick="go('segment')" style="font-size:11.5px;margin-left:6px;">判定の内訳を見る</a></div></div>
+              <div class="fx"><div class="k">顧客ランク <span class="src todo">❓ 未確定</span></div><div class="v empty">しきい値の設定後に自動表示</div></div>
+              <div class="fx"><div class="k">最終発注日 <span class="src auto">⚙️</span></div><div class="v">2026/07/15</div></div>
+              <div class="fx"><div class="k">発注停止日数 <span class="src auto">⚙️</span></div><div class="v">17日<span class="pill green" style="margin-left:6px;">30日未満</span></div></div>
+              <div class="fx"><div class="k">訪問月数（当年度） <span class="src auto">⚙️</span></div><div class="v">3ヶ月</div></div>
               <div class="fx"><div class="k">全製品 近2年 <span class="src auto">⚙️</span></div><div class="v">18本</div></div>
             </div>
           </div>
         </div>
 
         <div class="lexbox">
-          <div class="rlh">📊 ディーラー実績 <span class="api">DealerSales__c</span> <span class="cnt">4件を表示（全31件）</span> <span class="src imp">📥 月次取込</span><span class="more">すべて表示</span></div>
+          <div class="rlh">📊 ディーラー実績 <span class="cnt">4件を表示（全31件）</span> <span class="src imp">📥 月次取込</span><span class="more">すべて表示</span></div>
           <div class="tablewrap">
             <table class="lt">
-              <thead><tr><th>外部キー <span class="api">ExternalKey__c</span></th><th>対象年月</th><th>製品</th><th>数量（本）</th><th>ディーラー営業所</th></tr></thead>
+              <thead><tr><th>外部キー</th><th>対象年月</th><th>製品</th><th>数量（本）</th><th>ディーラー営業所</th></tr></thead>
               <tbody>
                 <tr><td>9000123-SF001-202607</td><td>2026/07</td><td>オーツスポットフォーム</td><td>2</td><td>01東日本営業所</td></tr>
                 <tr><td>9000123-SH002-202607</td><td>2026/07</td><td>オーツシャンプーエクストラ</td><td>1</td><td>01東日本営業所</td></tr>
@@ -774,10 +793,10 @@
         </div>
 
         <div class="lexbox">
-          <div class="rlh">📝 活動履歴 <span class="api">Event</span> <span class="cnt">3件を表示（全11件）</span> <span class="src man">✍️ 手入力</span><span class="more">すべて表示</span></div>
+          <div class="rlh">📝 活動履歴 <span class="cnt">3件を表示（全11件）</span> <span class="src man">✍️ 手入力</span><span class="more">すべて表示</span></div>
           <div class="tablewrap">
             <table class="lt">
-              <thead><tr><th>訪問日</th><th>訪問種別 <span class="api">VisitType__c</span></th><th>訪問結果 <span class="api">VisitResult__c</span></th><th>実訪問者 <span class="api">OwnerId</span></th><th>訪問メモ</th></tr></thead>
+              <thead><tr><th>訪問日</th><th>訪問種別</th><th>訪問結果</th><th>実訪問者</th><th>訪問メモ</th></tr></thead>
               <tbody>
                 <tr><td>2026/07/22</td><td>訪問</td><td>〇</td><td>担当A</td><td>院長より新製品の反応良好。次回展示会の案内を依頼された。</td></tr>
                 <tr><td>2026/05/14</td><td>展示会</td><td>〇</td><td>担当A</td><td>ブースへ来訪。シャンプーのサンプルを渡した。</td></tr>
@@ -825,6 +844,7 @@
   </section>
 
   <section class="screen" id="screen-opp">
+    <div class="alertbox blue" style="margin-bottom:14px;"><span>💼</span><div><b>案件は「金額・受注予定日・状況」の3項目から始めます。</b>案件は営業担当が作成し、AI（bellSales）は作成済みの案件の項目を埋める役割です。受注予定日は「次にいつ受注したいか」の意味で運用する案を確認中です。項目の追加やテンプレート化は2ndフェーズ以降で検討します。</div></div>
 
     <div class="alertbox" style="margin-bottom:14px;"><span>⚠️</span><div><b>アニマル事業部は、訪問活動と実績で管理する運用を基本とします。</b>案件管理は全社共通の機能として用意しており、この画面は<b>アニマル事業部でも案件管理を併用する場合のイメージ</b>です。使う場合はアニマル用のフェーズ定義が必要になります。</div></div>
 
@@ -832,7 +852,7 @@
       <div class="lexhead">
         <div class="lexico" style="background:#fcb95b;">💼</div>
         <div>
-          <div class="eyebrow">案件（オブジェクト：<span class="api">Opportunity</span>）</div>
+          <div class="eyebrow">案件</div>
           <div class="rectitle">アニマル：進行中の案件 ▾ <span class="pill amber">たたき台</span></div>
         </div>
         <div class="lexact">
@@ -886,7 +906,7 @@
         <tbody>
           <tr><td>案件名・フェーズ・金額・完了予定日・次のアクション・期限</td><td><span class="src man">✍️ 手入力</span></td><td>訪問した営業担当者が、案件の詳細ページで入力します。取引先や実績のように取込では埋まりません</td></tr>
           <tr><td>取引先</td><td><span class="src man">✍️ 選ぶだけ</span></td><td>取込済みの動物病院から選びます。新規に病院名を打ち込む必要はありません</td></tr>
-          <tr><td>DSセグメント</td><td><span class="src auto">⚙️ 自動</span></td><td>取引先の <code class="f">DSSegment__c</code> をそのまま表示。案件側で入力するものではありません</td></tr>
+          <tr><td>DSセグメント</td><td><span class="src auto">⚙️ 自動</span></td><td>取引先の <b>DSセグメント</b> をそのまま表示。案件側で入力するものではありません</td></tr>
           <tr><td>所有者</td><td><span class="src auto">⚙️ 自動</span></td><td>案件を作成した本人が入ります</td></tr>
         </tbody>
       </table>
@@ -904,7 +924,7 @@
       <div class="lexhead">
         <div class="lexico" style="background:#fcb95b;">💼</div>
         <div>
-          <div class="eyebrow">案件（<span class="api">Opportunity</span>）</div>
+          <div class="eyebrow">案件</div>
           <div class="rectitle">さくら動物病院｜シャンプー定期採用の提案</div>
         </div>
         <div class="lexact">
@@ -944,36 +964,36 @@
           <div class="sect">
             <div class="secth">💼 案件の基本情報 <span class="src man">✍️ すべて手入力</span></div>
             <div class="grid2">
-              <div class="fx"><div class="k">案件名 <span class="api">Name</span> <span class="src man">✍️</span></div><div class="v">さくら動物病院｜シャンプー定期採用の提案</div></div>
-              <div class="fx"><div class="k">取引先 <span class="api">AccountId</span> <span class="src man">✍️ 選ぶだけ</span></div><div class="v">さくら動物病院</div></div>
-              <div class="fx"><div class="k">フェーズ <span class="api">StageName</span> <span class="src man">✍️</span></div><div class="v">提案</div></div>
-              <div class="fx"><div class="k">完了予定日 <span class="api">CloseDate</span> <span class="src man">✍️</span></div><div class="v">2026/09/30</div></div>
-              <div class="fx"><div class="k">金額 <span class="api">Amount</span> <span class="src man">✍️</span></div><div class="v">¥180,000（概算）<span class="pill gray" style="margin-left:6px;">受注時は必須</span></div></div>
-              <div class="fx"><div class="k">顧客担当者 <span class="api">CustomerContact__c</span> <span class="src man">✍️ 選ぶだけ</span></div><div class="v">院長</div></div>
-              <div class="fx"><div class="k">同行者 <span class="api">Companion__c</span> <span class="src man">✍️</span></div><div class="v">商品開発 ◯◯</div></div>
-              <div class="fx"><div class="k">仕入先 <span class="api">SupplierId__c</span> <span class="src todo">❓ P&amp;P用</span></div><div class="v empty">アニマルでは未使用</div></div>
+              <div class="fx"><div class="k">案件名 <span class="src man">✍️</span></div><div class="v">さくら動物病院｜シャンプー定期採用の提案</div></div>
+              <div class="fx"><div class="k">取引先 <span class="src man">✍️ 選ぶだけ</span></div><div class="v">さくら動物病院</div></div>
+              <div class="fx"><div class="k">フェーズ <span class="src man">✍️</span></div><div class="v">提案</div></div>
+              <div class="fx"><div class="k">完了予定日 <span class="src man">✍️</span></div><div class="v">2026/09/30</div></div>
+              <div class="fx"><div class="k">金額 <span class="src man">✍️</span></div><div class="v">¥180,000（概算）<span class="pill gray" style="margin-left:6px;">受注時は必須</span></div></div>
+              <div class="fx"><div class="k">顧客担当者 <span class="src man">✍️ 選ぶだけ</span></div><div class="v">院長</div></div>
+              <div class="fx"><div class="k">同行者 <span class="src man">✍️</span></div><div class="v">商品開発 ◯◯</div></div>
+              <div class="fx"><div class="k">仕入先 <span class="src todo">❓ P&amp;P用</span></div><div class="v empty">アニマルでは未使用</div></div>
             </div>
           </div>
 
           <div class="sect">
             <div class="secth">📝 案件の進捗管理項目 <span class="src man">✍️ すべて手入力</span></div>
             <div class="grid2">
-              <div class="fx"><div class="k">顧客お困りごと <span class="api">CustomerIssue__c</span> <span class="src man">✍️</span></div><div class="v">皮膚疾患の再診が多く、院内でのケア提案に手が回っていない</div></div>
-              <div class="fx"><div class="k">提案内容 <span class="api">ProposalDetail__c</span> <span class="src man">✍️</span></div><div class="v">シャンプーとイヤークリーナーのセット提案。院内掲示用POPを提供</div></div>
-              <div class="fx"><div class="k">トラブル・クレーム <span class="api">TroubleNote__c</span> <span class="src man">✍️</span></div><div class="v empty">—</div></div>
-              <div class="fx"><div class="k">商品動向6ヶ月見通し <span class="api">Outlook6M__c</span> <span class="src man">✍️</span></div><div class="v">秋以降の皮膚疾患シーズンで採用拡大の見込み</div></div>
-              <div class="fx"><div class="k">年間見通し <span class="api">OutlookAnnual__c</span> <span class="src man">✍️</span></div><div class="v">年間24本程度</div></div>
-              <div class="fx"><div class="k">顧客新商品 <span class="api">CustomerNewProduct__c</span> <span class="src man">✍️</span></div><div class="v empty">—</div></div>
-              <div class="fx"><div class="k">課題・次のアクション <span class="api">NextAction__c</span> <span class="src man">✍️</span></div><div class="v">POP試作を持参して再訪</div></div>
-              <div class="fx"><div class="k">次のアクション期限 <span class="api">NextActionDue__c</span> <span class="src man">✍️</span></div><div class="v">2026/09/12</div></div>
-              <div class="fx"><div class="k">次回訪問日 <span class="api">NextVisitDate__c</span> <span class="src man">✍️</span></div><div class="v">2026/09/18</div></div>
-              <div class="fx"><div class="k">所有者 <span class="api">OwnerId</span> <span class="src auto">⚙️ 自動</span></div><div class="v">担当A（作成した本人）</div></div>
+              <div class="fx"><div class="k">顧客お困りごと <span class="src man">✍️</span></div><div class="v">皮膚疾患の再診が多く、院内でのケア提案に手が回っていない</div></div>
+              <div class="fx"><div class="k">提案内容 <span class="src man">✍️</span></div><div class="v">シャンプーとイヤークリーナーのセット提案。院内掲示用POPを提供</div></div>
+              <div class="fx"><div class="k">トラブル・クレーム <span class="src man">✍️</span></div><div class="v empty">—</div></div>
+              <div class="fx"><div class="k">商品動向6ヶ月見通し <span class="src man">✍️</span></div><div class="v">秋以降の皮膚疾患シーズンで採用拡大の見込み</div></div>
+              <div class="fx"><div class="k">年間見通し <span class="src man">✍️</span></div><div class="v">年間24本程度</div></div>
+              <div class="fx"><div class="k">顧客新商品 <span class="src man">✍️</span></div><div class="v empty">—</div></div>
+              <div class="fx"><div class="k">課題・次のアクション <span class="src man">✍️</span></div><div class="v">POP試作を持参して再訪</div></div>
+              <div class="fx"><div class="k">次のアクション期限 <span class="src man">✍️</span></div><div class="v">2026/09/12</div></div>
+              <div class="fx"><div class="k">次回訪問日 <span class="src man">✍️</span></div><div class="v">2026/09/18</div></div>
+              <div class="fx"><div class="k">所有者 <span class="src auto">⚙️ 自動</span></div><div class="v">担当A（作成した本人）</div></div>
             </div>
           </div>
         </div>
 
         <div class="lexbox">
-          <div class="rlh">📦 案件商品 <span class="api">OpportunityLineItem</span> <span class="cnt">2件</span> <span class="src man">✍️ 商品マスタから選ぶ</span><span class="more">すべて表示</span></div>
+          <div class="rlh">📦 案件商品 <span class="cnt">2件</span> <span class="src man">✍️ 商品マスタから選ぶ</span><span class="more">すべて表示</span></div>
           <div class="tablewrap">
             <table class="lt">
               <thead><tr><th>商品</th><th>数量</th><th>単価</th><th>小計</th></tr></thead>
@@ -983,11 +1003,11 @@
               </tbody>
             </table>
           </div>
-          <div class="lexsub" style="border-bottom:none;">商品を並べると、金額（<code class="f">Amount</code>）は合計から自動で入ります。概算のまま進める運用でも構いません。</div>
+          <div class="lexsub" style="border-bottom:none;">商品を並べると、金額（<b>金額</b>）は合計から自動で入ります。概算のまま進める運用でも構いません。</div>
         </div>
 
         <div class="lexbox">
-          <div class="rlh">📝 活動履歴 <span class="api">Event</span> <span class="cnt">2件</span> <span class="src man">✍️ 手入力</span><span class="more">すべて表示</span></div>
+          <div class="rlh">📝 活動履歴 <span class="cnt">2件</span> <span class="src man">✍️ 手入力</span><span class="more">すべて表示</span></div>
           <div class="tablewrap">
             <table class="lt">
               <thead><tr><th>訪問日</th><th>訪問種別</th><th>訪問結果</th><th>実訪問者</th><th>訪問メモ</th></tr></thead>
@@ -1054,13 +1074,13 @@
             <td>ディーラーの月次販売実績（Excel）</td>
             <td><span class="src imp">📥 月次取込</span> Excelをそのままインポート（API連携なし）</td>
             <td class="who">アニマル事業部の担当者1名<br>毎月1回（5分程度）</td>
-            <td><code class="f">DealerSales__c</code><br>施設コード7桁＋管理コード＋YYYYMM で上書き取込</td>
+            <td><b>販売実績</b><br>施設コード7桁＋管理コード＋YYYYMM で上書き取込</td>
           </tr>
           <tr>
             <td>営業所ごとの母数（動物病院口座数）</td>
             <td><span class="src todo">❓ 未確定</span> 月次Excelに含めるか、別途入手するかを導入時に決めます</td>
             <td class="who">毎月または年1回</td>
-            <td><code class="f">DealerBaseCount__c</code></td>
+            <td><b>ディーラー母数</b></td>
           </tr>
           <tr>
             <td>納入軒数・浸透率・目標との差</td>
@@ -1076,7 +1096,7 @@
       <div class="kpi g"><div class="n">28.6%</div><div class="l">関西営業所（現状最高） <span class="src auto">⚙️ 自動</span></div><div class="d" style="color:var(--green)">目標40%まであと11.4pt</div></div>
       <div class="kpi b"><div class="n">23.9%</div><div class="l">全社平均浸透率 <span class="src auto">⚙️ 自動</span></div><div class="d" style="color:var(--sf-blue)">目標35%まであと11.1pt</div></div>
       <div class="kpi a"><div class="n">6品目</div><div class="l">集計対象製品数 <span class="src imp">📥 取込</span></div><div class="d" style="color:var(--amber)">現状手作業はSF1品目のみ</div></div>
-      <div class="kpi r"><div class="n">約8,700</div><div class="l">対象動物病院（うちオーツ取扱約5,400） <span class="src todo">❓ 未確定</span></div><div class="d" style="color:var(--muted)">DealerBaseCount__c</div></div>
+      <div class="kpi r"><div class="n">約8,700</div><div class="l">対象動物病院（うちオーツ取扱約5,400） <span class="src todo">❓ 未確定</span></div><div class="d" style="color:var(--muted)">ディーラー母数</div></div>
     </div>
 
     <div class="card">
@@ -1106,7 +1126,7 @@
     </div>
 
     <div class="card">
-      <div class="chead">母数・納入軒数の内訳（DealerSales__c／DealerBaseCount__c）<span class="badge">関西営業所・7月</span></div>
+      <div class="chead">母数・納入軒数の内訳（販売実績／ディーラー母数）<span class="badge">関西営業所・7月</span></div>
       <div class="fields" style="display:flex;gap:24px;flex-wrap:wrap;">
         <div class="field"><div class="k">母数（ディーラー提供値をそのまま保持） <span class="src todo">❓ 入り口が未確定</span></div><div class="v">1,560病院</div></div>
         <div class="field"><div class="k">納入軒数（重複排除カウント・6品目いずれか納入あり） <span class="src auto">⚙️ 自動</span></div><div class="v">446病院</div></div>
@@ -1133,25 +1153,25 @@
             <td>施設コード・病院名・ディーラー営業所・ディーラーセグメント</td>
             <td><span class="src imp">📥 月次取込</span> 浸透率と同じ月次Excelから自動で作られます</td>
             <td class="who">入力不要（新規コードは自動作成）</td>
-            <td><code class="f">Account</code></td>
+            <td><b>取引先</b></td>
           </tr>
           <tr>
             <td>判定に使う本数（SF近2年・過去3年・全製品4年ほか）</td>
             <td><span class="src auto">⚙️ 自動</span> 取込済みの実績を年度で集計</td>
             <td class="who">入力不要・毎月の取込後に再計算</td>
-            <td><code class="f">Account</code> の集計項目</td>
+            <td><b>取引先</b> の集計項目</td>
           </tr>
           <tr>
             <td>セグメントの判定結果（A〜D・--）</td>
             <td><span class="src auto">⚙️ 自動</span> 評価順序どおりに自動判定</td>
             <td class="who">入力不要</td>
-            <td><code class="f">Account.DSSegment__c</code></td>
+            <td><b>取引先のDSセグメント</b></td>
           </tr>
           <tr>
             <td>大扇産業側の担当者</td>
             <td><span class="src todo">❓ 未確定</span> 画面上の「営業所」はディーラー側の組織のため、大扇産業側の担当者は別に設定します</td>
             <td class="who">導入時に設定</td>
-            <td><code class="f">Account.OwnerId</code></td>
+            <td><b>取引先の担当者</b></td>
           </tr>
         </tbody>
       </table>
@@ -1213,19 +1233,19 @@
             <td>訪問日・訪問種別・訪問結果・訪問メモ</td>
             <td><span class="src man">✍️ 手入力</span> Salesforceの訪問記録画面。項目は5つだけ</td>
             <td class="who">訪問した本人<br>訪問のつど（1件1分程度）</td>
-            <td><code class="f">Event</code></td>
+            <td><b>行動（活動）</b></td>
           </tr>
           <tr>
             <td>訪問先の動物病院</td>
             <td><span class="src man">✍️ 手入力</span> ただし取込済みの病院から選ぶだけ（新規入力ではありません）</td>
             <td class="who">訪問した本人</td>
-            <td><code class="f">Event.WhatId</code> → <code class="f">Account</code></td>
+            <td><b>行動の関連先</b> → <b>取引先</b></td>
           </tr>
           <tr>
             <td>実訪問者・管理コード・営業所</td>
             <td><span class="src auto">⚙️ 自動</span> 保存した本人と、取込済みの病院情報から埋まります</td>
             <td class="who">入力不要</td>
-            <td><code class="f">Event.OwnerId</code> ／ <code class="f">Account</code></td>
+            <td><b>行動の担当者</b> ／ <b>取引先</b></td>
           </tr>
           <tr>
             <td>CSVの列の並びと項目</td>
@@ -1320,7 +1340,7 @@
               <td><span class="src imp">📥 月次取込</span><br>画面からファイルを選んで取込</td>
               <td>アニマル事業部 担当1名</td>
               <td>毎月1回</td>
-              <td><code class="f">DealerSales__c</code></td>
+              <td><b>販売実績</b></td>
             </tr>
             <tr>
               <td><b>浸透率の自動算出</b></td>
@@ -1336,7 +1356,7 @@
               <td><span class="src todo">❓ 未確定</span><br>入手経路を導入時に決めます</td>
               <td>事業部の担当者</td>
               <td>毎月または年1回</td>
-              <td><code class="f">DealerBaseCount__c</code></td>
+              <td><b>ディーラー母数</b></td>
             </tr>
             <tr>
               <td><b>DSセグメントの自動判定</b></td>
@@ -1344,7 +1364,7 @@
               <td><span class="src auto">⚙️ 自動</span><br>いまの判定ルールどおりに再現</td>
               <td>—</td>
               <td>取込のつど</td>
-              <td><code class="f">Account.DSSegment__c</code></td>
+              <td><b>取引先のDSセグメント</b></td>
             </tr>
             <tr>
               <td><b>DSセグメントの自動判定</b></td>
@@ -1352,7 +1372,7 @@
               <td><span class="src todo">❓ 未確定</span><br>導入時に設定します</td>
               <td>事業部の担当者</td>
               <td>初期設定時</td>
-              <td><code class="f">Account.OwnerId</code></td>
+              <td><b>取引先の担当者</b></td>
             </tr>
             <tr>
               <td><b>訪問記録の一元管理</b></td>
@@ -1360,7 +1380,7 @@
               <td><span class="src man">✍️ 手入力</span><br>訪問記録画面で5項目</td>
               <td>訪問した本人</td>
               <td>訪問のつど</td>
-              <td><code class="f">Event</code></td>
+              <td><b>行動（活動）</b></td>
             </tr>
             <tr>
               <td><b>ディーラー報告用CSV</b></td>
@@ -1384,7 +1404,7 @@
               <td><span class="src man">✍️ 手入力</span><br>案件の詳細ページで営業担当が入力</td>
               <td>訪問した営業担当者</td>
               <td>案件が動くつど</td>
-              <td><code class="f">Opportunity</code></td>
+              <td><b>案件</b></td>
             </tr>
             <tr style="background:#fffdf5;">
               <td><b>案件管理（全社共通）</b></td>
@@ -1440,6 +1460,216 @@
     </div>
 
   </section>
+
+  <!-- ===== 販売実績 ===== -->
+  <section class="screen" id="screen-sales">
+    <div class="alertbox blue" style="margin-bottom:14px;"><span>🌏</span><div><b>国内／海外は、事業所コードから機械的に付けるフラグです。</b>事業所コード01〜08を「国内」、CA営業部以外を「海外」とします。推定は行いません。国内／海外の大きな分析は、浸透率ではなく<b>経営会議ダッシュボード</b>で見ていただく想定です（9/14の打合せでの合意）。</div></div>
+    <div class="lexbox">
+      <div class="lexhead">
+        <div class="lexico">📊</div>
+        <div>
+          <div class="eyebrow">販売実績（ディーラー実績データ）</div>
+          <div class="rectitle">今月取込分 ▾</div>
+        </div>
+        <div class="lexact">
+          <button class="btn" onclick="toast('モックのため動作しません')">月次取込</button>
+        </div>
+      </div>
+      <div class="lexsub">
+        <span>8 件を表示 ・ 数分前に更新</span>
+        <span class="pill blue">絞り込み：対象年月 ＝ 2026/08</span>
+        <span class="pill gray">納入ゼロの行は作りません</span>
+      </div>
+      <div class="tablewrap">
+        <table class="lt" id="tbl-sales">
+          <thead><tr>
+            <th>対象年月<br><span class="src imp">📥 取込</span></th>
+            <th>取引先<br><span class="src imp">📥 取込</span></th>
+            <th>製品<br><span class="src imp">📥 取込</span></th>
+            <th>数量（本）<br><span class="src imp">📥 取込</span></th>
+            <th>金額（円）<br><span class="src auto">⚙️ 自動</span></th>
+            <th>事業所コード<br><span class="src imp">📥 取込</span></th>
+            <th>国内／海外<br><span class="src auto">⚙️ 自動</span></th>
+          </tr></thead>
+          <tbody>
+            <tr><td>2026/08</td><td>さくら動物病院</td><td>オーツシャンプー 250ml</td><td>12</td><td>38,400</td><td>01</td><td><span class="pill blue">国内</span></td></tr>
+            <tr><td>2026/08</td><td>こまち動物病院</td><td>オーツイヤークリーナー</td><td>6</td><td>15,600</td><td>07</td><td><span class="pill blue">国内</span></td></tr>
+            <tr><td>2026/08</td><td>あおば動物病院</td><td>オーツシャンプー 250ml</td><td>24</td><td>76,800</td><td>01</td><td><span class="pill blue">国内</span></td></tr>
+            <tr><td>2026/08</td><td>みなと動物クリニック</td><td>オーツスキンローション</td><td>10</td><td>29,000</td><td>04</td><td><span class="pill blue">国内</span></td></tr>
+            <tr><td>2026/08</td><td>ひかり動物病院</td><td>オーツシャンプー 1L</td><td>4</td><td>36,000</td><td>08</td><td><span class="pill blue">国内</span></td></tr>
+            <tr><td>2026/08</td><td>海外代理店（ダミーA）</td><td>スポットフォーム</td><td>1,000</td><td>9,030,000</td><td>21</td><td><span class="pill purple">海外</span></td></tr>
+            <tr><td>2026/08</td><td>海外代理店（ダミーB）</td><td>オーツシャンプー 250ml</td><td>300</td><td>810,000</td><td>22</td><td><span class="pill purple">海外</span></td></tr>
+            <tr><td>2026/08</td><td>つばさ動物病院</td><td>オーツイヤークリーナー</td><td>8</td><td>20,800</td><td>05</td><td><span class="pill blue">国内</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note">国内／海外の判定ルール：事業所コード <b>01〜08 → 国内</b>／<b>CA営業部以外 → 海外</b>。コードの一覧は貴社からいただく前提で、判定の境界（新しい事業所コードが増えたときの扱い）は<b>確認中</b>です。</div>
+  </section>
+
+  <!-- ===== 活動（訪問記録） ===== -->
+  <section class="screen" id="screen-activity">
+    <div class="alertbox blue" style="margin-bottom:14px;"><span>🗓️</span><div><b>1回の訪問を1つの活動として記録し、1つの案件に紐づけます。</b>同じ訪問をほかの案件にも関連付けたい場合は、担当者が手動で紐づけます。bellSales（商談記録AI）との連携もこの前提で進めます。</div></div>
+    <div class="lexbox">
+      <div class="lexhead">
+        <div class="lexico" style="background:#cb65ff;">📝</div>
+        <div>
+          <div class="eyebrow">活動（訪問記録＝行動）</div>
+          <div class="rectitle">今月の訪問 ▾</div>
+        </div>
+        <div class="lexact"><button class="btn pri" onclick="toast('モックのため動作しません')">新規訪問</button></div>
+      </div>
+      <div class="lexsub">
+        <span>6 件 ・ 数分前に更新</span>
+        <span class="pill blue">絞り込み：訪問日 ＝ 今月</span>
+        <span class="pill gray">訪問月数は自動で集計</span>
+      </div>
+      <div class="tablewrap">
+        <table class="lt" id="tbl-activity">
+          <thead><tr>
+            <th>訪問日<br><span class="src man">✍️ 手入力</span></th>
+            <th>取引先<br><span class="src man">✍️ 選ぶだけ</span></th>
+            <th>関連する案件（1件）<br><span class="src man">✍️ 選ぶだけ</span></th>
+            <th>訪問種別<br><span class="src man">✍️</span></th>
+            <th>訪問結果<br><span class="src man">✍️</span></th>
+            <th>担当<br><span class="src auto">⚙️ 自動</span></th>
+            <th>記録元<br><span class="src todo">❓ 未確定</span></th>
+          </tr></thead>
+          <tbody>
+            <tr><td>2026/09/18</td><td>さくら動物病院</td><td>シャンプー定期採用の提案</td><td>定期訪問</td><td>POP試作を持参、院長が前向き</td><td>担当A</td><td>bellSales</td></tr>
+            <tr><td>2026/09/17</td><td>こまち動物病院</td><td>イヤークリーナー再開の提案</td><td>フォロー</td><td>発注停止の理由をヒアリング</td><td>担当B</td><td>手入力</td></tr>
+            <tr><td>2026/09/16</td><td>あおば動物病院</td><td>—（案件なし）</td><td>ディーラー同行</td><td>新商品サンプルを配布</td><td>担当B</td><td>手入力</td></tr>
+            <tr><td>2026/09/12</td><td>みなと動物クリニック</td><td>ローション採用の提案</td><td>初回訪問</td><td>勤務医3名に説明</td><td>担当C</td><td>bellSales</td></tr>
+            <tr><td>2026/09/10</td><td>ひかり動物病院</td><td>—（案件なし）</td><td>定期訪問</td><td>在庫確認のみ</td><td>担当A</td><td>手入力</td></tr>
+            <tr><td>2026/09/05</td><td>つばさ動物病院</td><td>イヤークリーナー定期採用</td><td>勉強会</td><td>看護師向けに使い方を説明</td><td>担当D</td><td>bellSales</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note">記録元が「bellSales」の活動は、商談記録AIが訪問内容を書き込んだものです。どの項目をAIに書かせるかは<b>確認中</b>です。</div>
+  </section>
+
+  <!-- ===== ToDo ===== -->
+  <section class="screen" id="screen-todo">
+    <div class="alertbox" style="margin-bottom:14px;"><span>📌</span><div><b>クレーム・開発・生産管理（受注→調達→生産→納品）は、標準のToDo（担当・期日・内容・関連先）とアラートで管理するところから始めます。</b>専用の管理画面は2ndフェーズ以降で検討します。</div></div>
+    <div class="kpis">
+      <div class="kpi r"><div class="n" id="todo-overdue">0</div><div class="l">期日超過</div></div>
+      <div class="kpi"><div class="n" id="todo-week">0</div><div class="l">今週が期日</div></div>
+      <div class="kpi"><div class="n" id="todo-open">0</div><div class="l">未完了</div></div>
+      <div class="kpi"><div class="n" id="todo-done">0</div><div class="l">完了</div></div>
+    </div>
+    <div class="lexbox">
+      <div class="lexhead">
+        <div class="lexico" style="background:#3ba755;">✅</div>
+        <div>
+          <div class="eyebrow">ToDo</div>
+          <div class="rectitle">アニマル：未完了のToDo ▾</div>
+        </div>
+        <div class="lexact"><button class="btn pri" onclick="toast('モックのため動作しません')">新規ToDo</button></div>
+      </div>
+      <div class="lexsub" id="todo-filters">
+        <span style="color:var(--muted);">種別：</span>
+        <button class="btn" data-k="すべて" onclick="setTodoFilter('すべて')">すべて</button>
+        <button class="btn" data-k="クレーム" onclick="setTodoFilter('クレーム')">クレーム</button>
+        <button class="btn" data-k="開発" onclick="setTodoFilter('開発')">開発</button>
+        <button class="btn" data-k="生産管理" onclick="setTodoFilter('生産管理')">生産管理</button>
+      </div>
+      <div class="tablewrap">
+        <table class="lt" id="tbl-todo">
+          <thead><tr><th>完了</th><th>種別</th><th>内容</th><th>関連先</th><th>担当</th><th>期日</th><th>アラート</th></tr></thead>
+          <tbody id="todo-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note">アラートは「期日の3日前」と「期日超過」に担当者へ通知するイメージです。誰がToDoを登録し、誰が一覧を見るかは<b>確認中</b>です。生産管理は「受注→調達→生産→納品」の各段階を1件ずつToDoにします。</div>
+  </section>
+
+  <!-- ===== 商品・価格表 ===== -->
+  <section class="screen" id="screen-pricebook">
+    <div class="alertbox" style="margin-bottom:14px;"><span>⚠️</span><div><b>原価の定義は確認中です。</b>この画面は暫定案として、品目ごとに<b>標準原価を1本</b>持ち、<b>日付つきの価格表</b>と組み合わせて粗利を出す形を示しています。原材料・資材レベルの原価変動は2ndフェーズ以降で扱います。</div></div>
+    <div class="lexbox">
+      <div class="lexhead">
+        <div class="lexico" style="background:#ff9a3c;">📦</div>
+        <div>
+          <div class="eyebrow">商品・価格表</div>
+          <div class="rectitle">アニマル：販売中の商品 ▾</div>
+        </div>
+        <div class="lexsub" style="border:0;background:transparent;margin-left:auto;">
+          <span style="color:var(--muted);">基準日：</span>
+          <select id="pb-date" onchange="renderPricebook()">
+            <option value="2026-09-30">2026/09/30</option>
+            <option value="2026-10-01">2026/10/01（価格改定後）</option>
+          </select>
+        </div>
+      </div>
+      <div class="tablewrap">
+        <table class="lt" id="tbl-pricebook">
+          <thead><tr><th>商品</th><th>適用開始日</th><th>販売価格（円）</th><th>標準原価（円）</th><th>粗利（円）</th><th>粗利率</th></tr></thead>
+          <tbody id="pb-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note">価格改定やキャンペーン価格を、受注日・出荷日・売上計上日のどれを基準に適用するかは<b>確認中</b>です。上の「基準日」を切り替えると、その日に有効な価格で粗利を計算し直します。</div>
+  </section>
+
+  <!-- ===== 取引先責任者 ===== -->
+  <section class="screen" id="screen-contacts">
+    <div class="lexbox">
+      <div class="lexhead">
+        <div class="lexico" style="background:#a094ed;">👤</div>
+        <div>
+          <div class="eyebrow">取引先責任者</div>
+          <div class="rectitle">アニマル：すべての取引先責任者 ▾</div>
+        </div>
+        <div class="lexact"><button class="btn pri" onclick="toast('モックのため動作しません')">新規</button></div>
+      </div>
+      <div class="lexsub">
+        <span>6 件を表示</span>
+        <span class="pill gray">件数は未確定</span>
+      </div>
+      <div class="tablewrap">
+        <table class="lt" id="tbl-contacts">
+          <thead><tr><th>氏名<br><span class="src man">✍️</span></th><th>取引先<br><span class="src man">✍️ 選ぶだけ</span></th><th>役割<br><span class="src man">✍️</span></th><th>キーマン<br><span class="src man">✍️</span></th><th>最終訪問日<br><span class="src auto">⚙️ 自動</span></th></tr></thead>
+          <tbody>
+            <tr><td>院長（ダミー1）</td><td>さくら動物病院</td><td>院長・獣医師</td><td>✓</td><td>2026/09/18</td></tr>
+            <tr><td>獣医師（ダミー2）</td><td>さくら動物病院</td><td>勤務医</td><td></td><td>2026/09/18</td></tr>
+            <tr><td>院長（ダミー3）</td><td>こまち動物病院</td><td>院長・獣医師</td><td>✓</td><td>2026/09/17</td></tr>
+            <tr><td>看護師（ダミー4）</td><td>つばさ動物病院</td><td>動物看護師</td><td></td><td>2026/09/05</td></tr>
+            <tr><td>担当者（ダミー5）</td><td>ディーラー（ダミー）東日本営業所</td><td>ディーラー営業員</td><td></td><td>2026/09/16</td></tr>
+            <tr><td>購買担当（ダミー6）</td><td>海外代理店（ダミーA）</td><td>購買</td><td>✓</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note">取引先責任者は、訪問先の院長・勤務医・看護師や、ディーラーの営業員を登録するイメージです。どこまで登録するか（件数・必須項目）は<b>確認中</b>です。</div>
+  </section>
+
+  <!-- ===== レポート・ダッシュボード ===== -->
+  <section class="screen" id="screen-dash">
+    <div class="alertbox blue" style="margin-bottom:14px;"><span>📈</span><div>1stフェーズで用意するレポートの一覧です。経営会議ダッシュボード・浸透率ダッシュボードは各タブに画面があります。<b>数値はダミー</b>です。</div></div>
+    <div class="card">
+      <div class="chead blue">国内／海外 売上（今期累計・千円）<span class="badge">販売実績から自動集計</span></div>
+      <div style="padding:12px 14px;" id="dash-bars"></div>
+    </div>
+    <div class="card">
+      <div class="chead">レポート一覧</div>
+      <div class="tablewrap">
+        <table class="lt" id="tbl-reports">
+          <thead><tr><th>レポート名</th><th>元データ</th><th>使う場面</th><th>状態</th></tr></thead>
+          <tbody>
+            <tr><td><a href="javascript:void(0)" onclick="go('exec')">経営会議 予実（国内／海外内訳つき）</a></td><td>月次見込・販売実績</td><td>月中会議</td><td><span class="pill green">画面あり</span></td></tr>
+            <tr><td><a href="javascript:void(0)" onclick="go('penetration')">営業所別・製品別 浸透率</a></td><td>販売実績・取引先</td><td>月中会議・ディーラー報告</td><td><span class="pill green">画面あり</span></td></tr>
+            <tr><td>発注が止まっている病院（60日以上）</td><td>取引先</td><td>訪問先の選定</td><td><span class="pill blue">1stで作成</span></td></tr>
+            <tr><td>担当別 訪問月数</td><td>活動</td><td>月次の振り返り</td><td><span class="pill blue">1stで作成</span></td></tr>
+            <tr><td>期日超過のToDo（クレーム・開発・生産管理）</td><td>ToDo</td><td>週次の確認</td><td><span class="pill blue">1stで作成</span></td></tr>
+            <tr><td>商品別 粗利</td><td>販売実績・価格表</td><td>月中会議</td><td><span class="pill amber">原価の定義を確認中</span></td></tr>
+            <tr><td>中国・台湾向けの推定</td><td>—</td><td>—</td><td><span class="pill gray">2nd以降</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
 
 </div>
 
@@ -1548,6 +1778,66 @@ function setProdTerm(w){
 }
 renderProducts();
 
+function toggleEdit(){
+  const on=!document.body.classList.contains('editing');
+  document.body.classList.toggle('editing',on);
+  document.querySelector('.wrap').contentEditable=on?'true':'false';
+  document.getElementById('editbanner').hidden=!on;
+  const b=document.getElementById('edittoggle');
+  b.classList.toggle('on',on);
+  b.textContent=on?'✏️ 編集モード：ON':'✏️ 編集モード';
+}
+const TODAY='2026-10-07';
+const TODOS=[
+ {k:'クレーム',t:'ボトルのキャップ破損の報告。代替品の手配と原因確認',r:'こまち動物病院',o:'担当B',d:'2026-10-05',x:false},
+ {k:'クレーム',t:'ラベル印字のかすれ。ロットを確認して回答',r:'ディーラー（ダミー）東日本営業所',o:'担当A',d:'2026-10-09',x:false},
+ {k:'開発',t:'新処方シャンプーの試作品評価を病院に依頼',r:'さくら動物病院',o:'担当C',d:'2026-10-20',x:false},
+ {k:'開発',t:'海外向けパッケージ表記の確認',r:'海外代理店（ダミーA）',o:'担当D',d:'2026-10-31',x:false},
+ {k:'生産管理',t:'【受注】スポットフォーム 1ロットの注文書を受領',r:'海外代理店（ダミーA）',o:'担当E',d:'2026-09-30',x:true},
+ {k:'生産管理',t:'【調達】原料・資材の手配',r:'海外代理店（ダミーA）',o:'担当E',d:'2026-10-08',x:false},
+ {k:'生産管理',t:'【生産】委託先での生産開始を確認',r:'海外代理店（ダミーA）',o:'担当E',d:'2026-10-22',x:false},
+ {k:'生産管理',t:'【納品】出荷・納品日の連絡',r:'海外代理店（ダミーA）',o:'担当E',d:'2026-11-10',x:false}
+];
+let todoFilter='すべて';
+function dd(a,b){return Math.round((new Date(a)-new Date(b))/86400000);}
+function todoAlert(t){
+  if(t.x) return '<span class="pill gray">完了</span>';
+  const n=dd(t.d,TODAY);
+  if(n<0) return '<span class="pill red">期日超過 '+(-n)+'日</span>';
+  if(n<=3) return '<span class="pill amber">あと'+n+'日</span>';
+  return '<span class="pill green">予定どおり</span>';
+}
+function renderTodos(){
+  const body=document.getElementById('todo-body'); if(!body) return;
+  body.innerHTML=TODOS.map((t,i)=>{ if(todoFilter!=='すべて'&&t.k!==todoFilter) return '';
+    return '<tr class="'+(t.x?'todo-done':'')+'"><td><input type="checkbox" '+(t.x?'checked':'')+' onchange="TODOS['+i+'].x=this.checked;renderTodos()"></td><td>'+t.k+'</td><td>'+t.t+'</td><td>'+t.r+'</td><td>'+t.o+'</td><td>'+t.d.replace(/-/g,'/')+'</td><td>'+todoAlert(t)+'</td></tr>';}).join('');
+  const open=TODOS.filter(t=>!t.x);
+  document.getElementById('todo-overdue').textContent=open.filter(t=>dd(t.d,TODAY)<0).length;
+  document.getElementById('todo-week').textContent=open.filter(t=>{const n=dd(t.d,TODAY);return n>=0&&n<=7;}).length;
+  document.getElementById('todo-open').textContent=open.length;
+  document.getElementById('todo-done').textContent=TODOS.length-open.length;
+  document.querySelectorAll('#todo-filters .btn').forEach(b=>b.classList.toggle('on',b.dataset.k===todoFilter));
+}
+function setTodoFilter(k){todoFilter=k;renderTodos();}
+const PB=[
+ {n:'オーツシャンプー 250ml',c:1400,p:[['2026-04-01',3200],['2026-10-01',3300]]},
+ {n:'オーツシャンプー 1L',c:4100,p:[['2026-04-01',9000]]},
+ {n:'オーツイヤークリーナー',c:1050,p:[['2026-04-01',2600],['2026-10-01',2750]]},
+ {n:'オーツスキンローション',c:1250,p:[['2026-04-01',2900]]},
+ {n:'スポットフォーム',c:4700,p:[['2026-04-01',9030]]}
+];
+function renderPricebook(){
+  const body=document.getElementById('pb-body'); if(!body) return;
+  const base=document.getElementById('pb-date').value;
+  body.innerHTML=PB.map(x=>{const v=x.p.filter(q=>q[0]<=base).pop();const gp=v[1]-x.c;
+    return '<tr><td>'+x.n+'</td><td>'+v[0].replace(/-/g,'/')+'</td><td>'+v[1].toLocaleString('ja-JP')+'</td><td>'+x.c.toLocaleString('ja-JP')+'</td><td>'+gp.toLocaleString('ja-JP')+'</td><td>'+(gp/v[1]*100).toFixed(1)+'%</td></tr>';}).join('');
+}
+function renderDashBars(){
+  const el=document.getElementById('dash-bars'); if(!el) return;
+  const rows=[['国内',145066,'var(--sf-blue)'],['海外',54180,'var(--purple)']]; const mx=145066;
+  el.innerHTML=rows.map(r=>'<div style="display:flex;align-items:center;gap:8px;margin:6px 0;font-size:12.5px;"><span style="width:40px;">'+r[0]+'</span><span style="flex:1;background:#eef1f5;border-radius:4px;height:14px;min-width:0;"><span style="display:block;height:14px;border-radius:4px;width:'+Math.round(r[1]/mx*100)+'%;background:'+r[2]+';"></span></span><span style="width:80px;text-align:right;">'+r[1].toLocaleString('ja-JP')+'</span></div>').join('')+'<div style="font-size:11px;color:var(--muted);">事業所コード01〜08＝国内、CA営業部以外＝海外で機械的に判定</div>';
+}
+renderTodos(); renderPricebook(); renderDashBars();
 </script>
 </body>
 </html>
