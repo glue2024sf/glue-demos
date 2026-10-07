@@ -237,6 +237,7 @@
   #todo-filters .btn.on{background:var(--sf-blue);color:#fff;border-color:var(--sf-blue);}
   tr.todo-done td{color:#aaa;text-decoration:line-through;}
   .tabnew{font-size:9px;font-weight:800;color:#fff;background:#fe9339;border-radius:6px;padding:0 5px;margin-left:4px;vertical-align:1px;}
+  .oi-tbl td:first-child{white-space:nowrap;} .oi-ans{min-width:140px;background:#fffdf3;} .oi-sel{font-size:12px;padding:3px;border:1px solid var(--border2);border-radius:4px;background:#fff;}
 </style>
 </head>
 <body>
@@ -267,6 +268,7 @@
   <div class="tab" data-tab="report" onclick="go('report')">訪問記録→CSV</div>
   <div class="tab" data-tab="dash" onclick="go('dash')">レポート・ダッシュボード<span class="tabnew">NEW</span></div>
   <div class="tab" data-tab="sources" onclick="go('sources')">データの入り口 一覧</div>
+  <div class="tab" data-tab="openitems" onclick="go('openitems')">確認事項・未決事項<span class="tabnew">NEW</span></div>
 </div>
 <div class="editbanner" id="editbanner" hidden>✏️ 編集モード中：編集内容は保存されません。変更したい箇所を書き換えて画面を撮り、お送りください（再読み込みで元に戻ります）</div>
 
@@ -1584,6 +1586,65 @@
     <div class="note">アラートは「期日の3日前」と「期日超過」に担当者へ通知するイメージです。誰がToDoを登録し、誰が一覧を見るかは<b>確認中</b>です。生産管理は「受注→調達→生産→納品」の各段階を1件ずつToDoにします。</div>
   </section>
 
+  <!-- ===== 確認事項・未決事項 ===== -->
+  <section class="screen" id="screen-openitems">
+    <div class="alertbox" style="margin-bottom:14px;"><span>📌</span><div><b>本日（10/7）で要件定義の内容を確定させるための一覧です。</b>その場で決められない項目は「回答期限」と「期限までにご回答がなければ弊社案で進めてよいか」をお決めいただきます。各行の状態は、プルダウンで切り替えられます。</div></div>
+    <div class="kpis">
+      <div class="kpi r"><div class="n" id="oi-open">0</div><div class="l">未決</div></div>
+      <div class="kpi a"><div class="n" id="oi-temp">0</div><div class="l">期限つきで弊社案</div></div>
+      <div class="kpi g"><div class="n" id="oi-done">0</div><div class="l">決定</div></div>
+      <div class="kpi b"><div class="n" id="oi-total">0</div><div class="l">全体</div></div>
+    </div>
+
+    <div class="lexbox">
+      <div class="lexhead">
+        <div class="lexico" style="background:#c23934;">❓</div>
+        <div><div class="eyebrow">未決事項</div><div class="rectitle">要件定義書「オープン項目」のうちアニマル事業部分</div></div>
+      </div>
+      <div class="tablewrap">
+        <table class="lt oi-tbl">
+          <thead><tr><th>No.</th><th>内容</th><th>ご確認先</th><th>弊社案</th><th>本日の結論</th><th>状態</th></tr></thead>
+          <tbody>
+            <tr><td>Q-13</td><td><b>ディーラー実績データをSalesforceに入れることへの、メーカー側のご了承</b><br><span style="color:var(--muted);font-size:11px;">これがないと販売実績・浸透率・DSセグメントにデータが入りません</span></td><td>アニマル事業部</td><td>ご了承をいただく日を本日決める。ご了承までは画面と項目だけ用意し、データは入れない</td><td></td><td></td></tr>
+            <tr><td>Q-10</td><td>取引先の「営業所・営業員」はメーカー側の組織。<b>大扇産業様側の担当者</b>をどう持つか</td><td>アニマル事業部</td><td>取引先の所有者＝大扇産業様の担当者。メーカー側の営業所・営業員は参照用の項目で持つ</td><td></td><td></td></tr>
+            <tr><td>Q-05</td><td>DSセグメントの<b>C（成長）とD（大口）が重なる</b>場合の扱い</td><td>アニマル事業部</td><td>D（大口）を優先して1つに決め、成長は別のフラグで持つ</td><td></td><td></td></tr>
+            <tr><td>Q-11</td><td>浸透率の<b>「継続版」と「リセット版」</b>の使い分け</td><td>アニマル事業部</td><td>継続版を標準の表示にし、リセット版はレポートで切り替えて見る</td><td></td><td></td></tr>
+            <tr><td>Q-02</td><td><b>顧客ランクのしきい値</b>（A/B/C/D、未取引先の初期ランクを含む）</td><td>アニマル事業部</td><td>現行Excelの基準をそのまま使う。基準がなければ年間売上で仮置きし、運用開始後に見直す</td><td></td><td></td></tr>
+            <tr><td>Q-09</td><td>過去データの<b>移行範囲</b></td><td>アニマル事業部</td><td>導入以降に積み上げる。経営会議資料に必要な直近分だけCSVで投入する</td><td></td><td></td></tr>
+            <tr><td>Q-08</td><td><b>ご利用者の一覧</b>（氏名・役職・使う機能）。権限設計とユーザー作成に必要</td><td>管理部</td><td>提出期限を本日決める</td><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="lexbox" style="margin-top:16px;">
+      <div class="lexhead">
+        <div class="lexico" style="background:#fe9339;">✅</div>
+        <div><div class="eyebrow">確認事項</div><div class="rectitle">本日の画面確認で決めること・ご用意いただくもの</div></div>
+      </div>
+      <div class="tablewrap">
+        <table class="lt oi-tbl">
+          <thead><tr><th>No.</th><th>内容</th><th>関連画面</th><th>弊社案</th><th>本日の結論</th><th>状態</th></tr></thead>
+          <tbody>
+            <tr><td>K-1</td><td><b>最初に載せる範囲</b>：案件と活動記録を中心とした営業管理から始める</td><td><a href="#" onclick="go('opp');return false;">案件</a>／<a href="#" onclick="go('activity');return false;">活動</a></td><td>案件は金額・受注予定日・状況の3項目から。残りの項目は運用が回ってから追加</td><td></td><td></td></tr>
+            <tr><td>K-2</td><td><b>クレーム・開発・生産管理</b>の管理方法</td><td><a href="#" onclick="go('todo');return false;">ToDo</a></td><td>標準のToDoで始める。専用の管理画面は2ndフェーズ以降で検討</td><td></td><td></td></tr>
+            <tr><td>K-3</td><td>ToDoを<b>誰が登録し、誰が一覧で見るか</b></td><td><a href="#" onclick="go('todo');return false;">ToDo</a></td><td>担当者が登録し、事業部長が一覧で確認</td><td></td><td></td></tr>
+            <tr><td>K-4</td><td><b>粗利に使う原価</b>は標準原価か実際原価か。品目ごとに1本で足りるか</td><td><a href="#" onclick="go('pricebook');return false;">商品・価格表</a></td><td>品目ごとに標準原価1本で始める</td><td></td><td></td></tr>
+            <tr><td>K-5</td><td>価格改定を<b>何日の時点で適用するか</b>（受注日／出荷日／売上計上日）</td><td><a href="#" onclick="go('pricebook');return false;">商品・価格表</a></td><td>売上計上日で適用する</td><td></td><td></td></tr>
+            <tr><td>K-6</td><td>現在Excelで粗利を出している<b>計算式（該当シート）の現物</b></td><td><a href="#" onclick="go('pricebook');return false;">商品・価格表</a></td><td>ご提供日を本日決める</td><td></td><td></td></tr>
+            <tr><td>K-7</td><td><b>国内／海外の判定ルール</b>（事業所コード01〜08＝国内、CA営業部以外＝海外）</td><td><a href="#" onclick="go('sales');return false;">販売実績</a></td><td>このルールで確定。推定による振り分けは行わない</td><td></td><td></td></tr>
+            <tr><td>K-8</td><td><b>訪問の記録方法</b>：1回の訪問＝1つの活動＝1つの案件。他の案件への紐づけは手動</td><td><a href="#" onclick="go('activity');return false;">活動</a></td><td>この運用で確定</td><td></td><td></td></tr>
+            <tr><td>K-9</td><td><b>取引先の初期投入</b>：動物病院約6,000件を弊社が先に投入。B2B／B2Cは1つの取引先でタイプで分ける</td><td><a href="#" onclick="go('accounts');return false;">取引先</a></td><td>この方針で確定</td><td></td><td></td></tr>
+            <tr><td>K-10</td><td><b>ディーラー報告書の現物</b>（直近1回分）。CSVの列構成を決めるため</td><td><a href="#" onclick="go('report');return false;">訪問記録→CSV</a></td><td>ご提供日を本日決める</td><td></td><td></td></tr>
+            <tr><td>K-11</td><td><b>要件定義書の承認日</b>と、更新版をお送りする日</td><td>—</td><td>本日の決定を反映した版を弊社からお送りし、承認日を決める</td><td></td><td></td></tr>
+            <tr><td>K-12</td><td><b>稼働の目標</b>：11月後半。取引先の投入後、その1〜2週間前から入力開始</td><td>—</td><td>3事業部そろえた日付入りの全体表は、メディカル事業部のお打ち合わせ後に書面でお送りする</td><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note">💡「本日の結論」欄は、画面右上の編集モードをONにすると、その場で書き込めます（再読み込みで元に戻ります）。決まった内容は、弊社で要件定義書に反映してお送りします。</div>
+  </section>
+
   <!-- ===== 商品・価格表 ===== -->
   <section class="screen" id="screen-pricebook">
     <div class="alertbox" style="margin-bottom:14px;"><span>⚠️</span><div><b>原価の定義は確認中です。</b>この画面は暫定案として、品目ごとに<b>標準原価を1本</b>持ち、<b>日付つきの価格表</b>と組み合わせて粗利を出す形を示しています。原材料・資材レベルの原価変動は2ndフェーズ以降で扱います。</div></div>
@@ -1838,6 +1899,28 @@ function renderDashBars(){
   el.innerHTML=rows.map(r=>'<div style="display:flex;align-items:center;gap:8px;margin:6px 0;font-size:12.5px;"><span style="width:40px;">'+r[0]+'</span><span style="flex:1;background:#eef1f5;border-radius:4px;height:14px;min-width:0;"><span style="display:block;height:14px;border-radius:4px;width:'+Math.round(r[1]/mx*100)+'%;background:'+r[2]+';"></span></span><span style="width:80px;text-align:right;">'+r[1].toLocaleString('ja-JP')+'</span></div>').join('')+'<div style="font-size:11px;color:var(--muted);">事業所コード01〜08＝国内、CA営業部以外＝海外で機械的に判定</div>';
 }
 renderTodos(); renderPricebook(); renderDashBars();
+
+/* 確認事項・未決事項：状態プルダウンと件数 */
+(function(){
+  var opts=[['open','未決'],['temp','期限つきで弊社案'],['done','決定']];
+  document.querySelectorAll('.oi-tbl tbody tr').forEach(function(tr){
+    var td=tr.lastElementChild; var sel=document.createElement('select');
+    sel.className='oi-sel'; sel.setAttribute('contenteditable','false');
+    opts.forEach(function(o){var op=document.createElement('option');op.value=o[0];op.textContent=o[1];sel.appendChild(op);});
+    sel.addEventListener('change',oiCount); td.appendChild(sel);
+    tr.children[4].className='oi-ans';
+  });
+  oiCount();
+})();
+function oiCount(){
+  var c={open:0,temp:0,done:0},n=0;
+  document.querySelectorAll('.oi-sel').forEach(function(s){c[s.value]++;n++;
+    var tr=s.closest('tr'); tr.style.background = s.value==='done'?'var(--green-bg)':(s.value==='temp'?'var(--amber-bg)':'');});
+  document.getElementById('oi-open').textContent=c.open;
+  document.getElementById('oi-temp').textContent=c.temp;
+  document.getElementById('oi-done').textContent=c.done;
+  document.getElementById('oi-total').textContent=n;
+}
 </script>
 </body>
 </html>
