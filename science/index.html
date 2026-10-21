@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>サイエンス・オブ・エンライトメント様 問い合わせ返信案エージェント デモ</title>
+<!-- 開発中は外部参照、配布時は build.sh が <style>/<script> にインライン化する -->
+<style>
+/* =====================================================================
+   demo-base.css — Glue Salesforce デモ 共通スタイル (SLDS Lightning 再現)
+   ---------------------------------------------------------------------
+   ・案件横断で共通の「chrome（ヘッダ/タブ/レコード作法）」と
+     「コンポーネントライブラリ」をここに集約する。
+   ・案件固有の色/業務独自パーツだけを各 index.html の <style> に追記する。
+   ・配布時は build.sh がこのファイルを <style> へインライン展開し、
+     単一HTML（ダブルクリックで開ける / 添付で送れる）にする。
+   ・出典: docs/aion/demo (基準実装) + tsubasa(帳票/フォーム) を統合。
+   ===================================================================== */
+
+:root{
+  --brand:#0176d3; --brand-dark:#014486; --brand-50:#eaf4fb;
+  --bg:#f3f3f3; --card:#ffffff; --border:#dddbda; --border-light:#f3f2f2;
+  --text:#181818; --text-2:#3e3e3c; --text-mute:#706e6b;
+  --success:#2e844a; --success-bg:#cdefc4; --warn:#fe9339; --warn-bg:#fef0e6;
+  --error:#ba0517; --error-bg:#fdd9d4; --info:#0176d3;
+  --shadow-card:0 2px 2px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.06);
+  --shadow-hover:0 2px 4px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.08);
+  --radius:.25rem;
+  /* 外部ツール色（案件で使う/使わないは任意。不要なら無視でOK） */
+  --chatwork:#e57400; --chatwork-bg:#fff4e6;
+  --claude:#cc785c; --claude-bg:#f5e9e2;
+  --sheets:#0f9d58; --sheets-bg:#e6f4ea;
+  /* 論点パネル */
+  --disc:#7a5cff; --disc-bg:#f1edff; --disc-border:#c9bcff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Salesforce Sans","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+  font-size:13px; color:var(--text); background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit; cursor:pointer}
+a{color:var(--brand); text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ===== Global Header ===== */
+.global-header{
+  background:linear-gradient(0deg,#032e61,#0176d3); height:48px;
+  display:flex; align-items:center; padding:0 16px; gap:12px;
+  position:sticky; top:0; z-index:1000;
+}
+.app-launcher{
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.1); border-radius:3px; cursor:pointer;
+}
+.app-launcher:hover{background:rgba(255,255,255,.2)}
+.app-launcher::before{
+  content:""; width:14px;height:14px;
+  background-image:
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px),
+    radial-gradient(circle, #fff 1.2px, transparent 1.4px);
+  background-size:5px 5px;
+  background-position:0 0,5px 0,10px 0,0 5px,5px 5px,10px 5px,0 10px,5px 10px,10px 10px;
+  background-repeat:no-repeat;
+}
+.app-name{
+  color:#fff; font-weight:700; font-size:14px;
+  padding-left:12px; border-left:1px solid rgba(255,255,255,.3);
+}
+.app-name .sub{font-weight:400; opacity:.8; margin-left:6px; font-size:12px}
+.gh-spacer{flex:1}
+.gh-search{
+  background:rgba(255,255,255,.95); border-radius:3px; padding:6px 12px;
+  width:380px; display:flex; align-items:center; gap:8px; font-size:13px;
+}
+.gh-search input{border:0;outline:0;flex:1;background:transparent;font-size:13px}
+.gh-actions{display:flex; gap:8px; align-items:center}
+.gh-actions .icon-btn{
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  color:#fff; cursor:pointer; border-radius:50%;
+}
+.gh-actions .icon-btn:hover{background:rgba(255,255,255,.15)}
+.gh-user{
+  width:32px;height:32px;border-radius:50%;
+  background:#a5d8ff;color:#0b4a83;display:flex;align-items:center;justify-content:center;
+  font-weight:700; cursor:pointer; font-size:12px;
+}
+
+/* ===== App Bar (Tabs) ===== */
+.app-bar{
+  background:#fff; border-bottom:1px solid var(--border);
+  display:flex; align-items:stretch; padding:0 16px; height:40px;
+  position:sticky; top:48px; z-index:999; overflow-x:auto;
+}
+.app-bar .tab{
+  padding:0 16px; display:flex; align-items:center; gap:6px; cursor:pointer;
+  border-bottom:3px solid transparent; color:var(--text-2); font-weight:400;
+  font-size:13px; user-select:none; white-space:nowrap;
+}
+.app-bar .tab:hover{background:var(--brand-50)}
+.app-bar .tab.active{border-bottom-color:var(--brand); color:var(--brand); font-weight:700}
+
+/* ===== Main content ===== */
+.main{padding:12px 16px; max-width:1440px; margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+
+/* ===== Object Page Header ===== */
+.obj-header{
+  background:#fff; padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.obj-header .row1{display:flex; align-items:center; gap:12px}
+.obj-icon{
+  width:40px;height:40px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  color:#fff; font-size:18px; font-weight:700;
+}
+/* 標準オブジェクトのアイコン色（SLDS準拠）。案件のカスタムobjは追記する */
+.obj-icon.account{background:#ff9a3c}
+.obj-icon.lead{background:#f88962}
+.obj-icon.opp{background:#fcb95b}
+.obj-icon.contact{background:#7f8de1}
+.obj-icon.quote{background:#a094ed}
+.obj-icon.order{background:#2e844a}
+.obj-icon.case{background:#f2cf5b}
+.obj-icon.report{background:#76ded9}
+.obj-icon.dashboard{background:#e6437f}
+.obj-icon.home{background:#0176d3}
+.obj-icon.custom{background:#5867e8}
+.obj-icon.chatwork{background:var(--chatwork)}
+.obj-icon.claude{background:var(--claude)}
+.obj-icon.sheets{background:var(--sheets)}
+.obj-title{flex:1}
+.obj-title .label{color:var(--text-mute); font-size:12px}
+.obj-title .name{font-size:18px; font-weight:700}
+.obj-actions{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+
+/* ===== Buttons ===== */
+.btn{
+  padding:6px 14px; border:1px solid var(--border); background:#fff;
+  border-radius:var(--radius); font-size:13px; color:var(--text);
+}
+.btn:hover{background:var(--border-light)}
+.btn.primary{background:var(--brand); color:#fff; border-color:var(--brand)}
+.btn.primary:hover{background:var(--brand-dark)}
+.btn.success{background:var(--success); color:#fff; border-color:var(--success)}
+.btn.success:hover{filter:brightness(0.95)}
+.btn.warn{background:var(--warn); color:#fff; border-color:var(--warn)}
+.btn.small{padding:3px 10px; font-size:12px}
+
+/* ===== Highlights Panel ===== */
+.highlights{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  padding:12px 16px; display:flex; gap:32px; margin-bottom:8px; flex-wrap:wrap;
+}
+.highlights .item{min-width:120px}
+.highlights .lbl{color:var(--text-mute); font-size:12px}
+.highlights .val{font-size:15px; font-weight:700; margin-top:2px}
+
+/* ===== Path Component (Sales/Stage Path) ===== */
+.path{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px; display:flex; padding:0; overflow:hidden;
+}
+.path .stage{
+  flex:1; padding:10px 0; text-align:center; position:relative;
+  background:#ecebea; color:var(--text-2); font-size:12px; cursor:pointer;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+  margin-right:-12px; min-width:0;
+}
+.path .stage:first-child{ clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%) }
+.path .stage:last-child{
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%); margin-right:0;
+}
+.path .stage.completed{background:#4bc076; color:#fff}
+.path .stage.current{background:var(--brand); color:#fff; font-weight:700}
+.path .stage:hover{filter:brightness(0.95)}
+.path-label{
+  display:flex; align-items:center; gap:6px;
+  padding:4px 12px 0; font-size:11px; color:var(--text-mute); background:#fff;
+  border:1px solid var(--border); border-bottom:0; border-radius:var(--radius) var(--radius) 0 0;
+}
+.path-label .badge{margin-left:auto}
+
+/* ===== Layout grids ===== */
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.two-col-3{display:grid; grid-template-columns:2fr 1fr; gap:8px}
+@media(max-width:1000px){ .two-col,.two-col-3{grid-template-columns:1fr} }
+
+/* ===== Card ===== */
+.card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.card .card-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.card .card-head .actions{margin-left:auto; display:flex; gap:6px}
+.card .card-body{padding:12px 16px}
+.sec-title{
+  font-size:12px; font-weight:700; color:var(--text-2);
+  padding:8px 16px; background:#fafaf9; border-bottom:1px solid var(--border-light);
+}
+
+/* ===== Field rows (read view) ===== */
+.field-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 24px}
+.field{padding:8px 0; border-bottom:1px solid var(--border-light)}
+.field .lbl{color:var(--text-mute); font-size:12px; margin-bottom:2px}
+.field .val{font-size:13px}
+.field.full{grid-column:1/-1}
+.field .val .ai-source{
+  display:inline-block; padding:1px 6px; border-radius:8px;
+  font-size:10px; background:var(--claude-bg); color:var(--claude);
+  margin-left:6px; vertical-align:middle;
+}
+.field .val .cw-source{ background:var(--chatwork-bg); color:var(--chatwork); }
+
+/* ===== Edit form (inline / modal) ===== */
+.form-2col{display:grid; grid-template-columns:1fr 1fr; gap:12px 24px}
+.form-row{display:flex; flex-direction:column; gap:4px}
+.form-row.full{grid-column:1/-1}
+.form-row label{font-size:12px; color:var(--text-2); font-weight:700}
+.form-row label .req{color:var(--error); margin-left:2px}
+.form-row input,.form-row select,.form-row textarea{
+  font-family:inherit; font-size:13px; padding:6px 10px;
+  border:1px solid var(--border); border-radius:var(--radius); background:#fff; color:var(--text);
+}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{
+  outline:0; border-color:var(--brand); box-shadow:0 0 0 2px var(--brand-50);
+}
+@media(max-width:700px){ .form-2col{grid-template-columns:1fr} }
+
+/* ===== Table ===== */
+.tbl{width:100%; border-collapse:collapse; background:#fff; font-size:13px}
+.tbl th{
+  background:#fafaf9; text-align:left; padding:8px 12px;
+  border-bottom:1px solid var(--border); font-weight:700; color:var(--text-2); font-size:12px;
+}
+.tbl td{padding:8px 12px; border-bottom:1px solid var(--border-light)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .num{text-align:right}
+.tbl tbody tr:hover{background:var(--brand-50)}
+.tbl .name-link{font-weight:700; cursor:pointer; color:var(--brand)}
+
+/* ===== Badges ===== */
+.badge{display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700}
+.badge.info{background:#e0f0fb; color:#0176d3}
+.badge.success{background:var(--success-bg); color:var(--success)}
+.badge.warn{background:var(--warn-bg); color:var(--warn)}
+.badge.error{background:var(--error-bg); color:var(--error)}
+.badge.gray{background:#ecebea; color:var(--text-mute)}
+.badge.cw{background:var(--chatwork-bg); color:var(--chatwork)}
+.badge.claude{background:var(--claude-bg); color:var(--claude)}
+.badge.sheets{background:var(--sheets-bg); color:var(--sheets)}
+
+/* ===== Related list card ===== */
+.related-card{
+  background:#fff; border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px;
+}
+.related-head{
+  padding:8px 16px; border-bottom:1px solid var(--border-light);
+  display:flex; align-items:center; gap:8px; font-weight:700;
+}
+.related-head .count{color:var(--text-mute); font-weight:400; font-size:12px}
+.related-head .actions{margin-left:auto}
+
+/* ===== Activity Timeline ===== */
+.timeline{padding:8px 16px}
+.tl-item{display:flex; gap:10px; padding:8px 0; border-bottom:1px solid var(--border-light)}
+.tl-item:last-child{border-bottom:0}
+.tl-icon{
+  width:28px; height:28px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff;
+}
+.tl-icon.call{background:#76ded9}
+.tl-icon.mail{background:#fcb95b}
+.tl-icon.meet{background:#0176d3}
+.tl-icon.task{background:#4bca81}
+.tl-icon.cw{background:var(--chatwork)}
+.tl-icon.claude{background:var(--claude)}
+.tl-body{flex:1}
+.tl-meta{font-size:11px; color:var(--text-mute)}
+.tl-title{font-weight:700; margin-top:1px}
+.tl-desc{color:var(--text-2); margin-top:2px; font-size:12px}
+
+/* ===== Dashboard widgets ===== */
+.dash-grid{display:grid; grid-template-columns:repeat(12,1fr); gap:8px}
+.widget{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px}
+.widget.span-3{grid-column:span 3}
+.widget.span-4{grid-column:span 4}
+.widget.span-6{grid-column:span 6}
+.widget.span-8{grid-column:span 8}
+.widget.span-12{grid-column:span 12}
+.w-title{font-weight:700; font-size:13px; margin-bottom:6px; color:var(--text-2)}
+.w-big{font-size:28px; font-weight:700; line-height:1.1}
+.w-sub{font-size:11px; color:var(--text-mute); margin-top:2px}
+.w-sub.up{color:var(--success)}
+.w-sub.down{color:var(--error)}
+
+/* Bar chart (CSS only) */
+.bar-chart-wrap{padding:8px 0 0}
+.bar-chart{display:flex; align-items:flex-end; gap:6px; height:160px; padding:0 4px}
+.bar-chart .bar{
+  flex:1; background:linear-gradient(0deg,#0176d3,#4faae8);
+  border-radius:3px 3px 0 0; position:relative; display:flex; flex-direction:column;
+  justify-content:flex-end; align-items:center; min-width:0;
+}
+.bar-chart .bar .v{font-size:10px; color:var(--text-2); position:absolute; top:-16px}
+.bar-chart .bar .x{font-size:10px; color:var(--text-mute); position:absolute; bottom:-18px}
+
+/* Donut (conic-gradient) */
+.donut-wrap{display:flex; align-items:center; gap:14px; padding:6px 0}
+.donut{width:120px; height:120px; border-radius:50%}
+.legend{flex:1; font-size:12px}
+.lg-item{display:flex; align-items:center; gap:6px; padding:3px 0}
+.lg-dot{width:10px; height:10px; border-radius:2px}
+
+/* ===== Misc ===== */
+.help-text{color:var(--text-mute); font-size:11px}
+.crumb{font-size:11px; color:var(--text-mute); margin-bottom:4px}
+.crumb a{color:var(--text-mute); cursor:pointer}
+.crumb .sep{margin:0 4px; color:#bbb}
+
+/* ===== Callout (in-screen note) ===== */
+.callout{
+  background:var(--brand-50); border-left:3px solid var(--brand);
+  padding:10px 14px; border-radius:0 var(--radius) var(--radius) 0;
+  margin-bottom:10px; font-size:12px;
+}
+.callout.warn{background:var(--warn-bg); border-color:var(--warn)}
+.callout.success{background:var(--success-bg); border-color:var(--success)}
+.callout strong{font-weight:700}
+
+/* ===== Modal ===== */
+.modal-bg{
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.4);
+  z-index:2000; align-items:center; justify-content:center; padding:24px;
+}
+.modal-bg.active{display:flex}
+.modal{
+  background:#fff; border-radius:6px; max-width:880px; width:100%;
+  max-height:90vh; overflow:auto; box-shadow:0 8px 24px rgba(0,0,0,.2);
+}
+.modal-head{padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center}
+.modal-head .title{font-weight:700; font-size:15px; flex:1}
+.modal-head .close{cursor:pointer; font-size:20px; color:var(--text-mute)}
+.modal-body{padding:20px}
+.modal-foot{padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end}
+
+/* ===== Toast ===== */
+.toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:#181818; color:#fff; padding:12px 20px; border-radius:6px; font-size:13px;
+  box-shadow:0 4px 16px rgba(0,0,0,.3); opacity:0; pointer-events:none;
+  transition:opacity .25s, transform .25s; z-index:3000; max-width:90vw;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.success{background:#1b5e2f}
+
+/* ===== 帳票 / PDF プレビュー (見積書・請求書・契約書) ===== */
+.pdf-toolbar{
+  background:#3c3c3c; color:#eee; padding:6px 14px; font-size:12px;
+  display:flex; align-items:center; gap:12px; border-radius:6px 6px 0 0;
+}
+.pdf-page{
+  background:#fff; max-width:760px; margin:0 auto; padding:48px 56px;
+  box-shadow:0 2px 12px rgba(0,0,0,.15); font-size:13px; color:#222;
+}
+.pdf-hdr{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px}
+.pdf-title{font-size:24px; font-weight:700; letter-spacing:.3em; border-bottom:2px solid #222; padding-bottom:6px}
+.pdf-tbl{width:100%; border-collapse:collapse; margin:18px 0; font-size:12px}
+.pdf-tbl th{background:#333; color:#fff; padding:8px 10px; text-align:left}
+.pdf-tbl td{padding:8px 10px; border-bottom:1px solid #ddd}
+.pdf-tbl .num{text-align:right}
+.pdf-amount-box{border:2px solid #222; padding:10px 16px; display:inline-block; font-size:18px; font-weight:700; margin:10px 0}
+.pdf-stamp{
+  width:64px;height:64px;border:2px solid #d33;border-radius:50%;color:#d33;
+  display:flex;align-items:center;justify-content:center;font-size:11px;transform:rotate(-12deg);
+}
+.pdf-bottom{margin-top:32px; font-size:11px; color:#555}
+
+/* =====================================================================
+   論点パネル (.disc) ── デモ品質の核
+   画面ごとに「出典 / 論点 / ※要確認」を載せ、デモを意思決定文書にする。
+   bodyに class="disc-on" が付くと表示。右下トグルで全画面ON/OFF。
+   プレゼン中は隠し(clean)、FB/レビュー時は表示に切替える運用。
+   ===================================================================== */
+.disc{display:none}
+body.disc-on .disc{
+  display:block;
+  background:var(--disc-bg); border:1px solid var(--disc-border); border-left:4px solid var(--disc);
+  border-radius:0 var(--radius) var(--radius) 0; padding:10px 14px; margin:0 0 10px; font-size:12px;
+}
+.disc .disc-q{font-weight:700; color:var(--disc); margin-bottom:3px}
+.disc .disc-src{font-size:11px; color:var(--text-mute); margin-bottom:4px}
+.disc .disc-src::before{content:"📎 出典: "}
+.disc .disc-body{color:var(--text-2); line-height:1.6}
+.disc .disc-flag{
+  display:inline-block; background:var(--warn-bg); color:var(--warn);
+  font-weight:700; font-size:11px; padding:1px 7px; border-radius:8px; margin:0 2px;
+}
+.disc .disc-flag::before{content:"※要確認 "}
+/* 論点トグル（右下固定） */
+.disc-toggle{
+  position:fixed; right:18px; bottom:18px; z-index:2500;
+  background:var(--disc); color:#fff; border:0; border-radius:20px;
+  padding:9px 16px; font-size:13px; font-weight:700; box-shadow:0 3px 10px rgba(0,0,0,.25);
+}
+.disc-toggle:hover{filter:brightness(1.05)}
+body.disc-on .disc-toggle{background:#fff; color:var(--disc); border:1px solid var(--disc-border)}
+
+/* ===== Responsive ===== */
+@media(max-width:1000px){
+  .dash-grid{grid-template-columns:repeat(4,1fr)}
+  .widget.span-3,.widget.span-4{grid-column:span 2}
+  .widget.span-6,.widget.span-8,.widget.span-12{grid-column:span 4}
+  .gh-search{display:none}
+}
+</style>
+<style>
+/* ===== 案件固有スタイル ===== */
+:root{ --af:#5a1ba9; --af-2:#7f3fe0; --af-bg:#f5f0fd; --af-border:#dccdf6; }
+.obj-icon.member{background:#7f8de1}
+.obj-icon.reserve{background:#3ba755}
+.obj-icon.af{background:linear-gradient(135deg,var(--af),#1b96ff)}
+.demo-note{font-size:11px;color:var(--text-mute);margin:4px 0 8px}
+
+/* Service Console 風のワークスペースタブ */
+.app-bar .nav-menu{padding:10px 14px;font-weight:700;color:var(--text);border-right:1px solid var(--border);margin-right:4px;white-space:nowrap}
+.app-bar .tab .x{margin-left:8px;color:var(--text-mute);font-size:11px}
+.app-bar .tab .ws{display:inline-block;width:8px;height:8px;border-radius:2px;background:#f2cf5b;margin-right:6px}
+
+/* ケースの本文（受信メール） */
+.mail-box{border:1px solid var(--border-light);border-radius:4px;background:#fafaf9;padding:10px 12px;line-height:1.75;white-space:pre-wrap;font-size:13px}
+.mail-meta{font-size:12px;color:var(--text-mute);margin-bottom:6px}
+.composer textarea{width:100%;min-height:150px;border:1px solid var(--border);border-radius:4px;padding:8px;font:inherit;font-size:13px;line-height:1.7}
+.composer .row{display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:12px}
+.composer .row .k{width:44px;color:var(--text-mute)}
+.composer .row input{flex:1;border:1px solid var(--border);border-radius:4px;padding:5px 8px;font:inherit;font-size:13px}
+
+/* ヘッダの Agentforce ボタン */
+.gh-actions .af-launch{background:linear-gradient(135deg,var(--af),#1b96ff);color:#fff;border-radius:14px;padding:4px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+
+/* ===== Agentforce パネル（右下） ===== */
+.af-fab{position:fixed;right:18px;bottom:66px;z-index:2400;width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;
+  background:linear-gradient(135deg,var(--af),#1b96ff);color:#fff;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.af-panel{position:fixed;right:18px;bottom:66px;z-index:2450;width:420px;height:calc(100vh - 150px);max-height:760px;
+  background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.25);display:none;flex-direction:column;overflow:hidden}
+.af-panel.open{display:flex}
+.af-top{display:flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(90deg,var(--af),#3d4fd8);color:#fff}
+.af-top .ttl{font-weight:700;font-size:14px;flex:1}
+.af-top .ttl small{display:block;font-weight:400;font-size:11px;opacity:.85}
+.af-top button{background:rgba(255,255,255,.15);border:0;color:#fff;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer}
+.af-ctx{font-size:11px;padding:6px 12px;background:var(--af-bg);border-bottom:1px solid var(--af-border);color:var(--af)}
+.af-ctx b{color:var(--text)}
+.af-log{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px;background:#fbfafd}
+.af-m{max-width:92%;font-size:13px;line-height:1.65}
+.af-m.bot{align-self:flex-start}
+.af-m.user{align-self:flex-end;background:var(--brand);color:#fff;padding:8px 12px;border-radius:12px 12px 2px 12px}
+.af-m.bot .b{background:#fff;border:1px solid var(--af-border);border-radius:2px 12px 12px 12px;padding:9px 12px}
+.af-m .who{font-size:10px;color:var(--af);font-weight:700;margin-bottom:2px}
+.af-steps{font-size:12px;background:#fff;border:1px dashed var(--af-border);border-radius:8px;padding:8px 10px}
+.af-steps .st{display:flex;gap:6px;padding:2px 0;color:var(--text-2)}
+.af-steps .st .ic{width:16px;text-align:center}
+.af-steps .st.wait{color:var(--text-mute)}
+.af-steps .st.skip{color:var(--warn)}
+.draft{background:#fff;border:1px solid var(--af-border);border-radius:8px;overflow:hidden}
+.draft .dh{background:var(--af-bg);padding:6px 10px;font-size:12px;font-weight:700;color:var(--af);display:flex;align-items:center;gap:6px}
+.draft .esc{background:#fef0e6;border-bottom:1px solid #f9c99f;color:#8c4b02;font-size:12px;padding:7px 10px;line-height:1.6}
+.draft .txt{padding:10px 12px;white-space:pre-wrap;font-size:13px;line-height:1.75}
+.draft .sec{border-top:1px solid var(--border-light);padding:7px 10px;font-size:12px}
+.draft .sec .h{font-weight:700;color:var(--text-2);margin-bottom:3px}
+.draft .sec ul{margin:0;padding-left:16px}
+.draft .sec li{margin:2px 0}
+.draft .acts{border-top:1px solid var(--border-light);padding:7px 10px;display:flex;gap:6px;flex-wrap:wrap;background:#fafaf9}
+.kakunin{background:#fff3c4;color:#7a4b00;font-weight:700;padding:0 3px;border-radius:2px}
+.src-tag{display:inline-block;font-size:10px;border-radius:8px;padding:0 6px;margin-right:4px;background:#eef4ff;color:#0b5cab;border:1px solid #cfe0fb}
+.src-tag.hide{background:#f3f3f3;color:#706e6b;border-color:#ddd}
+.src-tag.nouse{background:#fdecec;color:#ba0517;border-color:#f6c2c2}
+.af-chips{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;border-top:1px solid var(--border-light)}
+.af-chip{border:1px solid var(--af-border);background:var(--af-bg);color:var(--af);border-radius:14px;padding:5px 12px;font-size:12px;cursor:pointer}
+.af-chip:hover{background:#ebe1fb}
+.af-input{display:flex;gap:6px;padding:8px 12px;border-top:1px solid var(--border-light)}
+.af-input input{flex:1;border:1px solid var(--border);border-radius:16px;padding:7px 12px;font:inherit;font-size:13px}
+.af-foot{font-size:10px;color:var(--text-mute);padding:0 12px 8px}
+@media(max-width:700px){.af-panel{right:8px;left:8px;width:auto}}
+
+/* 項目の扱いバッジ（Q7） */
+.ftag{display:inline-block;font-size:10px;font-weight:700;border-radius:8px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+.ftag.hide{background:#ecebea;color:#3e3e3c}
+.ftag.nouse{background:var(--error-bg);color:var(--error)}
+.masked{color:var(--text-mute);letter-spacing:2px}
+
+/* 共有の流れ・選択肢 */
+.flow{display:flex;gap:6px;align-items:stretch;flex-wrap:wrap}
+.flow .fs{flex:1;min-width:150px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;line-height:1.6}
+.flow .fs b{display:block;font-size:12px;color:var(--brand-dark);margin-bottom:2px}
+.flow .arr{align-self:center;color:var(--text-mute)}
+.opt-tbl td,.opt-tbl th{vertical-align:top;line-height:1.6}
+.hl-row td{background:#fffbea}
+.feed-post{border:1px solid var(--border-light);border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:12px;line-height:1.7;background:#fff}
+.feed-post .fm{color:var(--text-mute);font-size:11px;margin-bottom:3px}
+.feed-post .q{background:#fafaf9;border-left:3px solid var(--af-border);padding:4px 8px;margin:4px 0;white-space:pre-wrap}
+.mention{color:var(--brand);font-weight:700}
+.place{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(max-width:1000px){.place{grid-template-columns:1fr}}
+.place .card-body{font-size:12px;line-height:1.7}
+.who-badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:var(--brand-50);color:var(--brand-dark);margin-left:6px}
+</style>
+</head>
+<body>
+
+<!-- ========================= グローバルヘッダ ========================= -->
+<div class="global-header">
+  <div class="app-launcher" title="アプリランチャー"></div>
+  <div class="app-name">Service Console <span class="sub">株式会社サイエンス・オブ・エンライトメント（Sandbox・デモ）</span></div>
+  <div class="gh-spacer"></div>
+  <div class="gh-search"><span style="color:#706e6b">🔍</span><input placeholder="ケース・取引先・研修予約を検索..." onkeydown="if(event.key==='Enter'){goPage('drafts');}"></div>
+  <div class="gh-actions">
+    <div class="af-launch" onclick="afToggle()" title="Agentforce">✦ Agentforce</div>
+    <div class="icon-btn" title="通知">🔔</div>
+    <div class="icon-btn" title="ヘルプ">❓</div>
+    <div class="gh-user" title="中村 さくら（サポート担当・架空）">中村</div>
+  </div>
+</div>
+
+<!-- ========================= ワークスペースタブ（業務の順） ========================= -->
+<div class="app-bar">
+  <div class="nav-menu">ケース ▾</div>
+  <div class="tab active" data-page="case-list">① ケース一覧</div>
+  <div class="tab" data-page="case-detail"><span class="ws"></span>② 00001234 応用研修のキャンセル <span class="x">✕</span></div>
+  <div class="tab" data-page="member-detail">②' 鈴木 美咲（会員）</div>
+  <div class="tab" data-page="case-nolink"><span class="ws"></span>③ 00001240 会員ひも付きなし <span class="x">✕</span></div>
+  <div class="tab" data-page="drafts">④ 返信案の保存・検索・共有</div>
+  <div class="tab" data-page="history">⑤ 会話履歴</div>
+  <div class="tab" data-page="metrics">⑥ 効果測定</div>
+</div>
+
+<div class="main">
+
+  <!-- =======================================================
+       ① ケース一覧
+       ======================================================= -->
+  <div class="page active" id="case-list">
+    <div class="disc">
+      <div class="disc-q">論点：第1弾の対象は「研修予約の変更・キャンセル」の1ジャンル。担当者がケースを開いて頼んだときだけ動かす</div>
+      <div class="disc-src">要件定義書 v0.1 §2-1・§2-2（メール受信をきっかけにした自動実行はしない。クレジット消費を抑えるため）</div>
+      <div class="disc-body">一覧の「ジャンル」列は説明用です。実際はエージェントがケースを読んだときに仮判定します（get_case_context）。会員サイトの問い合わせなど対象外のジャンルは、FAQだけを根拠にした参考案にとどめます。
+        <br><span class="disc-flag"></span>ケース化されていない問い合わせ（電話など）があるか。担当者が今どこから返信を送っているか（Salesforce か外部のメールソフトか、U-13）</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon case">💼</div>
+      <div class="obj-title"><div class="label">ケース</div><div class="name">未対応の問い合わせ（メール） <span style="color:var(--text-mute);font-weight:400">▼</span></div></div>
+      <div class="obj-actions"><button class="btn" onclick="toast('（モック）リストビューの表示条件を変更')">⚙</button><button class="btn" onclick="toast('（モック）新規ケース')">新規</button></div>
+    </div></div>
+    <div class="demo-note">5件の項目・並び替え: 受付日時 ・ このデモで開けるのは 00001234 と 00001240 の2件です（会員・ケースはすべて架空）</div>
+    <table class="tbl">
+      <thead><tr><th>ケース番号</th><th>件名</th><th>取引先名（会員）</th><th>Web メール</th><th>ジャンル（説明用）</th><th>受付日時</th><th>状況</th></tr></thead>
+      <tbody>
+        <tr><td><a class="name-link" data-go="case-detail">00001234</a></td><td><a class="name-link" data-go="case-detail">応用研修のキャンセルについて</a></td><td>鈴木 美咲</td><td>misaki.suzuki@example.com</td><td>キャンセル</td><td>2026/10/21 9:42</td><td><span class="badge warn">新規</span></td></tr>
+        <tr><td><a class="name-link" data-go="case-nolink">00001240</a></td><td><a class="name-link" data-go="case-nolink">1月の基礎研修の申し込みについて</a></td><td><span style="color:var(--error)">（ひも付きなし）</span></td><td>takahashi-home@example.com</td><td>予約変更</td><td>2026/10/21 10:05</td><td><span class="badge warn">新規</span></td></tr>
+        <tr><td><a class="name-link" onclick="toast('このデモで開けるのは 00001234 と 00001240 です')">00001231</a></td><td>11月の研修日を変更したいです</td><td>山田 花子</td><td>hanako.yamada@example.com</td><td>予約変更</td><td>2026/10/20 18:10</td><td><span class="badge warn">新規</span></td></tr>
+        <tr><td><a class="name-link" onclick="toast('このデモで開けるのは 00001234 と 00001240 です')">00001229</a></td><td>本日の研修を欠席します</td><td>佐藤 一郎</td><td>ichiro.sato@example.com</td><td>キャンセル</td><td>2026/10/20 8:30</td><td><span class="badge info">対応中</span></td></tr>
+        <tr><td><a class="name-link" onclick="toast('このデモで開けるのは 00001234 と 00001240 です')">00001226</a></td><td>会員サイトに入れません</td><td>田中 健</td><td>ken.tanaka@example.com</td><td><span class="badge gray">対象外（参考案）</span></td><td>2026/10/19 21:14</td><td><span class="badge info">対応中</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- =======================================================
+       ② ケース詳細（返信案を作成）
+       ======================================================= -->
+  <div class="page" id="case-detail">
+    <div class="disc">
+      <div class="disc-q">論点：ケースを開いて右下の Agentforce に「返信案を作成」と頼む。ケース → 会員 → 研修予約 → 請求 → FAQ の順に読んでから下書きを返す</div>
+      <div class="disc-src">AgentSpec「Behavioral Intent」／要件定義書 §3-2 手順2〜4・§4-3</div>
+      <div class="disc-body">下書きと一緒に「根拠」と「送る前に確かめてほしいこと」を返します。キャンセル料はルールを整備中（Q3回答）なので、金額は書かずに<span class="kakunin">要確認</span>として残します。返金の相談が含まれるため、冒頭に「上長確認を推奨」が出ます。
+        <br><span class="disc-flag"></span>表示中のケースIDをエージェントに渡せるか（U-14・Sandboxで検証。渡せなければケース番号を入力する運用）
+        <br><span class="disc-flag"></span>キャンセル料は常に「要確認」でよいか、上長確認に回すか（U-04。推奨は「要確認」、返金を伴うものだけ上長確認）</div>
+    </div>
+    <div class="disc">
+      <div class="disc-q">論点：請求を第1弾で参照するか（U-05）／Q2「キャンセルとみなす」条件</div>
+      <div class="disc-src">Q4回答「Salesforceの各オブジェクトで確認できる。研修や販売でそれぞれ管理」／Q2回答「予約履歴にキャンセルで、0／欠席でも、0／開催日よりも前に0の人がキャンセルとみなす」</div>
+      <div class="disc-body">デモでは請求も読んだ場合を見せています。Glueの推奨は「第1弾は参照しない（予約の変更・キャンセルに絞る）、オブジェクト名だけ今日伺う」です。
+        <br><span class="disc-flag"></span>研修・販売の請求オブジェクト名。Q2の「0」が何の値か（その場で画面か項目名を見せていただきたい、U-17）</div>
+    </div>
+    <div class="crumb"><a data-go="case-list">ケース</a><span class="sep">›</span>00001234</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon case">💼</div>
+      <div class="obj-title"><div class="label">ケース</div><div class="name">00001234 応用研修のキャンセルについて</div></div>
+      <div class="obj-actions"><button class="btn" onclick="toast('（モック）所有者の変更')">所有者の変更</button><button class="btn" onclick="toast('（モック）編集')">編集</button><button class="btn primary" onclick="afOpen();afRun('main')">✦ 返信案を作成</button></div>
+    </div></div>
+    <div class="path-label">状況 <span class="badge warn">新規</span></div>
+    <div class="path">
+      <div class="stage current">新規</div>
+      <div class="stage">対応中</div>
+      <div class="stage">上長確認</div>
+      <div class="stage">返信済み</div>
+      <div class="stage">完了</div>
+    </div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">取引先名（会員）</div><div class="val"><a data-go="member-detail">鈴木 美咲</a></div></div>
+      <div class="item"><div class="lbl">ケース発生源</div><div class="val">メール</div></div>
+      <div class="item"><div class="lbl">受付日時</div><div class="val">2026/10/21 9:42</div></div>
+      <div class="item"><div class="lbl">ケース所有者</div><div class="val">中村 さくら</div></div>
+      <div class="item"><div class="lbl">優先度</div><div class="val">中</div></div>
+    </div>
+    <div class="two-col-3">
+      <div>
+        <div class="card">
+          <div class="card-head">✉ 受信したメール</div>
+          <div class="card-body">
+            <div class="mail-meta">差出人: 鈴木 美咲 &lt;misaki.suzuki@example.com&gt; ・ 2026/10/21 9:42</div>
+            <div class="mail-box">件名: 応用研修のキャンセルについて
+
+いつもお世話になっております。鈴木です。
+12月12日（土）の応用研修を予約していますが、家の事情で参加が難しくなりました。
+キャンセルをお願いできますでしょうか。
+キャンセル料はかかりますか。また、お支払いした受講料はどうなりますか。
+
+よろしくお願いいたします。</div>
+          </div>
+        </div>
+        <div class="card composer">
+          <div class="card-head">✉ メール（返信）<span class="who-badge">送信は担当者が行う</span></div>
+          <div class="card-body">
+            <div class="row"><span class="k">宛先</span><input value="misaki.suzuki@example.com"></div>
+            <div class="row"><span class="k">件名</span><input value="Re: 応用研修のキャンセルについて"></div>
+            <textarea id="composerBody" placeholder="Agentforce の返信案を「メールに挿入」すると、ここに入ります（モック）"></textarea>
+            <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+              <button class="btn" onclick="toast('（モック）テンプレートを挿入')">テンプレート</button>
+              <button class="btn primary" onclick="toast('（モック）送信は担当者の操作。エージェントは自動送信しません','success')">送信</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">📝 ケース詳細</div>
+          <div class="card-body"><div class="field-grid">
+            <div class="field"><div class="lbl">Web メール</div><div class="val">misaki.suzuki@example.com</div></div>
+            <div class="field"><div class="lbl">会員とのひも付け</div><div class="val">メールアドレスで自動（Q6回答）</div></div>
+            <div class="field"><div class="lbl">種別</div><div class="val">研修予約</div></div>
+            <div class="field"><div class="lbl">ケース発生源</div><div class="val">メール</div></div>
+          </div></div>
+        </div>
+      </div>
+      <div>
+        <div class="related-card">
+          <div class="related-head">📅 研修予約 <span class="count">(3)</span></div>
+          <table class="tbl">
+            <tr><td><a class="name-link" data-go="member-detail">応用研修 12/12（土）13:00</a></td><td><span class="badge info">予約済み</span></td></tr>
+            <tr><td>基礎研修 2026/06/14</td><td><span class="badge gray">キャンセル扱い ※</span></td></tr>
+            <tr><td>基礎研修 2026/03/08</td><td><span class="badge success">受講済み</span></td></tr>
+          </table>
+          <div class="demo-note" style="padding:0 12px 8px">※ キャンセルの判定条件は未確定（Q2の「0」）</div>
+        </div>
+        <div class="related-card">
+          <div class="related-head">💴 研修請求 <span class="count">(1)</span></div>
+          <table class="tbl"><tr><td>応用研修 受講料</td><td><span class="badge success">入金済み</span></td></tr></table>
+        </div>
+        <div class="related-card">
+          <div class="related-head">📞 活動 <span class="count">(1)</span></div>
+          <div class="timeline">
+            <div class="tl-item"><div class="tl-icon mail">✉</div><div class="tl-body"><div class="tl-meta">2026/10/21 9:42</div><div class="tl-title">メール受信: 応用研修のキャンセルについて</div><div class="tl-desc">misaki.suzuki@example.com</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       ②' 会員（個人取引先）
+       ======================================================= -->
+  <div class="page" id="member-detail">
+    <div class="disc">
+      <div class="disc-q">論点：会員は個人取引先。返信案に「書かない情報」を2区分で扱う</div>
+      <div class="disc-src">Q1回答（会員は個人取引先。Pardot と同期したいときは Contact 側の項目を更新）／Q7回答（「個人取引先の注意事項」「秘宝など門外不出の情報の項目」は省きたい。考慮はしてほしいが文章には書かれたくない項目もある）</div>
+      <div class="disc-body"><b>参照しない</b>: エージェントに渡さない（取得対象から外すので確実に出ない）。<b>参照するが出力しない</b>: エージェントには渡し、下書きの文には書かせない（指示文で抑えるため、確実に守れるかはテストT5で検証）。デモでは門外不出の項目の中身を表示していません。
+        <br><span class="disc-flag"></span>どの項目をどちらに分けるか、一覧をいつ頂けるか（U-03。推奨は第1弾はすべて「参照しない」、2区分は一覧が出てから）</div>
+    </div>
+    <div class="disc">
+      <div class="disc-q">論点：値が入っていない項目は使わない。除外した項目の一覧は Glue が作って確認いただく</div>
+      <div class="disc-src">Q5回答／要件定義書 §5-2（U-18）</div>
+      <div class="disc-body">Sandbox で項目ごとに「使う／不足／対象外」を判定し、対象外にした項目の一覧をお渡しします。<span class="disc-flag"></span>一覧を渡す時期（Sandbox で項目を判定した週の定例を想定）</div>
+    </div>
+    <div class="crumb"><a data-go="case-detail">00001234</a><span class="sep">›</span>鈴木 美咲</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon member">👤</div>
+      <div class="obj-title"><div class="label">個人取引先</div><div class="name">鈴木 美咲</div></div>
+      <div class="obj-actions"><button class="btn" onclick="toast('（モック）編集')">編集</button></div>
+    </div></div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">会員種別</div><div class="val">正会員</div></div>
+      <div class="item"><div class="lbl">会員番号</div><div class="val">M-000123</div></div>
+      <div class="item"><div class="lbl">メール</div><div class="val">misaki.suzuki@example.com</div></div>
+      <div class="item"><div class="lbl">電話</div><div class="val">090-0000-0123</div></div>
+    </div>
+    <div class="two-col-3">
+      <div>
+        <div class="card">
+          <div class="card-head">📝 詳細</div>
+          <div class="sec-title">会員情報（エージェントが読む）</div>
+          <div class="card-body"><div class="field-grid">
+            <div class="field"><div class="lbl">氏名</div><div class="val">鈴木 美咲</div></div>
+            <div class="field"><div class="lbl">会員種別</div><div class="val">正会員</div></div>
+            <div class="field"><div class="lbl">入会日</div><div class="val">2025/04/01</div></div>
+            <div class="field"><div class="lbl">Pardot 同期項目</div><div class="val">Contact 側で管理（Q1回答）</div></div>
+          </div></div>
+          <div class="sec-title">返信案に書かない情報（Q7）</div>
+          <div class="card-body"><div class="field-grid">
+            <div class="field full"><div class="lbl">個人取引先の注意事項 <span class="ftag hide">参照するが出力しない（案）</span></div><div class="val">連絡はメールのみ希望。電話は控える（架空の例）</div></div>
+            <div class="field full"><div class="lbl">門外不出の情報の項目（「秘宝」など） <span class="ftag nouse">参照しない（案）</span></div><div class="val masked">■■■■■■（デモでは中身を表示しません）</div></div>
+          </div></div>
+        </div>
+      </div>
+      <div>
+        <div class="related-card">
+          <div class="related-head">📅 研修予約 <span class="count">(3)</span></div>
+          <table class="tbl">
+            <thead><tr><th>研修</th><th>開催日</th><th>状態</th></tr></thead>
+            <tr><td>応用研修</td><td>2026/12/12</td><td><span class="badge info">予約済み</span></td></tr>
+            <tr><td>基礎研修</td><td>2026/06/14</td><td><span class="badge gray">キャンセル扱い ※</span></td></tr>
+            <tr><td>基礎研修</td><td>2026/03/08</td><td><span class="badge success">受講済み</span></td></tr>
+          </table>
+          <div class="demo-note" style="padding:0 12px 8px">※ 判定条件は未確定（Q2の「0」）。オブジェクト名・項目名も Sandbox で確認</div>
+        </div>
+        <div class="related-card">
+          <div class="related-head">💴 研修請求 <span class="count">(2)</span></div>
+          <table class="tbl">
+            <tr><td>応用研修 受講料</td><td class="num">33,000円</td><td><span class="badge success">入金済み</span></td></tr>
+            <tr><td>基礎研修 受講料</td><td class="num">22,000円</td><td><span class="badge success">入金済み</span></td></tr>
+          </table>
+        </div>
+        <div class="related-card">
+          <div class="related-head">🛒 販売請求 <span class="count">(0)</span></div>
+          <div class="demo-note" style="padding:6px 12px">オブジェクト名は要確認（Q4回答）</div>
+        </div>
+        <div class="related-card">
+          <div class="related-head">💼 ケース <span class="count">(1)</span></div>
+          <table class="tbl"><tr><td><a class="name-link" data-go="case-detail">00001234 応用研修のキャンセルについて</a></td><td><span class="badge warn">新規</span></td></tr></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       ③ 会員がひも付かないケース
+       ======================================================= -->
+  <div class="page" id="case-nolink">
+    <div class="disc">
+      <div class="disc-q">論点：家族で同じメールアドレスを使っていて会員がひも付かないとき、エージェントは推測で会員を決めない</div>
+      <div class="disc-src">Q6回答（ケースと会員はメールアドレスで自動ひも付け。ひも付かないときは担当者がその都度確認。家族など同じアドレスだと紐付かない場合がある）／要件定義書 T7・U-12</div>
+      <div class="disc-body">右下の Agentforce に頼むと、会員を特定できない旨を返し、予約・請求は読みません。担当者が会員を指定すると、その会員で返信案を作ります（案A）。
+        <br><span class="disc-flag"></span>案A「特定できない旨を出して担当者に聞く」と案B「候補の会員を複数出す」のどちらにするか（推奨はA。候補の氏名を並べると、別の家族の情報を見せてしまうおそれがあるため）</div>
+    </div>
+    <div class="crumb"><a data-go="case-list">ケース</a><span class="sep">›</span>00001240</div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon case">💼</div>
+      <div class="obj-title"><div class="label">ケース</div><div class="name">00001240 1月の基礎研修の申し込みについて</div></div>
+      <div class="obj-actions"><button class="btn" onclick="toast('（モック）編集')">編集</button><button class="btn primary" onclick="afOpen();afRun('nolink')">✦ 返信案を作成</button></div>
+    </div></div>
+    <div class="path-label">状況 <span class="badge warn">新規</span></div>
+    <div class="path">
+      <div class="stage current">新規</div><div class="stage">対応中</div><div class="stage">上長確認</div><div class="stage">返信済み</div><div class="stage">完了</div>
+    </div>
+    <div class="highlights">
+      <div class="item"><div class="lbl">取引先名（会員）</div><div class="val" style="color:var(--error)">（空欄）</div></div>
+      <div class="item"><div class="lbl">Web メール</div><div class="val">takahashi-home@example.com</div></div>
+      <div class="item"><div class="lbl">受付日時</div><div class="val">2026/10/21 10:05</div></div>
+      <div class="item"><div class="lbl">ケース所有者</div><div class="val">中村 さくら</div></div>
+    </div>
+    <div class="callout warn" style="margin-bottom:8px"><strong>会員がひも付いていません。</strong> このメールアドレスは複数の個人取引先に登録されています（家族で共用）。</div>
+    <div class="two-col-3">
+      <div>
+        <div class="card">
+          <div class="card-head">✉ 受信したメール</div>
+          <div class="card-body">
+            <div class="mail-meta">差出人: takahashi-home@example.com ・ 2026/10/21 10:05</div>
+            <div class="mail-box">件名: 1月の基礎研修の申し込みについて
+
+お世話になっております。高橋です。
+1月の基礎研修に申し込んだのですが、日程を2月の回に変えることはできますか。
+
+よろしくお願いします。</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="related-card">
+          <div class="related-head">📅 研修予約 <span class="count">(0)</span></div>
+          <div class="demo-note" style="padding:6px 12px">会員がひも付いていないため表示されません</div>
+        </div>
+        <div class="related-card">
+          <div class="related-head">📞 活動 <span class="count">(1)</span></div>
+          <div class="timeline">
+            <div class="tl-item"><div class="tl-icon mail">✉</div><div class="tl-body"><div class="tl-meta">2026/10/21 10:05</div><div class="tl-title">メール受信</div><div class="tl-desc">takahashi-home@example.com</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       ④ 返信案の保存・検索・共有（相談①③）
+       ======================================================= -->
+  <div class="page" id="drafts">
+    <div class="disc">
+      <div class="disc-q">論点（相談①）：下書きはデータとして保存され、あとから検索できるか</div>
+      <div class="disc-src">Q1〜Q7回答に添えられた相談①／要件定義書 §3-3・U-06</div>
+      <div class="disc-body">残したいのが「送った文面」なら、Salesforce から送信したメールはケースに残り、検索できます（標準）。「AIの下書きそのもの」を残したいなら、ケースに保存する仕組みが別に要ります。新しいオブジェクトは作らない方針（#15）なので、ケースの項目かフィード投稿に残す案を考えています。
+        <br><span class="disc-flag"></span>残したいのは送った文面か、AIの下書きか
+        <br><span class="disc-flag"></span>製品の挙動は Sandbox で検証してから正式に回答します（このページの画面はすべて方向性を示すモックです）</div>
+    </div>
+    <div class="disc">
+      <div class="disc-q">論点（相談③）：下書きの共有・共同編集のワークフロー</div>
+      <div class="disc-src">相談③／要件定義書 §3-3（第1弾では下書きは頼んだ担当者にだけ返る想定）</div>
+      <div class="disc-body">Googleドキュメントのように複数人が同時に書き込む編集は、標準のケース画面にはない想定です。ケースのフィードに下書きを投稿して上長を @メンションし、コメントで直しを受けて担当者が仕上げる流れを提案します。
+        <br><span class="disc-flag"></span>今、上長確認をどう回しているか。共有したい相手は上長だけか、担当者同士もか</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon af">✦</div>
+      <div class="obj-title"><div class="label">相談①③への回答の方向</div><div class="name">返信案の保存・検索・共有</div></div>
+      <div class="obj-actions"><span class="badge warn">※要確認：Sandbox で検証</span></div>
+    </div></div>
+
+    <div class="card">
+      <div class="card-head">保存先の選択肢（新しいオブジェクトは作らない前提）</div>
+      <div class="card-body" style="padding:0">
+        <table class="tbl opt-tbl">
+          <thead><tr><th style="width:18%">案</th><th>残るもの</th><th>検索</th><th>共有</th><th>追加の作り込み</th></tr></thead>
+          <tr><td><b>A. 送信メールで残す</b></td><td>担当者が直して送った文面（ケースのメール・活動）</td><td>グローバル検索・ケースのリストビュー</td><td>ケースを開ける人なら見られる</td><td>なし（標準）。ただし Salesforce から送る運用が前提（U-13）</td></tr>
+          <tr class="hl-row"><td><b>B. ケースに「AI返信案」を保存</b><br><span class="badge info">推奨候補</span></td><td>AIの下書き（最新1件）＋作成者・日時</td><td>リストビューで「AI返信案あり」を絞り込み。長いテキスト項目が検索対象になるかは要検証</td><td>ケースを開ける人なら見られる</td><td>ケースに項目を2〜3個追加。パネルの「ケースに保存」ボタンの作り込み</td></tr>
+          <tr><td><b>C. ケースのフィードに投稿</b></td><td>AIの下書き（版ごとに残る）とコメントのやり取り</td><td>フィード検索</td><td>@メンションで上長に通知、コメントで直し</td><td>投稿は手作業ならなし。ボタン化するなら作り込み</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head">🔍 検索の例：「キャンセル料」で探す（モック）</div>
+        <div class="card-body" style="padding:0">
+          <table class="tbl">
+            <thead><tr><th>種別</th><th>件名・内容</th><th>ケース</th><th>日付</th></tr></thead>
+            <tr><td><span class="badge claude">AI返信案</span></td><td>…キャンセル料につきましては<span class="kakunin">要確認</span>…</td><td><a class="name-link" data-go="case-detail">00001234</a></td><td>10/21</td></tr>
+            <tr><td><span class="badge info">送信メール</span></td><td>Re: 当日のキャンセルについて …キャンセル料は…</td><td>00001198</td><td>10/14</td></tr>
+            <tr><td><span class="badge gray">フィード</span></td><td>@小林 キャンセル料の扱い、この文面で大丈夫でしょうか</td><td>00001198</td><td>10/14</td></tr>
+          </table>
+          <div class="demo-note" style="padding:6px 12px">3件・すべて架空。どの種別が検索結果に出るかは Sandbox で検証</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">💬 ケースのフィードで上長に共有（案C・モック）</div>
+        <div class="card-body">
+          <div class="feed-post">
+            <div class="fm">中村 さくら ・ 2026/10/21 10:20 ・ ケース 00001234</div>
+            <span class="mention">@小林 部長</span> 返金の相談があり、上長確認を推奨と出ました。下書きを確認お願いします。
+            <div class="q">鈴木 美咲 様
+…12月12日（土）の応用研修について、キャンセルのご希望を承りました。
+キャンセル料につきましては<span class="kakunin">要確認</span>…</div>
+          </div>
+          <div class="feed-post" style="margin-left:24px">
+            <div class="fm">小林 部長 ・ 2026/10/21 10:48</div>
+            受講料は全額返金で。金額は請求を見て書いてください。キャンセル料はなしでOK。
+          </div>
+          <div class="feed-post" style="margin-left:24px">
+            <div class="fm">中村 さくら ・ 2026/10/21 11:02</div>
+            修正して送信しました。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">共有・確認の流れ（案）</div>
+      <div class="card-body">
+        <div class="flow">
+          <div class="fs"><b>1. 担当者が依頼</b>ケースを開き、右下の Agentforce で返信案を作成</div><div class="arr">→</div>
+          <div class="fs"><b>2. 保存</b>「ケースに保存」でケースに残す（案B）</div><div class="arr">→</div>
+          <div class="fs"><b>3. 上長に共有</b>上長確認が出たものはフィードに投稿し @メンション（案C）</div><div class="arr">→</div>
+          <div class="fs"><b>4. 上長がコメント</b>直してほしい点をコメント。文面の編集は担当者が行う</div><div class="arr">→</div>
+          <div class="fs"><b>5. 担当者が送信</b>送ったメールはケースに残る（案A）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       ⑤ 会話履歴（相談②）
+       ======================================================= -->
+  <div class="page" id="history">
+    <div class="disc">
+      <div class="disc-q">論点（相談②）：右下のチャットは毎回初回から始まる。前回までの会話はどこで確かめるか</div>
+      <div class="disc-src">相談②／要件定義書 §3-3・§7-3</div>
+      <div class="disc-body">担当者が日々見返す場所は「ケース」に寄せるのが確実と考えています（保存した返信案・フィード・送信メールがケースの活動に並ぶ）。パネル自体の会話履歴を担当者が見返せるか、管理者向けのログでどこまで追えるかは製品仕様の確認が要ります。
+        <br><span class="disc-flag"></span>パネルの会話履歴の見返し可否、管理者ログの範囲と保存期間は Sandbox で検証してから回答します
+        <br><span class="disc-flag"></span>見返したいのは「前回の下書きの文面」か「AIとのやり取りそのもの」か</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon af">✦</div>
+      <div class="obj-title"><div class="label">相談②への回答の方向</div><div class="name">前回までの会話履歴の確認場所</div></div>
+      <div class="obj-actions"><span class="badge warn">※要確認：Sandbox で検証</span></div>
+    </div></div>
+    <div class="callout" style="margin-bottom:8px">デモの右下パネルも、ケースを切り替えると新しい会話になります（ご相談の挙動を再現）。下の3か所が前回の内容を確かめる候補です。</div>
+    <div class="place">
+      <div class="card">
+        <div class="card-head">① ケースの活動・フィード <span class="who-badge">担当者</span> <span class="badge success" style="margin-left:auto">推奨</span></div>
+        <div class="card-body">
+          保存した返信案、上長とのやり取り、送ったメールが時系列で並びます。チャットが初回から始まっても、ケースを開けば前回の状況が分かります。
+          <div class="timeline" style="margin-top:8px">
+            <div class="tl-item"><div class="tl-icon mail">✉</div><div class="tl-body"><div class="tl-meta">10/21 9:42</div><div class="tl-title">メール受信</div></div></div>
+            <div class="tl-item"><div class="tl-icon claude">AI</div><div class="tl-body"><div class="tl-meta">10/21 10:15</div><div class="tl-title">AI返信案を保存（中村）</div><div class="tl-desc">上長確認を推奨・要確認1件</div></div></div>
+            <div class="tl-item"><div class="tl-icon task">💬</div><div class="tl-body"><div class="tl-meta">10/21 10:20</div><div class="tl-title">フィード: @小林 部長 に確認依頼</div></div></div>
+            <div class="tl-item"><div class="tl-icon mail">✉</div><div class="tl-body"><div class="tl-meta">10/21 11:02</div><div class="tl-title">メール送信（中村）</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">② パネルの会話履歴 <span class="who-badge">担当者</span> <span class="badge warn" style="margin-left:auto">要検証</span></div>
+        <div class="card-body">
+          右下の Agentforce パネルで、過去の会話を開き直せるか。開けるとしても、どのケースの会話かを担当者が探せるか。
+          <div class="callout warn" style="margin-top:8px">版や設定で挙動が変わる可能性があるため、Sandbox の画面で確かめてから回答します。</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">③ 管理者向けの会話ログ <span class="who-badge">管理者</span> <span class="badge warn" style="margin-left:auto">要検証</span></div>
+        <div class="card-body">
+          いつ・誰が・どのケースで・何を頼み、エージェントがどのアクションを使ったか。担当者の画面ではなく、管理者が品質の確認や効果測定に使う場所です。
+          <table class="tbl" style="margin-top:8px">
+            <thead><tr><th>日時</th><th>担当者</th><th>ケース</th><th>結果</th></tr></thead>
+            <tr><td>10/21 10:14</td><td>中村</td><td>00001234</td><td>返信案（上長確認）</td></tr>
+            <tr><td>10/21 10:31</td><td>中村</td><td>00001240</td><td>会員を特定できず</td></tr>
+            <tr><td>10/20 18:22</td><td>中村</td><td>00001231</td><td>返信案</td></tr>
+          </table>
+          <div class="demo-note">イメージ（架空）。実際の項目と保存期間は要検証</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       ⑥ 効果測定（相談④）
+       ======================================================= -->
+  <div class="page" id="metrics">
+    <div class="disc">
+      <div class="disc-q">論点（相談④）：比較に使う現状値をどう測るか、記録を誰が担うか</div>
+      <div class="disc-src">相談④／要件定義書 §1-2・U-07（効果を判断する時期は12/7と社内メモにあるが、先方との合意は未確認）</div>
+      <div class="disc-body">ケース件数は Glue が Salesforce から月別に集計します。1件あたりの対応時間は Salesforce に記録がないため、担当者の方に2週間ほど「書き始め」と「送信」の時刻を記録シートに付けていただく案です。導入後も同じシートで比べます。
+        <br><span class="disc-flag"></span>記録をお願いする担当者と開始日。ケース化されていない問い合わせ（電話など）を件数に含めるか
+        <br><span class="disc-flag"></span>返信案の採用率（そのまま使った／直して使った／使わなかった）は新しい指標。第1弾ではフィードバック記録を作らないため、記録方法は相談</div>
+    </div>
+    <div class="obj-header"><div class="row1">
+      <div class="obj-icon dashboard">📊</div>
+      <div class="obj-title"><div class="label">ダッシュボード（案）</div><div class="name">問い合わせ対応の効果測定</div></div>
+      <div class="obj-actions"><span class="badge gray">数値はすべてダミー</span></div>
+    </div></div>
+    <div class="dash-grid">
+      <div class="widget span-4"><div class="w-title">月間の問い合わせ件数（ケース）</div><div class="w-big">—</div><div class="w-sub">Glue が Salesforce から集計 ・ 現状値はこれから</div></div>
+      <div class="widget span-4"><div class="w-title">1件あたりの対応時間</div><div class="w-big">—</div><div class="w-sub">先方の担当者が2週間記録（案）</div></div>
+      <div class="widget span-4"><div class="w-title">返信案の採用率</div><div class="w-big">—</div><div class="w-sub">新しい指標 ・ 記録方法は相談</div></div>
+
+      <div class="widget span-6">
+        <div class="w-title">月別のケース件数（イメージ・ダミー）</div>
+        <div class="bar-chart-wrap"><div class="bar-chart">
+          <div class="bar" style="height:55%"><span class="v">—</span><span class="x">5月</span></div>
+          <div class="bar" style="height:62%"><span class="v">—</span><span class="x">6月</span></div>
+          <div class="bar" style="height:58%"><span class="v">—</span><span class="x">7月</span></div>
+          <div class="bar" style="height:70%"><span class="v">—</span><span class="x">8月</span></div>
+          <div class="bar" style="height:66%"><span class="v">—</span><span class="x">9月</span></div>
+          <div class="bar" style="height:60%;opacity:.5"><span class="v">—</span><span class="x">10月</span></div>
+        </div></div>
+        <div class="demo-note" style="margin-top:24px">ジャンル別（予約変更・キャンセル・その他）にも分けて出す想定。2つ目のジャンルを決める材料にもなる（#16）</div>
+      </div>
+      <div class="widget span-6">
+        <div class="w-title">対応時間の記録シート（案）</div>
+        <table class="tbl" style="margin-top:6px">
+          <thead><tr><th>ケース番号</th><th>書き始め</th><th>送信</th><th class="num">分</th><th>返信案</th></tr></thead>
+          <tr><td>00001198</td><td>10:02</td><td>10:19</td><td class="num">17</td><td>未導入</td></tr>
+          <tr><td>00001201</td><td>11:30</td><td>11:41</td><td class="num">11</td><td>未導入</td></tr>
+          <tr><td>00001204</td><td>14:05</td><td>14:33</td><td class="num">28</td><td>未導入</td></tr>
+          <tr><td style="color:var(--text-mute)">（導入後）</td><td></td><td></td><td></td><td>そのまま／直した／使わず</td></tr>
+        </table>
+        <div class="demo-note">数値はダミー。「書き始め」はケースを開いた時刻か、返信を書き始めた時刻か、定義を合わせる</div>
+      </div>
+      <div class="widget span-12">
+        <div class="w-title">測り方の段取り（案）</div>
+        <div class="flow" style="margin-top:6px">
+          <div class="fs"><b>10/21 決める</b>測り方・記録の担当・開始日</div><div class="arr">→</div>
+          <div class="fs"><b>現状を2週間記録</b>担当者が記録シートに付ける。並行して Glue がケース件数を集計</div><div class="arr">→</div>
+          <div class="fs"><b>Sandbox で試用</b>返信案を使ったケースで同じシートに記録</div><div class="arr">→</div>
+          <div class="fs"><b>効果の判断</b>12/7 を想定（先方との合意は未確認）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.main -->
+
+<!-- ===== Agentforce パネル（右下） ===== -->
+<button class="af-fab" id="afFab" onclick="afToggle()" title="Agentforce">✦</button>
+<div class="af-panel" id="afPanel">
+  <div class="af-top">
+    <div class="ttl">✦ Agentforce<small>問い合わせ返信案アシスタント</small></div>
+    <button onclick="afReset(true)" title="新しい会話">新しい会話</button>
+    <button onclick="afToggle()" title="最小化">ー</button>
+  </div>
+  <div class="af-ctx" id="afCtx"></div>
+  <div class="af-log" id="afLog"></div>
+  <div class="af-chips" id="afChips"></div>
+  <div class="af-input"><input id="afText" placeholder="Agentforce に依頼する..." onkeydown="if(event.key==='Enter')afSend()"><button class="btn primary small" onclick="afSend()">送信</button></div>
+  <div class="af-foot">デモの応答は事前に用意した再現です。AIの出力は送る前に担当者が確認してください。</div>
+</div>
+
+<!-- 論点トグル（右下固定）。プレゼンはOFF、FB/レビューはON -->
+<button class="disc-toggle" id="discToggle" onclick="toggleDisc()">💡 論点を表示</button>
+
+<script>
+/* =====================================================================
+   demo-base.js — Glue Salesforce デモ 共通スクリプト
+   ---------------------------------------------------------------------
+   ・画面切替（タブ / data-go リンク）と論点パネルのON/OFFだけを担う。
+   ・「本物っぽく動く」演出は最小限に（モックである誠実さを優先）。
+     過度なインタラクションは「できる」と誤認させ要件の合意を歪める。
+   ・案件固有のダミー操作（変換・受注確定 等）は各 index.html 側に書く。
+   ===================================================================== */
+
+// ---- 画面ナビゲーション ----
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el){
+    el.classList.add('active');
+    // タブのactive状態も同期（該当タブがあれば）
+    document.querySelectorAll('.app-bar .tab').forEach(tab=>{
+      tab.classList.toggle('active', tab.getAttribute('data-page')===id);
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+  } else {
+    console.warn('[demo] goPage: 画面が見つかりません →', id);
+  }
+}
+
+// タブクリック
+document.querySelectorAll('[data-page]').forEach(t=>{
+  t.addEventListener('click', ()=> goPage(t.getAttribute('data-page')));
+});
+// ページ内リンク（一覧→詳細など）
+document.querySelectorAll('[data-go]').forEach(a=>{
+  a.style.cursor='pointer';
+  a.addEventListener('click', e=>{ e.preventDefault(); goPage(a.getAttribute('data-go')); });
+});
+
+// ---- 論点パネル ON/OFF ----
+function toggleDisc(){
+  document.body.classList.toggle('disc-on');
+  const btn = document.getElementById('discToggle');
+  if(btn) btn.textContent = document.body.classList.contains('disc-on') ? '💡 論点を隠す' : '💡 論点を表示';
+}
+
+// ---- モーダル ----
+function openModal(id){ const m=document.getElementById(id); if(m) m.classList.add('active'); }
+function closeModal(){ document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('active')); }
+document.addEventListener('click', e=>{ if(e.target.classList && e.target.classList.contains('modal-bg')) closeModal(); });
+
+// ---- トースト（ダミー操作の結果表示）----
+function toast(msg, type){
+  let t = document.getElementById('demoToast');
+  if(!t){ t=document.createElement('div'); t.id='demoToast'; t.className='toast'; document.body.appendChild(t); }
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.textContent = msg;
+  // reflow→show
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+// ---- 起動時 ----
+// 初期表示: 論点OFF（プレゼン用クリーン状態）。URL に #review が付いていれば論点ON。
+window.addEventListener('DOMContentLoaded', ()=>{
+  if(location.hash === '#review') document.body.classList.add('disc-on');
+  const btn = document.getElementById('discToggle');
+  if(btn) btn.textContent = document.body.classList.contains('disc-on') ? '💡 論点を隠す' : '💡 論点を表示';
+});
+</script>
+<script>
+/* ===== 案件固有: Agentforce パネルのシナリオ（モック） ===== */
+var AF = { open:false, ctxPage:null, busy:false };
+
+var CTX = {
+  'case-detail': { grp:'c1', label:'表示中: <b>ケース 00001234</b>（鈴木 美咲 様）', chips:[['このケースの返信案を作成','main']] },
+  'member-detail': { grp:'c1', label:'表示中: <b>ケース 00001234</b> のワークスペース（会員 鈴木 美咲 様）', chips:[['このケースの返信案を作成','main']] },
+  'case-nolink': { grp:'c2', label:'表示中: <b>ケース 00001240</b>（会員ひも付きなし）', chips:[['このケースの返信案を作成','nolink']] }
+};
+var CTX_DEFAULT = { label:'表示中のケース: なし', chips:[['返信案を作成','nocase']] };
+
+function esc(s){ return String(s).replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+function afLog(){ return document.getElementById('afLog'); }
+function afScroll(){ var l=afLog(); l.scrollTop=l.scrollHeight; }
+function afUser(t){ var d=document.createElement('div'); d.className='af-m user'; d.textContent=t; afLog().appendChild(d); afScroll(); }
+function afBot(html){ var d=document.createElement('div'); d.className='af-m bot'; d.innerHTML='<div class="who">Agentforce</div><div class="b">'+html+'</div>'; afLog().appendChild(d); afScroll(); return d; }
+function afRaw(html){ var d=document.createElement('div'); d.className='af-m bot'; d.style.maxWidth='100%'; d.innerHTML=html; afLog().appendChild(d); afScroll(); return d; }
+
+function afSetChips(list){
+  var c=document.getElementById('afChips'); c.innerHTML='';
+  (list||[]).forEach(function(x){
+    var b=document.createElement('button'); b.className='af-chip'; b.textContent=x[0];
+    b.onclick=function(){ afRun(x[1], x[0]); }; c.appendChild(b);
+  });
+}
+
+function afReset(manual){
+  var id = AF.ctxPage;
+  var ctx = CTX[id] || CTX_DEFAULT;
+  document.getElementById('afCtx').innerHTML = ctx.label;
+  afLog().innerHTML='';
+  AF.busy=false;
+  afBot('こんにちは、中村さん。ケースを開いた状態で「返信案を作成」と依頼してください。ケース・会員・研修予約とFAQを読んでから、返信メールの下書きを作ります。<br><span style="font-size:11px;color:var(--text-mute)">送信はしません。下書きを返すだけです。</span>');
+  afSetChips(ctx.chips);
+  if(manual) toast('新しい会話を始めました（前の会話はパネルには残りません：相談②）');
+}
+
+function afSync(pageId){
+  var key = CTX[pageId] ? CTX[pageId].grp : '_none';
+  var prev = AF.ctxPage && CTX[AF.ctxPage] ? CTX[AF.ctxPage].grp : '_none';
+  var changed = (AF.ctxPage===null) || key!==prev;
+  AF.ctxPage = pageId;
+  if(changed) afReset(false);
+}
+
+function afOpen(){ AF.open=true; document.getElementById('afPanel').classList.add('open'); document.getElementById('afFab').style.display='none'; }
+function afToggle(){
+  AF.open=!AF.open;
+  document.getElementById('afPanel').classList.toggle('open', AF.open);
+  document.getElementById('afFab').style.display = AF.open ? 'none' : '';
+}
+
+function afSend(){
+  var i=document.getElementById('afText'); var t=i.value.trim(); if(!t) return; i.value='';
+  if(/高橋|結衣/.test(t) && AF.ctxPage==='case-nolink'){ afRun('nolink2', t); return; }
+  if(/返信|下書き|作成/.test(t)){
+    var ctx=CTX[AF.ctxPage]||CTX_DEFAULT; afRun(ctx.chips[0][1], t); return;
+  }
+  afUser(t);
+  afBot('第1弾で対応しているのは、ケースの返信案の作成です。ケースを開いて「返信案を作成」と依頼してください。');
+}
+
+/* 読み込みステップを順に表示 */
+function afSteps(steps, done){
+  var box=afRaw('<div class="af-steps"></div>').querySelector('.af-steps');
+  var i=0;
+  (function next(){
+    if(i>=steps.length){ setTimeout(done, 250); return; }
+    var s=steps[i++]; var row=document.createElement('div');
+    row.className='st'+(s[2]?' '+s[2]:''); row.innerHTML='<span class="ic">'+(s[2]==='skip'?'⚠':'✓')+'</span><span>'+s[0]+(s[1]?' <span style="color:var(--text-mute)">'+s[1]+'</span>':'')+'</span>';
+    box.appendChild(row); afScroll(); setTimeout(next, 380);
+  })();
+}
+
+var DRAFT_MAIN =
+'鈴木 美咲 様\n\n'+
+'お問い合わせいただき、ありがとうございます。\n'+
+'12月12日（土）の応用研修について、キャンセルのご希望を承りました。\n\n'+
+'キャンセル料につきましては<span class="kakunin">【要確認：キャンセル料の有無・金額】</span>。\n'+
+'お支払いいただいた受講料のお取り扱いについては、確認のうえ、あらためて担当者よりご連絡いたします。\n'+
+'今しばらくお待ちいただけますと幸いです。\n\n'+
+'今後ともよろしくお願いいたします。';
+
+var DRAFT_NOLINK =
+'高橋 結衣 様\n\n'+
+'お問い合わせいただき、ありがとうございます。\n'+
+'1月16日（土）の基礎研修のご予約について、2月の回への変更を承ります。\n\n'+
+'研修日の3営業日前までは、会員サイトの「予約一覧」からご自身で変更いただけます。\n'+
+'ご希望の日程が決まっていらっしゃいましたら、このメールへの返信でお知らせください。\n'+
+'事務局にて振り替えのお手続きをいたします。\n\n'+
+'今後ともよろしくお願いいたします。';
+
+function draftActs(kind){
+  return '<div class="acts">'+
+    '<button class="btn small primary" onclick="afInsert(\''+kind+'\')">メールに挿入</button>'+
+    '<button class="btn small" onclick="afSave()">ケースに保存</button>'+
+    '<button class="btn small" onclick="afShare()">フィードで共有</button>'+
+    '<button class="btn small" onclick="toast(\'コピーしました（モック）\')">コピー</button>'+
+  '</div>';
+}
+
+function afInsert(kind){
+  var tmp=document.createElement('div'); tmp.innerHTML = (kind==='nolink'?DRAFT_NOLINK:DRAFT_MAIN);
+  var ta=document.getElementById('composerBody');
+  if(kind==='main' && ta){ ta.value = tmp.textContent; if(AF.ctxPage!=='case-detail') goPage('case-detail'); }
+  toast('返信メール欄に挿入しました（モック。パネルからメール欄へ直接入れられるかは Sandbox で検証）','success');
+}
+function afSave(){ toast('ケースに「AI返信案」として保存しました（モック。保存方法は相談①・要検証）','success'); }
+function afShare(){ toast('ケースのフィードに投稿する案です（モック）。④の画面で流れを説明します'); }
+
+function afRun(kind, label){
+  if(AF.busy) return;
+  if(!AF.open) afOpen();
+  var ctx=CTX[AF.ctxPage]||CTX_DEFAULT;
+  if(kind==='main' && AF.ctxPage!=='case-detail'){ goPage('case-detail'); }
+  if((kind==='nolink'||kind==='nolink2') && AF.ctxPage!=='case-nolink'){ goPage('case-nolink'); }
+  AF.busy=true;
+  afSetChips([]);
+
+  if(kind==='nocase'){
+    afUser(label||'返信案を作成');
+    afBot('どのケースへの返信か分からないため、まだ下書きは作れません。ケースを開いてから依頼するか、ケース番号を教えてください。<br><span style="font-size:11px;color:var(--text-mute)">ケースを読まずにFAQだけで一般論の返信案は作りません（テストT2）。</span>');
+    AF.busy=false; afSetChips(CTX_DEFAULT.chips); return;
+  }
+
+  if(kind==='main'){
+    afUser(label||'このケースの返信案を作成');
+    afSteps([
+      ['ケースを読み込みました','00001234「応用研修のキャンセルについて」'],
+      ['会員を確認しました','個人取引先 鈴木 美咲 様（メールアドレスで自動ひも付け）'],
+      ['研修予約を確認しました','応用研修 12/12（土）13:00 予約済み ほか2件'],
+      ['請求を確認しました','研修請求: 応用研修 受講料 入金済み'],
+      ['ジャンルを判定しました','キャンセル（本文に「返金」に当たる相談あり）'],
+      ['FAQを検索しました','RSV-002・RSV-003 がヒット'],
+      ['キャンセル料の根拠が見つかりません','ナレッジにルールなし → 要確認として残します','skip']
+    ], function(){
+      afRaw(
+        '<div class="draft">'+
+          '<div class="dh">✉ 返信の下書き <span class="badge warn" style="margin-left:auto">上長確認を推奨</span></div>'+
+          '<div class="esc"><b>【上長確認を推奨】</b>受講料の扱い（返金）のご相談が含まれています。返金の可否と金額は個別判断のため（FAQ: RSV-003）、キャンセルの受付だけを下書きしています。</div>'+
+          '<div class="txt">'+DRAFT_MAIN+'</div>'+
+          '<div class="sec"><div class="h">根拠</div><ul>'+
+            '<li><span class="src-tag">ケース</span><a onclick="goPage(\'case-detail\')">00001234</a> 2026/10/21 9:42 受付</li>'+
+            '<li><span class="src-tag">会員</span><a onclick="goPage(\'member-detail\')">鈴木 美咲 様</a>（正会員）</li>'+
+            '<li><span class="src-tag">研修予約</span>応用研修 12/12（土）13:00・予約済み</li>'+
+            '<li><span class="src-tag">研修予約</span>過去のキャンセル扱い 1件（2026/06/14 基礎研修）</li>'+
+            '<li><span class="src-tag">研修請求</span>応用研修 受講料・入金済み</li>'+
+            '<li><span class="src-tag">FAQ</span>RSV-002「研修をキャンセルしたい」／RSV-003「キャンセル後の返金」</li>'+
+          '</ul></div>'+
+          '<div class="sec"><div class="h">考慮したが本文に書いていない項目</div><ul>'+
+            '<li><span class="src-tag hide">参照するが出力しない</span>個人取引先の注意事項（連絡方法の希望を考慮）</li>'+
+          '</ul>'+
+          '<div class="h" style="margin-top:4px">読んでいない項目</div><ul>'+
+            '<li><span class="src-tag nouse">参照しない</span>門外不出の情報の項目（エージェントに渡していません）</li>'+
+          '</ul></div>'+
+          '<div class="sec"><div class="h">送る前に確かめてほしいこと</div><ul>'+
+            '<li><span class="kakunin">要確認</span> キャンセル料の有無と金額（ルール整備中のため、金額は書いていません）</li>'+
+            '<li>受講料の返金について、誰がいつ連絡するか（上長確認）</li>'+
+            '<li>注意事項にある連絡方法の希望に沿っているか</li>'+
+          '</ul></div>'+
+          draftActs('main')+
+        '</div>');
+      afBot('下書きを作りました。【要確認】の部分は根拠がないため空けています。直してから送ってください。');
+      AF.busy=false; afSetChips([['別のケースへ（00001240）','gonolink']]);
+    });
+    return;
+  }
+
+  if(kind==='gonolink'){ AF.busy=false; goPage('case-nolink'); afOpen(); return; }
+
+  if(kind==='nolink'){
+    afUser(label||'このケースの返信案を作成');
+    afSteps([
+      ['ケースを読み込みました','00001240「1月の基礎研修の申し込みについて」'],
+      ['会員を特定できません','takahashi-home@example.com は複数の個人取引先に登録されています','skip'],
+      ['研修予約・請求は読んでいません','会員が決まらないため','skip']
+    ], function(){
+      afBot('このケースは会員がひも付いていません。同じメールアドレスを使っている会員が複数いるため、どなたからのお問い合わせか特定できませんでした。<br><br>推測で会員を選ぶと別の方の予約を案内してしまうおそれがあるため、下書きはまだ作っていません。<b>どの会員からのお問い合わせか教えてください。</b><br><span style="font-size:11px;color:var(--text-mute)">ケースの「取引先名」に会員を設定していただくと、次からは自動で読み込みます。</span>');
+      AF.busy=false; afSetChips([['「高橋 結衣さん（会員番号 M-000456）です」と答える','nolink2']]);
+    });
+    return;
+  }
+
+  if(kind==='nolink2'){
+    afUser(label||'高橋 結衣さん（会員番号 M-000456）です');
+    afSteps([
+      ['会員を確認しました','個人取引先 高橋 結衣 様（担当者の指定）'],
+      ['研修予約を確認しました','基礎研修 1/16（土）予約済み'],
+      ['ジャンルを判定しました','予約変更'],
+      ['FAQを検索しました','RSV-001 がヒット']
+    ], function(){
+      afRaw(
+        '<div class="draft">'+
+          '<div class="dh">✉ 返信の下書き</div>'+
+          '<div class="txt">'+DRAFT_NOLINK+'</div>'+
+          '<div class="sec"><div class="h">根拠</div><ul>'+
+            '<li><span class="src-tag">会員</span>高橋 結衣 様（担当者が指定）</li>'+
+            '<li><span class="src-tag">研修予約</span>基礎研修 1/16（土）・予約済み</li>'+
+            '<li><span class="src-tag">FAQ</span>RSV-001「研修の日程を変更したい」</li>'+
+          '</ul></div>'+
+          '<div class="sec"><div class="h">送る前に確かめてほしいこと</div><ul>'+
+            '<li>宛名が正しいか（メールの署名は「高橋」のみ）</li>'+
+            '<li>ケースの取引先名に高橋 結衣 様を設定したか</li>'+
+          '</ul></div>'+
+          draftActs('nolink')+
+        '</div>');
+      AF.busy=false; afSetChips([]);
+    });
+    return;
+  }
+  AF.busy=false;
+}
+
+/* 画面切替にパネルの会話リセットを連動（ケースが変わると新しい会話＝相談②の再現） */
+var _goPage = goPage;
+goPage = function(id){ _goPage(id); afSync(id); };
+window.addEventListener('DOMContentLoaded', function(){ afSync('case-list'); });
+</script>
+</body>
+</html>
